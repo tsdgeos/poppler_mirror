@@ -105,7 +105,7 @@
 
 //------------------------------------------------------------------------
 
-#define ttcfTag 0x74746366
+const unsigned int ttcfTag = 0x74746366;
 
 //------------------------------------------------------------------------
 
@@ -135,17 +135,8 @@ struct TrueTypeLoca
     int len = 0;
 };
 
-#define cmapTag 0x636d6170
-#define glyfTag 0x676c7966
-#define headTag 0x68656164
-#define hheaTag 0x68686561
-#define hmtxTag 0x686d7478
-#define locaTag 0x6c6f6361
-#define nameTag 0x6e616d65
-#define os2Tag 0x4f532f32
-#define postTag 0x706f7374
-#define vrt2Tag 0x76727432
-#define vertTag 0x76657274
+const unsigned int vrt2Tag = 0x76727432;
+const unsigned int vertTag = 0x76657274;
 
 struct cmpTrueTypeLocaOffsetFunctor
 {
@@ -178,15 +169,16 @@ struct T42Table
 
 // TrueType tables to be embedded in Type 42 fonts.
 // NB: the table names must be in alphabetical order here.
-#define nT42Tables 11
-static const T42Table t42Tables[nT42Tables] = { { .tag = "cvt ", .required = true }, { .tag = "fpgm", .required = true },  { .tag = "glyf", .required = true }, { .tag = "head", .required = true },
-                                                { .tag = "hhea", .required = true }, { .tag = "hmtx", .required = true },  { .tag = "loca", .required = true }, { .tag = "maxp", .required = true },
-                                                { .tag = "prep", .required = true }, { .tag = "vhea", .required = false }, { .tag = "vmtx", .required = false } };
-#define t42HeadTable 3
-#define t42LocaTable 6
-#define t42GlyfTable 2
-#define t42VheaTable 9
-#define t42VmtxTable 10
+static const T42Table t42Tables[] = { { .tag = "cvt ", .required = true }, { .tag = "fpgm", .required = true },  { .tag = "glyf", .required = true }, { .tag = "head", .required = true },
+                                      { .tag = "hhea", .required = true }, { .tag = "hmtx", .required = true },  { .tag = "loca", .required = true }, { .tag = "maxp", .required = true },
+                                      { .tag = "prep", .required = true }, { .tag = "vhea", .required = false }, { .tag = "vmtx", .required = false } };
+constexpr int nT42Tables = sizeof(t42Tables) / sizeof(T42Table);
+
+constexpr int t42HeadTable = 3;
+constexpr int t42LocaTable = 6;
+constexpr int t42GlyfTable = 2;
+constexpr int t42VheaTable = 9;
+constexpr int t42VmtxTable = 10;
 
 //------------------------------------------------------------------------
 

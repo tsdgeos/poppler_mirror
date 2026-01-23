@@ -85,10 +85,10 @@
 // To limit memory usage and improve performance when printing, limit
 // cairo images to this size. 8192 is sufficient for an A2 sized
 // 300ppi image.
-#define MAX_PRINT_IMAGE_SIZE 8192
+constexpr int MAX_PRINT_IMAGE_SIZE = 8192;
 // Cairo has a max size for image surfaces due to their fixed-point
 // coordinate handling, namely INT16_MAX, aka 32767.
-#define MAX_CAIRO_IMAGE_SIZE 32767
+constexpr int MAX_CAIRO_IMAGE_SIZE = 32767;
 
 #ifdef LOG_CAIRO
 #    define LOG(x) (x)

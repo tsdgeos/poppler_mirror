@@ -33,7 +33,7 @@
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -53,7 +53,7 @@
 #include "CairoRescaleBox.h"
 
 /* we work in fixed point where 1. == 1 << 24 */
-#define FIXED_SHIFT 24
+constexpr int FIXED_SHIFT = 24;
 
 static void downsample_row_box_filter(int start, int width, uint32_t *src, const uint32_t *src_limit, uint32_t *dest, const int coverage[], int pixel_coverage)
 {

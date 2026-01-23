@@ -115,19 +115,16 @@ struct FILECloser
 
 //------------------------------------------------------------------------
 
-#define headerSearchSize                                                                                                                                                                                                                       \
-    1024 // read this many bytes at beginning of
-         //   file to look for '%PDF'
-#define pdfIdLength 32 // PDF Document IDs (PermanentId, UpdateId) length
+constexpr int headerSearchSize = 1024; // read this many bytes at beginning of
+                                       //   file to look for '%PDF'
+constexpr int pdfIdLength = 32; // PDF Document IDs (PermanentId, UpdateId) length
 
-#define linearizationSearchSize                                                                                                                                                                                                                \
-    1024 // read this many bytes at beginning of
-         // file to look for linearization
-         // dictionary
+constexpr int linearizationSearchSize = 1024; // read this many bytes at beginning of
+                                              // file to look for linearization
+                                              // dictionary
 
-#define xrefSearchSize                                                                                                                                                                                                                         \
-    1024 // read this many bytes at end of file
-         //   to look for 'startxref'
+constexpr int xrefSearchSize = 1024; // read this many bytes at end of file
+                                     //   to look for 'startxref'
 
 //------------------------------------------------------------------------
 // PDFDoc

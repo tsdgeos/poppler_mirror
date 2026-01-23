@@ -5,7 +5,7 @@
 // Copyright 2007 Brad Hards <bradh@kde.org>
 // Copyright 2008 Pino Toscano <pino@kde.org>
 // Copyright 2008, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2008, 2010, 2011, 2017-2019, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright 2008, 2010, 2011, 2017-2019, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright 2008 Mark Kaplan <mkaplan@finjan.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
@@ -23,11 +23,7 @@
 
 // Max depth of nested visibility expressions.  This is used to catch
 // infinite loops in the visibility expression object structure.
-#define visibilityExprRecursionLimit 50
-
-// Max depth of nested display nodes.  This is used to catch infinite
-// loops in the "Order" object structure.
-#define displayNodeRecursionLimit 50
+constexpr int visibilityExprRecursionLimit = 50;
 
 //------------------------------------------------------------------------
 

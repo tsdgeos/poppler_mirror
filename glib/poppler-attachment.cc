@@ -331,7 +331,7 @@ gboolean poppler_attachment_save_to_fd(PopplerAttachment *attachment, int fd, GE
 
 #endif /* !G_OS_WIN32 */
 
-#define BUF_SIZE 1024
+constexpr int BUF_SIZE = 1024;
 
 /**
  * poppler_attachment_save_to_callback:

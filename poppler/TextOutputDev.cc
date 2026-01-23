@@ -86,43 +86,39 @@
 
 // Each bucket in a text pool includes baselines within a range of
 // this many points.
-#define textPoolStep 4
+constexpr int textPoolStep = 4;
 
 // Inter-character space width which will cause addChar to start a new
 // word.
-#define minWordBreakSpace 0.1
+constexpr double minWordBreakSpace = 0.1;
 
 // Negative inter-character space width, i.e., overlap, which will
 // cause addChar to start a new word.
-#define minDupBreakOverlap 0.2
+constexpr double minDupBreakOverlap = 0.2;
 
 // Max distance between baselines of two lines within a block, as a
 // fraction of the font size.
-#define maxLineSpacingDelta 1.5
+constexpr double maxLineSpacingDelta = 1.5;
 
 // Max difference in primary font sizes on two lines in the same
 // block.  Delta1 is used when examining new lines above and below the
 // current block; delta2 is used when examining text that overlaps the
 // current block; delta3 is used when examining text to the left and
 // right of the current block.
-#define maxBlockFontSizeDelta1 0.05
-#define maxBlockFontSizeDelta2 0.6
-#define maxBlockFontSizeDelta3 0.2
+constexpr double maxBlockFontSizeDelta1 = 0.05;
+constexpr double maxBlockFontSizeDelta2 = 0.6;
+constexpr double maxBlockFontSizeDelta3 = 0.2;
 
 // Max difference in font sizes inside a word.
-#define maxWordFontSizeDelta 0.05
+constexpr double maxWordFontSizeDelta = 0.05;
 
 // Maximum distance between baselines of two words on the same line,
 // e.g., distance between subscript or superscript and the primary
 // baseline, as a fraction of the font size.
-#define maxIntraLineDelta 0.5
-
-// Minimum inter-word spacing, as a fraction of the font size.  (Only
-// used for raw ordering.)
-#define minWordSpacing 0.15
+constexpr double maxIntraLineDelta = 0.5;
 
 // Maximum inter-word spacing, as a fraction of the font size.
-#define maxWordSpacing 1.5
+constexpr double maxWordSpacing = 1.5;
 
 // Maximum horizontal spacing which will allow a word to be pulled
 // into a block, as a fraction of the font size.
@@ -130,67 +126,67 @@
 double TextOutputDev::minColSpacing1_default = 0.7;
 
 // Minimum spacing between columns, as a fraction of the font size.
-#define minColSpacing2 1.0
+constexpr double minColSpacing2 = 1.0;
 
 // Maximum vertical spacing between blocks within a flow, as a
 // multiple of the font size.
-#define maxBlockSpacing 2.5
+constexpr double maxBlockSpacing = 2.5;
 
 // Minimum spacing between characters within a word, as a fraction of
 // the font size.
-#define minCharSpacing (-0.5)
+constexpr double minCharSpacing = -0.5;
 
 // Maximum spacing between characters within a word, as a fraction of
 // the font size, when there is no obvious extra-wide character
 // spacing.
-#define maxCharSpacing 0.03
+constexpr double maxCharSpacing = 0.03;
 
 // When extra-wide character spacing is detected, the inter-character
 // space threshold is set to the minimum inter-character space
 // multiplied by this constant.
-#define maxWideCharSpacingMul 1.3
+constexpr double maxWideCharSpacingMul = 1.3;
 
 // Upper limit on spacing between characters in a word.
-#define maxWideCharSpacing 0.4
+constexpr double maxWideCharSpacing = 0.4;
 
 // Max difference in primary,secondary coordinates (as a fraction of
 // the font size) allowed for duplicated text (fake boldface, drop
 // shadows) which is to be discarded.
-#define dupMaxPriDelta 0.1
-#define dupMaxSecDelta 0.2
+constexpr double dupMaxPriDelta = 0.1;
+constexpr double dupMaxSecDelta = 0.2;
 
 // Max width of underlines (in points).
-#define maxUnderlineWidth 3
+constexpr int maxUnderlineWidth = 3;
 
 // Min distance between baseline and underline (in points).
 //~ this should be font-size-dependent
-#define minUnderlineGap (-2)
+constexpr int minUnderlineGap = -2;
 
 // Max distance between baseline and underline (in points).
 //~ this should be font-size-dependent
-#define maxUnderlineGap 4
+constexpr int maxUnderlineGap = 4;
 
 // Max horizontal distance between edge of word and start of underline
 // (in points).
 //~ this should be font-size-dependent
-#define underlineSlack 1
+constexpr int underlineSlack = 1;
 
 // Max distance between edge of text and edge of link border
-#define hyperlinkSlack 2
+constexpr int hyperlinkSlack = 2;
 
 // Max distance between characters when combining a base character and
 // combining character
-#define combMaxMidDelta 0.3
-#define combMaxBaseDelta 0.4
+constexpr double combMaxMidDelta = 0.3;
+constexpr double combMaxBaseDelta = 0.4;
 
 // Text is considered diagonal if abs(tan(angle)) > diagonalThreshold.
 // (Or 1/tan(angle) for 90/270 degrees.)
-#define diagonalThreshold 0.1
+constexpr double diagonalThreshold = 0.1;
 
 // How opaque a selection on a glyphless font should be. Since the font is
 // glyphless and overlaid over text in image form, this must enable users
 // to read the underlying image. Issue #157
-#define glyphlessSelectionOpacity 0.4
+constexpr double glyphlessSelectionOpacity = 0.4;
 
 // Returns whether x is between a and b or equal to a or b.
 // a and b don't need to be sorted.

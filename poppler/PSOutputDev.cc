@@ -97,7 +97,7 @@
 //------------------------------------------------------------------------
 
 // Max size of a slice when rasterizing pages, in pixels.
-#define rasterizationSliceSize 20000000
+constexpr double rasterizationSliceSize = 20000000;
 
 //------------------------------------------------------------------------
 // PostScript prolog and setup
@@ -931,11 +931,11 @@ struct PSFont16Enc
 // process colors
 //------------------------------------------------------------------------
 
-#define psProcessCyan 1
-#define psProcessMagenta 2
-#define psProcessYellow 4
-#define psProcessBlack 8
-#define psProcessCMYK 15
+constexpr int psProcessCyan = 1;
+constexpr int psProcessMagenta = 2;
+constexpr int psProcessYellow = 4;
+constexpr int psProcessBlack = 8;
+constexpr int psProcessCMYK = 15;
 
 //------------------------------------------------------------------------
 // PSOutCustomColor
@@ -3092,7 +3092,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
         delete splashOut;
         return false;
     }
-    nStripes = (int)ceil((double)(sliceArea) / (double)rasterizationSliceSize);
+    nStripes = (int)ceil((double)(sliceArea) / rasterizationSliceSize);
     if (unlikely(nStripes == 0)) {
         delete splashOut;
         return false;

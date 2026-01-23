@@ -907,7 +907,7 @@ struct PSObject
     };
 };
 
-#define psStackSize 100
+constexpr int psStackSize = 100;
 
 class PSStack
 {

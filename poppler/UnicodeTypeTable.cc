@@ -645,8 +645,8 @@ bool unicodeTypeAlphaNum(Unicode c)
     return t == 'L' || t == 'R' || t == '#';
 }
 
-#define UNICODE_ALPHABETIC_PRESENTATION_BLOCK_BEGIN 0xFB00
-#define UNICODE_ALPHABETIC_PRESENTATION_BLOCK_END 0xFB4F
+constexpr Unicode UNICODE_ALPHABETIC_PRESENTATION_BLOCK_BEGIN = 0xFB00;
+constexpr Unicode UNICODE_ALPHABETIC_PRESENTATION_BLOCK_END = 0xFB4F;
 
 bool unicodeIsAlphabeticPresentationForm(Unicode c)
 {
