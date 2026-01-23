@@ -33,6 +33,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         signature->validateResult();
     }
 
+    doc->outline();
+
     if (doc->numPages() > 0) {
         QList<int> pageList;
         for (int i = 0; i < doc->numPages(); i++) {
