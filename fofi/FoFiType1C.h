@@ -31,6 +31,7 @@
 
 #include "poppler_private_export.h"
 
+#include <array>
 #include <memory>
 #include <set>
 #include <vector>
