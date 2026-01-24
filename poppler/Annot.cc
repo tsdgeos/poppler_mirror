@@ -113,33 +113,10 @@
 #include "annot_stamp_for_public_release.h"
 #include "annot_stamp_draft.h"
 
-#ifndef M_PI
-#    define M_PI 3.14159265358979323846
-#endif
-
-#define fieldFlagReadOnly 0x00000001
-#define fieldFlagRequired 0x00000002
-#define fieldFlagNoExport 0x00000004
-#define fieldFlagMultiline 0x00001000
-#define fieldFlagPassword 0x00002000
-#define fieldFlagNoToggleToOff 0x00004000
-#define fieldFlagRadio 0x00008000
-#define fieldFlagPushbutton 0x00010000
-#define fieldFlagCombo 0x00020000
-#define fieldFlagEdit 0x00040000
-#define fieldFlagSort 0x00080000
-#define fieldFlagFileSelect 0x00100000
-#define fieldFlagMultiSelect 0x00200000
-#define fieldFlagDoNotSpellCheck 0x00400000
-#define fieldFlagDoNotScroll 0x00800000
-#define fieldFlagComb 0x01000000
-#define fieldFlagRichText 0x02000000
-#define fieldFlagRadiosInUnison 0x02000000
-#define fieldFlagCommitOnSelChange 0x04000000
-
 // distance of Bezier control point from center for circle approximation
-// = (4 * (sqrt(2) - 1) / 3) * r
-#define bezierCircle 0.55228475
+// TODO uncomment when we can depend on C++26
+// constexpr double bezierCircle = (4 * (sqrt(2) - 1) / 3);
+constexpr double bezierCircle = 0.55228475;
 
 static AnnotLineEndingStyle parseAnnotLineEndingStyle(const Object &name)
 {
@@ -1850,7 +1827,7 @@ void AnnotAppearanceBuilder::drawLineEndDiamond(double x, double y, double size,
 
 void AnnotAppearanceBuilder::drawLineEndArrow(double x, double y, double size, int orientation, bool isOpen, bool fill, const Matrix &m)
 {
-    const double alpha { M_PI / 6. };
+    const double alpha { std::numbers::pi / 6. };
     const double xOffs { orientation * size };
     const double yOffs { tan(alpha) * size };
     double tx, ty;
@@ -1872,7 +1849,7 @@ void AnnotAppearanceBuilder::drawLineEndArrow(double x, double y, double size, i
 void AnnotAppearanceBuilder::drawLineEndSlash(double x, double y, double size, const Matrix &m)
 {
     const double halfSize { size / 2. };
-    const double xOffs { cos(M_PI / 3.) * halfSize };
+    const double xOffs { cos(std::numbers::pi / 3.) * halfSize };
     double tx, ty;
 
     m.transform(x - xOffs, y - halfSize, &tx, &ty);
@@ -1943,7 +1920,7 @@ double AnnotAppearanceBuilder::lineEndingXExtendBBox(AnnotLineEndingStyle ending
     case annotLineEndingROpenArrow:
         return size;
     case annotLineEndingSlash:
-        return cos(M_PI / 3.) * size / 2.;
+        return cos(std::numbers::pi / 3.) * size / 2.;
     default:
         break;
     }

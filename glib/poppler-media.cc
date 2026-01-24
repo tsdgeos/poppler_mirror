@@ -328,7 +328,7 @@ gboolean poppler_media_save_to_fd(PopplerMedia *poppler_media, int fd, GError **
 
 #endif /* !G_OS_WIN32 */
 
-#define BUF_SIZE 1024
+constexpr int BUF_SIZE = 1024;
 
 /**
  * poppler_media_save_to_callback:

@@ -4,7 +4,7 @@
 //
 // A JPX stream decoder using OpenJPEG
 //
-// Copyright 2008-2010, 2012, 2017-2023, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright 2008-2010, 2012, 2017-2023, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright 2011 Daniel Glöckner <daniel-gl@gmx.net>
 // Copyright 2014, 2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright 2013, 2014 Adrian Johnson <ajohnson@redneon.com>
@@ -197,7 +197,7 @@ struct JPXData
     OPJ_OFF_T pos;
 };
 
-#define BUFFER_INITIAL_SIZE 4096
+constexpr int BUFFER_INITIAL_SIZE = 4096;
 
 static OPJ_SIZE_T jpxRead_callback(void *p_buffer, OPJ_SIZE_T p_nb_bytes, void *p_user_data)
 {

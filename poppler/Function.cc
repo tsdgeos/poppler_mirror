@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2008-2010, 2013-2015, 2017-2020, 2022-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008-2010, 2013-2015, 2017-2020, 2022-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
@@ -35,6 +35,7 @@
 #include <cstring>
 #include <cctype>
 #include <cmath>
+#include <numbers>
 #include "goo/gmem.h"
 #include "goo/gstrtod.h"
 #include "Object.h"
@@ -42,10 +43,6 @@
 #include "Stream.h"
 #include "Error.h"
 #include "Function.h"
-
-#ifndef M_PI
-#    define M_PI 3.14159265358979323846
-#endif
 
 //------------------------------------------------------------------------
 // Function
@@ -910,7 +907,7 @@ struct PSObject
     };
 };
 
-#define psStackSize 100
+constexpr int psStackSize = 100;
 
 class PSStack
 {
@@ -1423,7 +1420,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
             case psOpAtan: {
                 r2 = stack->popNum();
                 r1 = stack->popNum();
-                double result = atan2(r1, r2) * 180.0 / M_PI;
+                double result = atan2(r1, r2) * 180.0 / std::numbers::pi;
                 if (result < 0) {
                     result += 360.0;
                 }
@@ -1450,7 +1447,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
                 stack->copy(stack->popInt());
                 break;
             case psOpCos:
-                stack->pushReal(cos(stack->popNum() * M_PI / 180.0));
+                stack->pushReal(cos(stack->popNum() * std::numbers::pi / 180.0));
                 break;
             case psOpCvi:
                 if (!stack->topIsInt()) {
@@ -1641,7 +1638,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
                 }
                 break;
             case psOpSin:
-                stack->pushReal(sin(stack->popNum() * M_PI / 180.0));
+                stack->pushReal(sin(stack->popNum() * std::numbers::pi / 180.0));
                 break;
             case psOpSqrt:
                 stack->pushReal(sqrt(stack->popNum()));

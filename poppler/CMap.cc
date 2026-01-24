@@ -100,10 +100,10 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectio
 
         // Check for an identity CMap.
         if (cMapNameA == "Identity" || cMapNameA == "Identity-H") {
-            return std::shared_ptr<CMap>(new CMap(std::make_unique<GooString>(collectionA), std::make_unique<GooString>(cMapNameA), 0));
+            return std::shared_ptr<CMap>(new CMap(std::make_unique<GooString>(collectionA), std::make_unique<GooString>(cMapNameA), GfxFont::WritingMode::Horizontal));
         }
         if (cMapNameA == "Identity-V") {
-            return std::shared_ptr<CMap>(new CMap(std::make_unique<GooString>(collectionA), std::make_unique<GooString>(cMapNameA), 1));
+            return std::shared_ptr<CMap>(new CMap(std::make_unique<GooString>(collectionA), std::make_unique<GooString>(cMapNameA), GfxFont::WritingMode::Vertical));
         }
 
         error(errSyntaxError, -1, "Couldn't find '{0:s}' CMap file for '{1:s}' collection", cMapNameA.c_str(), collectionA.c_str());
@@ -153,7 +153,8 @@ void CMap::parse2(CMapCache *cache, int (*getCharFunc)(void *), void *data)
             }
             pst->getToken(tok1, sizeof(tok1), &n1);
         } else if (!strcmp(tok1, "/WMode")) {
-            wMode = atoi(tok2);
+            const int wModeI = atoi(tok2);
+            wMode = wModeI == 1 ? GfxFont::WritingMode::Vertical : GfxFont::WritingMode::Horizontal;
             pst->getToken(tok1, sizeof(tok1), &n1);
         } else if (!strcmp(tok2, "begincidchar")) {
             while (pst->getToken(tok1, sizeof(tok1), &n1)) {
@@ -205,7 +206,7 @@ void CMap::parse2(CMapCache *cache, int (*getCharFunc)(void *), void *data)
 CMap::CMap(std::unique_ptr<GooString> &&collectionA, std::unique_ptr<GooString> &&cMapNameA) : collection(std::move(collectionA)), cMapName(std::move(cMapNameA))
 {
     isIdent = false;
-    wMode = 0;
+    wMode = GfxFont::WritingMode::Horizontal;
     vector = (CMapVectorEntry *)gmallocn(256, sizeof(CMapVectorEntry));
     for (int i = 0; i < 256; ++i) {
         vector[i].isVector = false;
@@ -213,7 +214,7 @@ CMap::CMap(std::unique_ptr<GooString> &&collectionA, std::unique_ptr<GooString> 
     }
 }
 
-CMap::CMap(std::unique_ptr<GooString> &&collectionA, std::unique_ptr<GooString> &&cMapNameA, int wModeA) : collection(std::move(collectionA)), cMapName(std::move(cMapNameA))
+CMap::CMap(std::unique_ptr<GooString> &&collectionA, std::unique_ptr<GooString> &&cMapNameA, GfxFont::WritingMode wModeA) : collection(std::move(collectionA)), cMapName(std::move(cMapNameA))
 {
     isIdent = true;
     wMode = wModeA;

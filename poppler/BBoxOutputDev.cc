@@ -6,16 +6,13 @@
 //
 // Copyright 2020 sgerwk <sgerwk@aol.com>
 // Copyright 2022 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright 2025, 2026 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
 #include <cmath>
 #include <BBoxOutputDev.h>
 #include <GfxFont.h>
-
-#define writingModeHorizontal 0
-#define writingModeVertical 1
 
 BBoxOutputDev::BBoxOutputDev() : BBoxOutputDev(true, true, true) { }
 
@@ -116,7 +113,7 @@ void BBoxOutputDev::drawChar(GfxState *state, double x, double y, double dx, dou
     fontSize = state->getFontSize();
 
     const std::array<double, 4> &fb = font->getFontBBox();
-    if (font->getWMode() == writingModeHorizontal) {
+    if (font->getWMode() == GfxFont::WritingMode::Horizontal) {
         leftent = 0;
         rightent = 0;
         ascent = font->getAscent();

@@ -1939,7 +1939,7 @@ int GfxCIDFont::getNextChar(const char *s, int len, CharCode *code, Unicode cons
     }
 
     // horizontal
-    if (cMap->getWMode() == 0) {
+    if (cMap->getWMode() == GfxFont::WritingMode::Horizontal) {
         w = getWidth(cid);
         h = vx = vy = 0;
 
@@ -1977,9 +1977,9 @@ int GfxCIDFont::getNextChar(const char *s, int len, CharCode *code, Unicode cons
     return n;
 }
 
-int GfxCIDFont::getWMode() const
+GfxFont::WritingMode GfxCIDFont::getWMode() const
 {
-    return cMap ? cMap->getWMode() : 0;
+    return cMap ? cMap->getWMode() : GfxFont::WritingMode::Horizontal;
 }
 
 const CharCodeToUnicode *GfxCIDFont::getToUnicode() const
@@ -1992,10 +1992,10 @@ const GooString *GfxCIDFont::getCollection() const
     return cMap ? cMap->getCollection() : nullptr;
 }
 
-int GfxCIDFont::mapCodeToGID(FoFiTrueType *ff, int cmapi, Unicode unicode, bool wmode)
+int GfxCIDFont::mapCodeToGID(FoFiTrueType *ff, int cmapi, Unicode unicode, GfxFont::WritingMode wmode)
 {
     unsigned short gid = ff->mapCodeToGID(cmapi, unicode);
-    if (wmode) {
+    if (wmode == GfxFont::WritingMode::Vertical) {
         const unsigned short vgid = ff->mapToVertGID(gid);
         if (vgid != 0) {
             gid = vgid;
@@ -2103,7 +2103,7 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
         return {};
     }
 
-    const int wmode = getWMode();
+    const GfxFont::WritingMode wmode = getWMode();
     for (lp = CMapList; lp->collection != nullptr; lp++) {
         if (strcmp(lp->collection, getCollection()->c_str()) == 0) {
             break;
@@ -2134,7 +2134,7 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
         for (const std::string &cname : *lp->CMaps) {
             std::shared_ptr<CMap> cnameCMap;
             if ((cnameCMap = globalParams->getCMap(getCollection()->toStr(), cname)) != nullptr) {
-                if (cnameCMap->getWMode()) {
+                if (cnameCMap->getWMode() == GfxFont::WritingMode::Vertical) {
                     cnameCMap->setReverseMap(vumap, n, 1);
                 } else {
                     cnameCMap->setReverseMap(humap, n, N_UCS_CANDIDATES);
@@ -2175,23 +2175,23 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
         gid = 0;
         if (humap != nullptr) {
             for (i = 0; i < N_UCS_CANDIDATES && gid == 0 && (unicode = humap[code * N_UCS_CANDIDATES + i]) != 0; i++) {
-                gid = mapCodeToGID(ff, cmap, unicode, false);
+                gid = mapCodeToGID(ff, cmap, unicode, GfxFont::WritingMode::Horizontal);
             }
         }
         if (gid == 0 && vumap != nullptr) {
             unicode = vumap[code];
             if (unicode != 0) {
-                gid = mapCodeToGID(ff, cmap, unicode, true);
+                gid = mapCodeToGID(ff, cmap, unicode, GfxFont::WritingMode::Vertical);
                 if (gid == 0 && tumap != nullptr) {
                     if ((unicode = tumap[code]) != 0) {
-                        gid = mapCodeToGID(ff, cmap, unicode, true);
+                        gid = mapCodeToGID(ff, cmap, unicode, GfxFont::WritingMode::Vertical);
                     }
                 }
             }
         }
         if (gid == 0 && tumap != nullptr) {
             if ((unicode = tumap[code]) != 0) {
-                gid = mapCodeToGID(ff, cmap, unicode, false);
+                gid = mapCodeToGID(ff, cmap, unicode, GfxFont::WritingMode::Horizontal);
             }
         }
         if (gid == 0) {

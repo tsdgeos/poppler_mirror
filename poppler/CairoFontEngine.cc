@@ -60,7 +60,7 @@
 #include "Gfx.h"
 #include "Page.h"
 
-#define EMPTY_ARRAY (-1)
+constexpr int EMPTY_ARRAY = -1;
 
 //------------------------------------------------------------------------
 // CairoFont

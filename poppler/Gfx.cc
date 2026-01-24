@@ -66,6 +66,7 @@
 #include <cstring>
 #include <cmath>
 #include <memory>
+#include <numbers>
 #include "goo/GooTimer.h"
 #include "GlobalParams.h"
 #include "CharTypes.h"
@@ -90,54 +91,49 @@
 #    include "JPEG2000Stream.h"
 #endif
 
-// the MSVC math.h doesn't define this
-#ifndef M_PI
-#    define M_PI 3.14159265358979323846
-#endif
-
 //------------------------------------------------------------------------
 // constants
 //------------------------------------------------------------------------
 
 // Max recursive depth for a function shading fill.
-#define functionMaxDepth 6
+constexpr int functionMaxDepth = 6;
 
 // Max delta allowed in any color component for a function shading fill.
-#define functionColorDelta (dblToCol(1 / 256.0))
+constexpr GfxColorComp functionColorDelta = dblToCol(1 / 256.0);
 
 // Max number of splits along the t axis for an axial shading fill.
-#define axialMaxSplits 256
+constexpr int axialMaxSplits = 256;
 
 // Max delta allowed in any color component for an axial shading fill.
-#define axialColorDelta (dblToCol(1 / 256.0))
+constexpr GfxColorComp axialColorDelta = dblToCol(1 / 256.0);
 
 // Max number of splits along the t axis for a radial shading fill.
-#define radialMaxSplits 256
+constexpr int radialMaxSplits = 256;
 
 // Max delta allowed in any color component for a radial shading fill.
-#define radialColorDelta (dblToCol(1 / 256.0))
+constexpr GfxColorComp radialColorDelta = dblToCol(1 / 256.0);
 
 // Max recursive depth for a Gouraud triangle shading fill.
 //
 // Triangles will be split at most gouraudMaxDepth times (each time into 4
 // smaller ones). That makes pow(4,gouraudMaxDepth) many triangles for
 // every triangle.
-#define gouraudMaxDepth 6
+constexpr int gouraudMaxDepth = 6;
 
 // Max delta allowed in any color component for a Gouraud triangle
 // shading fill.
-#define gouraudColorDelta (dblToCol(3. / 256.0))
+constexpr GfxColorComp gouraudColorDelta = dblToCol(3. / 256.0);
 
 // Gouraud triangle: if the three color parameters differ by at more than this percend of
 // the total color parameter range, the triangle will be refined
-#define gouraudParameterizedColorDelta 5e-3
+constexpr double gouraudParameterizedColorDelta = 5e-3;
 
 // Max recursive depth for a patch mesh shading fill.
-#define patchMaxDepth 6
+constexpr int patchMaxDepth = 6;
 
 // Max delta allowed in any color component for a patch mesh shading
 // fill.
-#define patchColorDelta (dblToCol((3. / 256.0)))
+constexpr GfxColorComp patchColorDelta = dblToCol((3. / 256.0));
 
 //------------------------------------------------------------------------
 // Operator table
@@ -226,8 +222,6 @@ const Operator Gfx::opTab[] = {
     { .name = "w", .numArgs = 1, .tchk = { tchkNum }, .func = &Gfx::opSetLineWidth },
     { .name = "y", .numArgs = 4, .tchk = { tchkNum, tchkNum, tchkNum, tchkNum }, .func = &Gfx::opCurveTo2 },
 };
-
-#define numOps (sizeof(opTab) / sizeof(Operator))
 
 static inline bool isSameGfxColor(const GfxColor &colorA, const GfxColor &colorB, unsigned int nComps, double delta)
 {
@@ -787,6 +781,8 @@ void Gfx::execOp(Object *cmd, Object args[], int numArgs)
 
 const Operator *Gfx::findOp(const char *name)
 {
+    constexpr int numOps = sizeof(opTab) / sizeof(Operator);
+
     int a, b, m, cmp;
 
     a = -1;
@@ -3065,7 +3061,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
         if (unlikely(tmp == 1)) {
             n = 200;
         } else {
-            n = (int)(M_PI / acos(tmp));
+            n = (int)(std::numbers::pi / acos(tmp));
         }
         if (n < 3) {
             n = 3;
@@ -3144,7 +3140,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
                 // construct path for first circle (counterclockwise)
                 state->moveTo(xa + ra, ya);
                 for (k = 1; k < n; ++k) {
-                    angle = ((double)k / (double)n) * 2 * M_PI;
+                    angle = ((double)k / (double)n) * 2 * std::numbers::pi;
                     state->lineTo(xa + ra * cos(angle), ya + ra * sin(angle));
                 }
                 state->closePath();
@@ -3152,31 +3148,31 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
                 // construct and append path for second circle (clockwise)
                 state->moveTo(xb + rb, yb);
                 for (k = 1; k < n; ++k) {
-                    angle = -((double)k / (double)n) * 2 * M_PI;
+                    angle = -((double)k / (double)n) * 2 * std::numbers::pi;
                     state->lineTo(xb + rb * cos(angle), yb + rb * sin(angle));
                 }
                 state->closePath();
             } else {
                 // construct the first subpath (clockwise)
-                state->moveTo(xa + ra * cos(alpha + theta + 0.5 * M_PI), ya + ra * sin(alpha + theta + 0.5 * M_PI));
+                state->moveTo(xa + ra * cos(alpha + theta + 0.5 * std::numbers::pi), ya + ra * sin(alpha + theta + 0.5 * std::numbers::pi));
                 for (k = 0; k < n; ++k) {
-                    angle = alpha + theta + 0.5 * M_PI - ((double)k / (double)n) * (2 * theta + M_PI);
+                    angle = alpha + theta + 0.5 * std::numbers::pi - ((double)k / (double)n) * (2 * theta + std::numbers::pi);
                     state->lineTo(xb + rb * cos(angle), yb + rb * sin(angle));
                 }
                 for (k = 0; k < n; ++k) {
-                    angle = alpha - theta - 0.5 * M_PI + ((double)k / (double)n) * (2 * theta - M_PI);
+                    angle = alpha - theta - 0.5 * std::numbers::pi + ((double)k / (double)n) * (2 * theta - std::numbers::pi);
                     state->lineTo(xa + ra * cos(angle), ya + ra * sin(angle));
                 }
                 state->closePath();
 
                 // construct the second subpath (counterclockwise)
-                state->moveTo(xa + ra * cos(alpha + theta + 0.5 * M_PI), ya + ra * sin(alpha + theta + 0.5 * M_PI));
+                state->moveTo(xa + ra * cos(alpha + theta + 0.5 * std::numbers::pi), ya + ra * sin(alpha + theta + 0.5 * std::numbers::pi));
                 for (k = 0; k < n; ++k) {
-                    angle = alpha + theta + 0.5 * M_PI + ((double)k / (double)n) * (-2 * theta + M_PI);
+                    angle = alpha + theta + 0.5 * std::numbers::pi + ((double)k / (double)n) * (-2 * theta + std::numbers::pi);
                     state->lineTo(xb + rb * cos(angle), yb + rb * sin(angle));
                 }
                 for (k = 0; k < n; ++k) {
-                    angle = alpha - theta - 0.5 * M_PI + ((double)k / (double)n) * (2 * theta + M_PI);
+                    angle = alpha - theta - 0.5 * std::numbers::pi + ((double)k / (double)n) * (2 * theta + std::numbers::pi);
                     state->lineTo(xa + ra * cos(angle), ya + ra * sin(angle));
                 }
                 state->closePath();
@@ -3238,7 +3234,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
             out->updateFillColor(state);
             state->moveTo(xa + ra, ya);
             for (k = 1; k < n; ++k) {
-                angle = ((double)k / (double)n) * 2 * M_PI;
+                angle = ((double)k / (double)n) * 2 * std::numbers::pi;
                 state->lineTo(xa + ra * cos(angle), ya + ra * sin(angle));
             }
             state->closePath();
@@ -3269,7 +3265,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
             state->closePath();
             state->moveTo(xa + ra, ya);
             for (k = 1; k < n; ++k) {
-                angle = ((double)k / (double)n) * 2 * M_PI;
+                angle = ((double)k / (double)n) * 2 * std::numbers::pi;
                 state->lineTo(xa + ra * cos(angle), ya + ra * sin(angle));
             }
             state->closePath();
@@ -3828,7 +3824,6 @@ void Gfx::opMoveSetShowText(Object args[], int /*numArgs*/)
 void Gfx::opShowSpaceText(Object args[], int /*numArgs*/)
 {
     Array *a;
-    int wMode;
     int i;
 
     if (!state->getFont()) {
@@ -3840,14 +3835,14 @@ void Gfx::opShowSpaceText(Object args[], int /*numArgs*/)
         fontChanged = false;
     }
     out->beginStringOp(state);
-    wMode = state->getFont()->getWMode();
+    const GfxFont::WritingMode wMode = state->getFont()->getWMode();
     a = args[0].getArray();
     for (i = 0; i < a->getLength(); ++i) {
         Object obj = a->get(i);
         if (obj.isNum()) {
             // this uses the absolute value of the font size to match
             // Acrobat's behavior
-            if (wMode) {
+            if (wMode == GfxFont::WritingMode::Vertical) {
                 state->textShift(0, -obj.getNum() * 0.001 * state->getFontSize());
             } else {
                 state->textShift(-obj.getNum() * 0.001 * state->getFontSize() * state->getHorizScaling(), 0);
@@ -3873,7 +3868,6 @@ void Gfx::opShowSpaceText(Object args[], int /*numArgs*/)
 
 void Gfx::doShowText(const GooString *s)
 {
-    int wMode;
     double riseX, riseY;
     CharCode code;
     const Unicode *u = nullptr;
@@ -3890,7 +3884,7 @@ void Gfx::doShowText(const GooString *s)
     int len, n, uLen, nChars, nSpaces;
 
     GfxFont *const font = state->getFont().get();
-    wMode = font->getWMode();
+    const GfxFont::WritingMode wMode = font->getWMode();
 
     if (out->useDrawChar()) {
         out->beginString(state, s);
@@ -4021,7 +4015,7 @@ void Gfx::doShowText(const GooString *s)
         len = s->size();
         while (len > 0) {
             n = font->getNextChar(p, len, &code, &u, &uLen, &dx, &dy, &originX, &originY);
-            if (wMode) {
+            if (wMode == GfxFont::WritingMode::Vertical) {
                 dx *= state->getFontSize();
                 dy = dy * state->getFontSize() + state->getCharSpace();
                 if (n == 1 && *p == ' ') {
@@ -4062,7 +4056,7 @@ void Gfx::doShowText(const GooString *s)
             p += n;
             len -= n;
         }
-        if (wMode) {
+        if (wMode == GfxFont::WritingMode::Vertical) {
             dx *= state->getFontSize();
             dy = dy * state->getFontSize() + nChars * state->getCharSpace() + nSpaces * state->getWordSpace();
         } else {
@@ -5227,7 +5221,7 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
 
     // Rotation around the topleft corner (for the NoRotate flag)
     if (rotate != 0) {
-        const double angle_rad = rotate * M_PI / 180;
+        const double angle_rad = rotate * std::numbers::pi / 180;
         const double c = cos(angle_rad);
         const double s = sin(angle_rad);
 

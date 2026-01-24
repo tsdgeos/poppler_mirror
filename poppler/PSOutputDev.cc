@@ -57,6 +57,7 @@
 #include <climits>
 #include <algorithm>
 #include <array>
+#include <numbers>
 #include "goo/GooString.h"
 #include "poppler-config.h"
 #include "GlobalParams.h"
@@ -93,15 +94,10 @@
 #    include <lcms2.h>
 #endif
 
-// the MSVC math.h doesn't define this
-#ifndef M_PI
-#    define M_PI 3.14159265358979323846
-#endif
-
 //------------------------------------------------------------------------
 
 // Max size of a slice when rasterizing pages, in pixels.
-#define rasterizationSliceSize 20000000
+constexpr double rasterizationSliceSize = 20000000;
 
 //------------------------------------------------------------------------
 // PostScript prolog and setup
@@ -935,11 +931,11 @@ struct PSFont16Enc
 // process colors
 //------------------------------------------------------------------------
 
-#define psProcessCyan 1
-#define psProcessMagenta 2
-#define psProcessYellow 4
-#define psProcessBlack 8
-#define psProcessCMYK 15
+constexpr int psProcessCyan = 1;
+constexpr int psProcessMagenta = 2;
+constexpr int psProcessYellow = 4;
+constexpr int psProcessBlack = 8;
+constexpr int psProcessCMYK = 15;
 
 //------------------------------------------------------------------------
 // PSOutCustomColor
@@ -2012,10 +2008,11 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
 
     // generate PostScript code to set up the font
     if (font->isCIDFont()) {
+        const int fontWMode = font->getWMode() == GfxFont::WritingMode::Horizontal ? 0 : 1;
         if (level == psLevel3 || level == psLevel3Sep) {
-            writePSFmt("/F{0:d}_{1:d} /{2:t} {3:d} pdfMakeFont16L3\n", font->getID()->num, font->getID()->gen, psName.get(), font->getWMode());
+            writePSFmt("/F{0:d}_{1:d} /{2:t} {3:d} pdfMakeFont16L3\n", font->getID()->num, font->getID()->gen, psName.get(), fontWMode);
         } else {
-            writePSFmt("/F{0:d}_{1:d} /{2:t} {3:d} pdfMakeFont16\n", font->getID()->num, font->getID()->gen, psName.get(), font->getWMode());
+            writePSFmt("/F{0:d}_{1:d} /{2:t} {3:d} pdfMakeFont16\n", font->getID()->num, font->getID()->gen, psName.get(), fontWMode);
         }
     } else {
         writePSFmt("/F{0:d}_{1:d} /{2:t} {3:.6g} {4:.6g}\n", font->getID()->num, font->getID()->gen, psName.get(), xs, ys);
@@ -3095,7 +3092,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
         delete splashOut;
         return false;
     }
-    nStripes = (int)ceil((double)(sliceArea) / (double)rasterizationSliceSize);
+    nStripes = (int)ceil((double)(sliceArea) / rasterizationSliceSize);
     if (unlikely(nStripes == 0)) {
         delete splashOut;
         return false;
@@ -4135,7 +4132,7 @@ void PSOutputDev::updateTextPos(GfxState *state)
 
 void PSOutputDev::updateTextShift(GfxState *state, double shift)
 {
-    if (state->getFont()->getWMode()) {
+    if (state->getFont()->getWMode() == GfxFont::WritingMode::Vertical) {
         writePSFmt("{0:.6g} TJmV\n", shift);
     } else {
         writePSFmt("{0:.6g} TJm\n", shift);
@@ -4531,8 +4528,8 @@ bool PSOutputDev::radialShadedFill(GfxState *state, GfxRadialShading *shading, d
         a2 = 360;
     } else {
         alpha = atan2(y1 - y0, x1 - x0);
-        a1 = (180 / M_PI) * (alpha + theta) + 90;
-        a2 = (180 / M_PI) * (alpha - theta) - 90;
+        a1 = (180 / std::numbers::pi) * (alpha + theta) + 90;
+        a2 = (180 / std::numbers::pi) * (alpha - theta) - 90;
         while (a2 < a1) {
             a2 += 360;
         }
@@ -4850,7 +4847,6 @@ void PSOutputDev::doPath(const GfxPath *path)
 void PSOutputDev::drawString(GfxState *state, const GooString *s)
 {
     std::shared_ptr<GfxFont> font;
-    int wMode;
     std::vector<int> codeToGID;
     GooString *s2;
     double dx, dy, originX, originY;
@@ -4889,7 +4885,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
         maxGlyphInt = 0;
     }
     maxGlyph = (CharCode)maxGlyphInt;
-    wMode = font->getWMode();
+    const GfxFont::WritingMode wMode = font->getWMode();
 
     // check for a subtitute 16-bit font
     uMap = nullptr;
@@ -4926,7 +4922,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
         n = font->getNextChar(p, len, &code, &u, &uLen, &dx, &dy, &originX, &originY);
         dx *= state->getFontSize();
         dy *= state->getFontSize();
-        if (wMode) {
+        if (wMode == GfxFont::WritingMode::Vertical) {
             dy += state->getCharSpace();
             if (n == 1 && *p == ' ') {
                 dy += state->getWordSpace();

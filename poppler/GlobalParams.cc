@@ -105,8 +105,8 @@
 
 //------------------------------------------------------------------------
 
-#define cidToUnicodeCacheSize 4
-#define unicodeToUnicodeCacheSize 4
+constexpr int cidToUnicodeCacheSize = 4;
+constexpr int unicodeToUnicodeCacheSize = 4;
 
 //------------------------------------------------------------------------
 

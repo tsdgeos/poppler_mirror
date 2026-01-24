@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2007 Ilmari Heikkinen <ilmari.heikkinen@gmail.com>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
-// Copyright (C) 2009, 2012, 2018, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2018, 2021, 2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Harry Roberts <harry.roberts@midnight-labs.org>
@@ -33,6 +33,7 @@
 #ifndef SPLASHBITMAP_H
 #define SPLASHBITMAP_H
 
+#include "SplashErrorCodes.h"
 #include "SplashTypes.h"
 #include "poppler_private_export.h"
 #include <cstdio>

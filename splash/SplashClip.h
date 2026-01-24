@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2010, 2018, 2021, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2018, 2021, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2019, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
@@ -23,6 +23,7 @@
 #ifndef SPLASHCLIP_H
 #define SPLASHCLIP_H
 
+#include "SplashErrorCodes.h"
 #include "SplashTypes.h"
 
 #include <memory>

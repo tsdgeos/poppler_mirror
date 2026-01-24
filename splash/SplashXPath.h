@@ -32,7 +32,7 @@ struct SplashXPathAdjust;
 
 //------------------------------------------------------------------------
 
-#define splashMaxCurveSplits (1 << 10)
+static constexpr int splashMaxCurveSplits = 1 << 10;
 
 //------------------------------------------------------------------------
 // SplashXPathSeg

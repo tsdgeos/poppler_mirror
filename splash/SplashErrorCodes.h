@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2009 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2009, 2026 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -23,28 +23,20 @@
 
 //------------------------------------------------------------------------
 
-#define splashOk 0 // no error
-
-#define splashErrNoCurPt 1 // no current point
-
-#define splashErrEmptyPath 2 // zero points in path
-
-#define splashErrBogusPath 3 // only one point in subpath
-
-#define splashErrNoSave 4 // state stack is empty
-
-#define splashErrOpenFile 5 // couldn't open file
-
-#define splashErrNoGlyph 6 // couldn't get the requested glyph
-
-#define splashErrModeMismatch 7 // invalid combination of color modes
-
-#define splashErrSingularMatrix 8 // matrix is singular
-
-#define splashErrBadArg 9 // bad argument
-
-#define splashErrZeroImage 254 // image of 0x0
-
-#define splashErrGeneric 255
+enum class SplashError
+{
+    NoError, // no error
+    NoCurPt, // no current point
+    EmptyPath, // zero points in path
+    BogusPath, // only one point in subpath
+    NoSave, // state stack is empty
+    OpenFile, // couldn't open file
+    NoGlyph, // couldn't get the requested glyph
+    ModeMismatch, // invalid combination of color modes
+    SingularMatrix, // matrix is singular
+    BadArg, // bad argument
+    ZeroImage, // image of 0x0
+    Generic
+};
 
 #endif

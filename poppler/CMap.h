@@ -32,6 +32,7 @@
 
 #include "Object.h"
 #include "CharTypes.h"
+#include "GfxFont.h"
 
 class GooString;
 class Object;
@@ -71,8 +72,8 @@ public:
     // *<nUsed> to the number of bytes used by the char code.
     CID getCID(const char *s, int len, CharCode *c, int *nUsed);
 
-    // Return the writing mode (0=horizontal, 1=vertical).
-    int getWMode() const { return wMode; }
+    // Return the writing mode
+    GfxFont::WritingMode getWMode() const { return wMode; }
 
     void setReverseMap(unsigned int *rmap, unsigned int rmapSize, unsigned int ncand);
 
@@ -82,7 +83,7 @@ private:
 
     void parse2(CMapCache *cache, int (*getCharFunc)(void *), void *data);
     CMap(std::unique_ptr<GooString> &&collectionA, std::unique_ptr<GooString> &&cMapNameA);
-    CMap(std::unique_ptr<GooString> &&collectionA, std::unique_ptr<GooString> &&cMapNameA, int wModeA);
+    CMap(std::unique_ptr<GooString> &&collectionA, std::unique_ptr<GooString> &&cMapNameA, GfxFont::WritingMode wModeA);
     void useCMap(CMapCache *cache, const char *useName);
     void useCMap(Object *obj, RefRecursionChecker &recursion);
     void copyVector(CMapVectorEntry *dest, CMapVectorEntry *src);
@@ -94,7 +95,7 @@ private:
     const std::unique_ptr<GooString> cMapName;
     bool isIdent; // true if this CMap is an identity mapping,
                   //   or is based on one (via usecmap)
-    int wMode; // writing mode (0=horizontal, 1=vertical)
+    GfxFont::WritingMode wMode;
     CMapVectorEntry *vector; // vector for first byte (NULL for
                              //   identity CMap)
 };

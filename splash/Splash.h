@@ -100,8 +100,8 @@ public:
     SplashCoord getStrokeAlpha();
     SplashCoord getFillAlpha();
     SplashCoord getLineWidth();
-    int getLineCap();
-    int getLineJoin();
+    SplashLineCap getLineCap();
+    SplashLineJoin getLineJoin();
     SplashCoord getMiterLimit();
     SplashCoord getFlatness();
     SplashCoord getLineDashPhase();
@@ -124,8 +124,8 @@ public:
     void setStrokeOverprint(bool sop);
     void setOverprintMode(int opm);
     void setLineWidth(SplashCoord lineWidth);
-    void setLineCap(int lineCap);
-    void setLineJoin(int lineJoin);
+    void setLineCap(SplashLineCap lineCap);
+    void setLineJoin(SplashLineJoin lineJoin);
     void setMiterLimit(SplashCoord miterLimit);
     void setFlatness(SplashCoord flatness);
     // the <lineDash> array will be copied

@@ -313,7 +313,7 @@ static void savePageSlice(PDFDoc *doc, SplashOutputDev *splashOut, int pg, int x
         } else {
             e = bitmap->writePNMFile(ppmFile);
         }
-        if (e != splashOk) {
+        if (e != SplashError::NoError) {
             fprintf(stderr, "Could not write image to %s; exiting\n", ppmFile);
             exit(EXIT_FAILURE);
         }

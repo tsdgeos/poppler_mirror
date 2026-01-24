@@ -73,7 +73,7 @@
 
 // Max depth of nested color spaces.  This is used to catch infinite
 // loops in the color space object structure.
-#define colorSpaceRecursionLimit 8
+constexpr int colorSpaceRecursionLimit = 8;
 
 //------------------------------------------------------------------------
 

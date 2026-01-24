@@ -488,9 +488,9 @@ bool SplashAxialPattern::getParameter(double xc, double yc, double *t) const
 
 //------------------------------------------------------------------------
 // Type 3 font cache size parameters
-#define type3FontCacheAssoc 8
-#define type3FontCacheMaxSets 8
-#define type3FontCacheSize (128 * 1024)
+constexpr int type3FontCacheAssoc = 8;
+constexpr int type3FontCacheMaxSets = 8;
+constexpr int type3FontCacheSize = 128 * 1024;
 
 //------------------------------------------------------------------------
 // Divide a 16-bit value (in [0, 255*255]) by 255, returning an 8-bit result.
@@ -1381,8 +1381,8 @@ void SplashOutputDev::startPage(int /*pageNum*/, GfxState *state, XRef *xrefA)
     }
     splash->setStrokePattern(new SplashSolidColor(color));
     splash->setFillPattern(new SplashSolidColor(color));
-    splash->setLineCap(splashLineCapButt);
-    splash->setLineJoin(splashLineJoinMiter);
+    splash->setLineCap(SplashLineCap::Butt);
+    splash->setLineJoin(SplashLineJoin::Miter);
     splash->setLineDash({}, 0);
     splash->setMiterLimit(10);
     splash->setFlatness(1);
@@ -1474,12 +1474,18 @@ void SplashOutputDev::updateFlatness(GfxState * /*state*/)
 
 void SplashOutputDev::updateLineJoin(GfxState *state)
 {
-    splash->setLineJoin(state->getLineJoin());
+    static_assert(static_cast<SplashLineJoin>(GfxState::LineJoinMitre) == SplashLineJoin::Miter);
+    static_assert(static_cast<SplashLineJoin>(GfxState::LineJoinRound) == SplashLineJoin::Round);
+    static_assert(static_cast<SplashLineJoin>(GfxState::LineJoinBevel) == SplashLineJoin::Bevel);
+    splash->setLineJoin(static_cast<SplashLineJoin>(state->getLineJoin()));
 }
 
 void SplashOutputDev::updateLineCap(GfxState *state)
 {
-    splash->setLineCap(state->getLineCap());
+    static_assert(static_cast<SplashLineCap>(GfxState::LineCapButt) == SplashLineCap::Butt);
+    static_assert(static_cast<SplashLineCap>(GfxState::LineCapRound) == SplashLineCap::Round);
+    static_assert(static_cast<SplashLineCap>(GfxState::LineCapProjecting) == SplashLineCap::Projecting);
+    splash->setLineCap(static_cast<SplashLineCap>(state->getLineCap()));
 }
 
 void SplashOutputDev::updateMiterLimit(GfxState *state)
@@ -4403,7 +4409,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
         }
         retValue = true;
     } else {
-        retValue = splash->drawImage(&tilingBitmapSrc, nullptr, &imgData, colorMode, true, result_width, result_height, matc, false, true) == splashOk;
+        retValue = splash->drawImage(&tilingBitmapSrc, nullptr, &imgData, colorMode, true, result_width, result_height, matc, false, true) == SplashError::NoError;
     }
     delete tBitmap;
     if (!retValue) {
@@ -4491,7 +4497,7 @@ bool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePatt
     setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(), state->getOverprintMode(), nullptr);
     // If state->getStrokePattern() is set, then the current clipping region
     // is a stroke path.
-    retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), pattern, (state->getStrokePattern() != nullptr)) == splashOk);
+    retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), pattern, (state->getStrokePattern() != nullptr)) == SplashError::NoError);
     state->clearPath();
     setVectorAntialias(vaa);
 
@@ -4554,7 +4560,7 @@ bool SplashOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sh
     setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(), state->getOverprintMode(), nullptr);
     // If state->getStrokePattern() is set, then the current clipping region
     // is a stroke path.
-    retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), pattern, (state->getStrokePattern() != nullptr)) == splashOk);
+    retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), pattern, (state->getStrokePattern() != nullptr)) == SplashError::NoError);
     state->clearPath();
     setVectorAntialias(vaa);
 

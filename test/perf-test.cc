@@ -56,7 +56,7 @@
 
 #define dimof(X) (sizeof(X) / sizeof((X)[0]))
 
-#define INVALID_PAGE_NO (-1)
+constexpr int INVALID_PAGE_NO = -1;
 
 class PdfEnginePoppler
 {
@@ -105,13 +105,13 @@ struct StrList
 static StrList *gArgsListRoot = nullptr;
 
 /* Names of all command-line switches we recognize */
-#define TIMINGS_ARG "-timings"
-#define RESOLUTION_ARG "-resolution"
-#define RECURSIVE_ARG "-recursive"
-#define OUT_ARG "-out"
-#define LOAD_ONLY_ARG "-loadonly"
-#define PAGE_ARG "-page"
-#define TEXT_ARG "-text"
+constexpr const char *TIMINGS_ARG = "-timings";
+constexpr const char *RESOLUTION_ARG = "-resolution";
+constexpr const char *RECURSIVE_ARG = "-recursive";
+constexpr const char *OUT_ARG = "-out";
+constexpr const char *LOAD_ONLY_ARG = "-loadonly";
+constexpr const char *PAGE_ARG = "-page";
+constexpr const char *TEXT_ARG = "-text";
 
 /* Should we record timings? True if -timings command-line argument was given. */
 static bool gfTimings = false;
@@ -138,13 +138,10 @@ static FILE *gErrFile = nullptr;
    Controlled by -recursive command-line argument */
 static bool gfRecursive = false;
 
-/* 1 second (1000 milliseconds) */
-#define SLOW_PREVIEW_TIME 1000
-
 /* If true, we only dump the text, not render */
 static bool gfTextOnly = false;
 
-#define PAGE_NO_NOT_GIVEN (-1)
+constexpr int PAGE_NO_NOT_GIVEN = -1;
 
 /* If equals PAGE_NO_NOT_GIVEN, we're in default mode where we render all pages.
    If different, will only render this page */
@@ -153,17 +150,7 @@ static int gPageNo = PAGE_NO_NOT_GIVEN;
    profiling load time */
 static bool gfLoadOnly = false;
 
-#define PDF_FILE_DPI 72
-
-#define MAX_FILENAME_SIZE 1024
-
-/* DOS is 0xd 0xa */
-#define DOS_NEWLINE "\x0d\x0a"
-/* Mac is single 0xd */
-#define MAC_NEWLINE "\x0d"
-/* Unix is single 0xa (10) */
-#define UNIX_NEWLINE "\x0a"
-#define UNIX_NEWLINE_C 0xa
+constexpr int PDF_FILE_DPI = 72;
 
 static void memzero(void *data, size_t len)
 {

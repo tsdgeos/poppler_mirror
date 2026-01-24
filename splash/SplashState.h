@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2011, 2012, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2018, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2021, 2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -32,22 +32,6 @@ class SplashPattern;
 class SplashScreen;
 class SplashClip;
 class SplashBitmap;
-
-//------------------------------------------------------------------------
-// line cap values
-//------------------------------------------------------------------------
-
-#define splashLineCapButt 0
-#define splashLineCapRound 1
-#define splashLineCapProjecting 2
-
-//------------------------------------------------------------------------
-// line join values
-//------------------------------------------------------------------------
-
-#define splashLineJoinMiter 0
-#define splashLineJoinRound 1
-#define splashLineJoinBevel 2
 
 //------------------------------------------------------------------------
 // SplashState
@@ -102,8 +86,8 @@ private:
     SplashCoord patternStrokeAlpha;
     SplashCoord patternFillAlpha;
     SplashCoord lineWidth;
-    int lineCap;
-    int lineJoin;
+    SplashLineCap lineCap;
+    SplashLineJoin lineJoin;
     SplashCoord miterLimit;
     SplashCoord flatness;
     std::vector<SplashCoord> lineDash;

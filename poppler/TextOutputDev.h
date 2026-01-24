@@ -105,8 +105,8 @@ public:
     // Get the font descent, or a default value if the font is not set
     double getDescent() const;
 
-    // Get the writing mode (0 or 1), or 0 if the font is not set
-    int getWMode() const;
+    // Get the writing mode, or Horizontal if the font is not set
+    GfxFont::WritingMode getWMode() const;
 
     // Get the font name (which may be NULL).
     const GooString *getFontName() const { return fontName; }
@@ -212,7 +212,7 @@ private:
 
     int rot; // rotation, multiple of 90 degrees
              //   (0, 1, 2, or 3)
-    int wMode; // horizontal (0) or vertical (1) writing mode
+    GfxFont::WritingMode wMode;
     double xMin, xMax; // bounding box x coordinates
     double yMin, yMax; // bounding box y coordinates
     double base; // baseline x or y coordinate
