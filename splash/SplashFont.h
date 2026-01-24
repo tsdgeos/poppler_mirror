@@ -38,9 +38,9 @@ class SplashPath;
 
 // Fractional positioning uses this many bits to the right of the
 // decimal points.
-#define splashFontFractionBits 2
-#define splashFontFraction (1 << splashFontFractionBits)
-#define splashFontFractionMul ((SplashCoord)1 / (SplashCoord)splashFontFraction)
+static int constexpr splashFontFractionBits = 2;
+static int constexpr splashFontFraction = 1 << splashFontFractionBits;
+static SplashCoord constexpr splashFontFractionMul = (SplashCoord)1 / (SplashCoord)splashFontFraction;
 
 //------------------------------------------------------------------------
 // SplashFont
