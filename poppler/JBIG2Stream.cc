@@ -1231,7 +1231,7 @@ bool JBIG2Stream::rewind()
         arithDecoder->setStream(curStr);
         huffDecoder->setStream(curStr);
         mmrDecoder->setStream(curStr);
-        readSegments();
+        rewindSuccess = readSegments() && rewindSuccess;
         curStr->close();
         // swap the newly read segments list into globalSegments
         std::swap(segments, globalSegments);
@@ -1243,7 +1243,7 @@ bool JBIG2Stream::rewind()
     arithDecoder->setStream(curStr);
     huffDecoder->setStream(curStr);
     mmrDecoder->setStream(curStr);
-    readSegments();
+    rewindSuccess = readSegments() && rewindSuccess;
 
     if (pageBitmap) {
         dataPtr = pageBitmap->getDataPtr();
@@ -1319,7 +1319,7 @@ bool JBIG2Stream::isBinary(bool /*last*/) const
     return str->isBinary(true);
 }
 
-void JBIG2Stream::readSegments()
+bool JBIG2Stream::readSegments()
 {
     unsigned int segNum, segFlags, segType, page, segLength;
     unsigned int refFlags, nRefSegs;
@@ -1331,25 +1331,25 @@ void JBIG2Stream::readSegments()
 
         // segment header flags
         if (!readUByte(&segFlags)) {
-            goto eofError1;
+            goto error;
         }
         segType = segFlags & 0x3f;
 
         // referred-to segment count and retention flags
         if (!readUByte(&refFlags)) {
-            goto eofError1;
+            goto error;
         }
         nRefSegs = refFlags >> 5;
         if (nRefSegs == 7) {
             if ((c1 = curStr->getChar()) == EOF || (c2 = curStr->getChar()) == EOF || (c3 = curStr->getChar()) == EOF) {
-                goto eofError1;
+                goto error;
             }
             refFlags = (refFlags << 24) | (c1 << 16) | (c2 << 8) | c3;
             nRefSegs = refFlags & 0x1fffffff;
             const unsigned int nCharsToRead = (nRefSegs + 9) >> 3;
             for (unsigned int i = 0; i < nCharsToRead; ++i) {
                 if ((c1 = curStr->getChar()) == EOF) {
-                    goto eofError1;
+                    goto error;
                 }
             }
         }
@@ -1357,24 +1357,24 @@ void JBIG2Stream::readSegments()
         // referred-to segment numbers
         refSegs = (unsigned int *)gmallocn_checkoverflow(nRefSegs, sizeof(unsigned int));
         if (nRefSegs > 0 && !refSegs) {
-            return;
+            return false;
         }
         if (segNum <= 256) {
             for (unsigned int i = 0; i < nRefSegs; ++i) {
                 if (!readUByte(&refSegs[i])) {
-                    goto eofError2;
+                    goto errorFreeRefSegs;
                 }
             }
         } else if (segNum <= 65536) {
             for (unsigned int i = 0; i < nRefSegs; ++i) {
                 if (!readUWord(&refSegs[i])) {
-                    goto eofError2;
+                    goto errorFreeRefSegs;
                 }
             }
         } else {
             for (unsigned int i = 0; i < nRefSegs; ++i) {
                 if (!readULong(&refSegs[i])) {
-                    goto eofError2;
+                    goto errorFreeRefSegs;
                 }
             }
         }
@@ -1382,23 +1382,22 @@ void JBIG2Stream::readSegments()
         // segment page association
         if (segFlags & 0x40) {
             if (!readULong(&page)) {
-                goto eofError2;
+                goto errorFreeRefSegs;
             }
         } else {
             if (!readUByte(&page)) {
-                goto eofError2;
+                goto errorFreeRefSegs;
             }
         }
 
         // segment data length
         if (!readULong(&segLength)) {
-            goto eofError2;
+            goto errorFreeRefSegs;
         }
 
         // check for missing page information segment
         if (!pageBitmap && ((segType >= 4 && segType <= 7) || (segType >= 20 && segType <= 43))) {
-            error(errSyntaxError, curStr->getPos(), "First JBIG2 segment associated with a page must be a page information segment");
-            goto syntaxError;
+            goto errorFreeRefSegs;
         }
 
         // read the segment data
@@ -1409,48 +1408,57 @@ void JBIG2Stream::readSegments()
         switch (segType) {
         case 0:
             if (!readSymbolDictSeg(segNum, refSegs, nRefSegs)) {
-                error(errSyntaxError, curStr->getPos(), "readSymbolDictSeg reports syntax error!");
-                goto syntaxError;
+                goto errorFreeRefSegs;
             }
             break;
         case 4:
-            readTextRegionSeg(segNum, false, refSegs, nRefSegs);
+            if (!readTextRegionSeg(segNum, false, refSegs, nRefSegs)) {
+                goto errorFreeRefSegs;
+            }
             break;
         case 6:
-            readTextRegionSeg(segNum, true, refSegs, nRefSegs);
-            break;
         case 7:
-            readTextRegionSeg(segNum, true, refSegs, nRefSegs);
+            if (!readTextRegionSeg(segNum, true, refSegs, nRefSegs)) {
+                goto errorFreeRefSegs;
+            }
             break;
         case 16:
-            readPatternDictSeg(segNum, segLength);
+            if (!readPatternDictSeg(segNum, segLength)) {
+                goto errorFreeRefSegs;
+            }
             break;
         case 20:
-            readHalftoneRegionSeg(segNum, false, refSegs, nRefSegs);
+            if (!readHalftoneRegionSeg(segNum, false, refSegs, nRefSegs)) {
+                goto errorFreeRefSegs;
+            }
             break;
         case 22:
-            readHalftoneRegionSeg(segNum, true, refSegs, nRefSegs);
-            break;
         case 23:
-            readHalftoneRegionSeg(segNum, true, refSegs, nRefSegs);
+            if (!readHalftoneRegionSeg(segNum, true, refSegs, nRefSegs)) {
+                goto errorFreeRefSegs;
+            }
             break;
         case 36:
-            readGenericRegionSeg(segNum, false, segLength);
+            if (!readGenericRegionSeg(segNum, false, segLength)) {
+                goto errorFreeRefSegs;
+            }
             break;
         case 38:
-            readGenericRegionSeg(segNum, true, segLength);
-            break;
         case 39:
-            readGenericRegionSeg(segNum, true, segLength);
+            if (!readGenericRegionSeg(segNum, true, segLength)) {
+                goto errorFreeRefSegs;
+            }
             break;
         case 40:
-            readGenericRefinementRegionSeg(segNum, false, refSegs, nRefSegs);
+            if (!readGenericRefinementRegionSeg(segNum, false, refSegs, nRefSegs)) {
+                goto errorFreeRefSegs;
+            }
             break;
         case 42:
-            readGenericRefinementRegionSeg(segNum, true, refSegs, nRefSegs);
-            break;
         case 43:
-            readGenericRefinementRegionSeg(segNum, true, refSegs, nRefSegs);
+            if (!readGenericRefinementRegionSeg(segNum, true, refSegs, nRefSegs)) {
+                goto errorFreeRefSegs;
+            }
             break;
         case 48:
             readPageInfoSeg();
@@ -1475,7 +1483,7 @@ void JBIG2Stream::readSegments()
             error(errSyntaxError, curStr->getPos(), "Unknown segment type in JBIG2 stream");
             for (unsigned int i = 0; i < segLength; ++i) {
                 if ((c1 = curStr->getChar()) == EOF) {
-                    goto eofError2;
+                    goto errorFreeRefSegs;
                 }
             }
             break;
@@ -1510,23 +1518,20 @@ void JBIG2Stream::readSegments()
                 // segment length field, note an error.
 
                 error(errSyntaxError, curStr->getPos(), "Previous segment handler read too many bytes");
-                goto syntaxError;
+                goto errorFreeRefSegs;
             }
         }
 
         gfree(refSegs);
     }
 
-    return;
+    return true;
 
-syntaxError:
+errorFreeRefSegs:
     gfree(refSegs);
-    return;
-
-eofError2:
-    gfree(refSegs);
-eofError1:
-    error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+error:
+    error(errSyntaxError, curStr->getPos(), "JBIG2Stream::readSegments: error");
+    return false;
 }
 
 bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int *refSegs, unsigned int nRefSegs)
@@ -1967,7 +1972,7 @@ eofError:
     return false;
 }
 
-void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, unsigned int *refSegs, unsigned int nRefSegs)
+bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, unsigned int *refSegs, unsigned int nRefSegs)
 {
     std::unique_ptr<JBIG2Bitmap> bitmap;
     JBIG2HuffmanTable runLengthTab[36];
@@ -2044,14 +2049,14 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, unsigned int 
                 const unsigned int segSize = ((JBIG2SymbolDict *)seg)->getSize();
                 if (unlikely(checkedAdd(numSyms, segSize, &numSyms))) {
                     error(errSyntaxError, getPos(), "Too many symbols in JBIG2 text region");
-                    return;
+                    return false;
                 }
             } else if (seg->getType() == jbig2SegCodeTable) {
                 codeTables.push_back(seg);
             }
         } else {
             error(errSyntaxError, curStr->getPos(), "Invalid segment reference in JBIG2 text region");
-            return;
+            return false;
         }
     }
     i = numSyms;
@@ -2070,7 +2075,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, unsigned int 
     // get the symbol bitmaps
     syms = (JBIG2Bitmap **)gmallocn_checkoverflow(numSyms, sizeof(JBIG2Bitmap *));
     if (numSyms > 0 && !syms) {
-        return;
+        return false;
     }
     kk = 0;
     for (i = 0; i < nRefSegs; ++i) {
@@ -2202,7 +2207,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, unsigned int 
         symCodeTab = (JBIG2HuffmanTable *)gmallocn_checkoverflow(numSyms + 1, sizeof(JBIG2HuffmanTable));
         if (!symCodeTab) {
             gfree(static_cast<void *>(syms));
-            return;
+            return false;
         }
         for (i = 0; i < numSyms; ++i) {
             symCodeTab[i].val = i;
@@ -2243,7 +2248,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, unsigned int 
     if (!huff) {
         if (!resetIntStats(symCodeLen)) {
             gfree(static_cast<void *>(syms));
-            return;
+            return false;
         }
         arithDecoder->start();
     }
@@ -2276,15 +2281,16 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, unsigned int 
         gfree(symCodeTab);
     }
 
-    return;
+    return true;
 
 codeTableError:
     error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 text region");
     gfree(static_cast<void *>(syms));
-    return;
+    return false;
 
 eofError:
     error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+    return false;
 }
 
 std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, unsigned int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen,
@@ -2547,7 +2553,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
     return bitmap;
 }
 
-void JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
+bool JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
 {
     std::unique_ptr<JBIG2PatternDict> patternDict;
     std::unique_ptr<JBIG2Bitmap> bitmap;
@@ -2557,7 +2563,8 @@ void JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
 
     // halftone dictionary flags, pattern width and height, max gray value
     if (!readUByte(&flags) || !readUByte(&patternW) || !readUByte(&patternH) || !readULong(&grayMax)) {
-        goto eofError;
+        error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+        return false;
     }
     templ = (flags >> 1) & 3;
     mmr = flags & 1;
@@ -2580,19 +2587,19 @@ void JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
 
     unsigned int grayMaxPlusOne;
     if (unlikely(checkedAdd(grayMax, 1U, &grayMaxPlusOne))) {
-        return;
+        return false;
     }
     unsigned int bitmapW;
     if (unlikely(checkedMultiply(grayMaxPlusOne, patternW, &bitmapW))) {
-        return;
+        return false;
     }
     if (bitmapW >= INT_MAX) {
-        return;
+        return false;
     }
     bitmap = readGenericBitmap(mmr, static_cast<int>(bitmapW), patternH, templ, false, false, nullptr, atx, aty, length - 7);
 
     if (!bitmap) {
-        return;
+        return false;
     }
 
     // create the pattern dict object
@@ -2608,13 +2615,10 @@ void JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
     // store the new pattern dict
     segments.push_back(std::move(patternDict));
 
-    return;
-
-eofError:
-    error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+    return true;
 }
 
-void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, unsigned int *refSegs, unsigned int nRefSegs)
+bool JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, unsigned int *refSegs, unsigned int nRefSegs)
 {
     std::unique_ptr<JBIG2Bitmap> bitmap;
     JBIG2Segment *seg;
@@ -2648,22 +2652,22 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, unsigned 
     }
     if (w == 0 || h == 0 || w >= INT_MAX / h) {
         error(errSyntaxError, curStr->getPos(), "Bad bitmap size in JBIG2 halftone segment");
-        return;
+        return false;
     }
     if (gridH == 0 || gridW >= INT_MAX / gridH) {
         error(errSyntaxError, curStr->getPos(), "Bad grid size in JBIG2 halftone segment");
-        return;
+        return false;
     }
 
     // get pattern dictionary
     if (nRefSegs != 1) {
         error(errSyntaxError, curStr->getPos(), "Bad symbol dictionary reference in JBIG2 halftone segment");
-        return;
+        return false;
     }
     seg = findSegment(refSegs[0]);
     if (seg == nullptr || seg->getType() != jbig2SegPatternDict) {
         error(errSyntaxError, curStr->getPos(), "Bad symbol dictionary reference in JBIG2 halftone segment");
-        return;
+        return false;
     }
 
     patternDict = (JBIG2PatternDict *)seg;
@@ -2682,7 +2686,7 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, unsigned 
     patternBitmap = patternDict->getBitmap(0);
     if (unlikely(patternBitmap == nullptr)) {
         error(errSyntaxError, curStr->getPos(), "Bad pattern bitmap");
-        return;
+        return false;
     }
     patW = patternBitmap->getWidth();
     patH = patternBitmap->getHeight();
@@ -2719,7 +2723,7 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, unsigned 
     // read the gray-scale image
     grayImg = (unsigned int *)gmallocn_checkoverflow(gridW * gridH, sizeof(unsigned int));
     if (!grayImg) {
-        return;
+        return false;
     }
     memset(grayImg, 0, gridW * gridH * sizeof(unsigned int));
     atx[0] = templ <= 1 ? 3 : 2;
@@ -2734,7 +2738,7 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, unsigned 
         const std::unique_ptr<JBIG2Bitmap> grayBitmap = readGenericBitmap(mmr, gridW, gridH, templ, false, enableSkip, skipBitmap.get(), atx, aty, -1);
         if (!grayBitmap) {
             gfree(grayImg);
-            return;
+            return false;
         }
         i = 0;
         for (m = 0; m < gridH; ++m) {
@@ -2757,7 +2761,7 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, unsigned 
                 if (unlikely(patternBitmap == nullptr)) {
                     gfree(grayImg);
                     error(errSyntaxError, curStr->getPos(), "Bad pattern bitmap");
-                    return;
+                    return false;
                 }
                 bitmap->combine(patternBitmap, xx >> 8, yy >> 8, combOp);
             }
@@ -2781,13 +2785,14 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, unsigned 
         segments.push_back(std::move(bitmap));
     }
 
-    return;
+    return true;
 
 eofError:
     error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+    return false;
 }
 
-void JBIG2Stream::readGenericRegionSeg(unsigned int segNum, bool imm, unsigned int length)
+bool JBIG2Stream::readGenericRegionSeg(unsigned int segNum, bool imm, unsigned int length)
 {
     std::unique_ptr<JBIG2Bitmap> bitmap;
     unsigned int w, h, x, y, segInfoFlags, extCombOp, rowCount;
@@ -2796,13 +2801,13 @@ void JBIG2Stream::readGenericRegionSeg(unsigned int segNum, bool imm, unsigned i
 
     // region segment info field
     if (!readULong(&w) || !readULong(&h) || !readULong(&x) || !readULong(&y) || !readUByte(&segInfoFlags)) {
-        goto eofError;
+        return false;
     }
     extCombOp = segInfoFlags & 7;
 
     // rest of the generic region segment header
     if (!readUByte(&flags)) {
-        goto eofError;
+        return false;
     }
     mmr = flags & 1;
     templ = (flags >> 1) & 3;
@@ -2812,11 +2817,11 @@ void JBIG2Stream::readGenericRegionSeg(unsigned int segNum, bool imm, unsigned i
     if (!mmr) {
         if (templ == 0) {
             if (!readByte(&atx[0]) || !readByte(&aty[0]) || !readByte(&atx[1]) || !readByte(&aty[1]) || !readByte(&atx[2]) || !readByte(&aty[2]) || !readByte(&atx[3]) || !readByte(&aty[3])) {
-                goto eofError;
+                return false;
             }
         } else {
             if (!readByte(&atx[0]) || !readByte(&aty[0])) {
-                goto eofError;
+                return false;
             }
         }
     }
@@ -2830,7 +2835,7 @@ void JBIG2Stream::readGenericRegionSeg(unsigned int segNum, bool imm, unsigned i
     // read the bitmap
     bitmap = readGenericBitmap(mmr, w, h, templ, tpgdOn, false, nullptr, atx, aty, mmr ? length - 18 : 0);
     if (!bitmap) {
-        return;
+        return false;
     }
 
     // combine the region bitmap into the page bitmap
@@ -2838,8 +2843,7 @@ void JBIG2Stream::readGenericRegionSeg(unsigned int segNum, bool imm, unsigned i
         if (pageH == 0xffffffff && y + h > curPageH) {
             pageBitmap->expand(y + h, pageDefPixel);
             if (!pageBitmap->isOk()) {
-                error(errSyntaxError, curStr->getPos(), "JBIG2Stream::readGenericRegionSeg: expand failed");
-                return;
+                return false;
             }
         }
         pageBitmap->combine(bitmap.get(), x, y, extCombOp);
@@ -2853,13 +2857,12 @@ void JBIG2Stream::readGenericRegionSeg(unsigned int segNum, bool imm, unsigned i
     // immediate generic segments can have an unspecified length, in
     // which case, a row count is stored at the end of the segment
     if (imm && length == 0xffffffff) {
-        readULong(&rowCount);
+        if (!readULong(&rowCount)) {
+            return false;
+        }
     }
 
-    return;
-
-eofError:
-    error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+    return true;
 }
 
 inline void JBIG2Stream::mmrAddPixels(int a1, int blackPixels, int *codingLine, int *a0i, int w)
@@ -3689,7 +3692,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
     return bitmap;
 }
 
-void JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, unsigned int *refSegs, unsigned int nRefSegs)
+bool JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, unsigned int *refSegs, unsigned int nRefSegs)
 {
     std::unique_ptr<JBIG2Bitmap> bitmap;
     JBIG2Bitmap *refBitmap;
@@ -3728,13 +3731,13 @@ void JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, 
     // get referenced bitmap
     if (nRefSegs > 1) {
         error(errSyntaxError, curStr->getPos(), "Bad reference in JBIG2 generic refinement segment");
-        return;
+        return false;
     }
     if (nRefSegs == 1) {
         seg = findSegment(refSegs[0]);
         if (seg == nullptr || seg->getType() != jbig2SegBitmap) {
             error(errSyntaxError, curStr->getPos(), "Bad bitmap reference in JBIG2 generic refinement segment");
-            return;
+            return false;
         }
         refBitmap = (JBIG2Bitmap *)seg;
     } else {
@@ -3769,10 +3772,11 @@ void JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, 
         delete refBitmap;
     }
 
-    return;
+    return true;
 
 eofError:
     error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+    return false;
 }
 
 std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int h, int templ, bool tpgrOn, JBIG2Bitmap *refBitmap, int refDX, int refDY, int *atx, int *aty)
