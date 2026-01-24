@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2010, 2021, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2021, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013, 2021 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2019, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
@@ -136,7 +136,7 @@ SplashError SplashClip::clipToRect(SplashCoord x0, SplashCoord y0, SplashCoord x
             yMaxI = splashCeil(yMax) - 1;
         }
     }
-    return splashOk;
+    return SplashError::NoError;
 }
 
 namespace {
@@ -220,7 +220,7 @@ SplashError SplashClip::clipToPath(const SplashPath &path, const std::array<Spla
         scanners.emplace_back(std::make_shared<SplashXPathScanner>(xPath, eo, yMinAA, yMaxAA));
     }
 
-    return splashOk;
+    return SplashError::NoError;
 }
 
 SplashClipResult SplashClip::testRect(int rectXMin, int rectYMin, int rectXMax, int rectYMax)

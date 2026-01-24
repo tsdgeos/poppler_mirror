@@ -1722,12 +1722,12 @@ SplashError Splash::restoreState()
     SplashState *oldState;
 
     if (!state->next) {
-        return splashErrNoSave;
+        return SplashError::NoSave;
     }
     oldState = state;
     state = state->next;
     delete oldState;
-    return splashOk;
+    return SplashError::NoError;
 }
 
 //------------------------------------------------------------------------
@@ -1867,14 +1867,14 @@ SplashError Splash::stroke(const SplashPath &path)
     }
     opClipRes = splashClipAllOutside;
     if (path.length == 0) {
-        return splashErrEmptyPath;
+        return SplashError::EmptyPath;
     }
     std::unique_ptr<SplashPath> path2 = flattenPath(path, state->matrix, state->flatness);
     if (!state->lineDash.empty()) {
         std::unique_ptr<SplashPath> dPath = makeDashedPath(*path2);
         path2 = std::move(dPath);
         if (path2->length == 0) {
-            return splashErrEmptyPath;
+            return SplashError::EmptyPath;
         }
     }
 
@@ -1909,7 +1909,7 @@ SplashError Splash::stroke(const SplashPath &path)
         }
     }
 
-    return splashOk;
+    return SplashError::NoError;
 }
 
 void Splash::strokeNarrow(const SplashPath &path)
@@ -2298,11 +2298,11 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo, SplashPattern *pa
     int linePosI = 0;
 
     if (path->length == 0) {
-        return splashErrEmptyPath;
+        return SplashError::EmptyPath;
     }
     if (pathAllOutside(*path)) {
         opClipRes = splashClipAllOutside;
-        return splashOk;
+        return SplashError::NoError;
     }
 
     // add stroke adjustment hints for filled rectangles -- this only
@@ -2362,7 +2362,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo, SplashPattern *pa
         delta = (yMinI == yMaxI) ? yMaxFP - yMinFP : xMaxFP - xMinFP;
         if (delta < 0.2) {
             opClipRes = splashClipAllOutside;
-            return splashOk;
+            return SplashError::NoError;
         }
     }
 
@@ -2412,7 +2412,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo, SplashPattern *pa
     }
     opClipRes = clipRes;
 
-    return splashOk;
+    return SplashError::NoError;
 }
 
 bool Splash::pathAllOutside(const SplashPath &path)
@@ -2523,7 +2523,7 @@ SplashError Splash::fillChar(SplashCoord x, SplashCoord y, int c, SplashFont *fo
     y0 = splashFloor(yt);
     yFrac = splashFloor((yt - y0) * splashFontFraction);
     if (!font->getGlyph(c, xFrac, yFrac, &glyph, x0, y0, state->clip.get(), &clipRes)) {
-        return splashErrNoGlyph;
+        return SplashError::NoGlyph;
     }
     if (clipRes != splashClipAllOutside) {
         fillGlyph2(x0, y0, &glyph, clipRes == splashClipAllInside);
@@ -2532,7 +2532,7 @@ SplashError Splash::fillChar(SplashCoord x, SplashCoord y, int c, SplashFont *fo
     if (glyph.freeData) {
         gfree(glyph.data);
     }
-    return splashOk;
+    return SplashError::NoError;
 }
 
 void Splash::fillGlyph(SplashCoord x, SplashCoord y, SplashGlyphBitmap *glyph)
@@ -2684,12 +2684,12 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData, int 
     }
 
     if (w == 0 && h == 0) {
-        return splashErrZeroImage;
+        return SplashError::ZeroImage;
     }
 
     // check for singular matrix
     if (!splashCheckDet(mat[0], mat[1], mat[2], mat[3], 0.000001)) {
-        return splashErrSingularMatrix;
+        return SplashError::SingularMatrix;
     }
 
     minorAxisZero = mat[1] == 0 && mat[2] == 0;
@@ -2714,7 +2714,7 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData, int 
             scaledHeight = y1 - y0;
             yp = h / scaledHeight;
             if (yp < 0 || yp > INT_MAX - 1) {
-                return splashErrBadArg;
+                return SplashError::BadArg;
             }
             const std::unique_ptr<SplashBitmap> scaledMask = scaleMask(src, srcData, w, h, scaledWidth, scaledHeight);
             blitMask(*scaledMask, x0, y0, clipRes);
@@ -2740,7 +2740,7 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData, int 
             scaledHeight = y1 - y0;
             yp = h / scaledHeight;
             if (yp < 0 || yp > INT_MAX - 1) {
-                return splashErrBadArg;
+                return SplashError::BadArg;
             }
             const std::unique_ptr<SplashBitmap> scaledMask = scaleMask(src, srcData, w, h, scaledWidth, scaledHeight);
             vertFlipImage(scaledMask.get(), scaledWidth, scaledHeight, 1);
@@ -2752,7 +2752,7 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData, int 
         arbitraryTransformMask(src, srcData, w, h, mat, glyphMode);
     }
 
-    return splashOk;
+    return SplashError::NoError;
 }
 
 void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, const std::array<SplashCoord, 6> &mat, bool glyphMode)
@@ -3481,12 +3481,12 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
         break;
     }
     if (!ok) {
-        return splashErrModeMismatch;
+        return SplashError::ModeMismatch;
     }
 
     // check for singular matrix
     if (!splashCheckDet(mat[0], mat[1], mat[2], mat[3], 0.000001)) {
-        return splashErrSingularMatrix;
+        return SplashError::SingularMatrix;
     }
 
     minorAxisZero = mat[1] == 0 && mat[2] == 0;
@@ -3508,18 +3508,18 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
         opClipRes = clipRes;
         if (clipRes != splashClipAllOutside) {
             if (checkedSubtraction(x1, x0, &scaledWidth)) {
-                return splashErrBadArg;
+                return SplashError::BadArg;
             }
             if (checkedSubtraction(y1, y0, &scaledHeight)) {
-                return splashErrBadArg;
+                return SplashError::BadArg;
             }
             yp = h / scaledHeight;
             if (yp < 0 || yp > INT_MAX - 1) {
-                return splashErrBadArg;
+                return SplashError::BadArg;
             }
             const std::unique_ptr<SplashBitmap> scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, w, h, scaledWidth, scaledHeight, interpolate, tilingPattern);
             if (scaledImg == nullptr) {
-                return splashErrBadArg;
+                return SplashError::BadArg;
             }
             if (tf != nullptr) {
                 (*tf)(srcData, scaledImg.get());
@@ -3554,11 +3554,11 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
             scaledHeight = y1 - y0;
             yp = h / scaledHeight;
             if (yp < 0 || yp > INT_MAX - 1) {
-                return splashErrBadArg;
+                return SplashError::BadArg;
             }
             const std::unique_ptr<SplashBitmap> scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, w, h, scaledWidth, scaledHeight, interpolate, tilingPattern);
             if (scaledImg == nullptr) {
-                return splashErrBadArg;
+                return SplashError::BadArg;
             }
             if (tf != nullptr) {
                 (*tf)(srcData, scaledImg.get());
@@ -3572,7 +3572,7 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
         return arbitraryTransformImage(src, tf, srcData, srcMode, nComps, srcAlpha, w, h, mat, interpolate, tilingPattern);
     }
 
-    return splashOk;
+    return SplashError::NoError;
 }
 
 SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTransform tf, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, const std::array<SplashCoord, 6> &mat,
@@ -3625,23 +3625,23 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
     clipRes = state->clip->testRect(xMin, yMin, xMax, yMax);
     opClipRes = clipRes;
     if (clipRes == splashClipAllOutside) {
-        return splashOk;
+        return SplashError::NoError;
     }
 
     // compute the scale factors
     if (splashAbs(mat[0]) >= splashAbs(mat[1])) {
         if (unlikely(checkedSubtraction(xMax, xMin, &scaledWidth))) {
-            return splashErrBadArg;
+            return SplashError::BadArg;
         }
         if (unlikely(checkedSubtraction(yMax, yMin, &scaledHeight))) {
-            return splashErrBadArg;
+            return SplashError::BadArg;
         }
     } else {
         if (unlikely(checkedSubtraction(yMax, yMin, &scaledWidth))) {
-            return splashErrBadArg;
+            return SplashError::BadArg;
         }
         if (unlikely(checkedSubtraction(xMax, xMin, &scaledHeight))) {
-            return splashErrBadArg;
+            return SplashError::BadArg;
         }
     }
     if (scaledHeight <= 1 || scaledWidth <= 1 || tilingPattern) {
@@ -3707,7 +3707,7 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
     det = r00 * r11 - r01 * r10;
     if (splashAbs(det) < 1e-6) {
         // this should be caught by the singular matrix check in drawImage
-        return splashErrBadArg;
+        return SplashError::BadArg;
     }
     ir00 = r11 / det;
     ir01 = -r01 / det;
@@ -3717,12 +3717,12 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
     // scale the input image
     yp = srcHeight / scaledHeight;
     if (yp < 0 || yp > INT_MAX - 1) {
-        return splashErrBadArg;
+        return SplashError::BadArg;
     }
     const std::unique_ptr<SplashBitmap> scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, interpolate);
 
     if (scaledImg == nullptr) {
-        return splashErrBadArg;
+        return SplashError::BadArg;
     }
 
     if (tf != nullptr) {
@@ -3887,7 +3887,7 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
         }
     }
 
-    return splashOk;
+    return SplashError::NoError;
 }
 
 // determine if a scaled image requires interpolation based on the scale and
@@ -5066,11 +5066,11 @@ SplashError Splash::composite(const SplashBitmap &src, int xSrc, int ySrc, int x
     const unsigned char *ap;
 
     if (src.mode != bitmap->mode) {
-        return splashErrModeMismatch;
+        return SplashError::ModeMismatch;
     }
 
     if (unlikely(!bitmap->data)) {
-        return splashErrZeroImage;
+        return SplashError::ZeroImage;
     }
 
     if (src.getSeparationList()->size() > bitmap->getSeparationList()->size()) {
@@ -5136,7 +5136,7 @@ SplashError Splash::composite(const SplashBitmap &src, int xSrc, int ySrc, int x
         }
     }
 
-    return splashOk;
+    return SplashError::NoError;
 }
 
 void Splash::compositeBackground(SplashColorConstPtr color)
@@ -5782,11 +5782,11 @@ SplashError Splash::blitTransparent(const SplashBitmap &src, int xSrc, int ySrc,
     int x, y, mask, srcMask, width = w, height = h;
 
     if (src.mode != bitmap->mode) {
-        return splashErrModeMismatch;
+        return SplashError::ModeMismatch;
     }
 
     if (unlikely(!bitmap->data)) {
-        return splashErrZeroImage;
+        return SplashError::ZeroImage;
     }
 
     if (src.getWidth() - xSrc < width) {
@@ -5903,7 +5903,7 @@ SplashError Splash::blitTransparent(const SplashBitmap &src, int xSrc, int ySrc,
         }
     }
 
-    return splashOk;
+    return SplashError::NoError;
 }
 
 std::unique_ptr<SplashPath> Splash::makeStrokePath(const SplashPath &path, SplashCoord w, bool flatten)
@@ -6003,7 +6003,7 @@ std::unique_ptr<SplashPath> Splash::makeStrokePath(const SplashPath &path, Splas
         wdy = (SplashCoord)0.5 * w * dy;
 
         // draw the start cap
-        if (pathOut->moveTo(pathIn->pts[i0].x - wdy, pathIn->pts[i0].y + wdx) != splashOk) {
+        if (pathOut->moveTo(pathIn->pts[i0].x - wdy, pathIn->pts[i0].y + wdx) != SplashError::NoError) {
             break;
         }
         if (i0 == subpathStart0) {
@@ -6318,10 +6318,10 @@ SplashError Splash::shadedFill(const SplashPath &path, bool hasBBox, SplashPatte
     SplashClipResult clipRes;
 
     if (vectorAntialias && aaBuf == nullptr) { // should not happen, but to be secure
-        return splashErrGeneric;
+        return SplashError::Generic;
     }
     if (path.length == 0) {
-        return splashErrEmptyPath;
+        return SplashError::EmptyPath;
     }
     SplashXPath xPath(path, state->matrix, state->flatness, true);
     if (vectorAntialias) {
@@ -6443,5 +6443,5 @@ SplashError Splash::shadedFill(const SplashPath &path, bool hasBBox, SplashPatte
     }
     opClipRes = clipRes;
 
-    return splashOk;
+    return SplashError::NoError;
 }

@@ -4409,7 +4409,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
         }
         retValue = true;
     } else {
-        retValue = splash->drawImage(&tilingBitmapSrc, nullptr, &imgData, colorMode, true, result_width, result_height, matc, false, true) == splashOk;
+        retValue = splash->drawImage(&tilingBitmapSrc, nullptr, &imgData, colorMode, true, result_width, result_height, matc, false, true) == SplashError::NoError;
     }
     delete tBitmap;
     if (!retValue) {
@@ -4497,7 +4497,7 @@ bool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePatt
     setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(), state->getOverprintMode(), nullptr);
     // If state->getStrokePattern() is set, then the current clipping region
     // is a stroke path.
-    retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), pattern, (state->getStrokePattern() != nullptr)) == splashOk);
+    retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), pattern, (state->getStrokePattern() != nullptr)) == SplashError::NoError);
     state->clearPath();
     setVectorAntialias(vaa);
 
@@ -4560,7 +4560,7 @@ bool SplashOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sh
     setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(), state->getOverprintMode(), nullptr);
     // If state->getStrokePattern() is set, then the current clipping region
     // is a stroke path.
-    retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), pattern, (state->getStrokePattern() != nullptr)) == splashOk);
+    retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), pattern, (state->getStrokePattern() != nullptr)) == SplashError::NoError);
     state->clearPath();
     setVectorAntialias(vaa);
 

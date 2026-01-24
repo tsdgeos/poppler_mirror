@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2019, 2021, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -22,6 +22,7 @@
 #ifndef SPLASHPATH_H
 #define SPLASHPATH_H
 
+#include "SplashErrorCodes.h"
 #include "SplashTypes.h"
 #include "poppler_private_export.h"
 

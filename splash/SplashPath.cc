@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
-// Copyright (C) 2018-2021, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018-2021, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -24,7 +24,6 @@
 
 #include "goo/gmem.h"
 #include "goo/GooLikely.h"
-#include "SplashErrorCodes.h"
 #include "SplashPath.h"
 
 //------------------------------------------------------------------------
@@ -120,45 +119,45 @@ void SplashPath::append(SplashPath *path)
 SplashError SplashPath::moveTo(SplashCoord x, SplashCoord y)
 {
     if (onePointSubpath()) {
-        return splashErrBogusPath;
+        return SplashError::BogusPath;
     }
     grow(1);
     if (unlikely(size == 0)) {
-        return splashErrBogusPath;
+        return SplashError::BogusPath;
     }
     pts[length].x = x;
     pts[length].y = y;
     flags[length] = splashPathFirst | splashPathLast;
     curSubpath = length++;
-    return splashOk;
+    return SplashError::NoError;
 }
 
 SplashError SplashPath::lineTo(SplashCoord x, SplashCoord y)
 {
     if (noCurrentPoint()) {
-        return splashErrNoCurPt;
+        return SplashError::NoCurPt;
     }
     flags[length - 1] &= ~splashPathLast;
     grow(1);
     if (unlikely(size == 0)) {
-        return splashErrBogusPath;
+        return SplashError::BogusPath;
     }
     pts[length].x = x;
     pts[length].y = y;
     flags[length] = splashPathLast;
     ++length;
-    return splashOk;
+    return SplashError::NoError;
 }
 
 SplashError SplashPath::curveTo(SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3)
 {
     if (noCurrentPoint()) {
-        return splashErrNoCurPt;
+        return SplashError::NoCurPt;
     }
     flags[length - 1] &= ~splashPathLast;
     grow(3);
     if (unlikely(size == 0)) {
-        return splashErrBogusPath;
+        return SplashError::BogusPath;
     }
     pts[length].x = x1;
     pts[length].y = y1;
@@ -172,24 +171,24 @@ SplashError SplashPath::curveTo(SplashCoord x1, SplashCoord y1, SplashCoord x2, 
     pts[length].y = y3;
     flags[length] = splashPathLast;
     ++length;
-    return splashOk;
+    return SplashError::NoError;
 }
 
 SplashError SplashPath::close(bool force)
 {
     if (noCurrentPoint()) {
-        return splashErrNoCurPt;
+        return SplashError::NoCurPt;
     }
     if (force || curSubpath == length - 1 || pts[length - 1].x != pts[curSubpath].x || pts[length - 1].y != pts[curSubpath].y) {
         const auto lineToStatus = lineTo(pts[curSubpath].x, pts[curSubpath].y);
-        if (lineToStatus != splashOk) {
+        if (lineToStatus != SplashError::NoError) {
             return lineToStatus;
         }
     }
     flags[curSubpath] |= splashPathClosed;
     flags[length - 1] |= splashPathClosed;
     curSubpath = length;
-    return splashOk;
+    return SplashError::NoError;
 }
 
 void SplashPath::addStrokeAdjustHint(int ctrl0, int ctrl1, int firstPt, int lastPt)
