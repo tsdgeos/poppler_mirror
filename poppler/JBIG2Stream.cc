@@ -1231,7 +1231,7 @@ bool JBIG2Stream::rewind()
         arithDecoder->setStream(curStr);
         huffDecoder->setStream(curStr);
         mmrDecoder->setStream(curStr);
-        rewindSuccess = readSegments() && rewindSuccess;
+        rewindSuccess = rewindSuccess && readSegments();
         curStr->close();
         // swap the newly read segments list into globalSegments
         std::swap(segments, globalSegments);
@@ -1239,11 +1239,11 @@ bool JBIG2Stream::rewind()
 
     // read the main stream
     curStr = str;
-    rewindSuccess = curStr->rewind() && rewindSuccess;
+    rewindSuccess = rewindSuccess && curStr->rewind();
     arithDecoder->setStream(curStr);
     huffDecoder->setStream(curStr);
     mmrDecoder->setStream(curStr);
-    rewindSuccess = readSegments() && rewindSuccess;
+    rewindSuccess = rewindSuccess && readSegments();
 
     if (pageBitmap) {
         dataPtr = pageBitmap->getDataPtr();
