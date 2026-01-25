@@ -2902,6 +2902,11 @@ inline void JBIG2Stream::mmrAddPixelsNeg(int a1, int blackPixels, int *codingLin
     }
 }
 
+static inline bool isPixelOutsideAdaptiveField(int x, int y)
+{
+    return y < -128 || y > 0 || x < -128 || (y < 0 && x > 127) || (y == 0 && x >= 0);
+}
+
 std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int h, int templ, bool tpgdOn, bool useSkip, JBIG2Bitmap *skip, int *atx, int *aty, int mmrDataLength)
 {
     auto bitmap = std::make_unique<JBIG2Bitmap>(0, w, h);
@@ -3177,6 +3182,9 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 
             switch (templ) {
             case 0: {
+                if (isPixelOutsideAdaptiveField(atx[0], aty[0]) || isPixelOutsideAdaptiveField(atx[1], aty[1]) || isPixelOutsideAdaptiveField(atx[2], aty[2]) || isPixelOutsideAdaptiveField(atx[3], aty[3])) {
+                    return nullptr;
+                }
 
                 // set up the context
                 unsigned char *p0, *p1, *p2, *pp;
@@ -3342,6 +3350,9 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                 break;
             }
             case 1: {
+                if (isPixelOutsideAdaptiveField(atx[0], aty[0])) {
+                    return nullptr;
+                }
 
                 // set up the context
                 unsigned char *p0, *p1, *p2, *pp;
@@ -3465,6 +3476,10 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                 break;
             }
             case 2: {
+                if (isPixelOutsideAdaptiveField(atx[0], aty[0])) {
+                    return nullptr;
+                }
+
                 // set up the context
                 unsigned char *p0, *p1, *p2, *pp;
                 p2 = pp = bitmap->getDataPtr() + y * bitmap->getLineSize();
@@ -3584,6 +3599,9 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                 break;
             }
             case 3:
+                if (isPixelOutsideAdaptiveField(atx[0], aty[0])) {
+                    return nullptr;
+                }
 
                 // set up the context
                 unsigned char *p1, *p2, *pp;
