@@ -83,7 +83,7 @@ private:
     [[nodiscard]] bool readPageInfoSeg();
     void readEndOfStripeSeg(unsigned int length);
     void readProfilesSeg(unsigned int length);
-    void readCodeTableSeg(unsigned int segNum);
+    [[nodiscard]] bool readCodeTableSeg(unsigned int segNum);
     void readExtensionSeg(unsigned int length);
     JBIG2Segment *findSegment(unsigned int segNum);
     void discardSegment(unsigned int segNum);

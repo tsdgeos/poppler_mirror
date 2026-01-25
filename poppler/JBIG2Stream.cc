@@ -1474,7 +1474,9 @@ bool JBIG2Stream::readSegments()
             readProfilesSeg(segLength);
             break;
         case 53:
-            readCodeTableSeg(segNum);
+            if (!readCodeTableSeg(segNum)) {
+                return false;
+            }
             break;
         case 62:
             readExtensionSeg(segLength);
@@ -4022,7 +4024,7 @@ void JBIG2Stream::readProfilesSeg(unsigned int length)
     byteCounter += curStr->discardChars(length);
 }
 
-void JBIG2Stream::readCodeTableSeg(unsigned int segNum)
+bool JBIG2Stream::readCodeTableSeg(unsigned int segNum)
 {
     JBIG2HuffmanTable *huffTab;
     unsigned int flags, oob, prefixBits, rangeBits;
@@ -4031,7 +4033,8 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum)
     bool eof = false;
 
     if (!readUByte(&flags) || !readLong(&lowVal) || !readLong(&highVal)) {
-        goto eofError;
+        error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+        return false;
     }
     oob = flags & 1;
     prefixBits = ((flags >> 1) & 7) + 1;
@@ -4041,7 +4044,8 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum)
     huffTabSize = 8;
     huffTab = (JBIG2HuffmanTable *)gmallocn_checkoverflow(huffTabSize, sizeof(JBIG2HuffmanTable));
     if (unlikely(!huffTab)) {
-        goto oomError;
+        error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+        return false;
     }
 
     i = 0;
@@ -4051,7 +4055,8 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum)
             huffTabSize *= 2;
             huffTab = (JBIG2HuffmanTable *)greallocn_checkoverflow(huffTab, huffTabSize, sizeof(JBIG2HuffmanTable));
             if (unlikely(!huffTab)) {
-                goto oomError;
+                error(errInternal, curStr->getPos(), "Failed allocation when processing JBIG2 stream");
+                return false;
             }
         }
         huffTab[i].val = val;
@@ -4062,7 +4067,7 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum)
 
         if (eof || unlikely(checkedAdd(val, 1 << shiftBits, &val))) {
             free(huffTab);
-            return;
+            return false;
         }
         ++i;
     }
@@ -4070,7 +4075,8 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum)
         huffTabSize = i + oob + 3;
         huffTab = (JBIG2HuffmanTable *)greallocn_checkoverflow(huffTab, huffTabSize, sizeof(JBIG2HuffmanTable));
         if (unlikely(!huffTab)) {
-            goto oomError;
+            error(errInternal, curStr->getPos(), "Failed allocation when processing JBIG2 stream");
+            return false;
         }
     }
     huffTab[i].val = lowVal - 1;
@@ -4097,12 +4103,7 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum)
         free(huffTab);
     }
 
-    return;
-
-eofError:
-    error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
-oomError:
-    error(errInternal, curStr->getPos(), "Failed allocation when processing JBIG2 stream");
+    return true;
 }
 
 void JBIG2Stream::readExtensionSeg(unsigned int length)
