@@ -1965,19 +1965,16 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
     const JBIG2HuffmanTable *huffFSTable, *huffDSTable, *huffDTTable;
     const JBIG2HuffmanTable *huffRDWTable, *huffRDHTable;
     const JBIG2HuffmanTable *huffRDXTable, *huffRDYTable, *huffRSizeTable;
-    JBIG2Segment *seg;
     std::vector<JBIG2Segment *> codeTables;
-    JBIG2SymbolDict *symbolDict;
     std::vector<JBIG2Bitmap *> syms;
-    unsigned int w, h, x, y, segInfoFlags, extCombOp;
-    unsigned int flags, huff, refine, logStrips, refCorner, transposed;
-    unsigned int combOp, defPixel, templ;
+    unsigned int w, h, x, y, segInfoFlags;
+    unsigned int flags;
     int sOffset;
     unsigned int huffFlags, huffFS, huffDS, huffDT;
     unsigned int huffRDW, huffRDH, huffRDX, huffRDY, huffRSize;
     unsigned int numInstances, numSyms, symCodeLen;
     int atx[2], aty[2];
-    unsigned int i, k, kk;
+    unsigned int i;
     int j = 0;
 
     // region segment info field
@@ -1985,25 +1982,25 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
         error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
         return false;
     }
-    extCombOp = segInfoFlags & 7;
+    const unsigned int extCombOp = segInfoFlags & 7;
 
     // rest of the text region header
     if (!readUWord(&flags)) {
         error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
         return false;
     }
-    huff = flags & 1;
-    refine = (flags >> 1) & 1;
-    logStrips = (flags >> 2) & 3;
-    refCorner = (flags >> 4) & 3;
-    transposed = (flags >> 6) & 1;
-    combOp = (flags >> 7) & 3;
-    defPixel = (flags >> 9) & 1;
+    unsigned int huff = flags & 1;
+    const unsigned int refine = (flags >> 1) & 1;
+    const unsigned int logStrips = (flags >> 2) & 3;
+    const unsigned int refCorner = (flags >> 4) & 3;
+    const unsigned int transposed = (flags >> 6) & 1;
+    const unsigned int combOp = (flags >> 7) & 3;
+    const unsigned int defPixel = (flags >> 9) & 1;
     sOffset = (flags >> 10) & 0x1f;
     if (sOffset & 0x10) {
         sOffset |= -1 - 0x0f;
     }
-    templ = (flags >> 15) & 1;
+    const unsigned int templ = (flags >> 15) & 1;
     huffFS = huffDS = huffDT = 0; // make gcc happy
     huffRDW = huffRDH = huffRDX = huffRDY = huffRSize = 0; // make gcc happy
     if (huff) {
@@ -2034,7 +2031,8 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
     // get symbol dictionaries and tables
     numSyms = 0;
     for (const unsigned int refSegI : refSegs) {
-        if ((seg = findSegment(refSegI))) {
+        JBIG2Segment *seg = findSegment(refSegI);
+        if (seg) {
             if (seg->getType() == jbig2SegSymbolDict) {
                 const unsigned int segSize = static_cast<JBIG2SymbolDict *>(seg)->getSize();
                 if (unlikely(checkedAdd(numSyms, segSize, &numSyms))) {
@@ -2070,12 +2068,13 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
         return false;
     }
     syms.resize(numSyms);
-    kk = 0;
+    unsigned int kk = 0;
     for (const unsigned int refSegI : refSegs) {
-        if ((seg = findSegment(refSegI))) {
+        JBIG2Segment *seg = findSegment(refSegI);
+        if (seg) {
             if (seg->getType() == jbig2SegSymbolDict) {
-                symbolDict = static_cast<JBIG2SymbolDict *>(seg);
-                for (k = 0; k < symbolDict->getSize(); ++k) {
+                auto *symbolDict = static_cast<JBIG2SymbolDict *>(seg);
+                for (unsigned int k = 0; k < symbolDict->getSize(); ++k) {
                     syms[kk++] = symbolDict->getBitmap(k);
                 }
             }
