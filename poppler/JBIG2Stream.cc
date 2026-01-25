@@ -1278,6 +1278,12 @@ bool JBIG2Stream::isBinary(bool /*last*/) const
     return str->isBinary(true);
 }
 
+template<typename SizeType, typename ElementType>
+static inline bool sizeIsBiggerThanVectorMaxSize(SizeType size, const std::vector<ElementType> &vector)
+{
+    return size > vector.max_size();
+}
+
 bool JBIG2Stream::readSegments()
 {
     unsigned int segNum, segFlags, segType, page, segLength;
@@ -1318,10 +1324,7 @@ bool JBIG2Stream::readSegments()
         }
 
         // referred-to segment numbers
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare" // https://github.com/llvm/llvm-project/issues/177861
-        if (nRefSegs > refSegs.max_size()) {
-#pragma clang diagnostic pop
+        if (sizeIsBiggerThanVectorMaxSize(nRefSegs, refSegs)) {
             return false;
         }
         refSegs.resize(nRefSegs);
@@ -1705,12 +1708,8 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
         }
     }
 
-    // allocate symbol widths storage
     if (huff && !refAgg) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare" // https://github.com/llvm/llvm-project/issues/177861
-        if (numNewSyms > symWidths.max_size()) {
-#pragma clang diagnostic pop
+        if (sizeIsBiggerThanVectorMaxSize(numNewSyms, symWidths)) {
             goto syntaxError;
         }
         symWidths.resize(numNewSyms);
@@ -2043,10 +2042,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
     }
 
     // get the symbol bitmaps
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare" // https://github.com/llvm/llvm-project/issues/177861
-    if (numSyms > syms.max_size()) {
-#pragma clang diagnostic pop
+    if (sizeIsBiggerThanVectorMaxSize(numSyms, syms)) {
         return false;
     }
     syms.resize(numSyms);
