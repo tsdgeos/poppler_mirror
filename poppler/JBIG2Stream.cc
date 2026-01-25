@@ -54,6 +54,14 @@
 
 //------------------------------------------------------------------------
 
+template<typename SizeType, typename ElementType>
+static inline bool sizeIsBiggerThanVectorMaxSize(SizeType size, const std::vector<ElementType> &vector)
+{
+    return size > vector.max_size();
+}
+
+//------------------------------------------------------------------------
+
 static const int contextSize[4] = { 16, 13, 10, 10 };
 static const int refContextSize[2] = { 13, 10 };
 static constexpr auto intNBits = sizeof(int) * CHAR_BIT;
@@ -1048,9 +1056,9 @@ private:
 
 JBIG2SymbolDict::JBIG2SymbolDict(unsigned int segNumA, unsigned int sizeA) : JBIG2Segment(segNumA)
 {
-    ok = true;
-    if (sizeA > bitmaps.max_size()) {
-        ok = false;
+    ok = sizeA <= bitmaps.max_size();
+    if (ok) {
+        bitmaps.resize(sizeA);
     }
 }
 
@@ -1276,12 +1284,6 @@ std::optional<std::string> JBIG2Stream::getPSFilter(int /*psLevel*/, const char 
 bool JBIG2Stream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
-}
-
-template<typename SizeType, typename ElementType>
-static inline bool sizeIsBiggerThanVectorMaxSize(SizeType size, const std::vector<ElementType> &vector)
-{
-    return size > vector.max_size();
 }
 
 bool JBIG2Stream::readSegments()
