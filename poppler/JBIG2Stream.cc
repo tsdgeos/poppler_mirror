@@ -1534,7 +1534,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
     int sdATX[4], sdATY[4], sdrATX[2], sdrATY[2];
     unsigned int numExSyms, numNewSyms, numInputSyms, symCodeLen;
     JBIG2Bitmap **bitmaps;
-    JBIG2Bitmap *collBitmap, *refBitmap;
+    JBIG2Bitmap *refBitmap;
     unsigned int *symWidths;
     unsigned int symHeight, symWidth, totalWidth, x, symID;
     int dh = 0, dw, refAggNum, refDX = 0, refDY = 0, bmSize;
@@ -1843,12 +1843,12 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
         if (huff && !refAgg) {
             huffDecoder->decodeInt(&bmSize, huffBMSizeTable);
             huffDecoder->reset();
+            std::unique_ptr<JBIG2Bitmap> collBitmap;
             if (bmSize == 0) {
-                collBitmap = new JBIG2Bitmap(0, totalWidth, symHeight);
+                collBitmap = std::make_unique<JBIG2Bitmap>(0, totalWidth, symHeight);
                 bmSize = symHeight * ((totalWidth + 7) >> 3);
                 p = collBitmap->getDataPtr();
                 if (unlikely(p == nullptr)) {
-                    delete collBitmap;
                     goto syntaxError;
                 }
                 for (k = 0; k < (unsigned int)bmSize; ++k) {
@@ -1860,15 +1860,14 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                 }
                 byteCounter += k;
             } else {
-                collBitmap = readGenericBitmap(true, totalWidth, symHeight, 0, false, false, nullptr, nullptr, nullptr, bmSize).release();
+                collBitmap = readGenericBitmap(true, totalWidth, symHeight, 0, false, false, nullptr, nullptr, nullptr, bmSize);
             }
-            if (likely(collBitmap != nullptr)) {
+            if (collBitmap) {
                 x = 0;
                 for (; j < i; ++j) {
                     bitmaps[numInputSyms + j] = collBitmap->getSlice(x, 0, symWidths[j], symHeight).release();
                     x += symWidths[j];
                 }
-                delete collBitmap;
             } else {
                 error(errSyntaxError, curStr->getPos(), "collBitmap was null");
                 goto syntaxError;
