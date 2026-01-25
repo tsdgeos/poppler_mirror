@@ -1553,7 +1553,8 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
 
     // symbol dictionary flags
     if (!readUWord(&flags)) {
-        goto eofError;
+        error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+        return false;
     }
     sdTemplate = (flags >> 10) & 3;
     sdrTemplate = (flags >> 12) & 1;
@@ -1570,11 +1571,13 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
     if (!huff) {
         if (sdTemplate == 0) {
             if (!readByte(&sdATX[0]) || !readByte(&sdATY[0]) || !readByte(&sdATX[1]) || !readByte(&sdATY[1]) || !readByte(&sdATX[2]) || !readByte(&sdATY[2]) || !readByte(&sdATX[3]) || !readByte(&sdATY[3])) {
-                goto eofError;
+                error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+                return false;
             }
         } else {
             if (!readByte(&sdATX[0]) || !readByte(&sdATY[0])) {
-                goto eofError;
+                error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+                return false;
             }
         }
     }
@@ -1582,13 +1585,15 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
     // symbol dictionary refinement AT flags
     if (refAgg && !sdrTemplate) {
         if (!readByte(&sdrATX[0]) || !readByte(&sdrATY[0]) || !readByte(&sdrATX[1]) || !readByte(&sdrATY[1])) {
-            goto eofError;
+            error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+            return false;
         }
     }
 
     // SDNUMEXSYMS and SDNUMNEWSYMS
     if (!readULong(&numExSyms) || !readULong(&numNewSyms)) {
-        goto eofError;
+        error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+        return false;
     }
 
     // get referenced segments: input symbol dictionaries and code tables
@@ -1603,7 +1608,8 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                 j = static_cast<JBIG2SymbolDict *>(seg)->getSize();
                 if (numInputSyms > UINT_MAX - j) {
                     error(errSyntaxError, curStr->getPos(), "Too many input symbols in JBIG2 symbol dictionary");
-                    goto eofError;
+                    error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+                    return false;
                 }
                 numInputSyms += j;
             } else if (seg->getType() == jbig2SegCodeTable) {
@@ -1615,7 +1621,8 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
     }
     if (numInputSyms > UINT_MAX - numNewSyms) {
         error(errSyntaxError, curStr->getPos(), "Too many input symbols in JBIG2 symbol dictionary");
-        goto eofError;
+        error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+        return false;
     }
 
     // compute symbol code length, per 6.5.8.2.3
@@ -1637,7 +1644,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
     bitmaps = (JBIG2Bitmap **)gmallocn_checkoverflow(numInputSyms + numNewSyms, sizeof(JBIG2Bitmap *));
     if (!bitmaps && (numInputSyms + numNewSyms > 0)) {
         error(errSyntaxError, curStr->getPos(), "Too many input symbols in JBIG2 symbol dictionary");
-        goto eofError;
+        return false;
     }
     for (i = 0; i < numInputSyms + numNewSyms; ++i) {
         bitmaps[i] = nullptr;
@@ -1954,10 +1961,6 @@ syntaxError:
         }
     }
     gfree(static_cast<void *>(bitmaps));
-    return false;
-
-eofError:
-    error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
     return false;
 }
 
