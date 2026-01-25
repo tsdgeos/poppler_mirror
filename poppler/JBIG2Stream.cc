@@ -1525,7 +1525,6 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
     std::unique_ptr<JBIG2SymbolDict> symbolDict;
     const JBIG2HuffmanTable *huffDHTable, *huffDWTable;
     const JBIG2HuffmanTable *huffBMSizeTable, *huffAggInstTable;
-    JBIG2Segment *seg;
     std::vector<JBIG2Segment *> codeTables;
     JBIG2SymbolDict *inputSymbolDict;
     unsigned int flags, sdTemplate, sdrTemplate, huff, refAgg;
@@ -1589,7 +1588,8 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
         // This is need by bug 12014, returning false makes it not crash
         // but we end up with a empty page while acroread is able to render
         // part of it
-        if ((seg = findSegment(refSegI))) {
+        JBIG2Segment *seg = findSegment(refSegI);
+        if (seg) {
             if (seg->getType() == jbig2SegSymbolDict) {
                 j = ((JBIG2SymbolDict *)seg)->getSize();
                 if (numInputSyms > UINT_MAX - j) {
@@ -1636,7 +1636,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
     k = 0;
     inputSymbolDict = nullptr;
     for (const unsigned int refSegI : refSegs) {
-        seg = findSegment(refSegI);
+        JBIG2Segment *seg = findSegment(refSegI);
         if (seg != nullptr && seg->getType() == jbig2SegSymbolDict) {
             inputSymbolDict = (JBIG2SymbolDict *)seg;
             for (j = 0; j < inputSymbolDict->getSize(); ++j) {
