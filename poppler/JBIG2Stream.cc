@@ -639,7 +639,7 @@ public:
     explicit JBIG2Bitmap(JBIG2Bitmap *bitmap);
     ~JBIG2Bitmap() override;
     JBIG2SegmentType getType() override { return jbig2SegBitmap; }
-    JBIG2Bitmap *getSlice(unsigned int x, unsigned int y, unsigned int wA, unsigned int hA);
+    std::unique_ptr<JBIG2Bitmap> getSlice(unsigned int x, unsigned int y, unsigned int wA, unsigned int hA);
     void expand(int newH, unsigned int pixel);
     void clearToZero();
     void clearToOne();
@@ -716,28 +716,24 @@ JBIG2Bitmap::~JBIG2Bitmap()
 }
 
 //~ optimize this
-JBIG2Bitmap *JBIG2Bitmap::getSlice(unsigned int x, unsigned int y, unsigned int wA, unsigned int hA)
+std::unique_ptr<JBIG2Bitmap> JBIG2Bitmap::getSlice(unsigned int x, unsigned int y, unsigned int wA, unsigned int hA)
 {
-    JBIG2Bitmap *slice;
-    unsigned int xx, yy;
-
     if (!data) {
-        return nullptr;
+        return {};
     }
 
-    slice = new JBIG2Bitmap(0, wA, hA);
-    if (slice->isOk()) {
-        slice->clearToZero();
-        for (yy = 0; yy < hA; ++yy) {
-            for (xx = 0; xx < wA; ++xx) {
-                if (getPixel(x + xx, y + yy)) {
-                    slice->setPixel(xx, yy);
-                }
+    auto slice = std::make_unique<JBIG2Bitmap>(0, wA, hA);
+    if (!slice->isOk()) {
+        return {};
+    }
+
+    slice->clearToZero();
+    for (unsigned int yy = 0; yy < hA; ++yy) {
+        for (unsigned int xx = 0; xx < wA; ++xx) {
+            if (getPixel(x + xx, y + yy)) {
+                slice->setPixel(xx, yy);
             }
         }
-    } else {
-        delete slice;
-        slice = nullptr;
     }
     return slice;
 }
@@ -1882,7 +1878,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             if (likely(collBitmap != nullptr)) {
                 x = 0;
                 for (; j < i; ++j) {
-                    bitmaps[numInputSyms + j] = collBitmap->getSlice(x, 0, symWidths[j], symHeight);
+                    bitmaps[numInputSyms + j] = collBitmap->getSlice(x, 0, symWidths[j], symHeight).release();
                     x += symWidths[j];
                 }
                 delete collBitmap;
@@ -2611,7 +2607,7 @@ bool JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
     // split up the bitmap
     x = 0;
     for (i = 0; i <= grayMax && i < patternDict->getSize(); ++i) {
-        patternDict->setBitmap(i, bitmap->getSlice(x, 0, patternW, patternH));
+        patternDict->setBitmap(i, bitmap->getSlice(x, 0, patternW, patternH).release());
         x += patternW;
     }
 
@@ -3762,7 +3758,7 @@ bool JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, 
         }
         refBitmap = (JBIG2Bitmap *)seg;
     } else {
-        refBitmap = pageBitmap->getSlice(x, y, w, h);
+        refBitmap = pageBitmap->getSlice(x, y, w, h).release();
     }
 
     // set up the arithmetic decoder
