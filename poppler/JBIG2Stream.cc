@@ -1597,7 +1597,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
         JBIG2Segment *seg = findSegment(refSegI);
         if (seg) {
             if (seg->getType() == jbig2SegSymbolDict) {
-                j = ((JBIG2SymbolDict *)seg)->getSize();
+                j = static_cast<JBIG2SymbolDict *>(seg)->getSize();
                 if (numInputSyms > UINT_MAX - j) {
                     error(errSyntaxError, curStr->getPos(), "Too many input symbols in JBIG2 symbol dictionary");
                     goto eofError;
@@ -1644,7 +1644,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
     for (const unsigned int refSegI : refSegs) {
         JBIG2Segment *seg = findSegment(refSegI);
         if (seg != nullptr && seg->getType() == jbig2SegSymbolDict) {
-            inputSymbolDict = (JBIG2SymbolDict *)seg;
+            inputSymbolDict = static_cast<JBIG2SymbolDict *>(seg);
             for (j = 0; j < inputSymbolDict->getSize(); ++j) {
                 bitmaps[k++] = inputSymbolDict->getBitmap(j);
             }
@@ -1664,7 +1664,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffDHTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
+            huffDHTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
         if (huffDW == 0) {
             huffDWTable = huffTableB;
@@ -1674,7 +1674,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffDWTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
+            huffDWTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
         if (huffBMSize == 0) {
             huffBMSizeTable = huffTableA;
@@ -1682,7 +1682,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffBMSizeTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
+            huffBMSizeTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
         if (huffAggInst == 0) {
             huffAggInstTable = huffTableA;
@@ -1690,7 +1690,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffAggInstTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
+            huffAggInstTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
     }
 
@@ -2032,7 +2032,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
     for (const unsigned int refSegI : refSegs) {
         if ((seg = findSegment(refSegI))) {
             if (seg->getType() == jbig2SegSymbolDict) {
-                const unsigned int segSize = ((JBIG2SymbolDict *)seg)->getSize();
+                const unsigned int segSize = static_cast<JBIG2SymbolDict *>(seg)->getSize();
                 if (unlikely(checkedAdd(numSyms, segSize, &numSyms))) {
                     error(errSyntaxError, getPos(), "Too many symbols in JBIG2 text region");
                     return false;
@@ -2067,7 +2067,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
     for (const unsigned int refSegI : refSegs) {
         if ((seg = findSegment(refSegI))) {
             if (seg->getType() == jbig2SegSymbolDict) {
-                symbolDict = (JBIG2SymbolDict *)seg;
+                symbolDict = static_cast<JBIG2SymbolDict *>(seg);
                 for (k = 0; k < symbolDict->getSize(); ++k) {
                     syms[kk++] = symbolDict->getBitmap(k);
                 }
@@ -2089,7 +2089,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffFSTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
+            huffFSTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
         if (huffDS == 0) {
             huffDSTable = huffTableH;
@@ -2101,7 +2101,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffDSTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
+            huffDSTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
         if (huffDT == 0) {
             huffDTTable = huffTableK;
@@ -2113,7 +2113,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffDTTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
+            huffDTTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
         if (huffRDW == 0) {
             huffRDWTable = huffTableN;
@@ -2123,7 +2123,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffRDWTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
+            huffRDWTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
         if (huffRDH == 0) {
             huffRDHTable = huffTableN;
@@ -2133,7 +2133,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffRDHTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
+            huffRDHTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
         if (huffRDX == 0) {
             huffRDXTable = huffTableN;
@@ -2143,7 +2143,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffRDXTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
+            huffRDXTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
         if (huffRDY == 0) {
             huffRDYTable = huffTableN;
@@ -2153,7 +2153,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffRDYTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
+            huffRDYTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
         if (huffRSize == 0) {
             huffRSizeTable = huffTableA;
@@ -2161,7 +2161,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffRSizeTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
+            huffRSizeTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
     }
 
@@ -2656,7 +2656,7 @@ bool JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, const std
         return false;
     }
 
-    patternDict = (JBIG2PatternDict *)seg;
+    patternDict = static_cast<JBIG2PatternDict *>(seg);
     i = patternDict->getSize();
     if (i <= 1) {
         bpp = 0;
@@ -3743,7 +3743,7 @@ bool JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, 
             error(errSyntaxError, curStr->getPos(), "Bad bitmap reference in JBIG2 generic refinement segment");
             return false;
         }
-        refBitmap = (JBIG2Bitmap *)seg;
+        refBitmap = static_cast<JBIG2Bitmap *>(seg);
     } else {
         refBitmap = pageBitmap->getSlice(x, y, w, h).release();
     }
