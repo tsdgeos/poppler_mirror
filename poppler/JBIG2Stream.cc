@@ -613,7 +613,7 @@ public:
     JBIG2Segment &operator=(const JBIG2Segment &) = delete;
     void setSegNum(unsigned int segNumA) { segNum = segNumA; }
     unsigned int getSegNum() const { return segNum; }
-    virtual JBIG2SegmentType getType() = 0;
+    virtual JBIG2SegmentType getType() const = 0;
 
 private:
     unsigned int segNum;
@@ -638,7 +638,7 @@ public:
     JBIG2Bitmap(unsigned int segNumA, int wA, int hA);
     explicit JBIG2Bitmap(JBIG2Bitmap *bitmap);
     ~JBIG2Bitmap() override;
-    JBIG2SegmentType getType() override { return jbig2SegBitmap; }
+    JBIG2SegmentType getType() const override { return jbig2SegBitmap; }
     std::unique_ptr<JBIG2Bitmap> getSlice(unsigned int x, unsigned int y, unsigned int wA, unsigned int hA);
     void expand(int newH, unsigned int pixel);
     void clearToZero();
@@ -1030,7 +1030,7 @@ class JBIG2SymbolDict : public JBIG2Segment
 public:
     JBIG2SymbolDict(unsigned int segNumA, unsigned int sizeA);
     ~JBIG2SymbolDict() override;
-    JBIG2SegmentType getType() override { return jbig2SegSymbolDict; }
+    JBIG2SegmentType getType() const override { return jbig2SegSymbolDict; }
     unsigned int getSize() const { return size; }
     void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap) { bitmaps[idx] = bitmap; }
     JBIG2Bitmap *getBitmap(unsigned int idx) { return bitmaps[idx]; }
@@ -1089,7 +1089,7 @@ class JBIG2PatternDict : public JBIG2Segment
 public:
     JBIG2PatternDict(unsigned int segNumA, unsigned int sizeA);
     ~JBIG2PatternDict() override;
-    JBIG2SegmentType getType() override { return jbig2SegPatternDict; }
+    JBIG2SegmentType getType() const override { return jbig2SegPatternDict; }
     unsigned int getSize() const { return bitmaps.size(); }
     void setBitmap(unsigned int idx, std::unique_ptr<JBIG2Bitmap> bitmap)
     {
@@ -1121,7 +1121,7 @@ class JBIG2CodeTable : public JBIG2Segment
 public:
     JBIG2CodeTable(unsigned int segNumA, JBIG2HuffmanTable *tableA);
     ~JBIG2CodeTable() override;
-    JBIG2SegmentType getType() override { return jbig2SegCodeTable; }
+    JBIG2SegmentType getType() const override { return jbig2SegCodeTable; }
     JBIG2HuffmanTable *getHuffTable() { return table; }
 
 private:
