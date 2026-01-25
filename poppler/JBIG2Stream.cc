@@ -1968,7 +1968,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
     JBIG2Segment *seg;
     std::vector<JBIG2Segment *> codeTables;
     JBIG2SymbolDict *symbolDict;
-    JBIG2Bitmap **syms;
+    std::vector<JBIG2Bitmap *> syms;
     unsigned int w, h, x, y, segInfoFlags, extCombOp;
     unsigned int flags, huff, refine, logStrips, refCorner, transposed;
     unsigned int combOp, defPixel, templ;
@@ -2058,10 +2058,13 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
     }
 
     // get the symbol bitmaps
-    syms = (JBIG2Bitmap **)gmallocn_checkoverflow(numSyms, sizeof(JBIG2Bitmap *));
-    if (numSyms > 0 && !syms) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare" // https://github.com/llvm/llvm-project/issues/177861
+    if (numSyms > syms.max_size()) {
+#pragma clang diagnostic pop
         return false;
     }
+    syms.resize(numSyms);
     kk = 0;
     for (const unsigned int refSegI : refSegs) {
         if ((seg = findSegment(refSegI))) {
@@ -2191,7 +2194,6 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
     if (huff) {
         symCodeTab = (JBIG2HuffmanTable *)gmallocn_checkoverflow(numSyms + 1, sizeof(JBIG2HuffmanTable));
         if (!symCodeTab) {
-            gfree(static_cast<void *>(syms));
             return false;
         }
         for (i = 0; i < numSyms; ++i) {
@@ -2232,7 +2234,6 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
 
     if (!huff) {
         if (!resetIntStats(symCodeLen)) {
-            gfree(static_cast<void *>(syms));
             return false;
         }
         arithDecoder->start();
@@ -2241,10 +2242,8 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
         resetRefinementStats(templ, nullptr);
     }
 
-    bitmap = readTextRegion(huff, refine, w, h, numInstances, logStrips, numSyms, symCodeTab, symCodeLen, syms, defPixel, combOp, transposed, refCorner, sOffset, huffFSTable, huffDSTable, huffDTTable, huffRDWTable, huffRDHTable,
+    bitmap = readTextRegion(huff, refine, w, h, numInstances, logStrips, numSyms, symCodeTab, symCodeLen, syms.data(), defPixel, combOp, transposed, refCorner, sOffset, huffFSTable, huffDSTable, huffDTTable, huffRDWTable, huffRDHTable,
                             huffRDXTable, huffRDYTable, huffRSizeTable, templ, atx, aty);
-
-    gfree(static_cast<void *>(syms));
 
     if (bitmap) {
         // combine the region bitmap into the page bitmap
@@ -2270,7 +2269,6 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
 
 codeTableError:
     error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 text region");
-    gfree(static_cast<void *>(syms));
     return false;
 
 eofError:
