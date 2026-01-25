@@ -1535,15 +1535,13 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
     unsigned int numExSyms, numNewSyms, numInputSyms, symCodeLen;
     JBIG2Bitmap **bitmaps;
     JBIG2Bitmap *refBitmap;
-    unsigned int *symWidths;
+    std::vector<unsigned int> symWidths;
     unsigned int symHeight, symWidth, totalWidth, x, symID;
     int dh = 0, dw, refAggNum, refDX = 0, refDY = 0, bmSize;
     bool ex;
     int run, cnt, c;
     unsigned int i, j, k;
     unsigned char *p;
-
-    symWidths = nullptr;
 
     // symbol dictionary flags
     if (!readUWord(&flags)) {
@@ -1718,10 +1716,9 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
 
     // allocate symbol widths storage
     if (huff && !refAgg) {
-        symWidths = (unsigned int *)gmallocn_checkoverflow(numNewSyms, sizeof(unsigned int));
-        if (numNewSyms > 0 && !symWidths) {
-            goto syntaxError;
-        }
+        // TODO uncomment when we require gcc >= 12
+        // static_assert(std::numeric_limits<decltype(numNewSyms)>::max() < decltype(symWidths)().max_size());
+        symWidths.resize(numNewSyms);
     }
 
     symHeight = 0;
@@ -1920,9 +1917,6 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
         delete bitmaps[numInputSyms + i];
     }
     gfree(static_cast<void *>(bitmaps));
-    if (symWidths) {
-        gfree(symWidths);
-    }
 
     // save the arithmetic decoder stats
     if (!huff && contextRetained) {
@@ -1947,9 +1941,6 @@ syntaxError:
         }
     }
     gfree(static_cast<void *>(bitmaps));
-    if (symWidths) {
-        gfree(symWidths);
-    }
     return false;
 
 eofError:
