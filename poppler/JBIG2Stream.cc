@@ -1090,40 +1090,27 @@ public:
     JBIG2PatternDict(unsigned int segNumA, unsigned int sizeA);
     ~JBIG2PatternDict() override;
     JBIG2SegmentType getType() override { return jbig2SegPatternDict; }
-    unsigned int getSize() const { return size; }
-    void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap)
+    unsigned int getSize() const { return bitmaps.size(); }
+    void setBitmap(unsigned int idx, std::unique_ptr<JBIG2Bitmap> bitmap)
     {
-        if (likely(idx < size)) {
-            bitmaps[idx] = bitmap;
+        if (likely(idx < bitmaps.size())) {
+            bitmaps[idx] = std::move(bitmap);
         }
     }
-    JBIG2Bitmap *getBitmap(unsigned int idx) { return (idx < size) ? bitmaps[idx] : nullptr; }
+    JBIG2Bitmap *getBitmap(unsigned int idx) { return (idx < bitmaps.size()) ? bitmaps[idx].get() : nullptr; }
 
 private:
-    unsigned int size;
-    JBIG2Bitmap **bitmaps;
+    std::vector<std::unique_ptr<JBIG2Bitmap>> bitmaps;
 };
 
 JBIG2PatternDict::JBIG2PatternDict(unsigned int segNumA, unsigned int sizeA) : JBIG2Segment(segNumA)
 {
-    bitmaps = (JBIG2Bitmap **)gmallocn_checkoverflow(sizeA, sizeof(JBIG2Bitmap *));
-    if (bitmaps) {
-        size = sizeA;
-    } else {
-        size = 0;
-        error(errSyntaxError, -1, "JBIG2PatternDict: can't allocate bitmaps");
-    }
+    // TODO uncomment when we require gcc >= 12
+    // static_assert(std::numeric_limits<decltype(sizeA)>::max() < decltype(bitmaps)().max_size());
+    bitmaps.resize(sizeA);
 }
 
-JBIG2PatternDict::~JBIG2PatternDict()
-{
-    unsigned int i;
-
-    for (i = 0; i < size; ++i) {
-        delete bitmaps[i];
-    }
-    gfree(static_cast<void *>(bitmaps));
-}
+JBIG2PatternDict::~JBIG2PatternDict() = default;
 
 //------------------------------------------------------------------------
 // JBIG2CodeTable
@@ -1355,7 +1342,7 @@ bool JBIG2Stream::readSegments()
         }
 
         // referred-to segment numbers
-        // TODO uncomment when we can require gcc >= 12
+        // TODO uncomment when we require gcc >= 12
         // static_assert(std::numeric_limits<decltype(nRefSegs)>::max() < decltype(refSegs)().max_size());
         refSegs.resize(nRefSegs);
         if (segNum <= 256) {
@@ -2607,7 +2594,7 @@ bool JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
     // split up the bitmap
     x = 0;
     for (i = 0; i <= grayMax && i < patternDict->getSize(); ++i) {
-        patternDict->setBitmap(i, bitmap->getSlice(x, 0, patternW, patternH).release());
+        patternDict->setBitmap(i, bitmap->getSlice(x, 0, patternW, patternH));
         x += patternW;
     }
 
