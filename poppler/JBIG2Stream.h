@@ -100,7 +100,7 @@ private:
     Ref globalsStreamRef;
     unsigned int pageW, pageH, curPageH;
     unsigned int pageDefPixel;
-    JBIG2Bitmap *pageBitmap;
+    std::unique_ptr<JBIG2Bitmap> pageBitmap;
     unsigned int defCombOp;
     std::vector<std::unique_ptr<JBIG2Segment>> segments;
     std::vector<std::unique_ptr<JBIG2Segment>> globalSegments;

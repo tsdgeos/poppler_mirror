@@ -1130,8 +1130,6 @@ JBIG2CodeTable::~JBIG2CodeTable()
 
 JBIG2Stream::JBIG2Stream(std::unique_ptr<Stream> strA, Object &&globalsStreamA, Object *globalsStreamRefA) : OwnedFilterStream(std::move(strA))
 {
-    pageBitmap = nullptr;
-
     arithDecoder = new JArithmeticDecoder();
     genericRegionStats = std::make_unique<JArithmeticDecoderStats>(1 << 1);
     refinementRegionStats = std::make_unique<JArithmeticDecoderStats>(1 << 1);
@@ -1224,10 +1222,7 @@ bool JBIG2Stream::rewind()
 
 void JBIG2Stream::close()
 {
-    if (pageBitmap) {
-        delete pageBitmap;
-        pageBitmap = nullptr;
-    }
+    pageBitmap.reset();
     segments.resize(0);
     globalSegments.resize(0);
     dataPtr = dataEnd = nullptr;
@@ -3969,12 +3964,10 @@ bool JBIG2Stream::readPageInfoSeg()
     } else {
         curPageH = pageH;
     }
-    delete pageBitmap;
-    pageBitmap = new JBIG2Bitmap(0, pageW, curPageH);
+    pageBitmap = std::make_unique<JBIG2Bitmap>(0, pageW, curPageH);
 
     if (!pageBitmap->isOk()) {
-        delete pageBitmap;
-        pageBitmap = nullptr;
+        pageBitmap.reset();
         return false;
     }
 
