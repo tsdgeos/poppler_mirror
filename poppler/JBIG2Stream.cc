@@ -3673,27 +3673,24 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 
 bool JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, const std::vector<unsigned int> &refSegs)
 {
-    std::unique_ptr<JBIG2Bitmap> bitmap;
-    JBIG2Bitmap *refBitmap;
-    unsigned int w, h, x, y, segInfoFlags, extCombOp;
-    unsigned int flags, templ, tpgrOn;
+    unsigned int w, h, x, y, segInfoFlags;
+    unsigned int flags;
     int atx[2], aty[2];
-    JBIG2Segment *seg;
 
     // region segment info field
     if (!readULong(&w) || !readULong(&h) || !readULong(&x) || !readULong(&y) || !readUByte(&segInfoFlags)) {
         error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
         return false;
     }
-    extCombOp = segInfoFlags & 7;
+    const unsigned int extCombOp = segInfoFlags & 7;
 
     // rest of the generic refinement region segment header
     if (!readUByte(&flags)) {
         error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
         return false;
     }
-    templ = flags & 1;
-    tpgrOn = (flags >> 1) & 1;
+    const unsigned int templ = flags & 1;
+    const unsigned int tpgrOn = (flags >> 1) & 1;
 
     // AT flags
     if (!templ) {
@@ -3715,15 +3712,18 @@ bool JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, 
         error(errSyntaxError, curStr->getPos(), "Bad reference in JBIG2 generic refinement segment");
         return false;
     }
+    JBIG2Bitmap *refBitmap;
+    std::unique_ptr<JBIG2Bitmap> bitmapDeleter;
     if (refSegs.size() == 1) {
-        seg = findSegment(refSegs[0]);
+        JBIG2Segment *seg = findSegment(refSegs[0]);
         if (seg == nullptr || seg->getType() != jbig2SegBitmap) {
             error(errSyntaxError, curStr->getPos(), "Bad bitmap reference in JBIG2 generic refinement segment");
             return false;
         }
         refBitmap = static_cast<JBIG2Bitmap *>(seg);
     } else {
-        refBitmap = pageBitmap->getSlice(x, y, w, h).release();
+        bitmapDeleter = pageBitmap->getSlice(x, y, w, h);
+        refBitmap = bitmapDeleter.get();
     }
 
     // set up the arithmetic decoder
@@ -3731,7 +3731,7 @@ bool JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, 
     arithDecoder->start();
 
     // read
-    bitmap = readGenericRefinementRegion(w, h, templ, tpgrOn, refBitmap, 0, 0, atx, aty);
+    std::unique_ptr<JBIG2Bitmap> bitmap = readGenericRefinementRegion(w, h, templ, tpgrOn, refBitmap, 0, 0, atx, aty);
 
     // combine the region bitmap into the page bitmap
     if (imm && bitmap) {
@@ -3750,8 +3750,6 @@ bool JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, 
     // delete the referenced bitmap
     if (refSegs.size() == 1) {
         discardSegment(refSegs[0]);
-    } else {
-        delete refBitmap;
     }
 
     return true;
