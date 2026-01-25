@@ -47,11 +47,9 @@ JArithmeticDecoderStats::~JArithmeticDecoderStats()
     gfree(cxTab);
 }
 
-JArithmeticDecoderStats *JArithmeticDecoderStats::copy()
+std::unique_ptr<JArithmeticDecoderStats> JArithmeticDecoderStats::copy() const
 {
-    JArithmeticDecoderStats *stats;
-
-    stats = new JArithmeticDecoderStats(contextSize);
+    auto stats = std::make_unique<JArithmeticDecoderStats>(contextSize);
     memcpy(stats->cxTab, cxTab, contextSize);
     return stats;
 }

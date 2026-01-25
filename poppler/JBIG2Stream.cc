@@ -1034,16 +1034,16 @@ public:
     void setBitmap(unsigned int idx, std::unique_ptr<JBIG2Bitmap> bitmap) { bitmaps[idx] = std::move(bitmap); }
     JBIG2Bitmap *getBitmap(unsigned int idx) { return bitmaps[idx].get(); }
     bool isOk() const { return ok; }
-    void setGenericRegionStats(JArithmeticDecoderStats *stats) { genericRegionStats = stats; }
-    void setRefinementRegionStats(JArithmeticDecoderStats *stats) { refinementRegionStats = stats; }
-    JArithmeticDecoderStats *getGenericRegionStats() { return genericRegionStats; }
-    JArithmeticDecoderStats *getRefinementRegionStats() { return refinementRegionStats; }
+    void setGenericRegionStats(std::unique_ptr<JArithmeticDecoderStats> stats) { genericRegionStats = std::move(stats); }
+    void setRefinementRegionStats(std::unique_ptr<JArithmeticDecoderStats> stats) { refinementRegionStats = std::move(stats); }
+    JArithmeticDecoderStats *getGenericRegionStats() { return genericRegionStats.get(); }
+    JArithmeticDecoderStats *getRefinementRegionStats() { return refinementRegionStats.get(); }
 
 private:
     bool ok;
     std::vector<std::unique_ptr<JBIG2Bitmap>> bitmaps;
-    JArithmeticDecoderStats *genericRegionStats;
-    JArithmeticDecoderStats *refinementRegionStats;
+    std::unique_ptr<JArithmeticDecoderStats> genericRegionStats;
+    std::unique_ptr<JArithmeticDecoderStats> refinementRegionStats;
 };
 
 JBIG2SymbolDict::JBIG2SymbolDict(unsigned int segNumA, unsigned int sizeA) : JBIG2Segment(segNumA)
@@ -1052,15 +1052,9 @@ JBIG2SymbolDict::JBIG2SymbolDict(unsigned int segNumA, unsigned int sizeA) : JBI
     if (sizeA > bitmaps.max_size()) {
         ok = false;
     }
-    genericRegionStats = nullptr;
-    refinementRegionStats = nullptr;
 }
 
-JBIG2SymbolDict::~JBIG2SymbolDict()
-{
-    delete genericRegionStats;
-    delete refinementRegionStats;
-}
+JBIG2SymbolDict::~JBIG2SymbolDict() = default;
 
 //------------------------------------------------------------------------
 // JBIG2PatternDict
@@ -1131,8 +1125,8 @@ JBIG2Stream::JBIG2Stream(std::unique_ptr<Stream> strA, Object &&globalsStreamA, 
     pageBitmap = nullptr;
 
     arithDecoder = new JArithmeticDecoder();
-    genericRegionStats = new JArithmeticDecoderStats(1 << 1);
-    refinementRegionStats = new JArithmeticDecoderStats(1 << 1);
+    genericRegionStats = std::make_unique<JArithmeticDecoderStats>(1 << 1);
+    refinementRegionStats = std::make_unique<JArithmeticDecoderStats>(1 << 1);
     iadhStats = new JArithmeticDecoderStats(1 << 9);
     iadwStats = new JArithmeticDecoderStats(1 << 9);
     iaexStats = new JArithmeticDecoderStats(1 << 9);
@@ -1165,8 +1159,6 @@ JBIG2Stream::~JBIG2Stream()
 {
     close();
     delete arithDecoder;
-    delete genericRegionStats;
-    delete refinementRegionStats;
     delete iadhStats;
     delete iadwStats;
     delete iaexStats;
@@ -3145,7 +3137,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 
             // check for a "typical" (duplicate) row
             if (tpgdOn) {
-                if (arithDecoder->decodeBit(ltpCX, genericRegionStats)) {
+                if (arithDecoder->decodeBit(ltpCX, genericRegionStats.get())) {
                     ltp = !ltp;
                 }
                 if (ltp) {
@@ -3255,7 +3247,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats.get())) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                     if (aty[0] == 0) {
@@ -3310,7 +3302,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats.get())) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                 }
@@ -3391,7 +3383,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats.get())) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                     if (aty[0] == 0) {
@@ -3436,7 +3428,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats.get())) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                 }
@@ -3517,7 +3509,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats.get())) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                     if (aty[0] == 0) {
@@ -3559,7 +3551,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats.get())) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                 }
@@ -3629,7 +3621,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats.get())) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                     if (aty[0] == 0) {
@@ -3666,7 +3658,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats.get())) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                 }
@@ -3856,7 +3848,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int
                     tpgrCX2 = ((tpgrCX2 << 1) | refBitmap->nextPixel(&tpgrCXPtr2)) & 7;
 
                     // check for a "typical" pixel
-                    if (arithDecoder->decodeBit(ltpCX, refinementRegionStats)) {
+                    if (arithDecoder->decodeBit(ltpCX, refinementRegionStats.get())) {
                         ltp = !ltp;
                     }
                     if (tpgrCX0 == 0 && tpgrCX1 == 0 && tpgrCX2 == 0) {
@@ -3873,7 +3865,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int
                 cx = (cx0 << 7) | (bitmap->nextPixel(&cxPtr1) << 6) | (refBitmap->nextPixel(&cxPtr2) << 5) | (cx3 << 2) | cx4;
 
                 // decode the pixel
-                if ((pix = arithDecoder->decodeBit(cx, refinementRegionStats))) {
+                if ((pix = arithDecoder->decodeBit(cx, refinementRegionStats.get()))) {
                     bitmap->setPixel(x, y);
                 }
             }
@@ -3931,7 +3923,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int
                     tpgrCX2 = ((tpgrCX2 << 1) | refBitmap->nextPixel(&tpgrCXPtr2)) & 7;
 
                     // check for a "typical" pixel
-                    if (arithDecoder->decodeBit(ltpCX, refinementRegionStats)) {
+                    if (arithDecoder->decodeBit(ltpCX, refinementRegionStats.get())) {
                         ltp = !ltp;
                     }
                     if (tpgrCX0 == 0 && tpgrCX1 == 0 && tpgrCX2 == 0) {
@@ -3948,7 +3940,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int
                 cx = (cx0 << 11) | (bitmap->nextPixel(&cxPtr1) << 10) | (cx2 << 8) | (cx3 << 5) | (cx4 << 2) | (bitmap->nextPixel(&cxPtr5) << 1) | refBitmap->nextPixel(&cxPtr6);
 
                 // decode the pixel
-                if ((pix = arithDecoder->decodeBit(cx, refinementRegionStats))) {
+                if ((pix = arithDecoder->decodeBit(cx, refinementRegionStats.get()))) {
                     bitmap->setPixel(x, y);
                 }
 
@@ -4138,15 +4130,13 @@ void JBIG2Stream::resetGenericStats(unsigned int templ, JArithmeticDecoderStats 
         if (genericRegionStats->getContextSize() == size) {
             genericRegionStats->copyFrom(prevStats);
         } else {
-            delete genericRegionStats;
             genericRegionStats = prevStats->copy();
         }
     } else {
         if (genericRegionStats->getContextSize() == size) {
             genericRegionStats->reset();
         } else {
-            delete genericRegionStats;
-            genericRegionStats = new JArithmeticDecoderStats(1 << size);
+            genericRegionStats = std::make_unique<JArithmeticDecoderStats>(1 << size);
         }
     }
 }
@@ -4160,15 +4150,13 @@ void JBIG2Stream::resetRefinementStats(unsigned int templ, JArithmeticDecoderSta
         if (refinementRegionStats->getContextSize() == size) {
             refinementRegionStats->copyFrom(prevStats);
         } else {
-            delete refinementRegionStats;
             refinementRegionStats = prevStats->copy();
         }
     } else {
         if (refinementRegionStats->getContextSize() == size) {
             refinementRegionStats->reset();
         } else {
-            delete refinementRegionStats;
-            refinementRegionStats = new JArithmeticDecoderStats(1 << size);
+            refinementRegionStats = std::make_unique<JArithmeticDecoderStats>(1 << size);
         }
     }
 }

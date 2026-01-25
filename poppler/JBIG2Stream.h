@@ -110,8 +110,8 @@ private:
     unsigned int byteCounter;
 
     JArithmeticDecoder *arithDecoder;
-    JArithmeticDecoderStats *genericRegionStats;
-    JArithmeticDecoderStats *refinementRegionStats;
+    std::unique_ptr<JArithmeticDecoderStats> genericRegionStats;
+    std::unique_ptr<JArithmeticDecoderStats> refinementRegionStats;
     JArithmeticDecoderStats *iadhStats;
     JArithmeticDecoderStats *iadwStats;
     JArithmeticDecoderStats *iaexStats;
