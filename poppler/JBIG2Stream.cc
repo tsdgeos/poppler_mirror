@@ -1982,13 +1982,15 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
 
     // region segment info field
     if (!readULong(&w) || !readULong(&h) || !readULong(&x) || !readULong(&y) || !readUByte(&segInfoFlags)) {
-        goto eofError;
+        error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+        return false;
     }
     extCombOp = segInfoFlags & 7;
 
     // rest of the text region header
     if (!readUWord(&flags)) {
-        goto eofError;
+        error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+        return false;
     }
     huff = flags & 1;
     refine = (flags >> 1) & 1;
@@ -2006,7 +2008,8 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
     huffRDW = huffRDH = huffRDX = huffRDY = huffRSize = 0; // make gcc happy
     if (huff) {
         if (!readUWord(&huffFlags)) {
-            goto eofError;
+            error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+            return false;
         }
         huffFS = huffFlags & 3;
         huffDS = (huffFlags >> 2) & 3;
@@ -2019,11 +2022,13 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
     }
     if (refine && templ == 0) {
         if (!readByte(&atx[0]) || !readByte(&aty[0]) || !readByte(&atx[1]) || !readByte(&aty[1])) {
-            goto eofError;
+            error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+            return false;
         }
     }
     if (!readULong(&numInstances)) {
-        goto eofError;
+        error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+        return false;
     }
 
     // get symbol dictionaries and tables
@@ -2089,7 +2094,8 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             huffFSTable = huffTableG;
         } else {
             if (i >= codeTables.size()) {
-                goto codeTableError;
+                error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 text region");
+                return false;
             }
             huffFSTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
@@ -2101,7 +2107,8 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             huffDSTable = huffTableJ;
         } else {
             if (i >= codeTables.size()) {
-                goto codeTableError;
+                error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 text region");
+                return false;
             }
             huffDSTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
@@ -2113,7 +2120,8 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             huffDTTable = huffTableM;
         } else {
             if (i >= codeTables.size()) {
-                goto codeTableError;
+                error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 text region");
+                return false;
             }
             huffDTTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
@@ -2123,7 +2131,8 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             huffRDWTable = huffTableO;
         } else {
             if (i >= codeTables.size()) {
-                goto codeTableError;
+                error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 text region");
+                return false;
             }
             huffRDWTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
@@ -2133,7 +2142,8 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             huffRDHTable = huffTableO;
         } else {
             if (i >= codeTables.size()) {
-                goto codeTableError;
+                error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 text region");
+                return false;
             }
             huffRDHTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
@@ -2143,7 +2153,8 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             huffRDXTable = huffTableO;
         } else {
             if (i >= codeTables.size()) {
-                goto codeTableError;
+                error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 text region");
+                return false;
             }
             huffRDXTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
@@ -2153,7 +2164,8 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             huffRDYTable = huffTableO;
         } else {
             if (i >= codeTables.size()) {
-                goto codeTableError;
+                error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 text region");
+                return false;
             }
             huffRDYTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
@@ -2161,7 +2173,8 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             huffRSizeTable = huffTableA;
         } else {
             if (i >= codeTables.size()) {
-                goto codeTableError;
+                error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 text region");
+                return false;
             }
             huffRSizeTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
@@ -2266,14 +2279,6 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
     }
 
     return true;
-
-codeTableError:
-    error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 text region");
-    return false;
-
-eofError:
-    error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
-    return false;
 }
 
 std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, unsigned int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen,
