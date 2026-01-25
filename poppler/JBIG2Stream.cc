@@ -1459,7 +1459,9 @@ bool JBIG2Stream::readSegments()
             }
             break;
         case 48:
-            readPageInfoSeg();
+            if (!readPageInfoSeg()) {
+                return false;
+            }
             break;
         case 50:
             readEndOfStripeSeg(segLength);
@@ -3972,12 +3974,13 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int
     return bitmap;
 }
 
-void JBIG2Stream::readPageInfoSeg()
+bool JBIG2Stream::readPageInfoSeg()
 {
     unsigned int xRes, yRes, flags, striping;
 
     if (!readULong(&pageW) || !readULong(&pageH) || !readULong(&xRes) || !readULong(&yRes) || !readUByte(&flags) || !readUWord(&striping)) {
-        goto eofError;
+        error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+        return false;
     }
     pageDefPixel = (flags >> 2) & 1;
     defCombOp = (flags >> 3) & 3;
@@ -3994,7 +3997,7 @@ void JBIG2Stream::readPageInfoSeg()
     if (!pageBitmap->isOk()) {
         delete pageBitmap;
         pageBitmap = nullptr;
-        return;
+        return false;
     }
 
     // default pixel value
@@ -4004,10 +4007,7 @@ void JBIG2Stream::readPageInfoSeg()
         pageBitmap->clearToZero();
     }
 
-    return;
-
-eofError:
-    error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+    return true;
 }
 
 void JBIG2Stream::readEndOfStripeSeg(unsigned int length)

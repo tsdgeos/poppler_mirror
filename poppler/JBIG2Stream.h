@@ -80,7 +80,7 @@ private:
     std::unique_ptr<JBIG2Bitmap> readGenericBitmap(bool mmr, int w, int h, int templ, bool tpgdOn, bool useSkip, JBIG2Bitmap *skip, int *atx, int *aty, int mmrDataLength);
     [[nodiscard]] bool readGenericRefinementRegionSeg(unsigned int segNum, bool imm, const std::vector<unsigned int> &refSegs);
     std::unique_ptr<JBIG2Bitmap> readGenericRefinementRegion(int w, int h, int templ, bool tpgrOn, JBIG2Bitmap *refBitmap, int refDX, int refDY, int *atx, int *aty);
-    void readPageInfoSeg();
+    [[nodiscard]] bool readPageInfoSeg();
     void readEndOfStripeSeg(unsigned int length);
     void readProfilesSeg(unsigned int length);
     void readCodeTableSeg(unsigned int segNum);
