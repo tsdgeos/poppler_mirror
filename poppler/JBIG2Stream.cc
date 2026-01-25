@@ -2622,20 +2622,23 @@ bool JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, const std
 
     // region segment info field
     if (!readULong(&w) || !readULong(&h) || !readULong(&x) || !readULong(&y) || !readUByte(&segInfoFlags)) {
-        goto eofError;
+        error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+        return false;
     }
     extCombOp = segInfoFlags & 7;
 
     // rest of the halftone region header
     if (!readUByte(&flags)) {
-        goto eofError;
+        error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+        return false;
     }
     mmr = flags & 1;
     templ = (flags >> 1) & 3;
     enableSkip = (flags >> 3) & 1;
     combOp = (flags >> 4) & 7;
     if (!readULong(&gridW) || !readULong(&gridH) || !readLong(&gridX) || !readLong(&gridY) || !readUWord(&stepX) || !readUWord(&stepY)) {
-        goto eofError;
+        error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+        return false;
     }
     if (w == 0 || h == 0 || w >= INT_MAX / h) {
         error(errSyntaxError, curStr->getPos(), "Bad bitmap size in JBIG2 halftone segment");
@@ -2773,10 +2776,6 @@ bool JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, const std
     }
 
     return true;
-
-eofError:
-    error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
-    return false;
 }
 
 bool JBIG2Stream::readGenericRegionSeg(unsigned int segNum, bool imm, unsigned int length)
@@ -3708,13 +3707,15 @@ bool JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, 
 
     // region segment info field
     if (!readULong(&w) || !readULong(&h) || !readULong(&x) || !readULong(&y) || !readUByte(&segInfoFlags)) {
-        goto eofError;
+        error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+        return false;
     }
     extCombOp = segInfoFlags & 7;
 
     // rest of the generic refinement region segment header
     if (!readUByte(&flags)) {
-        goto eofError;
+        error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+        return false;
     }
     templ = flags & 1;
     tpgrOn = (flags >> 1) & 1;
@@ -3722,7 +3723,8 @@ bool JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, 
     // AT flags
     if (!templ) {
         if (!readByte(&atx[0]) || !readByte(&aty[0]) || !readByte(&atx[1]) || !readByte(&aty[1])) {
-            goto eofError;
+            error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+            return false;
         }
     }
 
@@ -3778,10 +3780,6 @@ bool JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, 
     }
 
     return true;
-
-eofError:
-    error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
-    return false;
 }
 
 std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int h, int templ, bool tpgrOn, JBIG2Bitmap *refBitmap, int refDX, int refDY, int *atx, int *aty)
