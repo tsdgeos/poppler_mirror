@@ -659,7 +659,7 @@ public:
     void getPixelPtr(int x, int y, JBIG2BitmapPtr *ptr);
     int nextPixel(JBIG2BitmapPtr *ptr) const;
     void duplicateRow(int yDest, int ySrc);
-    void combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp);
+    void combine(const JBIG2Bitmap &bitmap, int x, int y, unsigned int combOp);
     unsigned char *getDataPtr() { return data; }
     int getDataSize() const { return h * line; }
     bool isOk() const { return data != nullptr; }
@@ -822,7 +822,7 @@ void JBIG2Bitmap::duplicateRow(int yDest, int ySrc)
     memcpy(data + yDest * line, data + ySrc * line, line);
 }
 
-void JBIG2Bitmap::combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp)
+void JBIG2Bitmap::combine(const JBIG2Bitmap &bitmap, int x, int y, unsigned int combOp)
 {
     int x0, x1, y0, y1, xx, yy, yyy;
     unsigned char *srcPtr, *destPtr;
@@ -842,13 +842,13 @@ void JBIG2Bitmap::combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp
         y0 = 0;
     }
     int yPlusBitmapH;
-    if (unlikely(checkedAdd(y, bitmap->h, &yPlusBitmapH))) {
+    if (unlikely(checkedAdd(y, bitmap.h, &yPlusBitmapH))) {
         return;
     }
     if (yPlusBitmapH > h) {
         y1 = h - y;
     } else {
-        y1 = bitmap->h;
+        y1 = bitmap.h;
     }
     if (y0 >= y1) {
         return;
@@ -859,7 +859,7 @@ void JBIG2Bitmap::combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp
     } else {
         x0 = 0;
     }
-    if (unlikely(checkedAdd(x, bitmap->w, &x1))) {
+    if (unlikely(checkedAdd(x, bitmap.w, &x1))) {
         return;
     }
     if (x1 > w) {
@@ -889,7 +889,7 @@ void JBIG2Bitmap::combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp
         if (oneByte) {
             if (x >= 0) {
                 destPtr = data + yyy * line + (x >> 3);
-                srcPtr = bitmap->data + yy * bitmap->line;
+                srcPtr = bitmap.data + yy * bitmap.line;
                 dest = *destPtr;
                 src1 = *srcPtr;
                 switch (combOp) {
@@ -912,7 +912,7 @@ void JBIG2Bitmap::combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp
                 *destPtr = dest;
             } else {
                 destPtr = data + yyy * line;
-                srcPtr = bitmap->data + yy * bitmap->line + (-x >> 3);
+                srcPtr = bitmap.data + yy * bitmap.line + (-x >> 3);
                 dest = *destPtr;
                 src1 = *srcPtr;
                 switch (combOp) {
@@ -942,7 +942,7 @@ void JBIG2Bitmap::combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp
             // left-most byte
             if (x >= 0) {
                 destPtr = data + yyy * line + (x >> 3);
-                srcPtr = bitmap->data + yy * bitmap->line;
+                srcPtr = bitmap.data + yy * bitmap.line;
                 src1 = *srcPtr++;
                 dest = *destPtr;
                 switch (combOp) {
@@ -966,7 +966,7 @@ void JBIG2Bitmap::combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp
                 xx = x0 + 8;
             } else {
                 destPtr = data + yyy * line;
-                srcPtr = bitmap->data + yy * bitmap->line + (-x >> 3);
+                srcPtr = bitmap.data + yy * bitmap.line + (-x >> 3);
                 src1 = *srcPtr++;
                 xx = x0;
             }
@@ -2238,7 +2238,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
             if (pageH == 0xffffffff && y + h > curPageH) {
                 pageBitmap->expand(y + h, pageDefPixel);
             }
-            pageBitmap->combine(bitmap.get(), x, y, extCombOp);
+            pageBitmap->combine(*bitmap, x, y, extCombOp);
 
             // store the region bitmap
         } else {
@@ -2426,16 +2426,16 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                         }
                         switch (refCorner) {
                         case 0: // bottom left
-                            bitmap->combine(symbolBitmap, tt, s, combOp);
+                            bitmap->combine(*symbolBitmap, tt, s, combOp);
                             break;
                         case 1: // top left
-                            bitmap->combine(symbolBitmap, tt, s, combOp);
+                            bitmap->combine(*symbolBitmap, tt, s, combOp);
                             break;
                         case 2: // bottom right
-                            bitmap->combine(symbolBitmap, tt - bw, s, combOp);
+                            bitmap->combine(*symbolBitmap, tt - bw, s, combOp);
                             break;
                         case 3: // top right
-                            bitmap->combine(symbolBitmap, tt - bw, s, combOp);
+                            bitmap->combine(*symbolBitmap, tt - bw, s, combOp);
                             break;
                         }
                         s += bh;
@@ -2449,7 +2449,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                                 }
                                 return nullptr;
                             }
-                            bitmap->combine(symbolBitmap, s, tt - bh, combOp);
+                            bitmap->combine(*symbolBitmap, s, tt - bh, combOp);
                             break;
                         case 1: // top left
                             if (unlikely(tt > 2 * bitmap->getHeight())) {
@@ -2459,7 +2459,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                                 }
                                 return nullptr;
                             }
-                            bitmap->combine(symbolBitmap, s, tt, combOp);
+                            bitmap->combine(*symbolBitmap, s, tt, combOp);
                             break;
                         case 2: // bottom right
                             if (unlikely(tt - (int)bh > 2 * bitmap->getHeight())) {
@@ -2469,7 +2469,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                                 }
                                 return nullptr;
                             }
-                            bitmap->combine(symbolBitmap, s, tt - bh, combOp);
+                            bitmap->combine(*symbolBitmap, s, tt - bh, combOp);
                             break;
                         case 3: // top right
                             if (unlikely(tt > 2 * bitmap->getHeight())) {
@@ -2479,7 +2479,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                                 }
                                 return nullptr;
                             }
-                            bitmap->combine(symbolBitmap, s, tt, combOp);
+                            bitmap->combine(*symbolBitmap, s, tt, combOp);
                             break;
                         }
                         s += bw;
@@ -2728,7 +2728,7 @@ bool JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, const std
                     error(errSyntaxError, curStr->getPos(), "Bad pattern bitmap");
                     return false;
                 }
-                bitmap->combine(patternBitmap, xx >> 8, yy >> 8, combOp);
+                bitmap->combine(*patternBitmap, xx >> 8, yy >> 8, combOp);
             }
             xx += stepX;
             yy -= stepY;
@@ -2743,7 +2743,7 @@ bool JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, const std
         if (pageH == 0xffffffff && y + h > curPageH) {
             pageBitmap->expand(y + h, pageDefPixel);
         }
-        pageBitmap->combine(bitmap.get(), x, y, extCombOp);
+        pageBitmap->combine(*bitmap, x, y, extCombOp);
 
         // store the region bitmap
     } else {
@@ -2807,7 +2807,7 @@ bool JBIG2Stream::readGenericRegionSeg(unsigned int segNum, bool imm, unsigned i
                 return false;
             }
         }
-        pageBitmap->combine(bitmap.get(), x, y, extCombOp);
+        pageBitmap->combine(*bitmap, x, y, extCombOp);
 
         // store the region bitmap
     } else {
@@ -3735,7 +3735,7 @@ bool JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, 
 
     // combine the region bitmap into the page bitmap
     if (imm && bitmap) {
-        pageBitmap->combine(bitmap.get(), x, y, extCombOp);
+        pageBitmap->combine(*bitmap, x, y, extCombOp);
 
         // store the region bitmap
     } else {
