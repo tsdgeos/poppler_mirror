@@ -1105,8 +1105,10 @@ private:
 
 JBIG2PatternDict::JBIG2PatternDict(unsigned int segNumA, unsigned int sizeA) : JBIG2Segment(segNumA)
 {
-    // TODO uncomment when we require gcc >= 12
-    // static_assert(std::numeric_limits<decltype(sizeA)>::max() < decltype(bitmaps)().max_size());
+    if (sizeA > bitmaps.max_size()) {
+        error(errSyntaxError, -1, "JBIG2PatternDict: can't allocate bitmaps");
+        return;
+    }
     bitmaps.resize(sizeA);
 }
 
@@ -1342,8 +1344,12 @@ bool JBIG2Stream::readSegments()
         }
 
         // referred-to segment numbers
-        // TODO uncomment when we require gcc >= 12
-        // static_assert(std::numeric_limits<decltype(nRefSegs)>::max() < decltype(refSegs)().max_size());
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare" // https://github.com/llvm/llvm-project/issues/177861
+        if (nRefSegs > refSegs.max_size()) {
+#pragma clang diagnostic pop
+            return false;
+        }
         refSegs.resize(nRefSegs);
         if (segNum <= 256) {
             for (unsigned int i = 0; i < nRefSegs; ++i) {
@@ -1716,8 +1722,12 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
 
     // allocate symbol widths storage
     if (huff && !refAgg) {
-        // TODO uncomment when we require gcc >= 12
-        // static_assert(std::numeric_limits<decltype(numNewSyms)>::max() < decltype(symWidths)().max_size());
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare" // https://github.com/llvm/llvm-project/issues/177861
+        if (numNewSyms > symWidths.max_size()) {
+#pragma clang diagnostic pop
+            goto syntaxError;
+        }
         symWidths.resize(numNewSyms);
     }
 
