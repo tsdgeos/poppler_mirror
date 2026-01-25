@@ -1030,9 +1030,9 @@ public:
     JBIG2SymbolDict(unsigned int segNumA, unsigned int sizeA);
     ~JBIG2SymbolDict() override;
     JBIG2SegmentType getType() const override { return jbig2SegSymbolDict; }
-    unsigned int getSize() const { return size; }
-    void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap) { bitmaps[idx] = bitmap; }
-    JBIG2Bitmap *getBitmap(unsigned int idx) { return bitmaps[idx]; }
+    unsigned int getSize() const { return bitmaps.size(); }
+    void setBitmap(unsigned int idx, std::unique_ptr<JBIG2Bitmap> bitmap) { bitmaps[idx] = std::move(bitmap); }
+    JBIG2Bitmap *getBitmap(unsigned int idx) { return bitmaps[idx].get(); }
     bool isOk() const { return ok; }
     void setGenericRegionStats(JArithmeticDecoderStats *stats) { genericRegionStats = stats; }
     void setRefinementRegionStats(JArithmeticDecoderStats *stats) { refinementRegionStats = stats; }
@@ -1041,8 +1041,7 @@ public:
 
 private:
     bool ok;
-    unsigned int size;
-    JBIG2Bitmap **bitmaps;
+    std::vector<std::unique_ptr<JBIG2Bitmap>> bitmaps;
     JArithmeticDecoderStats *genericRegionStats;
     JArithmeticDecoderStats *refinementRegionStats;
 };
@@ -1050,18 +1049,8 @@ private:
 JBIG2SymbolDict::JBIG2SymbolDict(unsigned int segNumA, unsigned int sizeA) : JBIG2Segment(segNumA)
 {
     ok = true;
-    size = sizeA;
-    if (size != 0) {
-        bitmaps = (JBIG2Bitmap **)gmallocn_checkoverflow(size, sizeof(JBIG2Bitmap *));
-        if (!bitmaps) {
-            ok = false;
-            size = 0;
-        }
-    } else {
-        bitmaps = nullptr;
-    }
-    for (unsigned int i = 0; i < size; ++i) {
-        bitmaps[i] = nullptr;
+    if (sizeA > bitmaps.max_size()) {
+        ok = false;
     }
     genericRegionStats = nullptr;
     refinementRegionStats = nullptr;
@@ -1069,12 +1058,6 @@ JBIG2SymbolDict::JBIG2SymbolDict(unsigned int segNumA, unsigned int sizeA) : JBI
 
 JBIG2SymbolDict::~JBIG2SymbolDict()
 {
-    unsigned int i;
-
-    for (i = 0; i < size; ++i) {
-        delete bitmaps[i];
-    }
-    gfree(static_cast<void *>(bitmaps));
     delete genericRegionStats;
     delete refinementRegionStats;
 }
@@ -1918,7 +1901,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
         }
         if (ex) {
             for (cnt = 0; cnt < run; ++cnt) {
-                symbolDict->setBitmap(j++, new JBIG2Bitmap(bitmaps[i++]));
+                symbolDict->setBitmap(j++, std::make_unique<JBIG2Bitmap>(bitmaps[i++]));
             }
         } else {
             i += run;
