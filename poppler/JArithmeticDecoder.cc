@@ -38,7 +38,7 @@ JArithmeticDecoderStats::JArithmeticDecoderStats(int contextSizeA)
     contextSize = contextSizeA;
     cxTab = (unsigned char *)gmallocn_checkoverflow(contextSize, sizeof(unsigned char));
     if (cxTab) {
-        reset();
+        resetContext();
     }
 }
 
@@ -54,7 +54,7 @@ std::unique_ptr<JArithmeticDecoderStats> JArithmeticDecoderStats::copy() const
     return stats;
 }
 
-void JArithmeticDecoderStats::reset()
+void JArithmeticDecoderStats::resetContext()
 {
     memset(cxTab, 0, contextSize);
 }

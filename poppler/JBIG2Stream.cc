@@ -4134,7 +4134,7 @@ void JBIG2Stream::resetGenericStats(unsigned int templ, JArithmeticDecoderStats 
         }
     } else {
         if (genericRegionStats->getContextSize() == size) {
-            genericRegionStats->reset();
+            genericRegionStats->resetContext();
         } else {
             genericRegionStats = std::make_unique<JArithmeticDecoderStats>(1 << size);
         }
@@ -4154,7 +4154,7 @@ void JBIG2Stream::resetRefinementStats(unsigned int templ, JArithmeticDecoderSta
         }
     } else {
         if (refinementRegionStats->getContextSize() == size) {
-            refinementRegionStats->reset();
+            refinementRegionStats->resetContext();
         } else {
             refinementRegionStats = std::make_unique<JArithmeticDecoderStats>(1 << size);
         }
@@ -4163,24 +4163,24 @@ void JBIG2Stream::resetRefinementStats(unsigned int templ, JArithmeticDecoderSta
 
 bool JBIG2Stream::resetIntStats(int symCodeLen)
 {
-    iadhStats->reset();
-    iadwStats->reset();
-    iaexStats->reset();
-    iaaiStats->reset();
-    iadtStats->reset();
-    iaitStats->reset();
-    iafsStats->reset();
-    iadsStats->reset();
-    iardxStats->reset();
-    iardyStats->reset();
-    iardwStats->reset();
-    iardhStats->reset();
-    iariStats->reset();
+    iadhStats->resetContext();
+    iadwStats->resetContext();
+    iaexStats->resetContext();
+    iaaiStats->resetContext();
+    iadtStats->resetContext();
+    iaitStats->resetContext();
+    iafsStats->resetContext();
+    iadsStats->resetContext();
+    iardxStats->resetContext();
+    iardyStats->resetContext();
+    iardwStats->resetContext();
+    iardhStats->resetContext();
+    iariStats->resetContext();
     if (symCodeLen + 1 >= 31) {
         return false;
     }
     if (iaidStats != nullptr && iaidStats->getContextSize() == 1 << (symCodeLen + 1)) {
-        iaidStats->reset();
+        iaidStats->resetContext();
     } else {
         delete iaidStats;
         iaidStats = new JArithmeticDecoderStats(1 << (symCodeLen + 1));

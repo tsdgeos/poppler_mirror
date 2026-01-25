@@ -41,7 +41,7 @@ public:
     JArithmeticDecoderStats(const JArithmeticDecoderStats &) = delete;
     JArithmeticDecoderStats &operator=(const JArithmeticDecoderStats &) = delete;
     std::unique_ptr<JArithmeticDecoderStats> copy() const;
-    void reset();
+    void resetContext();
     int getContextSize() const { return contextSize; }
     void copyFrom(JArithmeticDecoderStats *stats);
     void setEntry(unsigned int cx, int i, int mps);
