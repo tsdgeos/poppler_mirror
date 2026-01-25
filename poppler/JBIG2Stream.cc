@@ -351,8 +351,7 @@ unsigned int JBIG2HuffmanDecoder::readBit()
 
 bool JBIG2HuffmanDecoder::buildTable(JBIG2HuffmanTable *table, unsigned int len)
 {
-    unsigned int i, j, k, prefix;
-    JBIG2HuffmanTable tab;
+    unsigned int i, j;
 
     // stable selection sort:
     // - entries with prefixLen > 0, in ascending prefixLen order
@@ -366,14 +365,14 @@ bool JBIG2HuffmanDecoder::buildTable(JBIG2HuffmanTable *table, unsigned int len)
         if (j == len) {
             break;
         }
-        for (k = j + 1; k < len; ++k) {
+        for (unsigned int k = j + 1; k < len; ++k) {
             if (table[k].prefixLen > 0 && table[k].prefixLen < table[j].prefixLen) {
                 j = k;
             }
         }
         if (j != i) {
-            tab = table[j];
-            for (k = j; k > i; --k) {
+            const JBIG2HuffmanTable tab = table[j];
+            for (unsigned int k = j; k > i; --k) {
                 table[k] = table[k - 1];
             }
             table[i] = tab;
@@ -384,7 +383,7 @@ bool JBIG2HuffmanDecoder::buildTable(JBIG2HuffmanTable *table, unsigned int len)
     // assign prefixes
     if (table[0].rangeLen != jbig2HuffmanEOT) {
         i = 0;
-        prefix = 0;
+        unsigned int prefix = 0;
         table[i++].prefix = prefix++;
         for (; table[i].rangeLen != jbig2HuffmanEOT; ++i) {
             const size_t bitsToShift = table[i].prefixLen - table[i - 1].prefixLen;
