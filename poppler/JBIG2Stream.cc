@@ -1533,7 +1533,8 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
     unsigned int flags;
     int sdATX[4], sdATY[4], sdrATX[2], sdrATY[2];
     unsigned int numExSyms, numNewSyms, numInputSyms;
-    JBIG2Bitmap **bitmaps;
+    std::vector<JBIG2Bitmap *> bitmaps;
+    std::vector<std::unique_ptr<JBIG2Bitmap>> bitmapsToDelete;
     std::vector<unsigned int> symWidths;
     unsigned int symHeight, symWidth, totalWidth, symID;
     int dh = 0, dw;
@@ -1614,14 +1615,11 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
     const unsigned int symCodeLen = calculateSymCodeLen(numInputSyms, numNewSyms, huff);
 
     // get the input symbol bitmaps
-    bitmaps = (JBIG2Bitmap **)gmallocn_checkoverflow(numInputSyms + numNewSyms, sizeof(JBIG2Bitmap *));
-    if (!bitmaps && (numInputSyms + numNewSyms > 0)) {
+    if (sizeIsBiggerThanVectorMaxSize(numInputSyms + numNewSyms, bitmaps)) {
         error(errSyntaxError, curStr->getPos(), "Too many input symbols in JBIG2 symbol dictionary");
         return false;
     }
-    for (i = 0; i < numInputSyms + numNewSyms; ++i) {
-        bitmaps[i] = nullptr;
-    }
+    bitmaps.resize(numInputSyms + numNewSyms);
     k = 0;
     inputSymbolDict = nullptr;
     for (const unsigned int refSegI : refSegs) {
@@ -1810,25 +1808,30 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                         error(errSyntaxError, curStr->getPos(), "Invalid ref bitmap for symbol ID {0:ud} in JBIG2 symbol dictionary", symID);
                         goto syntaxError;
                     }
-                    bitmaps[numInputSyms + i] = readGenericRefinementRegion(symWidth, symHeight, sdrTemplate, false, refBitmap, refDX, refDY, sdrATX, sdrATY).release();
+                    std::unique_ptr<JBIG2Bitmap> bitmap = readGenericRefinementRegion(symWidth, symHeight, sdrTemplate, false, refBitmap, refDX, refDY, sdrATX, sdrATY);
+                    bitmaps[numInputSyms + i] = bitmap.get();
+                    bitmapsToDelete.emplace_back(std::move(bitmap));
                     //~ do we need to use the bmSize value here (in Huffman mode)?
                 } else {
-                    bitmaps[numInputSyms + i] = readTextRegion(huff, true, symWidth, symHeight, refAggNum, 0, numInputSyms + i, nullptr, symCodeLen, bitmaps, 0, 0, 0, 1, 0, huffTableF, huffTableH, huffTableK, huffTableO, huffTableO,
-                                                               huffTableO, huffTableO, huffTableA, sdrTemplate, sdrATX, sdrATY)
-                                                        .release();
-                    if (unlikely(!bitmaps[numInputSyms + i])) {
+                    std::unique_ptr<JBIG2Bitmap> bitmap = readTextRegion(huff, true, symWidth, symHeight, refAggNum, 0, numInputSyms + i, nullptr, symCodeLen, bitmaps.data(), 0, 0, 0, 1, 0, huffTableF, huffTableH, huffTableK, huffTableO,
+                                                                         huffTableO, huffTableO, huffTableO, huffTableA, sdrTemplate, sdrATX, sdrATY);
+                    if (unlikely(!bitmap)) {
                         error(errSyntaxError, curStr->getPos(), "NULL bitmap in readTextRegion");
                         goto syntaxError;
                     }
+                    bitmaps[numInputSyms + i] = bitmap.get();
+                    bitmapsToDelete.emplace_back(std::move(bitmap));
                 }
 
                 // non-ref/agg coding
             } else {
-                bitmaps[numInputSyms + i] = readGenericBitmap(false, symWidth, symHeight, sdTemplate, false, false, nullptr, sdATX, sdATY, 0).release();
-                if (unlikely(!bitmaps[numInputSyms + i])) {
+                std::unique_ptr<JBIG2Bitmap> bitmap = readGenericBitmap(false, symWidth, symHeight, sdTemplate, false, false, nullptr, sdATX, sdATY, 0);
+                if (unlikely(!bitmap)) {
                     error(errSyntaxError, curStr->getPos(), "NULL bitmap in readGenericBitmap");
                     goto syntaxError;
                 }
+                bitmaps[numInputSyms + i] = bitmap.get();
+                bitmapsToDelete.emplace_back(std::move(bitmap));
             }
 
             ++i;
@@ -1862,7 +1865,12 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             if (collBitmap) {
                 unsigned int x = 0;
                 for (; j < i; ++j) {
-                    bitmaps[numInputSyms + j] = collBitmap->getSlice(x, 0, symWidths[j], symHeight).release();
+                    std::unique_ptr<JBIG2Bitmap> bitmap = collBitmap->getSlice(x, 0, symWidths[j], symHeight);
+                    if (!bitmap) {
+                        goto syntaxError;
+                    }
+                    bitmaps[numInputSyms + j] = bitmap.get();
+                    bitmapsToDelete.emplace_back(std::move(bitmap));
                     x += symWidths[j];
                 }
             } else {
@@ -1913,11 +1921,6 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
         goto syntaxError;
     }
 
-    for (i = 0; i < numNewSyms; ++i) {
-        delete bitmaps[numInputSyms + i];
-    }
-    gfree(static_cast<void *>(bitmaps));
-
     // save the arithmetic decoder stats
     if (!huff && contextRetained) {
         symbolDict->setGenericRegionStats(genericRegionStats->copy());
@@ -1935,12 +1938,6 @@ codeTableError:
     error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 symbol dictionary");
 
 syntaxError:
-    for (i = 0; i < numNewSyms; ++i) {
-        if (bitmaps[numInputSyms + i]) {
-            delete bitmaps[numInputSyms + i];
-        }
-    }
-    gfree(static_cast<void *>(bitmaps));
     return false;
 }
 
