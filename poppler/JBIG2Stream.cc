@@ -1813,7 +1813,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                     bitmapsToDelete.emplace_back(std::move(bitmap));
                     //~ do we need to use the bmSize value here (in Huffman mode)?
                 } else {
-                    std::unique_ptr<JBIG2Bitmap> bitmap = readTextRegion(huff, true, symWidth, symHeight, refAggNum, 0, numInputSyms + i, nullptr, symCodeLen, bitmaps.data(), 0, 0, 0, 1, 0, huffTableF, huffTableH, huffTableK, huffTableO,
+                    std::unique_ptr<JBIG2Bitmap> bitmap = readTextRegion(huff, true, symWidth, symHeight, refAggNum, 0, numInputSyms + i, nullptr, symCodeLen, bitmaps, 0, 0, 0, 1, 0, huffTableF, huffTableH, huffTableK, huffTableO,
                                                                          huffTableO, huffTableO, huffTableO, huffTableA, sdrTemplate, sdrATX, sdrATY);
                     if (unlikely(!bitmap)) {
                         error(errSyntaxError, curStr->getPos(), "NULL bitmap in readTextRegion");
@@ -2235,7 +2235,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
         resetRefinementStats(templ, nullptr);
     }
 
-    bitmap = readTextRegion(huff, refine, w, h, numInstances, logStrips, numSyms, symCodeTab, symCodeLen, syms.data(), defPixel, combOp, transposed, refCorner, sOffset, huffFSTable, huffDSTable, huffDTTable, huffRDWTable, huffRDHTable,
+    bitmap = readTextRegion(huff, refine, w, h, numInstances, logStrips, numSyms, symCodeTab, symCodeLen, syms, defPixel, combOp, transposed, refCorner, sOffset, huffFSTable, huffDSTable, huffDTTable, huffRDWTable, huffRDHTable,
                             huffRDXTable, huffRDYTable, huffRSizeTable, templ, atx, aty);
 
     if (bitmap) {
@@ -2262,7 +2262,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
 }
 
 std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, unsigned int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen,
-                                                         JBIG2Bitmap **syms, unsigned int defPixel, unsigned int combOp, unsigned int transposed, unsigned int refCorner, int sOffset, const JBIG2HuffmanTable *huffFSTable,
+                                                         const std::vector<JBIG2Bitmap *> &syms, unsigned int defPixel, unsigned int combOp, unsigned int transposed, unsigned int refCorner, int sOffset, const JBIG2HuffmanTable *huffFSTable,
                                                          const JBIG2HuffmanTable *huffDSTable, const JBIG2HuffmanTable *huffDTTable, const JBIG2HuffmanTable *huffRDWTable, const JBIG2HuffmanTable *huffRDHTable,
                                                          const JBIG2HuffmanTable *huffRDXTable, const JBIG2HuffmanTable *huffRDYTable, const JBIG2HuffmanTable *huffRSizeTable, unsigned int templ, int *atx, int *aty)
 {

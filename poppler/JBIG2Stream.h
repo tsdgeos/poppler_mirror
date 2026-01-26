@@ -68,9 +68,9 @@ private:
     [[nodiscard]] bool readSegments();
     [[nodiscard]] bool readSymbolDictSeg(unsigned int segNum, const std::vector<unsigned int> &refSegs);
     [[nodiscard]] bool readTextRegionSeg(unsigned int segNum, bool imm, const std::vector<unsigned int> &refSegs);
-    std::unique_ptr<JBIG2Bitmap> readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, unsigned int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen, JBIG2Bitmap **syms,
-                                                unsigned int defPixel, unsigned int combOp, unsigned int transposed, unsigned int refCorner, int sOffset, const JBIG2HuffmanTable *huffFSTable, const JBIG2HuffmanTable *huffDSTable,
-                                                const JBIG2HuffmanTable *huffDTTable, const JBIG2HuffmanTable *huffRDWTable, const JBIG2HuffmanTable *huffRDHTable, const JBIG2HuffmanTable *huffRDXTable,
+    std::unique_ptr<JBIG2Bitmap> readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, unsigned int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen,
+                                                const std::vector<JBIG2Bitmap *> &syms, unsigned int defPixel, unsigned int combOp, unsigned int transposed, unsigned int refCorner, int sOffset, const JBIG2HuffmanTable *huffFSTable,
+                                                const JBIG2HuffmanTable *huffDSTable, const JBIG2HuffmanTable *huffDTTable, const JBIG2HuffmanTable *huffRDWTable, const JBIG2HuffmanTable *huffRDHTable, const JBIG2HuffmanTable *huffRDXTable,
                                                 const JBIG2HuffmanTable *huffRDYTable, const JBIG2HuffmanTable *huffRSizeTable, unsigned int templ, int *atx, int *aty);
     [[nodiscard]] bool readPatternDictSeg(unsigned int segNum, unsigned int length);
     [[nodiscard]] bool readHalftoneRegionSeg(unsigned int segNum, bool imm, const std::vector<unsigned int> &refSegs);
