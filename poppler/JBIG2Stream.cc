@@ -425,7 +425,7 @@ public:
     unsigned int get24Bits();
     void resetByteCounter() { byteCounter = 0; }
     unsigned int getByteCounter() const { return byteCounter; }
-    void skipTo(unsigned int length);
+    [[nodiscard]] bool skipTo(unsigned int length);
 
 private:
     Stream *str;
@@ -592,11 +592,13 @@ unsigned int JBIG2MMRDecoder::get24Bits()
     return (buf >> (bufLen - 24)) & 0xffffff;
 }
 
-void JBIG2MMRDecoder::skipTo(unsigned int length)
+bool JBIG2MMRDecoder::skipTo(unsigned int length)
 {
-    int n = str->discardChars(length - nBytesRead);
+    const unsigned int nBytesToDiscard = length - nBytesRead;
+    const unsigned int n = str->discardChars(nBytesToDiscard);
     nBytesRead += n;
     byteCounter += n;
+    return n == nBytesToDiscard;
 }
 
 //------------------------------------------------------------------------
@@ -1439,14 +1441,18 @@ bool JBIG2Stream::readSegments()
             }
             break;
         case 50:
-            readEndOfStripeSeg(segLength);
+            if (!readEndOfStripeSeg(segLength)) {
+                return false;
+            }
             break;
         case 51:
             // end of file segment
             done = true;
             break;
         case 52:
-            readProfilesSeg(segLength);
+            if (!readProfilesSeg(segLength)) {
+                return false;
+            }
             break;
         case 53:
             if (!readCodeTableSeg(segNum)) {
@@ -1454,7 +1460,9 @@ bool JBIG2Stream::readSegments()
             }
             break;
         case 62:
-            readExtensionSeg(segLength);
+            if (!readExtensionSeg(segLength)) {
+                return false;
+            }
             break;
         default:
             error(errSyntaxError, curStr->getPos(), "Unknown segment type in JBIG2 stream");
@@ -3095,7 +3103,12 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
         }
 
         if (mmrDataLength >= 0) {
-            mmrDecoder->skipTo(mmrDataLength);
+            if (!mmrDecoder->skipTo(mmrDataLength)) {
+                error(errSyntaxError, curStr->getPos(), "Error in mmrDecoder skikpping");
+                gfree(refLine);
+                gfree(codingLine);
+                return {};
+            }
         } else {
             if (mmrDecoder->get24Bits() != 0x001001) {
                 error(errSyntaxError, curStr->getPos(), "Missing EOFB in JBIG2 MMR bitmap data");
@@ -3992,16 +4005,20 @@ bool JBIG2Stream::readPageInfoSeg()
     return true;
 }
 
-void JBIG2Stream::readEndOfStripeSeg(unsigned int length)
+bool JBIG2Stream::readEndOfStripeSeg(unsigned int length)
 {
     // skip the segment
-    byteCounter += curStr->discardChars(length);
+    const unsigned int discardedChars = curStr->discardChars(length);
+    byteCounter += discardedChars;
+    return discardedChars == length;
 }
 
-void JBIG2Stream::readProfilesSeg(unsigned int length)
+bool JBIG2Stream::readProfilesSeg(unsigned int length)
 {
     // skip the segment
-    byteCounter += curStr->discardChars(length);
+    const unsigned int discardedChars = curStr->discardChars(length);
+    byteCounter += discardedChars;
+    return discardedChars == length;
 }
 
 bool JBIG2Stream::readCodeTableSeg(unsigned int segNum)
@@ -4086,10 +4103,12 @@ bool JBIG2Stream::readCodeTableSeg(unsigned int segNum)
     return true;
 }
 
-void JBIG2Stream::readExtensionSeg(unsigned int length)
+bool JBIG2Stream::readExtensionSeg(unsigned int length)
 {
     // skip the segment
-    byteCounter += curStr->discardChars(length);
+    const unsigned int discardedChars = curStr->discardChars(length);
+    byteCounter += discardedChars;
+    return discardedChars == length;
 }
 
 JBIG2Segment *JBIG2Stream::findSegment(unsigned int segNum)

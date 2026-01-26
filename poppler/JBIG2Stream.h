@@ -81,10 +81,10 @@ private:
     [[nodiscard]] bool readGenericRefinementRegionSeg(unsigned int segNum, bool imm, const std::vector<unsigned int> &refSegs);
     std::unique_ptr<JBIG2Bitmap> readGenericRefinementRegion(int w, int h, int templ, bool tpgrOn, JBIG2Bitmap *refBitmap, int refDX, int refDY, int *atx, int *aty);
     [[nodiscard]] bool readPageInfoSeg();
-    void readEndOfStripeSeg(unsigned int length);
-    void readProfilesSeg(unsigned int length);
+    [[nodiscard]] bool readEndOfStripeSeg(unsigned int length);
+    [[nodiscard]] bool readProfilesSeg(unsigned int length);
     [[nodiscard]] bool readCodeTableSeg(unsigned int segNum);
-    void readExtensionSeg(unsigned int length);
+    [[nodiscard]] bool readExtensionSeg(unsigned int length);
     JBIG2Segment *findSegment(unsigned int segNum);
     void discardSegment(unsigned int segNum);
     void resetGenericStats(unsigned int templ, const JArithmeticDecoderStats *prevStats);
