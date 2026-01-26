@@ -1504,6 +1504,25 @@ bool JBIG2Stream::readSegments()
     return true;
 }
 
+// compute symbol code length, per 6.5.8.2.3
+//  symCodeLen = ceil( log2( numInputSyms + numNewSyms ) )
+static unsigned int calculateSymCodeLen(const unsigned int numInputSyms, const unsigned int numNewSyms, const unsigned int huff)
+{
+    unsigned int i = numInputSyms + numNewSyms;
+    if (i <= 1) {
+        return huff ? 1 : 0;
+    }
+
+    --i;
+    unsigned int symCodeLen = 0;
+    // i = floor((numSyms-1) / 2^symCodeLen)
+    while (i > 0) {
+        ++symCodeLen;
+        i >>= 1;
+    }
+    return symCodeLen;
+}
+
 bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsigned int> &refSegs)
 {
     std::unique_ptr<JBIG2SymbolDict> symbolDict;
@@ -1511,36 +1530,28 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
     const JBIG2HuffmanTable *huffBMSizeTable, *huffAggInstTable;
     std::vector<JBIG2Segment *> codeTables;
     JBIG2SymbolDict *inputSymbolDict;
-    unsigned int flags, sdTemplate, sdrTemplate, huff, refAgg;
-    unsigned int huffDH, huffDW, huffBMSize, huffAggInst;
-    unsigned int contextUsed, contextRetained;
+    unsigned int flags;
     int sdATX[4], sdATY[4], sdrATX[2], sdrATY[2];
-    unsigned int numExSyms, numNewSyms, numInputSyms, symCodeLen;
+    unsigned int numExSyms, numNewSyms, numInputSyms;
     JBIG2Bitmap **bitmaps;
-    JBIG2Bitmap *refBitmap;
     std::vector<unsigned int> symWidths;
-    unsigned int symHeight, symWidth, totalWidth, x, symID;
-    int dh = 0, dw, refAggNum, refDX = 0, refDY = 0, bmSize;
+    unsigned int symHeight, symWidth, totalWidth, symID;
+    int dh = 0, dw;
     bool ex;
-    int run, cnt, c;
+    int run;
     unsigned int i, j, k;
-    unsigned char *p;
 
     // symbol dictionary flags
     if (!readUWord(&flags)) {
         error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
         return false;
     }
-    sdTemplate = (flags >> 10) & 3;
-    sdrTemplate = (flags >> 12) & 1;
-    huff = flags & 1;
-    refAgg = (flags >> 1) & 1;
-    huffDH = (flags >> 2) & 3;
-    huffDW = (flags >> 4) & 3;
-    huffBMSize = (flags >> 6) & 1;
-    huffAggInst = (flags >> 7) & 1;
-    contextUsed = (flags >> 8) & 1;
-    contextRetained = (flags >> 9) & 1;
+    const unsigned int sdTemplate = (flags >> 10) & 3;
+    const unsigned int sdrTemplate = (flags >> 12) & 1;
+    const unsigned int huff = flags & 1;
+    const unsigned int refAgg = (flags >> 1) & 1;
+    const unsigned int contextUsed = (flags >> 8) & 1;
+    const unsigned int contextRetained = (flags >> 9) & 1;
 
     // symbol dictionary AT flags
     if (!huff) {
@@ -1600,20 +1611,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
         return false;
     }
 
-    // compute symbol code length, per 6.5.8.2.3
-    //  symCodeLen = ceil( log2( numInputSyms + numNewSyms ) )
-    i = numInputSyms + numNewSyms;
-    if (i <= 1) {
-        symCodeLen = huff ? 1 : 0;
-    } else {
-        --i;
-        symCodeLen = 0;
-        // i = floor((numSyms-1) / 2^symCodeLen)
-        while (i > 0) {
-            ++symCodeLen;
-            i >>= 1;
-        }
-    }
+    const unsigned int symCodeLen = calculateSymCodeLen(numInputSyms, numNewSyms, huff);
 
     // get the input symbol bitmaps
     bitmaps = (JBIG2Bitmap **)gmallocn_checkoverflow(numInputSyms + numNewSyms, sizeof(JBIG2Bitmap *));
@@ -1641,6 +1639,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
     huffBMSizeTable = huffAggInstTable = nullptr; // make gcc happy
     i = 0;
     if (huff) {
+        const unsigned int huffDH = (flags >> 2) & 3;
         if (huffDH == 0) {
             huffDHTable = huffTableD;
         } else if (huffDH == 1) {
@@ -1651,6 +1650,8 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             }
             huffDHTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
+
+        const unsigned int huffDW = (flags >> 4) & 3;
         if (huffDW == 0) {
             huffDWTable = huffTableB;
         } else if (huffDW == 1) {
@@ -1661,6 +1662,8 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             }
             huffDWTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
+
+        const unsigned int huffBMSize = (flags >> 6) & 1;
         if (huffBMSize == 0) {
             huffBMSizeTable = huffTableA;
         } else {
@@ -1669,6 +1672,8 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             }
             huffBMSizeTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
+
+        const unsigned int huffAggInst = (flags >> 7) & 1;
         if (huffAggInst == 0) {
             huffAggInstTable = huffTableA;
         } else {
@@ -1765,6 +1770,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
 
                 // refinement/aggregate coding
             } else if (refAgg) {
+                int refAggNum;
                 if (huff) {
                     if (!huffDecoder->decodeInt(&refAggNum, huffAggInstTable)) {
                         break;
@@ -1779,6 +1785,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                 //~ JBIG2 images that predate it.
                 //~ if (0) {
                 if (refAggNum == 1) {
+                    int refDX = 0, refDY = 0, bmSize;
                     if (huff) {
                         symID = huffDecoder->readBits(symCodeLen);
                         huffDecoder->decodeInt(&refDX, huffTableO);
@@ -1798,7 +1805,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                         error(errSyntaxError, curStr->getPos(), "Invalid symbol ID in JBIG2 symbol dictionary");
                         goto syntaxError;
                     }
-                    refBitmap = bitmaps[symID];
+                    JBIG2Bitmap *refBitmap = bitmaps[symID];
                     if (unlikely(refBitmap == nullptr)) {
                         error(errSyntaxError, curStr->getPos(), "Invalid ref bitmap for symbol ID {0:ud} in JBIG2 symbol dictionary", symID);
                         goto syntaxError;
@@ -1829,18 +1836,20 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
 
         // read the collective bitmap
         if (huff && !refAgg) {
+            int bmSize;
             huffDecoder->decodeInt(&bmSize, huffBMSizeTable);
             huffDecoder->reset();
             std::unique_ptr<JBIG2Bitmap> collBitmap;
             if (bmSize == 0) {
                 collBitmap = std::make_unique<JBIG2Bitmap>(0, totalWidth, symHeight);
                 bmSize = symHeight * ((totalWidth + 7) >> 3);
-                p = collBitmap->getDataPtr();
+                unsigned char *p = collBitmap->getDataPtr();
                 if (unlikely(p == nullptr)) {
                     goto syntaxError;
                 }
                 for (k = 0; k < (unsigned int)bmSize; ++k) {
-                    if ((c = curStr->getChar()) == EOF) {
+                    const int c = curStr->getChar();
+                    if (c == EOF) {
                         memset(p, 0, bmSize - k);
                         break;
                     }
@@ -1851,7 +1860,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                 collBitmap = readGenericBitmap(true, totalWidth, symHeight, 0, false, false, nullptr, nullptr, nullptr, bmSize);
             }
             if (collBitmap) {
-                x = 0;
+                unsigned int x = 0;
                 for (; j < i; ++j) {
                     bitmaps[numInputSyms + j] = collBitmap->getSlice(x, 0, symWidths[j], symHeight).release();
                     x += symWidths[j];
@@ -1888,7 +1897,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             goto syntaxError;
         }
         if (ex) {
-            for (cnt = 0; cnt < run; ++cnt) {
+            for (int cnt = 0; cnt < run; ++cnt) {
                 symbolDict->setBitmap(j++, std::make_unique<JBIG2Bitmap>(bitmaps[i++]));
             }
         } else {
