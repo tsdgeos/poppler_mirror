@@ -35,6 +35,7 @@
 // Copyright (C) 2022 kVdNi <kVdNi@waqa.eu>
 // Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Hagen Möbius <hagen.moebius@googlemail.com>
+// Copyright (C) 2026 Ojas Maheshwari <workonlyojas@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
