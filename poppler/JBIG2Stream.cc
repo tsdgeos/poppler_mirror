@@ -1644,7 +1644,8 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             huffDHTable = huffTableE;
         } else {
             if (i >= codeTables.size()) {
-                goto codeTableError;
+                error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 symbol dictionary");
+                return false;
             }
             huffDHTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
@@ -1656,7 +1657,8 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             huffDWTable = huffTableC;
         } else {
             if (i >= codeTables.size()) {
-                goto codeTableError;
+                error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 symbol dictionary");
+                return false;
             }
             huffDWTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
@@ -1666,7 +1668,8 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             huffBMSizeTable = huffTableA;
         } else {
             if (i >= codeTables.size()) {
-                goto codeTableError;
+                error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 symbol dictionary");
+                return false;
             }
             huffBMSizeTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
@@ -1676,7 +1679,8 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             huffAggInstTable = huffTableA;
         } else {
             if (i >= codeTables.size()) {
-                goto codeTableError;
+                error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 symbol dictionary");
+                return false;
             }
             huffAggInstTable = static_cast<JBIG2CodeTable *>(codeTables[i++])->getHuffTable();
         }
@@ -1694,7 +1698,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             resetGenericStats(sdTemplate, nullptr);
         }
         if (!resetIntStats(symCodeLen)) {
-            goto syntaxError;
+            return false;
         }
         arithDecoder->start();
     }
@@ -1710,7 +1714,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
 
     if (huff && !refAgg) {
         if (sizeIsBiggerThanVectorMaxSize(numNewSyms, symWidths)) {
-            goto syntaxError;
+            return false;
         }
         symWidths.resize(numNewSyms);
     }
@@ -1727,12 +1731,12 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
         }
         if (dh < 0 && (unsigned int)-dh >= symHeight) {
             error(errSyntaxError, curStr->getPos(), "Bad delta-height value in JBIG2 symbol dictionary");
-            goto syntaxError;
+            return false;
         }
         symHeight += dh;
         if (unlikely(symHeight > 0x40000000)) {
             error(errSyntaxError, curStr->getPos(), "Bad height value in JBIG2 symbol dictionary");
-            goto syntaxError;
+            return false;
         }
         symWidth = 0;
         totalWidth = 0;
@@ -1753,12 +1757,12 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             }
             if (dw < 0 && (unsigned int)-dw >= symWidth) {
                 error(errSyntaxError, curStr->getPos(), "Bad delta-height value in JBIG2 symbol dictionary");
-                goto syntaxError;
+                return false;
             }
             symWidth += dw;
             if (i >= numNewSyms) {
                 error(errSyntaxError, curStr->getPos(), "Too many symbols in JBIG2 symbol dictionary");
-                goto syntaxError;
+                return false;
             }
 
             // using a collective bitmap, so don't read a bitmap here
@@ -1793,7 +1797,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                         arithDecoder->start();
                     } else {
                         if (iaidStats == nullptr) {
-                            goto syntaxError;
+                            return false;
                         }
                         symID = arithDecoder->decodeIAID(symCodeLen, iaidStats);
                         arithDecoder->decodeInt(&refDX, iardxStats);
@@ -1801,12 +1805,12 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                     }
                     if (symID >= numInputSyms + i) {
                         error(errSyntaxError, curStr->getPos(), "Invalid symbol ID in JBIG2 symbol dictionary");
-                        goto syntaxError;
+                        return false;
                     }
                     JBIG2Bitmap *refBitmap = bitmaps[symID];
                     if (unlikely(refBitmap == nullptr)) {
                         error(errSyntaxError, curStr->getPos(), "Invalid ref bitmap for symbol ID {0:ud} in JBIG2 symbol dictionary", symID);
-                        goto syntaxError;
+                        return false;
                     }
                     std::unique_ptr<JBIG2Bitmap> bitmap = readGenericRefinementRegion(symWidth, symHeight, sdrTemplate, false, refBitmap, refDX, refDY, sdrATX, sdrATY);
                     bitmaps[numInputSyms + i] = bitmap.get();
@@ -1817,7 +1821,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                                                                          huffTableO, huffTableO, huffTableO, huffTableA, sdrTemplate, sdrATX, sdrATY);
                     if (unlikely(!bitmap)) {
                         error(errSyntaxError, curStr->getPos(), "NULL bitmap in readTextRegion");
-                        goto syntaxError;
+                        return false;
                     }
                     bitmaps[numInputSyms + i] = bitmap.get();
                     bitmapsToDelete.emplace_back(std::move(bitmap));
@@ -1828,7 +1832,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                 std::unique_ptr<JBIG2Bitmap> bitmap = readGenericBitmap(false, symWidth, symHeight, sdTemplate, false, false, nullptr, sdATX, sdATY, 0);
                 if (unlikely(!bitmap)) {
                     error(errSyntaxError, curStr->getPos(), "NULL bitmap in readGenericBitmap");
-                    goto syntaxError;
+                    return false;
                 }
                 bitmaps[numInputSyms + i] = bitmap.get();
                 bitmapsToDelete.emplace_back(std::move(bitmap));
@@ -1848,7 +1852,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                 bmSize = symHeight * ((totalWidth + 7) >> 3);
                 unsigned char *p = collBitmap->getDataPtr();
                 if (unlikely(p == nullptr)) {
-                    goto syntaxError;
+                    return false;
                 }
                 for (k = 0; k < (unsigned int)bmSize; ++k) {
                     const int c = curStr->getChar();
@@ -1867,7 +1871,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                 for (; j < i; ++j) {
                     std::unique_ptr<JBIG2Bitmap> bitmap = collBitmap->getSlice(x, 0, symWidths[j], symHeight);
                     if (!bitmap) {
-                        goto syntaxError;
+                        return false;
                     }
                     bitmaps[numInputSyms + j] = bitmap.get();
                     bitmapsToDelete.emplace_back(std::move(bitmap));
@@ -1875,7 +1879,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                 }
             } else {
                 error(errSyntaxError, curStr->getPos(), "collBitmap was null");
-                goto syntaxError;
+                return false;
             }
         }
     }
@@ -1883,7 +1887,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
     // create the symbol dict object
     symbolDict = std::make_unique<JBIG2SymbolDict>(segNum, numExSyms);
     if (!symbolDict->isOk()) {
-        goto syntaxError;
+        return false;
     }
 
     // exported symbol list
@@ -1902,7 +1906,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             for (; j < numExSyms; ++j) {
                 symbolDict->setBitmap(j, nullptr);
             }
-            goto syntaxError;
+            return false;
         }
         if (ex) {
             for (int cnt = 0; cnt < run; ++cnt) {
@@ -1918,7 +1922,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
         for (; j < numExSyms; ++j) {
             symbolDict->setBitmap(j, nullptr);
         }
-        goto syntaxError;
+        return false;
     }
 
     // save the arithmetic decoder stats
@@ -1933,12 +1937,6 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
     segments.push_back(std::move(symbolDict));
 
     return true;
-
-codeTableError:
-    error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 symbol dictionary");
-
-syntaxError:
-    return false;
 }
 
 bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::vector<unsigned int> &refSegs)
