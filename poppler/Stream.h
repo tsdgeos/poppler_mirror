@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
-// Copyright (C) 2008, 2010, 2011, 2016-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2011, 2016-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
@@ -228,7 +228,7 @@ public:
     // Discard the next <n> bytes from stream.  Returns the number of
     // bytes discarded, which will be less than <n> only if EOF is
     // reached.
-    virtual unsigned int discardChars(unsigned int n);
+    [[nodiscard]] virtual unsigned int discardChars(unsigned int n);
 
     // Get current position in file.
     virtual Goffset getPos() = 0;
