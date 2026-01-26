@@ -1521,7 +1521,7 @@ void XRef::removeIndirectObject(Ref r)
     if (e->type == xrefEntryFree) {
         return;
     }
-    e->obj.~Object();
+    e->obj = Object();
     e->type = xrefEntryFree;
     if (likely(e->gen < 65535)) {
         e->gen++;
