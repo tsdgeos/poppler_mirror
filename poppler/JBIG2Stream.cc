@@ -3429,6 +3429,9 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                 }
+                                if (unlikely(arithDecoder->getReadPastEndOfStream())) {
+                                    return nullptr;
+                                }
                             }
 
                             // update the context
@@ -3512,6 +3515,9 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                                     if (aty[0] == 0) {
                                         atBuf0 |= 0x8000;
                                     }
+                                }
+                                if (unlikely(arithDecoder->getReadPastEndOfStream())) {
+                                    return nullptr;
                                 }
                             }
 
@@ -3862,6 +3868,9 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int
                 // decode the pixel
                 if ((pix = arithDecoder->decodeBit(cx, refinementRegionStats.get()))) {
                     bitmap->setPixel(x, y);
+                }
+                if (unlikely(arithDecoder->getReadPastEndOfStream())) {
+                    return nullptr;
                 }
             }
 
