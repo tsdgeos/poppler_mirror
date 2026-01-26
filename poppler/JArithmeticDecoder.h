@@ -43,7 +43,7 @@ public:
     std::unique_ptr<JArithmeticDecoderStats> copy() const;
     void resetContext();
     int getContextSize() const { return contextSize; }
-    void copyFrom(JArithmeticDecoderStats *stats);
+    void copyFrom(const JArithmeticDecoderStats &stats);
     void setEntry(unsigned int cx, int i, int mps);
     bool isValid() const { return cxTab != nullptr; }
 

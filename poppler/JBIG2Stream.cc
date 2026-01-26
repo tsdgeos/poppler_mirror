@@ -4110,14 +4110,14 @@ void JBIG2Stream::discardSegment(unsigned int segNum)
     }
 }
 
-void JBIG2Stream::resetGenericStats(unsigned int templ, JArithmeticDecoderStats *prevStats)
+void JBIG2Stream::resetGenericStats(unsigned int templ, const JArithmeticDecoderStats *prevStats)
 {
     int size;
 
     size = contextSize[templ];
     if (prevStats && prevStats->getContextSize() == size) {
         if (genericRegionStats->getContextSize() == size) {
-            genericRegionStats->copyFrom(prevStats);
+            genericRegionStats->copyFrom(*prevStats);
         } else {
             genericRegionStats = prevStats->copy();
         }
@@ -4130,14 +4130,14 @@ void JBIG2Stream::resetGenericStats(unsigned int templ, JArithmeticDecoderStats 
     }
 }
 
-void JBIG2Stream::resetRefinementStats(unsigned int templ, JArithmeticDecoderStats *prevStats)
+void JBIG2Stream::resetRefinementStats(unsigned int templ, const JArithmeticDecoderStats *prevStats)
 {
     int size;
 
     size = refContextSize[templ];
     if (prevStats && prevStats->getContextSize() == size) {
         if (refinementRegionStats->getContextSize() == size) {
-            refinementRegionStats->copyFrom(prevStats);
+            refinementRegionStats->copyFrom(*prevStats);
         } else {
             refinementRegionStats = prevStats->copy();
         }

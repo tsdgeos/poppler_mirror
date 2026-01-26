@@ -59,9 +59,9 @@ void JArithmeticDecoderStats::resetContext()
     memset(cxTab, 0, contextSize);
 }
 
-void JArithmeticDecoderStats::copyFrom(JArithmeticDecoderStats *stats)
+void JArithmeticDecoderStats::copyFrom(const JArithmeticDecoderStats &stats)
 {
-    memcpy(cxTab, stats->cxTab, contextSize);
+    memcpy(cxTab, stats.cxTab, contextSize);
 }
 
 void JArithmeticDecoderStats::setEntry(unsigned int cx, int i, int mps)

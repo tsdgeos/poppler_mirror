@@ -87,8 +87,8 @@ private:
     void readExtensionSeg(unsigned int length);
     JBIG2Segment *findSegment(unsigned int segNum);
     void discardSegment(unsigned int segNum);
-    void resetGenericStats(unsigned int templ, JArithmeticDecoderStats *prevStats);
-    void resetRefinementStats(unsigned int templ, JArithmeticDecoderStats *prevStats);
+    void resetGenericStats(unsigned int templ, const JArithmeticDecoderStats *prevStats);
+    void resetRefinementStats(unsigned int templ, const JArithmeticDecoderStats *prevStats);
     [[nodiscard]] bool resetIntStats(int symCodeLen);
     [[nodiscard]] bool readUByte(unsigned int *x);
     [[nodiscard]] bool readByte(int *x);
