@@ -38,7 +38,7 @@ JArithmeticDecoderStats::JArithmeticDecoderStats(int contextSizeA)
     contextSize = contextSizeA;
     cxTab = (unsigned char *)gmallocn_checkoverflow(contextSize, sizeof(unsigned char));
     if (cxTab) {
-        reset();
+        resetContext();
     }
 }
 
@@ -47,23 +47,21 @@ JArithmeticDecoderStats::~JArithmeticDecoderStats()
     gfree(cxTab);
 }
 
-JArithmeticDecoderStats *JArithmeticDecoderStats::copy()
+std::unique_ptr<JArithmeticDecoderStats> JArithmeticDecoderStats::copy() const
 {
-    JArithmeticDecoderStats *stats;
-
-    stats = new JArithmeticDecoderStats(contextSize);
+    auto stats = std::make_unique<JArithmeticDecoderStats>(contextSize);
     memcpy(stats->cxTab, cxTab, contextSize);
     return stats;
 }
 
-void JArithmeticDecoderStats::reset()
+void JArithmeticDecoderStats::resetContext()
 {
     memset(cxTab, 0, contextSize);
 }
 
-void JArithmeticDecoderStats::copyFrom(JArithmeticDecoderStats *stats)
+void JArithmeticDecoderStats::copyFrom(const JArithmeticDecoderStats &stats)
 {
-    memcpy(cxTab, stats->cxTab, contextSize);
+    memcpy(cxTab, stats.cxTab, contextSize);
 }
 
 void JArithmeticDecoderStats::setEntry(unsigned int cx, int i, int mps)

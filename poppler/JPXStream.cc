@@ -2403,7 +2403,7 @@ bool JPXStream::readCodeBlockData(JPXTileComp *tileComp, unsigned int res, unsig
         }
 
         if (tileComp->codeBlockStyle & 0x02) {
-            cb->stats->reset();
+            cb->stats->resetContext();
             cb->stats->setEntry(jpxContextSigProp, 4, 0);
             cb->stats->setEntry(jpxContextRunLength, 3, 0);
             cb->stats->setEntry(jpxContextUniform, 46, 0);

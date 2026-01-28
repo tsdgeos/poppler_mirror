@@ -65,42 +65,42 @@ private:
     bool hasGetChars() override { return true; }
     int getChars(int nChars, unsigned char *buffer) override;
 
-    void readSegments();
-    bool readSymbolDictSeg(unsigned int segNum, unsigned int *refSegs, unsigned int nRefSegs);
-    void readTextRegionSeg(unsigned int segNum, bool imm, unsigned int *refSegs, unsigned int nRefSegs);
-    std::unique_ptr<JBIG2Bitmap> readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, unsigned int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen, JBIG2Bitmap **syms,
-                                                unsigned int defPixel, unsigned int combOp, unsigned int transposed, unsigned int refCorner, int sOffset, const JBIG2HuffmanTable *huffFSTable, const JBIG2HuffmanTable *huffDSTable,
-                                                const JBIG2HuffmanTable *huffDTTable, const JBIG2HuffmanTable *huffRDWTable, const JBIG2HuffmanTable *huffRDHTable, const JBIG2HuffmanTable *huffRDXTable,
+    [[nodiscard]] bool readSegments();
+    [[nodiscard]] bool readSymbolDictSeg(unsigned int segNum, const std::vector<unsigned int> &refSegs);
+    [[nodiscard]] bool readTextRegionSeg(unsigned int segNum, bool imm, const std::vector<unsigned int> &refSegs);
+    std::unique_ptr<JBIG2Bitmap> readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, unsigned int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen,
+                                                const std::vector<JBIG2Bitmap *> &syms, unsigned int defPixel, unsigned int combOp, unsigned int transposed, unsigned int refCorner, int sOffset, const JBIG2HuffmanTable *huffFSTable,
+                                                const JBIG2HuffmanTable *huffDSTable, const JBIG2HuffmanTable *huffDTTable, const JBIG2HuffmanTable *huffRDWTable, const JBIG2HuffmanTable *huffRDHTable, const JBIG2HuffmanTable *huffRDXTable,
                                                 const JBIG2HuffmanTable *huffRDYTable, const JBIG2HuffmanTable *huffRSizeTable, unsigned int templ, int *atx, int *aty);
-    void readPatternDictSeg(unsigned int segNum, unsigned int length);
-    void readHalftoneRegionSeg(unsigned int segNum, bool imm, unsigned int *refSegs, unsigned int nRefSegs);
-    void readGenericRegionSeg(unsigned int segNum, bool imm, unsigned int length);
+    [[nodiscard]] bool readPatternDictSeg(unsigned int segNum, unsigned int length);
+    [[nodiscard]] bool readHalftoneRegionSeg(unsigned int segNum, bool imm, const std::vector<unsigned int> &refSegs);
+    [[nodiscard]] bool readGenericRegionSeg(unsigned int segNum, bool imm, unsigned int length);
     void mmrAddPixels(int a1, int blackPixels, int *codingLine, int *a0i, int w);
     void mmrAddPixelsNeg(int a1, int blackPixels, int *codingLine, int *a0i, int w);
     std::unique_ptr<JBIG2Bitmap> readGenericBitmap(bool mmr, int w, int h, int templ, bool tpgdOn, bool useSkip, JBIG2Bitmap *skip, int *atx, int *aty, int mmrDataLength);
-    void readGenericRefinementRegionSeg(unsigned int segNum, bool imm, unsigned int *refSegs, unsigned int nRefSegs);
+    [[nodiscard]] bool readGenericRefinementRegionSeg(unsigned int segNum, bool imm, const std::vector<unsigned int> &refSegs);
     std::unique_ptr<JBIG2Bitmap> readGenericRefinementRegion(int w, int h, int templ, bool tpgrOn, JBIG2Bitmap *refBitmap, int refDX, int refDY, int *atx, int *aty);
-    void readPageInfoSeg();
-    void readEndOfStripeSeg(unsigned int length);
-    void readProfilesSeg(unsigned int length);
-    void readCodeTableSeg(unsigned int segNum);
-    void readExtensionSeg(unsigned int length);
+    [[nodiscard]] bool readPageInfoSeg();
+    [[nodiscard]] bool readEndOfStripeSeg(unsigned int length);
+    [[nodiscard]] bool readProfilesSeg(unsigned int length);
+    [[nodiscard]] bool readCodeTableSeg(unsigned int segNum);
+    [[nodiscard]] bool readExtensionSeg(unsigned int length);
     JBIG2Segment *findSegment(unsigned int segNum);
     void discardSegment(unsigned int segNum);
-    void resetGenericStats(unsigned int templ, JArithmeticDecoderStats *prevStats);
-    void resetRefinementStats(unsigned int templ, JArithmeticDecoderStats *prevStats);
-    bool resetIntStats(int symCodeLen);
-    bool readUByte(unsigned int *x);
-    bool readByte(int *x);
-    bool readUWord(unsigned int *x);
-    bool readULong(unsigned int *x);
-    bool readLong(int *x);
+    void resetGenericStats(unsigned int templ, const JArithmeticDecoderStats *prevStats);
+    void resetRefinementStats(unsigned int templ, const JArithmeticDecoderStats *prevStats);
+    [[nodiscard]] bool resetIntStats(int symCodeLen);
+    [[nodiscard]] bool readUByte(unsigned int *x);
+    [[nodiscard]] bool readByte(int *x);
+    [[nodiscard]] bool readUWord(unsigned int *x);
+    [[nodiscard]] bool readULong(unsigned int *x);
+    [[nodiscard]] bool readLong(int *x);
 
     Object globalsStream;
     Ref globalsStreamRef;
     unsigned int pageW, pageH, curPageH;
     unsigned int pageDefPixel;
-    JBIG2Bitmap *pageBitmap;
+    std::unique_ptr<JBIG2Bitmap> pageBitmap;
     unsigned int defCombOp;
     std::vector<std::unique_ptr<JBIG2Segment>> segments;
     std::vector<std::unique_ptr<JBIG2Segment>> globalSegments;
@@ -110,8 +110,8 @@ private:
     unsigned int byteCounter;
 
     JArithmeticDecoder *arithDecoder;
-    JArithmeticDecoderStats *genericRegionStats;
-    JArithmeticDecoderStats *refinementRegionStats;
+    std::unique_ptr<JArithmeticDecoderStats> genericRegionStats;
+    std::unique_ptr<JArithmeticDecoderStats> refinementRegionStats;
     JArithmeticDecoderStats *iadhStats;
     JArithmeticDecoderStats *iadwStats;
     JArithmeticDecoderStats *iaexStats;

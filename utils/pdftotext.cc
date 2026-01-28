@@ -35,6 +35,7 @@
 // Copyright (C) 2022 kVdNi <kVdNi@waqa.eu>
 // Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Hagen Möbius <hagen.moebius@googlemail.com>
+// Copyright (C) 2026 Ojas Maheshwari <workonlyojas@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -544,15 +545,10 @@ void printDocBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int l
 
 void printTSVBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last)
 {
-    double xMin = 0, yMin = 0, xMax = 0, yMax = 0;
     const TextFlow *flow;
     const TextBlock *blk;
     const TextLine *line;
     const TextWord *word;
-    int blockNum = 0;
-    int lineNum = 0;
-    int flowNum = 0;
-    int wordNum = 0;
     const int pageLevel = 1;
     const int blockLevel = 3;
     const int lineLevel = 4;
@@ -566,18 +562,26 @@ void printTSVBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int l
         const double wid = useCropBox ? doc->getPageCropWidth(page) : doc->getPageMediaWidth(page);
         const double hgt = useCropBox ? doc->getPageCropHeight(page) : doc->getPageMediaHeight(page);
 
-        fprintf(f, "%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%d\t###PAGE###\n", pageLevel, page, flowNum, blockNum, lineNum, wordNum, xMin, yMin, wid, hgt, metaConf);
+        fprintf(f, "%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%d\t###PAGE###\n", pageLevel, page, 0, 0, 0, 0, 0.0, 0.0, wid, hgt, metaConf);
         doc->displayPage(textOut, page, resolution, resolution, 0, !useCropBox, useCropBox, false);
+
+        double xMin = 0, yMin = 0, xMax = 0, yMax = 0;
+        int flowNum = 0;
 
         for (flow = textOut->getFlows(); flow; flow = flow->getNext()) {
             // flow->getBBox(&xMin, &yMin, &xMax, &yMax);
             // fprintf(f, "%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t\n", page,flowNum,blockNum,lineNum,wordNum,xMin,yMin,wid, hgt);
 
+            int blockNum = 0;
+
             for (blk = flow->getBlocks(); blk; blk = blk->getNext()) {
+                int lineNum = 0;
+
                 blk->getBBox(&xMin, &yMin, &xMax, &yMax);
-                fprintf(f, "%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%d\t###FLOW###\n", blockLevel, page, flowNum, blockNum, lineNum, wordNum, xMin, yMin, xMax - xMin, yMax - yMin, metaConf);
+                fprintf(f, "%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%d\t###FLOW###\n", blockLevel, page, flowNum, blockNum, lineNum, 0, xMin, yMin, xMax - xMin, yMax - yMin, metaConf);
 
                 for (line = blk->getLines(); line; line = line->getNext()) {
+                    int wordNum = 0;
 
                     double lxMin = 1E+37, lyMin = 1E+37;
                     double lxMax = 0, lyMax = 0;
@@ -607,16 +611,12 @@ void printTSVBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int l
                     fprintf(f, "%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%d\t###LINE###\n", lineLevel, page, flowNum, blockNum, lineNum, 0, lxMin, lyMin, lxMax - lxMin, lyMax - lyMin, metaConf);
                     fprintf(f, "%s", lineWordsBuffer->c_str());
                     delete lineWordsBuffer;
-                    wordNum = 0;
                     lineNum++;
                 }
-                lineNum = 0;
                 blockNum++;
             }
-            blockNum = 0;
             flowNum++;
         }
-        flowNum = 0;
     }
 }
 
