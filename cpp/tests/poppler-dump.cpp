@@ -189,10 +189,8 @@ static void print_info(poppler::document *doc)
         std::cout << std::setw(out_width) << "PDF IDs"
                   << ": <none>" << std::endl;
     }
-    const std::vector<std::string> keys = doc->info_keys();
-    auto key_it = keys.begin(), key_end = keys.end();
-    for (; key_it != key_end; ++key_it) {
-        std::cout << std::setw(out_width) << *key_it << ": " << doc->info_key(*key_it) << std::endl;
+    for (const auto &key : doc->info_keys()) {
+        std::cout << std::setw(out_width) << key << ": " << doc->info_key(key) << std::endl;
     }
     std::cout << std::setw(out_width) << "Date (creation)"
               << ": " << out_date(doc->info_date_t("CreationDate")) << std::endl;
@@ -235,9 +233,8 @@ static void print_toc_item(poppler::toc_item *item, int indent)
 {
     std::cout << std::setw(indent * 2) << " "
               << "+ " << item->title() << " (" << item->is_open() << ")" << std::endl;
-    auto it = item->children_begin(), it_end = item->children_end();
-    for (; it != it_end; ++it) {
-        print_toc_item(*it, indent + 1);
+    for (const auto &child : item->children()) {
+        print_toc_item(child, indent + 1);
     }
 }
 
@@ -257,12 +254,11 @@ static void print_fonts(poppler::document *doc)
     std::cout << "Document fonts:" << std::endl;
     std::vector<poppler::font_info> fl = doc->fonts();
     if (!fl.empty()) {
-        auto it = fl.begin(), it_end = fl.end();
         const std::ios_base::fmtflags f = std::cout.flags();
         std::left(std::cout);
-        for (; it != it_end; ++it) {
-            std::cout << " " << std::setw(out_width + 10) << it->name() << " " << std::setw(15) << out_font_info_type(it->type()) << " " << std::setw(5) << it->is_embedded() << " " << std::setw(5) << it->is_subset() << " " << it->file()
-                      << std::endl;
+        for (const auto &font : fl) {
+            std::cout << " " << std::setw(out_width + 10) << font.name() << " " << std::setw(15) << out_font_info_type(font.type()) << " " << std::setw(5) << font.is_embedded() << " " << std::setw(5) << font.is_subset() << " "
+                      << font.file() << std::endl;
         }
         std::cout.flags(f);
     } else {
@@ -276,11 +272,9 @@ static void print_embedded_files(poppler::document *doc)
     std::cout << "Document embedded files:" << std::endl;
     std::vector<poppler::embedded_file *> ef = doc->embedded_files();
     if (!ef.empty()) {
-        auto it = ef.begin(), it_end = ef.end();
         const std::ios_base::fmtflags flags = std::cout.flags();
         std::left(std::cout);
-        for (; it != it_end; ++it) {
-            poppler::embedded_file *f = *it;
+        for (const auto *f : ef) {
             std::cout << " " << std::setw(out_width + 10) << f->unicodeName() << " " << std::setw(10) << out_size(f->size()) << " " << std::setw(20) << out_date(f->creation_date_t()) << " " << std::setw(20)
                       << out_date(f->modification_date_t()) << std::endl
                       << "     ";
