@@ -689,12 +689,7 @@ QString Page::text(const QRectF &r, TextLayout textLayout) const
     output_dev = new TextOutputDev(nullptr, physLayout, 0, rawOrder, false);
     m_page->parentDoc->doc->displayPageSlice(output_dev, m_page->index + 1, 72, 72, 0, false, true, false, -1, -1, -1, -1, nullptr, nullptr, nullptr, nullptr, true);
     if (r.isNull()) {
-        const PDFRectangle *rect = m_page->page->getCropBox();
-        if (orientation() == Orientation::Portrait || orientation() == Orientation::UpsideDown) {
-            s = output_dev->getText(*rect);
-        } else {
-            s = output_dev->getText(PDFRectangle { rect->y1, rect->x1, rect->y2, rect->x2 });
-        }
+        s = output_dev->getText(std::nullopt);
     } else {
         if (textLayout == ReadingOrder) {
             qWarning() << "ReadingOrder is not supported with non null rect";
