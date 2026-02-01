@@ -5269,7 +5269,8 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
             frag.computeCoords(oneRot);
         }
         if (!frags.empty() && area) {
-            assignColumns(frags.data(), frags.size(), true);
+            // Recalculate columns, as some blocks/lines were possibly discarded above
+            assignColumns(frags.data(), frags.size(), oneRot);
         }
         if (oneRot) {
             std::ranges::sort(frags, &TextLineFrag::cmpYXLineRot);
