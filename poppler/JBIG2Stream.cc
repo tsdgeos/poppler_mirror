@@ -3644,6 +3644,9 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                                         atBuf0 |= 0x8000;
                                     }
                                 }
+                                if (unlikely(arithDecoder->getReadPastEndOfStream())) {
+                                    return nullptr;
+                                }
                             }
 
                             // update the context
