@@ -1437,27 +1437,26 @@ void TextLineFrag::computeCoords(bool oneRot)
 
 bool TextLineFrag::cmpYXPrimaryRot(const TextLineFrag &frag1, const TextLineFrag &frag2)
 {
-    double cmp;
+    double cmp = 0; // make gcc happy
 
-    cmp = 0; // make gcc happy
     switch (frag1.line->blk->page->primaryRot) {
     case 0:
-        if (fabs(cmp = frag1.yMin - frag2.yMin) < 0.01) {
+        if ((cmp = frag1.yMin - frag2.yMin) == 0) {
             cmp = frag1.xMin - frag2.xMin;
         }
         break;
     case 1:
-        if (fabs(cmp = frag2.xMax - frag1.xMax) < 0.01) {
+        if ((cmp = frag2.xMax - frag1.xMax) == 0) {
             cmp = frag1.yMin - frag2.yMin;
         }
         break;
     case 2:
-        if (fabs(cmp = frag2.yMin - frag1.yMin) < 0.01) {
+        if ((cmp = frag2.yMin - frag1.yMin) == 0) {
             cmp = frag2.xMax - frag1.xMax;
         }
         break;
     case 3:
-        if (fabs(cmp = frag1.xMax - frag2.xMax) < 0.01) {
+        if ((cmp = frag1.xMax - frag2.xMax) == 0) {
             cmp = frag2.yMax - frag1.yMax;
         }
         break;
@@ -5269,7 +5268,8 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
             frag.computeCoords(oneRot);
         }
         if (!frags.empty() && area) {
-            assignColumns(frags.data(), frags.size(), true);
+            // Recalculate columns, as some blocks/lines were possibly discarded above
+            assignColumns(frags.data(), frags.size(), oneRot);
         }
         if (oneRot) {
             std::ranges::sort(frags, &TextLineFrag::cmpYXLineRot);

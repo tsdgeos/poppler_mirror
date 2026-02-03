@@ -95,7 +95,7 @@ public:
     //     clipped
     //   - splashClipPartial if the rectangle is part inside and part
     //     outside the clipping region
-    SplashClipResult testRect(int rectXMin, int rectYMin, int rectXMax, int rectYMax);
+    SplashClipResult testRect(int rectXMin, int rectYMin, int rectXMax, int rectYMax) const;
 
     // Similar to testRect, but tests a horizontal span.
     SplashClipResult testSpan(int spanXMin, int spanXMax, int spanY);
