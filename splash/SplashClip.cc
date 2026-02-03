@@ -223,7 +223,7 @@ SplashError SplashClip::clipToPath(const SplashPath &path, const std::array<Spla
     return SplashError::NoError;
 }
 
-SplashClipResult SplashClip::testRect(int rectXMin, int rectYMin, int rectXMax, int rectYMax)
+SplashClipResult SplashClip::testRect(int rectXMin, int rectYMin, int rectXMax, int rectYMax) const
 {
     // This tests the rectangle:
     //     x = [rectXMin, rectXMax + 1)    (note: rect coords are ints)

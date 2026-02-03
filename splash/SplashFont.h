@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2018, 2019, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2018, 2019, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
@@ -75,11 +75,11 @@ public:
     // splashFontFraction = 1 << splashFontFractionBits.  Subclasses
     // should override this to zero out xFrac and/or yFrac if they don't
     // support fractional coordinates.
-    virtual bool getGlyph(int c, int xFrac, int yFrac, SplashGlyphBitmap *bitmap, int x0, int y0, SplashClip *clip, SplashClipResult *clipRes);
+    virtual bool getGlyph(int c, int xFrac, int yFrac, SplashGlyphBitmap *bitmap, int x0, int y0, const SplashClip &clip, SplashClipResult *clipRes);
 
     // Rasterize a glyph.  The <xFrac> and <yFrac> values are the same
     // as described for getGlyph.
-    virtual bool makeGlyph(int c, int xFrac, int yFrac, SplashGlyphBitmap *bitmap, int x0, int y0, SplashClip *clip, SplashClipResult *clipRes) = 0;
+    virtual bool makeGlyph(int c, int xFrac, int yFrac, SplashGlyphBitmap *bitmap, int x0, int y0, const SplashClip &clip, SplashClipResult *clipRes) = 0;
 
     // Return the path for a glyph.
     virtual SplashPath *getGlyphPath(int c) = 0;

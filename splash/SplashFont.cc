@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2010, 2014, 2019, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2014, 2019, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
@@ -108,7 +108,7 @@ SplashFont::~SplashFont()
     }
 }
 
-bool SplashFont::getGlyph(int c, int xFrac, int yFrac, SplashGlyphBitmap *bitmap, int x0, int y0, SplashClip *clip, SplashClipResult *clipRes)
+bool SplashFont::getGlyph(int c, int xFrac, int yFrac, SplashGlyphBitmap *bitmap, int x0, int y0, const SplashClip &clip, SplashClipResult *clipRes)
 {
     SplashGlyphBitmap bitmap2;
     int size;
@@ -139,7 +139,7 @@ bool SplashFont::getGlyph(int c, int xFrac, int yFrac, SplashGlyphBitmap *bitmap
             bitmap->data = cache + (i + j) * glyphSize;
             bitmap->freeData = false;
 
-            *clipRes = clip->testRect(x0 - bitmap->x, y0 - bitmap->y, x0 - bitmap->x + bitmap->w - 1, y0 - bitmap->y + bitmap->h - 1);
+            *clipRes = clip.testRect(x0 - bitmap->x, y0 - bitmap->y, x0 - bitmap->x + bitmap->w - 1, y0 - bitmap->y + bitmap->h - 1);
 
             return true;
         }

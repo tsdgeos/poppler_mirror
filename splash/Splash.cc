@@ -2522,7 +2522,7 @@ SplashError Splash::fillChar(SplashCoord x, SplashCoord y, int c, SplashFont *fo
     xFrac = splashFloor((xt - x0) * splashFontFraction);
     y0 = splashFloor(yt);
     yFrac = splashFloor((yt - y0) * splashFontFraction);
-    if (!font->getGlyph(c, xFrac, yFrac, &glyph, x0, y0, state->clip.get(), &clipRes)) {
+    if (!font->getGlyph(c, xFrac, yFrac, &glyph, x0, y0, *state->clip, &clipRes)) {
         return SplashError::NoGlyph;
     }
     if (clipRes != splashClipAllOutside) {
