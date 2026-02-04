@@ -49,6 +49,7 @@ build:
 
 build_clang17_libcpp:
   stage: build
+  image: debian:trixie
   script:
     - echo "This is to simulate xcode 16.2 that is the minimum macos version we support"
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
