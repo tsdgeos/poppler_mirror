@@ -69,7 +69,7 @@ public:
 
     // Create a new SplashFont, i.e., a scaled instance of this font
     // file.
-    virtual SplashFont *makeFont(const std::array<SplashCoord, 4> &mat, const std::array<SplashCoord, 4> &textMat) = 0;
+    virtual SplashFont *makeFont(const std::array<double, 4> &mat, const std::array<double, 4> &textMat) = 0;
 
     // Get the font file ID.
     const SplashFontFileID &getID() const { return *id; }

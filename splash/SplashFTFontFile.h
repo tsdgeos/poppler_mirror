@@ -55,7 +55,7 @@ public:
 
     // Create a new SplashFTFont, i.e., a scaled instance of this font
     // file.
-    SplashFont *makeFont(const std::array<SplashCoord, 4> &mat, const std::array<SplashCoord, 4> &textMat) override;
+    SplashFont *makeFont(const std::array<double, 4> &mat, const std::array<double, 4> &textMat) override;
 
     SplashFTFontFile(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, FT_Face faceA, std::vector<int> &&codeToGIDA, bool trueTypeA, bool type1A, PrivateTag /*unused*/ = {});
 

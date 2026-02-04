@@ -118,7 +118,7 @@ SplashFTFontFile::~SplashFTFontFile()
     }
 }
 
-SplashFont *SplashFTFontFile::makeFont(const std::array<SplashCoord, 4> &mat, const std::array<SplashCoord, 4> &textMat)
+SplashFont *SplashFTFontFile::makeFont(const std::array<double, 4> &mat, const std::array<double, 4> &textMat)
 {
     SplashFont *font;
 

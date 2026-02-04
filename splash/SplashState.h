@@ -60,7 +60,7 @@ public:
     void setFillPattern(SplashPattern *fillPatternA);
 
     // Set the line dash pattern.
-    void setLineDash(std::vector<SplashCoord> &&lineDashA, SplashCoord lineDashPhaseA);
+    void setLineDash(std::vector<double> &&lineDashA, double lineDashPhaseA);
 
     // Set the soft mask bitmap.
     void setSoftMask(SplashBitmap *softMaskA);
@@ -76,23 +76,23 @@ public:
 private:
     explicit SplashState(const SplashState *state);
 
-    std::array<SplashCoord, 6> matrix;
+    std::array<double, 6> matrix;
     SplashPattern *strokePattern;
     SplashPattern *fillPattern;
     SplashScreen *screen;
     SplashBlendFunc blendFunc;
-    SplashCoord strokeAlpha;
-    SplashCoord fillAlpha;
+    double strokeAlpha;
+    double fillAlpha;
     bool multiplyPatternAlpha;
-    SplashCoord patternStrokeAlpha;
-    SplashCoord patternFillAlpha;
-    SplashCoord lineWidth;
+    double patternStrokeAlpha;
+    double patternFillAlpha;
+    double lineWidth;
     SplashLineCap lineCap;
     SplashLineJoin lineJoin;
-    SplashCoord miterLimit;
-    SplashCoord flatness;
-    std::vector<SplashCoord> lineDash;
-    SplashCoord lineDashPhase;
+    double miterLimit;
+    double flatness;
+    std::vector<double> lineDash;
+    double lineDashPhase;
     bool strokeAdjust;
     std::unique_ptr<SplashClip> clip;
     SplashBitmap *softMask;

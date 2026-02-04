@@ -1206,7 +1206,7 @@ struct SplashTransparencyGroup
     //----- for knockout
     SplashBitmap *shape;
     bool knockout;
-    SplashCoord knockoutOpacity;
+    double knockoutOpacity;
     bool fontAA;
 
     //----- saved state
@@ -1352,15 +1352,7 @@ void SplashOutputDev::startPage(int /*pageNum*/, GfxState *state, XRef *xrefA)
     splash->setThinLineMode(thinLineMode);
     splash->setMinLineWidth(s_minLineWidth);
     if (state) {
-        const std::array<double, 6> &ctm = state->getCTM();
-        std::array<SplashCoord, 6> mat;
-        mat[0] = static_cast<SplashCoord>(ctm[0]);
-        mat[1] = static_cast<SplashCoord>(ctm[1]);
-        mat[2] = static_cast<SplashCoord>(ctm[2]);
-        mat[3] = static_cast<SplashCoord>(ctm[3]);
-        mat[4] = static_cast<SplashCoord>(ctm[4]);
-        mat[5] = static_cast<SplashCoord>(ctm[5]);
-        splash->setMatrix(mat);
+        splash->setMatrix(state->getCTM());
     }
     switch (colorMode) {
     case splashModeMono1:
@@ -1438,32 +1430,22 @@ void SplashOutputDev::updateAll(GfxState *state)
 
 void SplashOutputDev::updateCTM(GfxState *state, double /*m11*/, double /*m12*/, double /*m21*/, double /*m22*/, double /*m31*/, double /*m32*/)
 {
-    std::array<SplashCoord, 6> mat;
-
-    const std::array<double, 6> &ctm = state->getCTM();
-    mat[0] = static_cast<SplashCoord>(ctm[0]);
-    mat[1] = static_cast<SplashCoord>(ctm[1]);
-    mat[2] = static_cast<SplashCoord>(ctm[2]);
-    mat[3] = static_cast<SplashCoord>(ctm[3]);
-    mat[4] = static_cast<SplashCoord>(ctm[4]);
-    mat[5] = static_cast<SplashCoord>(ctm[5]);
-    splash->setMatrix(mat);
+    splash->setMatrix(state->getCTM());
 }
 
 void SplashOutputDev::updateLineDash(GfxState *state)
 {
     double dashStart;
 
-    const std::vector<double> &dashPattern = state->getLineDash(&dashStart);
+    std::vector<double> dash { state->getLineDash(&dashStart) };
 
-    std::vector<SplashCoord> dash(dashPattern.size());
-    for (std::vector<double>::size_type i = 0; i < dashPattern.size(); ++i) {
-        dash[i] = static_cast<SplashCoord>(dashPattern[i]);
-        if (dash[i] < 0) {
-            dash[i] = 0;
+    for (auto &elem : dash) {
+        if (elem < 0) {
+            elem = 0;
         }
     }
-    splash->setLineDash(std::move(dash), static_cast<SplashCoord>(dashStart));
+
+    splash->setLineDash(std::move(dash), dashStart);
 }
 
 void SplashOutputDev::updateFlatness(GfxState * /*state*/)
@@ -1732,23 +1714,23 @@ void SplashOutputDev::updateBlendMode(GfxState *state)
 
 void SplashOutputDev::updateFillOpacity(GfxState *state)
 {
-    splash->setFillAlpha(static_cast<SplashCoord>(state->getFillOpacity()));
-    if (transpGroupStack != nullptr && static_cast<SplashCoord>(state->getFillOpacity()) < transpGroupStack->knockoutOpacity) {
-        transpGroupStack->knockoutOpacity = static_cast<SplashCoord>(state->getFillOpacity());
+    splash->setFillAlpha(state->getFillOpacity());
+    if (transpGroupStack != nullptr && state->getFillOpacity() < transpGroupStack->knockoutOpacity) {
+        transpGroupStack->knockoutOpacity = state->getFillOpacity();
     }
 }
 
 void SplashOutputDev::updateStrokeOpacity(GfxState *state)
 {
-    splash->setStrokeAlpha(static_cast<SplashCoord>(state->getStrokeOpacity()));
-    if (transpGroupStack != nullptr && static_cast<SplashCoord>(state->getStrokeOpacity()) < transpGroupStack->knockoutOpacity) {
-        transpGroupStack->knockoutOpacity = static_cast<SplashCoord>(state->getStrokeOpacity());
+    splash->setStrokeAlpha(state->getStrokeOpacity());
+    if (transpGroupStack != nullptr && state->getStrokeOpacity() < transpGroupStack->knockoutOpacity) {
+        transpGroupStack->knockoutOpacity = state->getStrokeOpacity();
     }
 }
 
 void SplashOutputDev::updatePatternOpacity(GfxState *state)
 {
-    splash->setPatternAlpha(static_cast<SplashCoord>(state->getStrokeOpacity()), static_cast<SplashCoord>(state->getFillOpacity()));
+    splash->setPatternAlpha(state->getStrokeOpacity(), state->getFillOpacity());
 }
 
 void SplashOutputDev::clearPatternOpacity(GfxState * /*state*/)
@@ -1818,7 +1800,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
     std::shared_ptr<SplashFontFile> fontFile;
     std::unique_ptr<SplashOutFontFileID> id;
     double m11, m12, m21, m22, fontSize;
-    std::array<SplashCoord, 4> mat;
+    std::array<double, 4> mat;
     bool recreateFont = false;
     bool doAdjustFontMatrix = false;
 
@@ -2108,15 +2090,14 @@ SplashPath SplashOutputDev::convertPath(const GfxPath *path, bool dropEmptySubpa
         const GfxSubpath *subpath = path->getSubpath(i);
         if (subpath->getNumPoints() > n) {
             sPath.reserve(subpath->getNumPoints() + 1);
-            sPath.moveTo(static_cast<SplashCoord>(subpath->getX(0)), static_cast<SplashCoord>(subpath->getY(0)));
+            sPath.moveTo(subpath->getX(0), subpath->getY(0));
             j = 1;
             while (j < subpath->getNumPoints()) {
                 if (subpath->getCurve(j)) {
-                    sPath.curveTo(static_cast<SplashCoord>(subpath->getX(j)), static_cast<SplashCoord>(subpath->getY(j)), static_cast<SplashCoord>(subpath->getX(j + 1)), static_cast<SplashCoord>(subpath->getY(j + 1)),
-                                  static_cast<SplashCoord>(subpath->getX(j + 2)), static_cast<SplashCoord>(subpath->getY(j + 2)));
+                    sPath.curveTo(subpath->getX(j), subpath->getY(j), subpath->getX(j + 1), subpath->getY(j + 1), subpath->getX(j + 2), subpath->getY(j + 2));
                     j += 3;
                 } else {
-                    sPath.lineTo(static_cast<SplashCoord>(subpath->getX(j)), static_cast<SplashCoord>(subpath->getY(j)));
+                    sPath.lineTo(subpath->getX(j), subpath->getY(j));
                     ++j;
                 }
             }
@@ -2165,13 +2146,13 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y, double /*dx*
     doClip = render & 4;
 
     path = nullptr;
-    SplashCoord lineWidth = splash->getLineWidth();
+    double lineWidth = splash->getLineWidth();
     if (doStroke && lineWidth == 0.0) {
         splash->setLineWidth(1 / state->getVDPI());
     }
     if (doStroke || doClip) {
         if ((path = font->getGlyphPath(code))) {
-            path->offset(static_cast<SplashCoord>(x), static_cast<SplashCoord>(y));
+            path->offset(x, y);
         }
     }
 
@@ -2196,7 +2177,7 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y, double /*dx*
         // fill
     } else if (doFill) {
         setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), state->getFillColor());
-        splash->fillChar(static_cast<SplashCoord>(x), static_cast<SplashCoord>(y), code, font);
+        splash->fillChar(x, y, code, font);
 
         // stroke
     } else if (doStroke) {
@@ -2581,7 +2562,7 @@ bool SplashOutputDev::imageMaskSrc(void *data, SplashColorPtr line)
 
 void SplashOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*interpolate*/, bool inlineImg)
 {
-    std::array<SplashCoord, 6> mat;
+    std::array<double, 6> mat;
     SplashOutImageMaskData imgMaskData;
 
     if (state->getFillColorSpace()->isNonMarking()) {
@@ -2626,7 +2607,7 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *s
 
 void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, std::array<double, 6> &baseMatrix)
 {
-    std::array<SplashCoord, 6> mat;
+    std::array<double, 6> mat;
     SplashOutImageMaskData imgMaskData;
     Splash *maskSplash;
     SplashColor maskColor;
@@ -3204,7 +3185,7 @@ bool SplashOutputDev::tilingBitmapSrc(void *data, SplashColorPtr colorLine, unsi
 
 void SplashOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg)
 {
-    std::array<SplashCoord, 6> mat;
+    std::array<double, 6> mat;
     SplashOutImageData imgData;
     SplashColorMode srcMode;
     SplashImageSource src;
@@ -3468,7 +3449,7 @@ bool SplashOutputDev::maskedImageSrc(void *data, SplashColorPtr colorLine, unsig
 
 void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate)
 {
-    std::array<SplashCoord, 6> mat;
+    std::array<double, 6> mat;
     SplashOutMaskedImageData imgData;
     SplashOutImageMaskData imgMaskData;
     SplashColorMode srcMode;
@@ -3495,10 +3476,10 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str,
     } else {
         //----- scale the mask image to the same size as the source image
 
-        mat[0] = static_cast<SplashCoord>(width);
+        mat[0] = static_cast<double>(width);
         mat[1] = 0;
         mat[2] = 0;
-        mat[3] = static_cast<SplashCoord>(height);
+        mat[3] = static_cast<double>(height);
         mat[4] = 0;
         mat[5] = 0;
         imgMaskData.imgStr = std::make_unique<ImageStream>(maskStr, maskWidth, 1, 1);
@@ -3625,7 +3606,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str,
 void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,
                                           bool maskInterpolate)
 {
-    std::array<SplashCoord, 6> mat;
+    std::array<double, 6> mat;
     SplashOutImageData imgData;
     SplashOutImageData imgMaskData;
     SplashColorMode srcMode;
@@ -4002,7 +3983,7 @@ void SplashOutputDev::paintTransparencyGroup(GfxState * /*state*/, const std::ar
     // paint the transparency group onto the parent bitmap
     // - the clip path was set in the parent's state)
     if (tx < bitmap->getWidth() && ty < bitmap->getHeight()) {
-        SplashCoord knockoutOpacity = (transpGroupStack->next != nullptr) ? transpGroupStack->next->knockoutOpacity : transpGroupStack->knockoutOpacity;
+        double knockoutOpacity = (transpGroupStack->next != nullptr) ? transpGroupStack->next->knockoutOpacity : transpGroupStack->knockoutOpacity;
         splash->setOverprintMask(0xffffffff, false);
         splash->composite(*tBitmap, 0, 0, tx, ty, tBitmap->getWidth(), tBitmap->getHeight(), false, !isolated, transpGroupStack->next != nullptr && transpGroupStack->next->knockout, knockoutOpacity);
         fontEngine->setAA(transpGroupStack->fontAA);
@@ -4217,7 +4198,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
     double width, height;
     int surface_width, surface_height, result_width, result_height, i;
     int repeatX, repeatY;
-    std::array<SplashCoord, 6> matc;
+    std::array<double, 6> matc;
     Matrix m1;
     double savedCTM[6];
     double kx, ky, sx, sy;

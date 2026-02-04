@@ -43,7 +43,7 @@ struct SplashFontCacheTag
 // SplashFont
 //------------------------------------------------------------------------
 
-SplashFont::SplashFont(const std::shared_ptr<SplashFontFile> &fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA, bool aaA) : mat(matA), textMat(textMatA)
+SplashFont::SplashFont(const std::shared_ptr<SplashFontFile> &fontFileA, const std::array<double, 4> &matA, const std::array<double, 4> &textMatA, bool aaA) : mat(matA), textMat(textMatA)
 {
     fontFile = fontFileA;
     aa = aaA;

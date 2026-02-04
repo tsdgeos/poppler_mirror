@@ -126,8 +126,8 @@ void SplashScreen::buildDispersedMatrix(int i, int j, int val, int delta, int of
 
 void SplashScreen::buildClusteredMatrix()
 {
-    SplashCoord *dist;
-    SplashCoord u, v, d;
+    double *dist;
+    double u, v, d;
     unsigned char val;
     int size2, x, y, x1, y1, i;
 
@@ -141,15 +141,15 @@ void SplashScreen::buildClusteredMatrix()
     }
 
     // build the distance matrix
-    dist = static_cast<SplashCoord *>(gmallocn(size * size2, sizeof(SplashCoord)));
+    dist = static_cast<double *>(gmallocn(size * size2, sizeof(double)));
     for (y = 0; y < size2; ++y) {
         for (x = 0; x < size2; ++x) {
             if (x + y < size2 - 1) {
-                u = static_cast<SplashCoord>(x) + 0.5 - 0;
-                v = static_cast<SplashCoord>(y) + 0.5 - 0;
+                u = static_cast<double>(x) + 0.5 - 0;
+                v = static_cast<double>(y) + 0.5 - 0;
             } else {
-                u = static_cast<SplashCoord>(x) + 0.5 - static_cast<SplashCoord>(size2);
-                v = static_cast<SplashCoord>(y) + 0.5 - static_cast<SplashCoord>(size2);
+                u = static_cast<double>(x) + 0.5 - static_cast<double>(size2);
+                v = static_cast<double>(y) + 0.5 - static_cast<double>(size2);
             }
             dist[y * size2 + x] = u * u + v * v;
         }
@@ -157,11 +157,11 @@ void SplashScreen::buildClusteredMatrix()
     for (y = 0; y < size2; ++y) {
         for (x = 0; x < size2; ++x) {
             if (x < y) {
-                u = static_cast<SplashCoord>(x) + 0.5 - 0;
-                v = static_cast<SplashCoord>(y) + 0.5 - static_cast<SplashCoord>(size2);
+                u = static_cast<double>(x) + 0.5 - 0;
+                v = static_cast<double>(y) + 0.5 - static_cast<double>(size2);
             } else {
-                u = static_cast<SplashCoord>(x) + 0.5 - static_cast<SplashCoord>(size2);
-                v = static_cast<SplashCoord>(y) + 0.5 - 0;
+                u = static_cast<double>(x) + 0.5 - static_cast<double>(size2);
+                v = static_cast<double>(y) + 0.5 - 0;
             }
             dist[(size2 + y) * size2 + x] = u * u + v * v;
         }

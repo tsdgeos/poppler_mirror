@@ -53,7 +53,7 @@ static int glyphPathCubicTo(const FT_Vector *ctrl1, const FT_Vector *ctrl2, cons
 // SplashFTFont
 //------------------------------------------------------------------------
 
-SplashFTFont::SplashFTFont(const std::shared_ptr<SplashFTFontFile> &fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA)
+SplashFTFont::SplashFTFont(const std::shared_ptr<SplashFTFontFile> &fontFileA, const std::array<double, 4> &matA, const std::array<double, 4> &textMatA)
     : SplashFont(fontFileA, matA, textMatA, fontFileA->engine->aa), enableFreeTypeHinting(fontFileA->engine->enableFreeTypeHinting), enableSlightHinting(fontFileA->engine->enableSlightHinting)
 {
     FT_Face face;
@@ -132,7 +132,7 @@ SplashFTFont::SplashFTFont(const std::shared_ptr<SplashFTFontFile> &fontFileA, c
     }
     if (yMax == yMin) {
         yMin = 0;
-        yMax = static_cast<int>(static_cast<SplashCoord>(1.2) * size);
+        yMax = static_cast<int>(1.2 * size);
     }
 
     // compute the transform matrix
@@ -202,7 +202,7 @@ bool SplashFTFont::makeGlyph(int c, int xFrac, int /*yFrac*/, SplashGlyphBitmap 
     ff = static_cast<SplashFTFontFile *>(fontFile.get());
 
     ff->face->size = sizeObj;
-    offset.x = static_cast<FT_Pos>(static_cast<int>(static_cast<SplashCoord>(xFrac) * splashFontFractionMul * 64));
+    offset.x = static_cast<FT_Pos>(static_cast<int>(static_cast<double>(xFrac) * splashFontFractionMul * 64));
     offset.y = 0;
     FT_Set_Transform(ff->face, &matrix, &offset);
     slot = ff->face->glyph;
@@ -310,7 +310,7 @@ double SplashFTFont::getGlyphAdvance(int c)
 struct SplashFTFontPath
 {
     SplashPath *path;
-    SplashCoord textScale;
+    double textScale;
     bool needClose;
 };
 
@@ -378,7 +378,7 @@ static int glyphPathMoveTo(const FT_Vector *pt, void *path)
         p->path->close();
         p->needClose = false;
     }
-    p->path->moveTo(static_cast<SplashCoord>(pt->x) * p->textScale / 64.0, static_cast<SplashCoord>(pt->y) * p->textScale / 64.0);
+    p->path->moveTo(static_cast<double>(pt->x) * p->textScale / 64.0, static_cast<double>(pt->y) * p->textScale / 64.0);
     return 0;
 }
 
@@ -386,7 +386,7 @@ static int glyphPathLineTo(const FT_Vector *pt, void *path)
 {
     auto *p = static_cast<SplashFTFontPath *>(path);
 
-    p->path->lineTo(static_cast<SplashCoord>(pt->x) * p->textScale / 64.0, static_cast<SplashCoord>(pt->y) * p->textScale / 64.0);
+    p->path->lineTo(static_cast<double>(pt->x) * p->textScale / 64.0, static_cast<double>(pt->y) * p->textScale / 64.0);
     p->needClose = true;
     return 0;
 }
@@ -394,15 +394,15 @@ static int glyphPathLineTo(const FT_Vector *pt, void *path)
 static int glyphPathConicTo(const FT_Vector *ctrl, const FT_Vector *pt, void *path)
 {
     auto *p = static_cast<SplashFTFontPath *>(path);
-    SplashCoord x0, y0, x1, y1, x2, y2, x3, y3, xc, yc;
+    double x0, y0, x1, y1, x2, y2, x3, y3, xc, yc;
 
     if (!p->path->getCurPt(&x0, &y0)) {
         return 0;
     }
-    xc = static_cast<SplashCoord>(ctrl->x) * p->textScale / 64.0;
-    yc = static_cast<SplashCoord>(ctrl->y) * p->textScale / 64.0;
-    x3 = static_cast<SplashCoord>(pt->x) * p->textScale / 64.0;
-    y3 = static_cast<SplashCoord>(pt->y) * p->textScale / 64.0;
+    xc = static_cast<double>(ctrl->x) * p->textScale / 64.0;
+    yc = static_cast<double>(ctrl->y) * p->textScale / 64.0;
+    x3 = static_cast<double>(pt->x) * p->textScale / 64.0;
+    y3 = static_cast<double>(pt->y) * p->textScale / 64.0;
 
     // A second-order Bezier curve is defined by two endpoints, p0 and
     // p3, and one control point, pc:
@@ -420,10 +420,10 @@ static int glyphPathConicTo(const FT_Vector *ctrl, const FT_Vector *pt, void *pa
     //     p1 = (1/3) * (p0 + 2pc)
     //     p2 = (1/3) * (2pc + p3)
 
-    x1 = static_cast<SplashCoord>(1.0 / 3.0) * (x0 + static_cast<SplashCoord>(2) * xc);
-    y1 = static_cast<SplashCoord>(1.0 / 3.0) * (y0 + static_cast<SplashCoord>(2) * yc);
-    x2 = static_cast<SplashCoord>(1.0 / 3.0) * (static_cast<SplashCoord>(2) * xc + x3);
-    y2 = static_cast<SplashCoord>(1.0 / 3.0) * (static_cast<SplashCoord>(2) * yc + y3);
+    x1 = (1.0 / 3.0) * (x0 + 2.0 * xc);
+    y1 = (1.0 / 3.0) * (y0 + 2.0 * yc);
+    x2 = (1.0 / 3.0) * (2.0 * xc + x3);
+    y2 = (1.0 / 3.0) * (2.0 * yc + y3);
 
     p->path->curveTo(x1, y1, x2, y2, x3, y3);
     p->needClose = true;
@@ -434,8 +434,8 @@ static int glyphPathCubicTo(const FT_Vector *ctrl1, const FT_Vector *ctrl2, cons
 {
     auto *p = static_cast<SplashFTFontPath *>(path);
 
-    p->path->curveTo(static_cast<SplashCoord>(ctrl1->x) * p->textScale / 64.0, static_cast<SplashCoord>(ctrl1->y) * p->textScale / 64.0, static_cast<SplashCoord>(ctrl2->x) * p->textScale / 64.0,
-                     static_cast<SplashCoord>(ctrl2->y) * p->textScale / 64.0, static_cast<SplashCoord>(pt->x) * p->textScale / 64.0, static_cast<SplashCoord>(pt->y) * p->textScale / 64.0);
+    p->path->curveTo(static_cast<double>(ctrl1->x) * p->textScale / 64.0, static_cast<double>(ctrl1->y) * p->textScale / 64.0, static_cast<double>(ctrl2->x) * p->textScale / 64.0, static_cast<double>(ctrl2->y) * p->textScale / 64.0,
+                     static_cast<double>(pt->x) * p->textScale / 64.0, static_cast<double>(pt->y) * p->textScale / 64.0);
     p->needClose = true;
     return 0;
 }

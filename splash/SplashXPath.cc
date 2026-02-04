@@ -34,22 +34,22 @@
 
 struct SplashXPathPoint
 {
-    SplashCoord x, y;
+    double x, y;
 };
 
 struct SplashXPathAdjust
 {
     int firstPt, lastPt; // range of points
     bool vert; // vertical or horizontal hint
-    SplashCoord x0a, x0b, // hint boundaries
+    double x0a, x0b, // hint boundaries
             xma, xmb, x1a, x1b;
-    SplashCoord x0, x1, xm; // adjusted coordinates
+    double x0, x1, xm; // adjusted coordinates
 };
 
 //------------------------------------------------------------------------
 
 // Transform a point from user space to device space.
-inline void SplashXPath::transform(const std::array<SplashCoord, 6> &matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo)
+inline void SplashXPath::transform(const std::array<double, 6> &matrix, double xi, double yi, double *xo, double *yo)
 {
     //                          [ m[0] m[1] 0 ]
     // [xo yo 1] = [xi yi 1] *  [ m[2] m[3] 0 ]
@@ -62,13 +62,13 @@ inline void SplashXPath::transform(const std::array<SplashCoord, 6> &matrix, Spl
 // SplashXPath
 //------------------------------------------------------------------------
 
-SplashXPath::SplashXPath(const SplashPath &path, const std::array<SplashCoord, 6> &matrix, SplashCoord flatness, bool closeSubpaths, bool adjustLines, int linePosI)
+SplashXPath::SplashXPath(const SplashPath &path, const std::array<double, 6> &matrix, double flatness, bool closeSubpaths, bool adjustLines, int linePosI)
 {
     SplashPathHint *hint;
     SplashXPathPoint *pts;
     SplashXPathAdjust *adjusts, *adjust;
-    SplashCoord x0, y0, x1, y1, x2, y2, x3, y3, xsp, ysp;
-    SplashCoord adj0, adj1;
+    double x0, y0, x1, y1, x2, y2, x3, y3, xsp, ysp;
+    double adj0, adj1;
     int curSubpath, i, j;
 
     // transform the points
@@ -116,8 +116,8 @@ SplashXPath::SplashXPath(const SplashPath &path, const std::array<SplashCoord, 6
                 }
                 adjusts[i].x0a = adj0 - 0.01;
                 adjusts[i].x0b = adj0 + 0.01;
-                adjusts[i].xma = static_cast<SplashCoord>(0.5) * (adj0 + adj1) - 0.01;
-                adjusts[i].xmb = static_cast<SplashCoord>(0.5) * (adj0 + adj1) + 0.01;
+                adjusts[i].xma = 0.5 * (adj0 + adj1) - 0.01;
+                adjusts[i].xmb = 0.5 * (adj0 + adj1) + 0.01;
                 adjusts[i].x1a = adj1 - 0.01;
                 adjusts[i].x1b = adj1 + 0.01;
                 // rounding both edge coordinates can result in lines of
@@ -140,7 +140,7 @@ SplashXPath::SplashXPath(const SplashPath &path, const std::array<SplashCoord, 6
                 }
                 adjusts[i].x0 = x0;
                 adjusts[i].x1 = x1 - 0.01;
-                adjusts[i].xm = static_cast<SplashCoord>(0.5) * (adjusts[i].x0 + adjusts[i].x1);
+                adjusts[i].xm = 0.5 * (adjusts[i].x0 + adjusts[i].x1);
                 adjusts[i].firstPt = hint->firstPt;
                 adjusts[i].lastPt = hint->lastPt;
             }
@@ -217,9 +217,9 @@ SplashXPath::SplashXPath(const SplashPath &path, const std::array<SplashCoord, 6
 }
 
 // Apply the stroke adjust hints to point <pt>: (*<xp>, *<yp>).
-void SplashXPath::strokeAdjust(SplashXPathAdjust *adjust, SplashCoord *xp, SplashCoord *yp)
+void SplashXPath::strokeAdjust(SplashXPathAdjust *adjust, double *xp, double *yp)
 {
-    SplashCoord x, y;
+    double x, y;
 
     if (adjust->vert) {
         x = *xp;
@@ -265,19 +265,19 @@ void SplashXPath::grow(int nSegs)
     }
 }
 
-void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3, SplashCoord flatness)
+void SplashXPath::addCurve(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, double flatness)
 {
     if (!curveData) {
         // allocate on first use
         curveData = std::make_unique<CurveData>();
     }
-    SplashCoord *cx = curveData->cx.data();
-    SplashCoord *cy = curveData->cy.data();
+    double *cx = curveData->cx.data();
+    double *cy = curveData->cy.data();
     int *cNext = curveData->cNext.data();
 
-    SplashCoord xl0, xl1, xl2, xr0, xr1, xr2, xr3, xx1, xx2, xh;
-    SplashCoord yl0, yl1, yl2, yr0, yr1, yr2, yr3, yy1, yy2, yh;
-    SplashCoord dx, dy, mx, my, d1, d2, flatness2;
+    double xl0, xl1, xl2, xr0, xr1, xr2, xr3, xx1, xx2, xh;
+    double yl0, yl1, yl2, yr0, yr1, yr2, yr3, yy1, yy2, yh;
+    double dx, dy, mx, my, d1, d2, flatness2;
     int p1, p2, p3;
 
     flatness2 = flatness * flatness;
@@ -371,7 +371,7 @@ void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, Splas
     }
 }
 
-void SplashXPath::addSegment(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1)
+void SplashXPath::addSegment(double x0, double y0, double x1, double y1)
 {
     grow(1);
     if (unlikely(!segs)) {

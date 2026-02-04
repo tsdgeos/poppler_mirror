@@ -40,7 +40,7 @@ class SplashPath;
 // decimal points.
 static int constexpr splashFontFractionBits = 2;
 static int constexpr splashFontFraction = 1 << splashFontFractionBits;
-static SplashCoord constexpr splashFontFractionMul = static_cast<SplashCoord>(1) / static_cast<SplashCoord>(splashFontFraction);
+static double constexpr splashFontFractionMul = static_cast<double>(1) / static_cast<double>(splashFontFraction);
 
 //------------------------------------------------------------------------
 // SplashFont
@@ -49,7 +49,7 @@ static SplashCoord constexpr splashFontFractionMul = static_cast<SplashCoord>(1)
 class POPPLER_PRIVATE_EXPORT SplashFont
 {
 public:
-    SplashFont(const std::shared_ptr<SplashFontFile> &fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA, bool aaA);
+    SplashFont(const std::shared_ptr<SplashFontFile> &fontFileA, const std::array<double, 4> &matA, const std::array<double, 4> &textMatA, bool aaA);
 
     // This must be called after the constructor, so that the subclass
     // constructor has a chance to compute the bbox.
@@ -63,7 +63,7 @@ public:
     std::shared_ptr<SplashFontFile> getFontFile() { return fontFile; }
 
     // Return true if <this> matches the specified font file and matrix.
-    bool matches(const std::shared_ptr<SplashFontFile> &fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA) const
+    bool matches(const std::shared_ptr<SplashFontFile> &fontFileA, const std::array<double, 4> &matA, const std::array<double, 4> &textMatA) const
     {
         return fontFileA == fontFile && matA[0] == mat[0] && matA[1] == mat[1] && matA[2] == mat[2] && matA[3] == mat[3] && textMatA[0] == textMat[0] && textMatA[1] == textMat[1] && textMatA[2] == textMat[2] && textMatA[3] == textMat[3];
     }
@@ -99,10 +99,10 @@ public:
 
 protected:
     std::shared_ptr<SplashFontFile> fontFile;
-    const std::array<SplashCoord, 4> mat; // font transform matrix
-                                          //   (text space -> device space)
-    const std::array<SplashCoord, 4> textMat; // text transform matrix
-                                              //   (text space -> user space)
+    const std::array<double, 4> mat; // font transform matrix
+                                     //   (text space -> device space)
+    const std::array<double, 4> textMat; // text transform matrix
+                                         //   (text space -> user space)
     bool aa; // anti-aliasing
     int xMin, yMin, xMax, yMax; // glyph bounding box
     unsigned char *cache; // glyph bitmap cache

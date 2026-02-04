@@ -79,7 +79,7 @@ public:
     // specifies the font transform in PostScript style:
     //    [x' y'] = [x y] * mat
     // Note that the Splash y axis points downward.
-    SplashFont *getFont(std::shared_ptr<SplashFontFile> fontFile, const std::array<SplashCoord, 4> &textMat, const std::array<SplashCoord, 6> &ctm);
+    SplashFont *getFont(std::shared_ptr<SplashFontFile> fontFile, const std::array<double, 4> &textMat, const std::array<double, 6> &ctm);
     bool getAA();
     void setAA(bool aa);
 

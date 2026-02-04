@@ -116,7 +116,7 @@ void SplashPath::append(SplashPath *path)
     }
 }
 
-SplashError SplashPath::moveTo(SplashCoord x, SplashCoord y)
+SplashError SplashPath::moveTo(double x, double y)
 {
     if (onePointSubpath()) {
         return SplashError::BogusPath;
@@ -132,7 +132,7 @@ SplashError SplashPath::moveTo(SplashCoord x, SplashCoord y)
     return SplashError::NoError;
 }
 
-SplashError SplashPath::lineTo(SplashCoord x, SplashCoord y)
+SplashError SplashPath::lineTo(double x, double y)
 {
     if (noCurrentPoint()) {
         return SplashError::NoCurPt;
@@ -149,7 +149,7 @@ SplashError SplashPath::lineTo(SplashCoord x, SplashCoord y)
     return SplashError::NoError;
 }
 
-SplashError SplashPath::curveTo(SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3)
+SplashError SplashPath::curveTo(double x1, double y1, double x2, double y2, double x3, double y3)
 {
     if (noCurrentPoint()) {
         return SplashError::NoCurPt;
@@ -207,7 +207,7 @@ void SplashPath::addStrokeAdjustHint(int ctrl0, int ctrl1, int firstPt, int last
     ++hintsLength;
 }
 
-void SplashPath::offset(SplashCoord dx, SplashCoord dy)
+void SplashPath::offset(double dx, double dy)
 {
     int i;
 
@@ -217,7 +217,7 @@ void SplashPath::offset(SplashCoord dx, SplashCoord dy)
     }
 }
 
-bool SplashPath::getCurPt(SplashCoord *x, SplashCoord *y)
+bool SplashPath::getCurPt(double *x, double *y)
 {
     if (noCurrentPoint()) {
         return false;

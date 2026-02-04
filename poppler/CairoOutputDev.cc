@@ -2099,17 +2099,17 @@ void CairoOutputDev::endActualText(GfxState *state)
     }
 }
 
-static inline int splashRound(SplashCoord x)
+static inline int splashRound(double x)
 {
     return static_cast<int>(floor(x + 0.5));
 }
 
-static inline int splashCeil(SplashCoord x)
+static inline int splashCeil(double x)
 {
     return static_cast<int>(ceil(x));
 }
 
-static inline int splashFloor(SplashCoord x)
+static inline int splashFloor(double x)
 {
     return static_cast<int>(floor(x));
 }
