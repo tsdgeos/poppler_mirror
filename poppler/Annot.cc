@@ -1971,12 +1971,14 @@ std::unique_ptr<Dict> Annot::createResourcesDict(const char *formName, Object &&
     }
     auto stateDict = std::make_unique<Dict>(doc->getXRef());
     stateDict->set(stateName, Object(std::move(gsDict)));
-    auto formDict = std::make_unique<Dict>(doc->getXRef());
-    formDict->set(formName, std::move(formStream));
 
     auto resDict = std::make_unique<Dict>(doc->getXRef());
     resDict->set("ExtGState", Object(std::move(stateDict)));
-    resDict->set("XObject", Object(std::move(formDict)));
+    if (formName) {
+        auto formDict = std::make_unique<Dict>(doc->getXRef());
+        formDict->set(formName, std::move(formStream));
+        resDict->set("XObject", Object(std::move(formDict)));
+    }
 
     return resDict;
 }
@@ -6686,6 +6688,9 @@ void AnnotInk::generateInkAppearance()
     appearBBox = std::make_unique<AnnotAppearanceBBox>(rect.get());
 
     AnnotAppearanceBuilder appearBuilder;
+    if (opacity != 1 || drawBelow) {
+        appearBuilder.append("/GS0 gs\n");
+    }
     appearBuilder.append("q\n");
 
     if (color) {
@@ -6729,12 +6734,8 @@ void AnnotInk::generateInkAppearance()
     if (opacity == 1 && !drawBelow) {
         newAppearance = createForm(appearBuilder.buffer(), bbox, false, Object {});
     } else {
-        Object aStream = createForm(appearBuilder.buffer(), bbox, true, Object {});
-
-        GooString appearBuf("/GS0 gs\n/Fm0 Do");
-
-        std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", opacity, drawBelow ? "Multiply" : nullptr);
-        newAppearance = createForm(&appearBuf, bbox, false, std::move(resDict));
+        std::unique_ptr<Dict> resDict = createResourcesDict(nullptr, Object::null(), "GS0", opacity, drawBelow ? "Multiply" : nullptr);
+        newAppearance = createForm(appearBuilder.buffer(), bbox, false, std::move(resDict));
     }
 
     /* If the annotation is drawn below (highlighting), we must save the
