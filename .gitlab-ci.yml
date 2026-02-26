@@ -32,9 +32,9 @@ clang_format:
   stage: build
   before_script:
   - apt-get update
-  - apt-get install --yes --no-install-recommends git clang-format-21
+  - apt-get install --yes --no-install-recommends git clang-format-23
   script:
-    - find . \( -name "*.cpp" -or -name "*.h"  -or -name "*.c"  -or -name "*.cc" \) -exec clang-format-21 -i {} \;
+    - find . \( -name "*.cpp" -or -name "*.h"  -or -name "*.c"  -or -name "*.cc" \) -exec clang-format-23 -i {} \;
     - git diff --exit-code
 
 build:

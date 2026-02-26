@@ -371,7 +371,7 @@ static void processPageJobs()
         pthread_mutex_unlock(&pageJobMutex);
 
         // process the job
-        SplashOutputDev *splashOut = new SplashOutputDev(mono                              ? splashModeMono1
+        SplashOutputDev *splashOut = new SplashOutputDev(mono ? splashModeMono1
                                                                  : gray                    ? splashModeMono8
                                                                  : (jpegcmyk || overprint) ? splashModeDeviceN8
                                                                                            : splashModeRGB8,

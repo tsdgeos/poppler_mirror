@@ -55,7 +55,6 @@ enum class SigningError
     KeyMissing, /**The key/certificate not specified*/
     BadPassphrase, /** Bad passphrase */
     UnsupportedSignatureType, /** Requested signature type and key is not compatible */
-
 };
 
 struct SigningOperationData
