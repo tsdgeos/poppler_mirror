@@ -278,6 +278,10 @@ for f in $fuzzers; do
         -Wl,-Bdynamic
 done
 
+mkdir -p $OUT/unittestcases/signing_nss
+cp -r $SRC/poppler-test/unittestcases/signing_nss/db_complete \
+      $OUT/unittestcases/signing_nss/
+
 mv $SRC/{*.zip,*.dict} $OUT
 
 pushd $SRC/poppler-data

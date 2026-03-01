@@ -1,11 +1,37 @@
 #include <cstdint>
 #include <vector>
+
 #include <poppler-qt6.h>
 #include <poppler-converter.h>
+#include <poppler-form.h>
+
 #include <QtCore/QBuffer>
 #include <QtCore/QTemporaryFile>
 
+#include <unistd.h>
+#include <libgen.h>
+#include <linux/limits.h>
+
 static void dummy_error_function(const QString &, const QVariant &) { }
+
+static void initialize_nss_dir()
+{
+    static bool initialized = false;
+    if (initialized) {
+        return;
+    }
+
+    char exe_path[PATH_MAX];
+    ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
+    if (len != -1) {
+        exe_path[len] = '\0';
+        char *dir_path = dirname(exe_path);
+        const QString nssDir = QString::fromLocal8Bit(dir_path) + QStringLiteral("/unittestcases/signing_nss/db_complete");
+        Poppler::setNSSDir(nssDir);
+    }
+
+    initialized = true;
+}
 
 static std::vector<uint8_t> createTestImage(const uint8_t *data, size_t size, uint8_t mode)
 {
@@ -35,7 +61,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
 
     Poppler::setDebugErrorFunction(dummy_error_function, QVariant());
-    Poppler::setNSSDir(QString::fromUtf8(TESTDATADIR) + QStringLiteral("/signature-secrets"));
+    initialize_nss_dir();
 
     uint8_t mode = data[0];
     std::vector<uint8_t> imageData = createTestImage(data + 1, size - 1, mode);
