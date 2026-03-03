@@ -440,7 +440,7 @@ inline QList<QRectF> PageData::performMultipleTextSearch(TextPage *textPage, QVe
             resultN.setLeft(continueMatch.x1);
             resultN.setTop(continueMatch.y1);
             resultN.setRight(continueMatch.x2);
-            resultN.setBottom(continueMatch.y1);
+            resultN.setBottom(continueMatch.y2);
 
             results.append(resultN);
             continueMatch.x1 = DBL_MAX;
