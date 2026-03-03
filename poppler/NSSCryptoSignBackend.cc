@@ -646,33 +646,51 @@ std::unique_ptr<X509CertificateInfo> NSSSignatureCreation::getCertificateInfo() 
 
 static std::optional<std::string> getDefaultFirefoxCertDB()
 {
+    std::vector<std::string> firefoxPaths;
+
 #ifdef _WIN32
     const char *env = getenv("APPDATA");
     if (!env) {
         return {};
     }
-    const std::string firefoxPath = std::string(env) + "/Mozilla/Firefox/Profiles/";
+    firefoxPaths.emplace_back(std::string(env) + "/Mozilla/Firefox/Profiles/");
 #else
     const char *env = getenv("HOME");
+    const char *xdg_config_home = getenv("XDG_CONFIG_HOME");
+    const char *legacy = getenv("MOZ_LEGACY_HOME");
     if (!env) {
         return {};
     }
-    const std::string firefoxPath = std::string(env) + "/.mozilla/firefox/";
+    const std::string firefoxLegacyPath = std::string(env) + "/.mozilla/firefox/";
+
+    if (legacy == nullptr || legacy[0] != '1') {
+        if (xdg_config_home != nullptr) {
+            firefoxPaths.emplace_back(std::string(xdg_config_home) + "/mozilla/firefox/");
+        } else {
+            firefoxPaths.emplace_back(std::string(env) + "/.config/mozilla/firefox/");
+        }
+    }
+    firefoxPaths.emplace_back(firefoxLegacyPath);
 #endif
 
     std::error_code ec; // ensures directory_iterator doesn't throw exceptions
     std::optional<std::string> latestDir;
     std::filesystem::file_time_type latestWriteTime;
-    for (const auto &entry : std::filesystem::directory_iterator { firefoxPath, ec }) {
-        if (entry.is_directory() && entry.path().string().find("default") != std::string::npos) {
-            const auto certPath = entry.path() / "cert9.db";
-            if (std::filesystem::exists(certPath, ec) && std::filesystem::is_regular_file(certPath, ec)) {
-                const auto writeTime = std::filesystem::last_write_time(certPath, ec);
-                if (!latestDir.has_value() || writeTime > latestWriteTime) {
-                    latestWriteTime = writeTime;
-                    latestDir = entry.path().string();
+    for (const std::string &firefoxPath : firefoxPaths) {
+        for (const auto &entry : std::filesystem::directory_iterator { firefoxPath, ec }) {
+            if (entry.is_directory() && entry.path().string().find("default") != std::string::npos) {
+                const auto certPath = entry.path() / "cert9.db";
+                if (std::filesystem::exists(certPath, ec) && std::filesystem::is_regular_file(certPath, ec)) {
+                    const auto writeTime = std::filesystem::last_write_time(certPath, ec);
+                    if (!latestDir.has_value() || writeTime > latestWriteTime) {
+                        latestWriteTime = writeTime;
+                        latestDir = entry.path().string();
+                    }
                 }
             }
+        }
+        if (latestDir.has_value()) {
+            break;
         }
     }
     return latestDir;
