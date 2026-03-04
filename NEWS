@@ -1,3 +1,25 @@
+Release 26.03.0:
+        core:
+         * Add compression support for stamp annotation images
+         * NSS signature backend: Look for Firefox profiles also in XDG config directory
+         * GPG signature backend: Fix marking of qualified keys
+         * Simplify the form of some ink annotations
+         * Speed improvements for some fixes
+         * Internal code improvements
+
+        qt5:
+         * Replace deprecated Qt::SystemLocaleDate
+         * Fix wrong result bottom coordinate when searching across lines
+
+        qt6:
+         * Fix wrong result bottom coordinate when searching across lines
+
+        glib:
+         * Mark structure_element_iter_new as nullable
+
+        build system:
+         * Remove USE_FLOAT cmake option
+
 Release 26.02.0:
         core:
          * Improvements in signature checking
