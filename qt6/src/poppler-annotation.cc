@@ -483,7 +483,7 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
             auto *attachann = static_cast<AnnotFileAttachment *>(ann.get());
             auto *f = new FileAttachmentAnnotation();
             // -> fileIcon
-            f->setFileIconName(QString::fromLatin1(attachann->getName()->c_str()));
+            f->setFileIconName(QString::fromLatin1(attachann->getIconName()->c_str()));
             // -> embeddedFile
             auto filespec = std::make_unique<FileSpec>(attachann->getFile());
             f->setEmbeddedFile(new EmbeddedFile(*new EmbeddedFileData(std::move(filespec))));
@@ -499,7 +499,7 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
             auto *s = new SoundAnnotation();
 
             // -> soundIcon
-            s->setSoundIconName(QString::fromLatin1(soundann->getName()->c_str()));
+            s->setSoundIconName(QString::fromLatin1(soundann->getIconName()->c_str()));
             // -> sound
             s->setSound(new SoundObject(soundann->getSound()));
             annotation.reset(s);
@@ -1095,7 +1095,7 @@ QString Annotation::uniqueName() const
         return d->uniqueName;
     }
 
-    return UnicodeParsedString(d->pdfAnnot->getName());
+    return UnicodeParsedString(d->pdfAnnot->getUniqueName());
 }
 
 void Annotation::setUniqueName(const QString &uniqueName)

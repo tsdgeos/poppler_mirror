@@ -4,6 +4,7 @@
 //
 // Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // Mechanically extracted from an SVG created for Okular by Eugene Trounev eugene.trounev@gmail.com
 //
@@ -17,6 +18,7 @@
 #include "Dict.h"
 #include "Object.h"
 #include "PDFDoc.h"
+#include "annot_stamp.h"
 
 static const double ANNOT_STAMP_FINAL_WIDTH = 79.758179;
 static const double ANNOT_STAMP_FINAL_HEIGHT = 26.484743;
@@ -100,21 +102,9 @@ static const char *ANNOT_STAMP_FINAL = "1 0 0 -1 0 26.484741 cm\n"
                                        "3.867 3.844 m B Q\n"
                                        "Q\n";
 
-static Dict *getFinalStampExtGStateDict(PDFDoc *doc)
+static std::unique_ptr<Dict> getFinalStampExtGStateDict(PDFDoc *doc)
 {
-    Dict *a0Dict = new Dict(doc->getXRef());
-    a0Dict->add("CA", Object(0.588235));
-    a0Dict->add("ca", Object(0.588235));
-
-    Dict *a1Dict = new Dict(doc->getXRef());
-    a1Dict->add("CA", Object(1));
-    a1Dict->add("ca", Object(1));
-
-    Dict *extGStateDict = new Dict(doc->getXRef());
-    extGStateDict->add("a0", Object(a0Dict));
-    extGStateDict->add("a1", Object(a1Dict));
-
-    return extGStateDict;
+    return getStampExtGStateDict(doc, 0.588235, 0.588235);
 }
 
 #endif

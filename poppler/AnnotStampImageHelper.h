@@ -4,6 +4,7 @@
 //
 // Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2026 Malika Asman <asmanodeny@gmail.com>
 //
 // Licensed under GPLv2 or later
 //
@@ -53,11 +54,8 @@ public:
     void removeAnnotStampImageObject();
 
 private:
-    void initialize(PDFDoc *docA, int widthA, int heightA, ColorSpace colorSpace, int bitsPerComponent, char *data, int dataLength);
-
     PDFDoc *doc;
 
-    Object imgObj;
     Ref ref;
     Ref sMaskRef;
 

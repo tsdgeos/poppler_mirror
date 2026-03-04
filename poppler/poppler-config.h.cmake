@@ -19,7 +19,7 @@
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
-// Copyright (C) 2020, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2020, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -31,9 +31,6 @@
 
 /* Defines the poppler version. */
 #define POPPLER_VERSION "${POPPLER_VERSION}"
-
-/* Use single precision arithmetic in the Splash backend */
-#cmakedefine01 USE_FLOAT
 
 /* Support for curl is compiled in. */
 #cmakedefine01 POPPLER_HAS_CURL_SUPPORT

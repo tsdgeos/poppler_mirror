@@ -26,9 +26,10 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright (C) 2023 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Adam Sampson <ats@offog.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -262,17 +263,17 @@ public:
         type = objInt64;
         int64g = int64gA;
     }
-    explicit Object(Array *arrayA)
+    explicit Object(std::unique_ptr<Array> arrayA)
     {
         assert(arrayA);
         type = objArray;
-        array = arrayA;
+        array = arrayA.release();
     }
-    explicit Object(Dict *dictA)
+    explicit Object(std::unique_ptr<Dict> &&dictA)
     {
         assert(dictA);
         type = objDict;
-        dict = dictA;
+        dict = dictA.release();
     }
     template<typename StreamType>
         requires(std::is_base_of_v<Stream, StreamType>)
@@ -428,6 +429,8 @@ public:
 
     // Special type checking.
     bool isName(std::string_view nameA) const { return type == objName && getName() == nameA; }
+    bool isArrayOfLength(int length) const;
+    bool isArrayOfLengthAtLeast(int length) const;
     bool isDict(std::string_view dictType) const;
     bool isCmd(std::string_view cmdA) const { return type == objCmd && cString == cmdA; }
 

@@ -38,7 +38,7 @@
 // Copyright 2023-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2024 Pratham Gandhi <ppg.1382@gmail.com>
 // Copyright 2024 Vincent Lefevre <vincent@vinc17.net>
-// Copyright 2025 Juraj Šarinay <juraj@sarinay.com>
+// Copyright 2025, 2026 Juraj Šarinay <juraj@sarinay.com>
 // Copyright 2025 Blair Bonnett <blair.bonnett@gmail.com>
 // Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
 //
@@ -625,6 +625,8 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
 
     auto sigHandler = backend->createSigningHandler(certNickname, HashAlgorithm::Sha256);
 
+    const unsigned int maxExpectedSignatureSize = sigHandler->estimateSize();
+
     auto *signatureField = static_cast<FormFieldSignature *>(field);
     std::unique_ptr<X509CertificateInfo> certInfo = sigHandler->getCertificateInfo();
     if (!certInfo) {
@@ -635,9 +637,9 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
     signatureField->setCertificateInfo(certInfo);
     updateWidgetAppearance(); // add visible signing info to appearance
 
-    Object vObj(new Dict(xref));
+    Object vObj(std::make_unique<Dict>(xref));
     Ref vref = xref->addIndirectObject(vObj);
-    if (!createSignature(vObj, vref, GooString(signerName), CryptoSign::maxSupportedSignatureSize, reason, location, sigHandler->signatureType())) {
+    if (!createSignature(vObj, vref, GooString(signerName), maxExpectedSignatureSize, reason, location, sigHandler->signatureType())) {
         return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::InternalError, .message = ERROR_IN_CODE_LOCATION };
     }
 
@@ -681,14 +683,14 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
         return std::get<CryptoSign::SigningErrorMessage>(signature);
     }
 
-    if (std::get<std::vector<unsigned char>>(signature).size() > CryptoSign::maxSupportedSignatureSize) {
+    if (std::get<std::vector<unsigned char>>(signature).size() > maxExpectedSignatureSize) {
         error(errInternal, -1, "signature too large");
         fclose(file);
         return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::InternalError, .message = ERROR_IN_CODE_LOCATION };
     }
 
     // pad with zeroes to placeholder length
-    std::get<std::vector<unsigned char>>(signature).resize(CryptoSign::maxSupportedSignatureSize, '\0');
+    std::get<std::vector<unsigned char>>(signature).resize(maxExpectedSignatureSize, '\0');
 
     // write signature to saved file
     if (!updateSignature(file, sigStart, sigEnd, std::get<std::vector<unsigned char>>(signature))) {
@@ -939,7 +941,7 @@ bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooStrin
     }
 
     vObj.dictAdd("Contents", Object(objHexString, std::string(placeholderLength, '\0')));
-    Object bObj(new Array(xref));
+    Object bObj(std::make_unique<Array>(xref));
     // reserve space in byte range for maximum number of bytes
     bObj.arrayAdd(Object(0LL));
     bObj.arrayAdd(Object(9999999999LL));
@@ -2020,7 +2022,7 @@ void FormFieldChoice::updateSelection()
 
         // Create /I array only if multiple selection is allowed (as per PDF spec)
         if (multiselect) {
-            objI = Object(new Array(xref));
+            objI = Object(std::make_unique<Array>(xref));
         }
 
         if (numSelected == 0) {
@@ -2045,7 +2047,7 @@ void FormFieldChoice::updateSelection()
             }
         } else {
             // More than one option is selected
-            objV = Object(new Array(xref));
+            objV = Object(std::make_unique<Array>(xref));
             for (int i = 0; i < numChoices; i++) {
                 if (choices[i].selected) {
                     if (multiselect) {
@@ -2758,7 +2760,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
     bool embedActualFont = !(fontSubstitutedIn && GfxFont::isBase14Font(fontFamily, fontStyle));
 
     XRef *xref = doc->getXRef();
-    Object fontDict(new Dict(xref));
+    Object fontDict(std::make_unique<Dict>(xref));
     fontDict.dictSet("Type", Object(objName, "Font"));
     fontDict.dictSet("Subtype", Object(objName, (embedActualFont ? "Type0" : "Type1")));
     fontDict.dictSet("BaseFont", Object(objName, fontFamilyAndStyle.c_str()));
@@ -2775,11 +2777,11 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
 
         {
             // We only support fonts with identity cmaps for now
-            Dict *cidSystemInfo = new Dict(xref);
+            auto cidSystemInfo = std::make_unique<Dict>(xref);
             cidSystemInfo->set("Registry", Object(std::make_unique<GooString>("Adobe")));
             cidSystemInfo->set("Ordering", Object(std::make_unique<GooString>("Identity")));
             cidSystemInfo->set("Supplement", Object(0));
-            descendantFont->set("CIDSystemInfo", Object(cidSystemInfo));
+            descendantFont->set("CIDSystemInfo", Object(std::move(cidSystemInfo)));
         }
 
         FT_Library freetypeLib;
@@ -2814,12 +2816,12 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                 fontDescriptor->set("Flags", Object(0)); // Sans Serif
             }
 
-            auto *fontBBox = new Array(xref);
+            auto fontBBox = std::make_unique<Array>(xref);
             fontBBox->add(Object(static_cast<int>(face->bbox.xMin)));
             fontBBox->add(Object(static_cast<int>(face->bbox.yMin)));
             fontBBox->add(Object(static_cast<int>(face->bbox.xMax)));
             fontBBox->add(Object(static_cast<int>(face->bbox.yMax)));
-            fontDescriptor->set("FontBBox", Object(fontBBox));
+            fontDescriptor->set("FontBBox", Object(std::move(fontBBox)));
 
             fontDescriptor->set("Ascent", Object(static_cast<int>(face->ascender)));
 
@@ -2850,17 +2852,17 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                 }
 
                 if (isTrueType) {
-                    const Ref fontFile2Ref = xref->addStreamObject(new Dict(xref), std::move(data), StreamCompression::Compress);
+                    const Ref fontFile2Ref = xref->addStreamObject(std::make_unique<Dict>(xref), std::move(data), StreamCompression::Compress);
                     fontDescriptor->set("FontFile2", Object(fontFile2Ref));
                 } else {
-                    Dict *fontFileStreamDict = new Dict(xref);
+                    auto fontFileStreamDict = std::make_unique<Dict>(xref);
                     fontFileStreamDict->set("Subtype", Object(objName, "OpenType"));
-                    const Ref fontFile3Ref = xref->addStreamObject(fontFileStreamDict, std::move(data), StreamCompression::Compress);
+                    const Ref fontFile3Ref = xref->addStreamObject(std::move(fontFileStreamDict), std::move(data), StreamCompression::Compress);
                     fontDescriptor->set("FontFile3", Object(fontFile3Ref));
                 }
             }
 
-            const Ref fontDescriptorRef = xref->addIndirectObject(Object(fontDescriptor.release()));
+            const Ref fontDescriptorRef = xref->addIndirectObject(Object(std::move(fontDescriptor)));
             descendantFont->set("FontDescriptor", Object(fontDescriptorRef));
         }
 
@@ -2889,7 +2891,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                     fontsWidths.addWidth(code, static_cast<int>(face->glyph->metrics.horiAdvance));
                 }
             }
-            auto *widths = new Array(xref);
+            auto widths = std::make_unique<Array>(xref);
             for (const auto &segment : fontsWidths.takeSegments()) {
                 std::visit(
                         [&widths, &xref](auto &&s) {
@@ -2900,7 +2902,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                                 for (const auto &w : s.widths) {
                                     widthsInner->add(Object(w));
                                 }
-                                widths->add(Object(widthsInner.release()));
+                                widths->add(Object(std::move(widthsInner)));
                             } else if constexpr (std::is_same_v<T, CIDFontsWidthsBuilder::RangeSegment>) {
                                 widths->add(Object(s.first));
                                 widths->add(Object(s.last));
@@ -2911,7 +2913,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                         },
                         segment);
             }
-            descendantFont->set("W", Object(widths));
+            descendantFont->set("W", Object(std::move(widths)));
 
             std::vector<char> data;
             data.reserve(2 * basicMultilingualMaxCode);
@@ -2921,13 +2923,13 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                 data.push_back((char)(glyph >> 8));
                 data.push_back((char)(glyph & 0xff));
             }
-            const Ref cidToGidMapStream = xref->addStreamObject(new Dict(xref), std::move(data), StreamCompression::Compress);
+            const Ref cidToGidMapStream = xref->addStreamObject(std::make_unique<Dict>(xref), std::move(data), StreamCompression::Compress);
             descendantFont->set("CIDToGIDMap", Object(cidToGidMapStream));
         }
 
-        descendantFonts->add(Object(descendantFont.release()));
+        descendantFonts->add(Object(std::move(descendantFont)));
 
-        fontDict.dictSet("DescendantFonts", Object(descendantFonts.release()));
+        fontDict.dictSet("DescendantFonts", Object(std::move(descendantFonts)));
     }
 
     const Ref fontDictRef = xref->addIndirectObject(fontDict);
@@ -2957,15 +2959,15 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
         delete defaultResources;
         defaultResources = new GfxResources(xref, resDict.getDict(), nullptr);
     } else {
-        Dict *fontsDict = new Dict(xref);
+        auto fontsDict = std::make_unique<Dict>(xref);
         fontsDict->set(dictFontName, Object(fontDictRef));
 
-        Dict *defaultResourcesDict = new Dict(xref);
-        defaultResourcesDict->set("Font", Object(fontsDict));
+        auto defaultResourcesDict = std::make_unique<Dict>(xref);
+        defaultResourcesDict->set("Font", Object(std::move(fontsDict)));
 
         assert(!defaultResources);
-        defaultResources = new GfxResources(xref, defaultResourcesDict, nullptr);
-        resDict = Object(defaultResourcesDict);
+        defaultResources = new GfxResources(xref, defaultResourcesDict.get(), nullptr);
+        resDict = Object(std::move(defaultResourcesDict));
 
         acroForm->dictSet("DR", resDict.copy());
         doc->getCatalog()->setAcroFormModified();

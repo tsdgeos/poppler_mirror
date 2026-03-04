@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009-2011, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2020 Jean Ghali <jghali@libertysurf.fr>
 //
@@ -30,18 +30,12 @@
 
 static inline SplashCoord splashAbs(SplashCoord x)
 {
-#if USE_FLOAT
-    return fabsf(x);
-#else
     return fabs(x);
-#endif
 }
 
 static inline int splashFloor(SplashCoord x)
 {
-#if USE_FLOAT
-    return (int)floorf(x);
-#elif defined(__GNUC__) && defined(__i386__)
+#if defined(__GNUC__) && defined(__i386__)
     // floor() and (int)() are implemented separately, which results
     // in changing the FPCW multiple times - so we optimize it with
     // some inline assembly
@@ -88,9 +82,7 @@ static inline int splashFloor(SplashCoord x)
 
 static inline int splashCeil(SplashCoord x)
 {
-#if USE_FLOAT
-    return (int)ceilf(x);
-#elif defined(__GNUC__) && defined(__i386__)
+#if defined(__GNUC__) && defined(__i386__)
     // ceil() and (int)() are implemented separately, which results
     // in changing the FPCW multiple times - so we optimize it with
     // some inline assembly
@@ -183,20 +175,12 @@ static inline SplashCoord splashAvg(SplashCoord x, SplashCoord y)
 
 static inline SplashCoord splashSqrt(SplashCoord x)
 {
-#if USE_FLOAT
-    return sqrtf(x);
-#else
     return sqrt(x);
-#endif
 }
 
 static inline SplashCoord splashPow(SplashCoord x, SplashCoord y)
 {
-#if USE_FLOAT
-    return powf(x, y);
-#else
     return pow(x, y);
-#endif
 }
 
 static inline SplashCoord splashDist(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1)

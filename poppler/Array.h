@@ -19,6 +19,8 @@
 // Copyright (C) 2017-2019, 2021, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Adam Sampson <ats@offog.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -57,9 +59,9 @@ public:
     int getLength() const { return elems.size(); }
 
     // Copy array with new xref
-    Array *copy(XRef *xrefA) const;
+    std::unique_ptr<Array> copy(XRef *xrefA) const;
 
-    Array *deepCopy() const;
+    std::unique_ptr<Array> deepCopy() const;
 
     // Add an element
     // elem becomes a dead object after this call
@@ -91,6 +93,16 @@ private:
 //------------------------------------------------------------------------
 // Object Array accessors.
 //------------------------------------------------------------------------
+
+inline bool Object::isArrayOfLength(int length) const
+{
+    return type == objArray && array->getLength() == length;
+}
+
+inline bool Object::isArrayOfLengthAtLeast(int length) const
+{
+    return type == objArray && array->getLength() >= length;
+}
 
 inline int Object::arrayGetLength() const
 {

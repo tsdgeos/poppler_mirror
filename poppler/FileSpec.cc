@@ -12,7 +12,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
-// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -166,11 +166,11 @@ EmbFile *FileSpec::getEmbeddedFile()
 
 Object FileSpec::newFileSpecObject(XRef *xref, GooFile *file, const std::string &fileName)
 {
-    Object paramsDict = Object(new Dict(xref));
+    Object paramsDict = Object(std::make_unique<Dict>(xref));
     paramsDict.dictSet("Size", Object(file->size()));
 
     // No Subtype in the embedded file stream dictionary for now
-    Object streamDict = Object(new Dict(xref));
+    Object streamDict = Object(std::make_unique<Dict>(xref));
     streamDict.dictSet("Length", Object(file->size()));
     streamDict.dictSet("Params", std::move(paramsDict));
 
@@ -178,15 +178,15 @@ Object FileSpec::newFileSpecObject(XRef *xref, GooFile *file, const std::string 
     fStream->setNeedsEncryptionOnSave(true);
     const Ref streamRef = xref->addIndirectObject(Object(std::move(fStream)));
 
-    Dict *efDict = new Dict(xref);
+    auto efDict = std::make_unique<Dict>(xref);
     efDict->set("F", Object(streamRef));
 
-    Dict *fsDict = new Dict(xref);
+    auto fsDict = std::make_unique<Dict>(xref);
     fsDict->set("Type", Object(objName, "Filespec"));
     fsDict->set("UF", Object(std::make_unique<GooString>(fileName)));
-    fsDict->set("EF", Object(efDict));
+    fsDict->set("EF", Object(std::move(efDict)));
 
-    return Object(fsDict);
+    return Object(std::move(fsDict));
 }
 
 GooString *FileSpec::getFileNameForPlatform()

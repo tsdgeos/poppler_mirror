@@ -52,6 +52,7 @@
 // Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Trystan Mata <trystan.mata@tytanium.xyz>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Adam Sampson <ats@offog.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -241,13 +242,10 @@ GfxResources::GfxResources(XRef *xrefA, Dict *resDictA, GfxResources *nextA) : g
 {
     if (resDictA) {
 
-        // build font dictionary
-        Dict *resDict = resDictA->copy(xref);
-        Ref fontDictRef;
-        const Object &fontDictObj = resDict->lookup("Font", &fontDictRef);
-        if (fontDictObj.isDict()) {
-            fonts = std::make_unique<GfxFontDict>(xref, fontDictRef, fontDictObj.getDict());
-        }
+        std::unique_ptr<Dict> resDict = resDictA->copy(xref);
+
+        // get Font dictionary
+        fontDict = resDict->lookup("Font", &fontDictRef);
 
         // get XObject dictionary
         xObjDict = resDict->lookup("XObject");
@@ -267,9 +265,7 @@ GfxResources::GfxResources(XRef *xrefA, Dict *resDictA, GfxResources *nextA) : g
         // get properties dictionary
         propertiesDict = resDict->lookup("Properties");
 
-        delete resDict;
     } else {
-        fonts = nullptr;
         xObjDict.setToNull();
         colorSpaceDict.setToNull();
         patternDict.setToNull();
@@ -288,6 +284,9 @@ std::shared_ptr<GfxFont> GfxResources::doLookupFont(const char *name) const
     const GfxResources *resPtr;
 
     for (resPtr = this; resPtr; resPtr = resPtr->next) {
+        if (resPtr->fontDict.isDict() && !resPtr->fonts) {
+            resPtr->fonts = std::make_unique<GfxFontDict>(resPtr->xref, resPtr->fontDictRef, *resPtr->fontDict.getDict());
+        }
         if (resPtr->fonts) {
             if (std::shared_ptr<GfxFont> font = resPtr->fonts->lookup(name)) {
                 return font;
@@ -978,7 +977,7 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
         opSetMiterLimit(&obj2, 1);
     }
     obj2 = obj1.dictLookup("D");
-    if (obj2.isArray() && obj2.arrayGetLength() == 2) {
+    if (obj2.isArrayOfLength(2)) {
         Object args2[2];
         args2[0] = obj2.arrayGet(0);
         args2[1] = obj2.arrayGet(1);
@@ -1064,7 +1063,7 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
     if (obj2.isName("Default") || obj2.isName("Identity")) {
         state->setTransfer({});
         out->updateTransfer(state);
-    } else if (obj2.isArray() && obj2.arrayGetLength() == 4) {
+    } else if (obj2.isArrayOfLength(4)) {
         std::vector<std::unique_ptr<Function>> funcs;
         funcs.resize(4);
         for (int i = 0; i < 4; ++i) {
@@ -1177,7 +1176,7 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
                 Object fobj = fargs0.fetch(xref);
                 if (fobj.isDict()) {
                     Ref r = fargs0.getRef();
-                    std::shared_ptr<GfxFont> font = GfxFont::makeFont(xref, args[0].getName(), r, fobj.getDict());
+                    std::shared_ptr<GfxFont> font = GfxFont::makeFont(xref, args[0].getName(), r, *fobj.getDict());
                     state->setFont(font, fargs1.getNum());
                     fontChanged = true;
                 }
@@ -4967,7 +4966,7 @@ void Gfx::opBeginImage(Object /*args*/[], int /*numArgs*/)
 std::unique_ptr<Stream> Gfx::buildImageStream()
 {
     // build dictionary
-    Object dict(new Dict(xref));
+    Object dict(std::make_unique<Dict>(xref));
     Object obj = parser->getObj();
     while (!obj.isCmd("ID") && !obj.isEOF()) {
         if (!obj.isName()) {
@@ -5259,7 +5258,7 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
 
         // get the form matrix
         Object matrixObj = dict->lookup("Matrix");
-        if (matrixObj.isArray() && matrixObj.arrayGetLength() >= 6) {
+        if (matrixObj.isArrayOfLengthAtLeast(6)) {
             for (i = 0; i < 6; ++i) {
                 Object obj1 = matrixObj.arrayGet(i);
                 if (likely(obj1.isNum())) {

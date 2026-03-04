@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2026 Juraj Šarinay <juraj@sarinay.com>
 //========================================================================
 #ifndef GPGME_CRYPTO_SIGN_BACKEND_H
 #define GPGME_CRYPTO_SIGN_BACKEND_H
@@ -36,6 +37,7 @@ public:
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
     std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> signDetached(const std::string &password) final;
     CryptoSign::SignatureType signatureType() const final;
+    unsigned int estimateSize() const final;
 
 private:
     std::unique_ptr<GpgME::Context> gpgContext;

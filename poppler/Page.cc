@@ -37,6 +37,7 @@
 // Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Adam Sampson <ats@offog.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -213,7 +214,7 @@ bool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box)
     bool ok;
 
     obj1 = dict->lookup(key);
-    if (obj1.isArray() && obj1.arrayGetLength() == 4) {
+    if (obj1.isArrayOfLength(4)) {
         ok = true;
         obj2 = obj1.arrayGet(0);
         if (obj2.isNum()) {
@@ -312,13 +313,13 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, std::unique_
         annotsObj.setToNull();
     }
 
-    if (annotsObj.isArray() && annotsObj.arrayGetLength() > 10000) {
+    if (annotsObj.isArrayOfLengthAtLeast(10000)) {
         error(errSyntaxError, -1, "Page annotations object (page {0:d}) is likely malformed. Too big: ({1:d})", num, annotsObj.arrayGetLength());
         goto err2;
     }
     if (annotsObj.isRef()) {
         auto resolvedObj = getAnnotsObject();
-        if (resolvedObj.isArray() && resolvedObj.arrayGetLength() > 10000) {
+        if (resolvedObj.isArrayOfLengthAtLeast(10000)) {
             error(errSyntaxError, -1, "Page annotations object (page {0:d}) is likely malformed. Too big: ({1:d})", num, resolvedObj.arrayGetLength());
             goto err2;
         }
@@ -370,7 +371,7 @@ Object *Page::getResourceDictObject()
     return attrs->getResourceDictObject();
 }
 
-Dict *Page::getResourceDictCopy(XRef *xrefA)
+std::unique_ptr<Dict> Page::getResourceDictCopy(XRef *xrefA)
 {
     pageLocker();
     Dict *dict = attrs->getResourceDict();
@@ -379,7 +380,7 @@ Dict *Page::getResourceDictCopy(XRef *xrefA)
 
 void Page::replaceXRef(XRef *xrefA)
 {
-    Dict *pageDict = pageObj.getDict()->copy(xrefA);
+    std::unique_ptr<Dict> pageDict = pageObj.getDict()->copy(xrefA);
     xref = xrefA;
     trans = pageDict->lookupNF("Trans").copy();
     annotsObj = pageDict->lookupNF("Annots").copy();
@@ -393,7 +394,6 @@ void Page::replaceXRef(XRef *xrefA)
     if (resources.isDict()) {
         attrs->replaceResource(std::move(resources));
     }
-    delete pageDict;
 }
 
 /* Loads standalone fields into Page, should be called once per page only */
@@ -465,10 +465,10 @@ bool Page::addAnnot(const std::shared_ptr<Annot> &annot)
         // page doesn't have annots array,
         // we have to create it
 
-        auto *annotsArray = new Array(xref);
+        auto annotsArray = std::make_unique<Array>(xref);
         annotsArray->add(Object(annotRef));
 
-        annotsRef = xref->addIndirectObject(Object(annotsArray));
+        annotsRef = xref->addIndirectObject(Object(std::move(annotsArray)));
         annotsObj = Object(annotsRef);
         pageObj.dictSet("Annots", Object(annotsRef));
         xref->setModifiedObject(&pageObj, pageRef);

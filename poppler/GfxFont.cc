@@ -42,6 +42,7 @@
 // Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
 // Copyright (C) 2024 G B <glen.browman@veeva.com>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Adam Sampson <ats@offog.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -193,20 +194,20 @@ GfxFontLoc &GfxFontLoc::operator=(GfxFontLoc &&other) noexcept = default;
 // GfxFont
 //------------------------------------------------------------------------
 
-std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict)
+std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA, const Dict &fontDict)
 {
     std::optional<std::string> name;
     Ref embFontIDA;
 
     // get base font name
-    Object obj1 = fontDict->lookup("BaseFont");
+    Object obj1 = fontDict.lookup("BaseFont");
     if (obj1.isName()) {
         name = obj1.getName();
     }
 
     // There is no BaseFont in Type 3 fonts, try fontDescriptor.FontName
     if (!name) {
-        Object fontDesc = fontDict->lookup("FontDescriptor");
+        Object fontDesc = fontDict.lookup("FontDescriptor");
         if (fontDesc.isDict()) {
             Object obj2 = fontDesc.dictLookup("FontName");
             if (obj2.isName()) {
@@ -217,7 +218,7 @@ std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA
 
     // As a last resort try the Name key
     if (!name) {
-        Object obj2 = fontDict->lookup("Name");
+        Object obj2 = fontDict.lookup("Name");
         if (obj2.isName()) {
             name = obj2.getName();
         }
@@ -283,18 +284,17 @@ std::string GfxFont::getNameWithoutSubsetTag() const
 // If the expected and actual font types don't match, a warning
 // message is printed.  The expected font type is not used for
 // anything else.
-GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID)
+GfxFontType GfxFont::getFontType(XRef *xref, const Dict &fontDict, Ref *embID)
 {
     GfxFontType t, expectedType;
     FoFiIdentifierType fft;
-    Dict *fontDict2;
     bool isType0, err;
 
     t = fontUnknownType;
     *embID = Ref::INVALID();
     err = false;
 
-    Object subtype = fontDict->lookup("Subtype");
+    Object subtype = fontDict.lookup("Subtype");
     expectedType = fontUnknownType;
     isType0 = false;
     if (subtype.isName("Type1") || subtype.isName("MMType1")) {
@@ -311,8 +311,8 @@ GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID)
         error(errSyntaxWarning, -1, "Unknown font type: '{0:s}'", subtype.isName() ? subtype.getName() : "???");
     }
 
-    fontDict2 = fontDict;
-    Object obj1 = fontDict->lookup("DescendantFonts");
+    const Dict *fontDict2 = &fontDict;
+    Object obj1 = fontDict.lookup("DescendantFonts");
     Object obj2; // Do not move to inside the if
                  // we need it around so that fontDict2 remains valid
     if (obj1.isArray()) {
@@ -454,7 +454,7 @@ GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID)
     return t;
 }
 
-void GfxFont::readFontDescriptor(Dict *fontDict)
+void GfxFont::readFontDescriptor(const Dict &fontDict)
 {
     double t;
 
@@ -463,7 +463,7 @@ void GfxFont::readFontDescriptor(Dict *fontDict)
 
     missingWidth = 0;
 
-    Object obj1 = fontDict->lookup("FontDescriptor");
+    Object obj1 = fontDict.lookup("FontDescriptor");
     if (obj1.isDict()) {
 
         // get flags
@@ -590,10 +590,10 @@ void GfxFont::readFontDescriptor(Dict *fontDict)
     }
 }
 
-std::unique_ptr<CharCodeToUnicode> GfxFont::readToUnicodeCMap(Dict *fontDict, int nBits, std::unique_ptr<CharCodeToUnicode> ctu)
+std::unique_ptr<CharCodeToUnicode> GfxFont::readToUnicodeCMap(const Dict &fontDict, int nBits, std::unique_ptr<CharCodeToUnicode> ctu)
 {
 
-    Object obj1 = fontDict->lookup("ToUnicode");
+    Object obj1 = fontDict.lookup("ToUnicode");
     if (!obj1.isStream()) {
         return ctu;
     }
@@ -908,11 +908,11 @@ static bool parseNumericName(const char *s, bool hex, unsigned int *u)
 
 // Returns true if the font has character names like xx or Axx which
 // should be parsed for hex or decimal values.
-static bool testForNumericNames(Dict *fontDict, bool hex)
+static bool testForNumericNames(const Dict &fontDict, bool hex)
 {
     bool numeric = true;
 
-    Object enc = fontDict->lookup("Encoding");
+    Object enc = fontDict.lookup("Encoding");
     if (!enc.isDict()) {
         return false;
     }
@@ -942,7 +942,7 @@ static bool testForNumericNames(Dict *fontDict, bool hex)
     return numeric;
 }
 
-Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict) : GfxFont(tagA, idA, std::move(nameA), typeA, embFontIDA)
+Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, const Dict &fontDict) : GfxFont(tagA, idA, std::move(nameA), typeA, embFontIDA)
 {
     const BuiltinFont *builtinFont;
     const char **baseEnc;
@@ -1028,7 +1028,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
     // get font matrix
     fontMat[0] = fontMat[3] = 1;
     fontMat[1] = fontMat[2] = fontMat[4] = fontMat[5] = 0;
-    obj1 = fontDict->lookup("FontMatrix");
+    obj1 = fontDict.lookup("FontMatrix");
     if (obj1.isArray()) {
         for (int i = 0; i < 6 && i < obj1.arrayGetLength(); ++i) {
             Object obj2 = obj1.arrayGet(i);
@@ -1040,7 +1040,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
 
     // get Type 3 bounding box, font definition, and resources
     if (type == fontType3) {
-        obj1 = fontDict->lookup("FontBBox");
+        obj1 = fontDict.lookup("FontBBox");
         if (obj1.isArray()) {
             for (int i = 0; i < 4 && i < obj1.arrayGetLength(); ++i) {
                 Object obj2 = obj1.arrayGet(i);
@@ -1049,12 +1049,12 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
                 }
             }
         }
-        charProcs = fontDict->lookup("CharProcs");
+        charProcs = fontDict.lookup("CharProcs");
         if (!charProcs.isDict()) {
             error(errSyntaxError, -1, "Missing or invalid CharProcs dictionary in Type 3 font");
             charProcs.setToNull();
         }
-        resources = fontDict->lookup("Resources");
+        resources = fontDict.lookup("Resources");
         if (!resources.isDict()) {
             resources.setToNull();
         }
@@ -1079,7 +1079,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
     usesMacRomanEnc = false;
     baseEnc = nullptr;
     baseEncFromFontFile = false;
-    obj1 = fontDict->lookup("Encoding");
+    obj1 = fontDict.lookup("Encoding");
     bool isZapfDingbats = name && name->ends_with("ZapfDingbats");
     if (isZapfDingbats) {
         baseEnc = zapfDingbatsEncoding;
@@ -1306,18 +1306,18 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
     }
 
     // use widths from font dict, if present
-    obj1 = fontDict->lookup("FirstChar");
+    obj1 = fontDict.lookup("FirstChar");
     firstChar = obj1.isInt() ? obj1.getInt() : 0;
     if (firstChar < 0 || firstChar > 255) {
         firstChar = 0;
     }
-    obj1 = fontDict->lookup("LastChar");
+    obj1 = fontDict.lookup("LastChar");
     lastChar = obj1.isInt() ? obj1.getInt() : 255;
     if (lastChar < 0 || lastChar > 255) {
         lastChar = 255;
     }
     const double mul = (type == fontType3) ? fontMat[0] : 0.001;
-    obj1 = fontDict->lookup("Widths");
+    obj1 = fontDict.lookup("Widths");
     if (obj1.isArray()) {
         flags |= fontFixedWidth;
         if (obj1.arrayGetLength() < lastChar - firstChar + 1) {
@@ -1693,7 +1693,7 @@ struct cmpWidthExcepVFunctor
     bool operator()(const GfxFontCIDWidthExcepV &w1, const GfxFontCIDWidthExcepV &w2) { return w1.first < w2.first; }
 };
 
-GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict) : GfxFont(tagA, idA, std::move(nameA), typeA, embFontIDA)
+GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, const Dict &fontDict) : GfxFont(tagA, idA, std::move(nameA), typeA, embFontIDA)
 {
     Dict *desFontDict;
     Object desFontDictObj;
@@ -1710,8 +1710,8 @@ GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&n
     widths.defVY = 0.880;
 
     // get the descendant font
-    obj1 = fontDict->lookup("DescendantFonts");
-    if (!obj1.isArray() || obj1.arrayGetLength() == 0) {
+    obj1 = fontDict.lookup("DescendantFonts");
+    if (!obj1.isArrayOfLengthAtLeast(1)) {
         error(errSyntaxError, -1, "Missing or empty DescendantFonts entry in Type 0 font");
         return;
     }
@@ -1723,7 +1723,7 @@ GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&n
     desFontDict = desFontDictObj.getDict();
 
     // get info from font descriptor
-    readFontDescriptor(desFontDict);
+    readFontDescriptor(*desFontDict);
 
     //----- encoding info -----
 
@@ -1780,7 +1780,7 @@ GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&n
     }
 
     // encoding (i.e., CMap)
-    obj1 = fontDict->lookup("Encoding");
+    obj1 = fontDict.lookup("Encoding");
     if (obj1.isNull()) {
         error(errSyntaxError, -1, "Missing Encoding entry in Type 0 font");
         return;
@@ -1853,7 +1853,7 @@ GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&n
 
     // default metrics for vertical font
     obj1 = desFontDict->lookup("DW2");
-    if (obj1.isArray() && obj1.arrayGetLength() == 2) {
+    if (obj1.isArrayOfLength(2)) {
         obj2 = obj1.arrayGet(0);
         if (obj2.isNum()) {
             widths.defVY = obj2.getNum() * 0.001;
@@ -2270,13 +2270,13 @@ bool GfxFont::isBase14Font(std::string_view family, std::string_view style)
 // GfxFontDict
 //------------------------------------------------------------------------
 
-GfxFontDict::GfxFontDict(XRef *xref, const Ref fontDictRef, Dict *fontDict)
+GfxFontDict::GfxFontDict(XRef *xref, const Ref fontDictRef, const Dict &fontDict)
 {
     Ref r;
 
-    fonts.resize(fontDict->getLength());
+    fonts.resize(fontDict.getLength());
     for (std::size_t i = 0; i < fonts.size(); ++i) {
-        const Object &obj1 = fontDict->getValNF(i);
+        const Object &obj1 = fontDict.getValNF(i);
         Object obj2 = obj1.fetch(xref);
         if (obj2.isDict()) {
             if (obj1.isRef()) {
@@ -2292,7 +2292,7 @@ GfxFontDict::GfxFontDict(XRef *xref, const Ref fontDictRef, Dict *fontDict)
                 r.gen = 100000;
                 r.num = hashFontObject(&obj2);
             }
-            fonts[i] = GfxFont::makeFont(xref, fontDict->getKey(i), r, obj2.getDict());
+            fonts[i] = GfxFont::makeFont(xref, fontDict.getKey(i), r, *obj2.getDict());
             if (fonts[i] && !fonts[i]->isOk()) {
                 // XXX: it may be meaningful to distinguish between
                 // NULL and !isOk() so that when we do lookups

@@ -26,7 +26,7 @@
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
-// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -753,11 +753,11 @@ LinkJavaScript::~LinkJavaScript() = default;
 
 Object LinkJavaScript::createObject(XRef *xref, const std::string &js)
 {
-    Dict *linkDict = new Dict(xref);
+    auto linkDict = std::make_unique<Dict>(xref);
     linkDict->add("S", Object(objName, "JavaScript"));
     linkDict->add("JS", Object(std::make_unique<GooString>(js)));
 
-    return Object(linkDict);
+    return Object(std::move(linkDict));
 }
 
 //------------------------------------------------------------------------

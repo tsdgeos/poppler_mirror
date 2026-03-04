@@ -41,6 +41,7 @@
 // Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Trystan Mata <trystan.mata@tytanium.xyz>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Adam Sampson <ats@offog.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -267,7 +268,7 @@ std::unique_ptr<GfxColorSpace> GfxColorSpace::parse(GfxResources *res, Object *c
         }
         error(errSyntaxWarning, -1, "Bad color space '{0:s}'", csObj->getName());
 
-    } else if (csObj->isArray() && csObj->arrayGetLength() > 0) {
+    } else if (csObj->isArrayOfLengthAtLeast(1)) {
         obj1 = csObj->arrayGet(0);
         if (obj1.isName("DeviceGray") || obj1.isName("G")) {
             if (res != nullptr) {
@@ -732,13 +733,13 @@ std::unique_ptr<GfxColorSpace> GfxCalGrayColorSpace::parse(const Array &arr, Gfx
     }
     auto cs = std::make_unique<GfxCalGrayColorSpace>();
     obj2 = obj1.dictLookup("WhitePoint");
-    if (obj2.isArray() && obj2.arrayGetLength() == 3) {
+    if (obj2.isArrayOfLength(3)) {
         cs->whiteX = obj2.arrayGet(0).getNumWithDefaultValue(1);
         cs->whiteY = obj2.arrayGet(1).getNumWithDefaultValue(1);
         cs->whiteZ = obj2.arrayGet(2).getNumWithDefaultValue(1);
     }
     obj2 = obj1.dictLookup("BlackPoint");
-    if (obj2.isArray() && obj2.arrayGetLength() == 3) {
+    if (obj2.isArrayOfLength(3)) {
         cs->blackX = obj2.arrayGet(0).getNumWithDefaultValue(0);
         cs->blackY = obj2.arrayGet(1).getNumWithDefaultValue(0);
         cs->blackZ = obj2.arrayGet(2).getNumWithDefaultValue(0);
@@ -1105,25 +1106,25 @@ std::unique_ptr<GfxColorSpace> GfxCalRGBColorSpace::parse(const Array &arr, GfxS
     }
     auto cs = std::make_unique<GfxCalRGBColorSpace>();
     obj2 = obj1.dictLookup("WhitePoint");
-    if (obj2.isArray() && obj2.arrayGetLength() == 3) {
+    if (obj2.isArrayOfLength(3)) {
         cs->whiteX = obj2.arrayGet(0).getNumWithDefaultValue(1);
         cs->whiteY = obj2.arrayGet(1).getNumWithDefaultValue(1);
         cs->whiteZ = obj2.arrayGet(2).getNumWithDefaultValue(1);
     }
     obj2 = obj1.dictLookup("BlackPoint");
-    if (obj2.isArray() && obj2.arrayGetLength() == 3) {
+    if (obj2.isArrayOfLength(3)) {
         cs->blackX = obj2.arrayGet(0).getNumWithDefaultValue(0);
         cs->blackY = obj2.arrayGet(1).getNumWithDefaultValue(0);
         cs->blackZ = obj2.arrayGet(2).getNumWithDefaultValue(0);
     }
     obj2 = obj1.dictLookup("Gamma");
-    if (obj2.isArray() && obj2.arrayGetLength() == 3) {
+    if (obj2.isArrayOfLength(3)) {
         cs->gammaR = obj2.arrayGet(0).getNumWithDefaultValue(1);
         cs->gammaG = obj2.arrayGet(1).getNumWithDefaultValue(1);
         cs->gammaB = obj2.arrayGet(2).getNumWithDefaultValue(1);
     }
     obj2 = obj1.dictLookup("Matrix");
-    if (obj2.isArray() && obj2.arrayGetLength() == 9) {
+    if (obj2.isArrayOfLength(9)) {
         for (i = 0; i < 9; ++i) {
             Object obj3 = obj2.arrayGet(i);
             if (likely(obj3.isNum())) {
@@ -1448,19 +1449,19 @@ std::unique_ptr<GfxColorSpace> GfxLabColorSpace::parse(const Array &arr, GfxStat
     auto cs = std::make_unique<GfxLabColorSpace>();
     bool ok = true;
     obj2 = obj1.dictLookup("WhitePoint");
-    if (obj2.isArray() && obj2.arrayGetLength() == 3) {
+    if (obj2.isArrayOfLength(3)) {
         cs->whiteX = obj2.arrayGet(0).getNum(&ok);
         cs->whiteY = obj2.arrayGet(1).getNum(&ok);
         cs->whiteZ = obj2.arrayGet(2).getNum(&ok);
     }
     obj2 = obj1.dictLookup("BlackPoint");
-    if (obj2.isArray() && obj2.arrayGetLength() == 3) {
+    if (obj2.isArrayOfLength(3)) {
         cs->blackX = obj2.arrayGet(0).getNum(&ok);
         cs->blackY = obj2.arrayGet(1).getNum(&ok);
         cs->blackZ = obj2.arrayGet(2).getNum(&ok);
     }
     obj2 = obj1.dictLookup("Range");
-    if (obj2.isArray() && obj2.arrayGetLength() == 4) {
+    if (obj2.isArrayOfLength(4)) {
         cs->aMin = obj2.arrayGet(0).getNum(&ok);
         cs->aMax = obj2.arrayGet(1).getNum(&ok);
         cs->bMin = obj2.arrayGet(2).getNum(&ok);
@@ -1785,7 +1786,7 @@ std::unique_ptr<GfxColorSpace> GfxICCBasedColorSpace::parse(const Array &arr, Ou
     }
     auto cs = std::make_unique<GfxICCBasedColorSpace>(nCompsA, std::move(altA), &iccProfileStreamA);
     obj2 = dict->lookup("Range");
-    if (obj2.isArray() && obj2.arrayGetLength() == 2 * nCompsA) {
+    if (obj2.isArrayOfLength(2 * nCompsA)) {
         for (i = 0; i < nCompsA; ++i) {
             cs->rangeMin[i] = obj2.arrayGet(2 * i).getNumWithDefaultValue(0);
             cs->rangeMax[i] = obj2.arrayGet(2 * i + 1).getNumWithDefaultValue(1);
@@ -3215,7 +3216,7 @@ std::unique_ptr<GfxTilingPattern> GfxTilingPattern::parse(Object *patObj, int pa
     bboxA[0] = bboxA[1] = 0;
     bboxA[2] = bboxA[3] = 1;
     obj1 = dict->lookup("BBox");
-    if (obj1.isArray() && obj1.arrayGetLength() == 4) {
+    if (obj1.isArrayOfLength(4)) {
         for (i = 0; i < 4; ++i) {
             Object obj2 = obj1.arrayGet(i);
             if (obj2.isNum()) {
@@ -3251,7 +3252,7 @@ std::unique_ptr<GfxTilingPattern> GfxTilingPattern::parse(Object *patObj, int pa
     matrixA[4] = 0;
     matrixA[5] = 0;
     obj1 = dict->lookup("Matrix");
-    if (obj1.isArray() && obj1.arrayGetLength() == 6) {
+    if (obj1.isArrayOfLength(6)) {
         for (i = 0; i < 6; ++i) {
             Object obj2 = obj1.arrayGet(i);
             if (obj2.isNum()) {
@@ -3313,7 +3314,7 @@ std::unique_ptr<GfxShadingPattern> GfxShadingPattern::parse(GfxResources *res, O
     matrixA[4] = 0;
     matrixA[5] = 0;
     obj1 = dict->lookup("Matrix");
-    if (obj1.isArray() && obj1.arrayGetLength() == 6) {
+    if (obj1.isArrayOfLength(6)) {
         for (i = 0; i < 6; ++i) {
             Object obj2 = obj1.arrayGet(i);
             if (obj2.isNum()) {
@@ -3516,7 +3517,7 @@ std::unique_ptr<GfxFunctionShading> GfxFunctionShading::parse(GfxResources *res,
     x0A = y0A = 0;
     x1A = y1A = 1;
     obj1 = dict->lookup("Domain");
-    if (obj1.isArray() && obj1.arrayGetLength() == 4) {
+    if (obj1.isArrayOfLength(4)) {
         bool decodeOk = true;
         x0A = obj1.arrayGet(0).getNum(&decodeOk);
         x1A = obj1.arrayGet(1).getNum(&decodeOk);
@@ -3537,7 +3538,7 @@ std::unique_ptr<GfxFunctionShading> GfxFunctionShading::parse(GfxResources *res,
     matrixA[4] = 0;
     matrixA[5] = 0;
     obj1 = dict->lookup("Matrix");
-    if (obj1.isArray() && obj1.arrayGetLength() == 6) {
+    if (obj1.isArrayOfLength(6)) {
         bool decodeOk = true;
         matrixA[0] = obj1.arrayGet(0).getNum(&decodeOk);
         matrixA[1] = obj1.arrayGet(1).getNum(&decodeOk);
@@ -3886,7 +3887,7 @@ std::unique_ptr<GfxAxialShading> GfxAxialShading::parse(GfxResources *res, Dict 
 
     x0A = y0A = x1A = y1A = 0;
     obj1 = dict->lookup("Coords");
-    if (obj1.isArray() && obj1.arrayGetLength() == 4) {
+    if (obj1.isArrayOfLength(4)) {
         x0A = obj1.arrayGet(0).getNumWithDefaultValue(0);
         y0A = obj1.arrayGet(1).getNumWithDefaultValue(0);
         x1A = obj1.arrayGet(2).getNumWithDefaultValue(0);
@@ -3899,7 +3900,7 @@ std::unique_ptr<GfxAxialShading> GfxAxialShading::parse(GfxResources *res, Dict 
     t0A = 0;
     t1A = 1;
     obj1 = dict->lookup("Domain");
-    if (obj1.isArray() && obj1.arrayGetLength() == 2) {
+    if (obj1.isArrayOfLength(2)) {
         t0A = obj1.arrayGet(0).getNumWithDefaultValue(0);
         t1A = obj1.arrayGet(1).getNumWithDefaultValue(1);
     }
@@ -3929,7 +3930,7 @@ std::unique_ptr<GfxAxialShading> GfxAxialShading::parse(GfxResources *res, Dict 
 
     extend0A = extend1A = false;
     obj1 = dict->lookup("Extend");
-    if (obj1.isArray() && obj1.arrayGetLength() == 2) {
+    if (obj1.isArrayOfLength(2)) {
         Object obj2 = obj1.arrayGet(0);
         if (obj2.isBool()) {
             extend0A = obj2.getBool();
@@ -4066,7 +4067,7 @@ std::unique_ptr<GfxRadialShading> GfxRadialShading::parse(GfxResources *res, Dic
 
     x0A = y0A = r0A = x1A = y1A = r1A = 0;
     obj1 = dict->lookup("Coords");
-    if (obj1.isArray() && obj1.arrayGetLength() == 6) {
+    if (obj1.isArrayOfLength(6)) {
         x0A = obj1.arrayGet(0).getNumWithDefaultValue(0);
         y0A = obj1.arrayGet(1).getNumWithDefaultValue(0);
         r0A = obj1.arrayGet(2).getNumWithDefaultValue(0);
@@ -4081,7 +4082,7 @@ std::unique_ptr<GfxRadialShading> GfxRadialShading::parse(GfxResources *res, Dic
     t0A = 0;
     t1A = 1;
     obj1 = dict->lookup("Domain");
-    if (obj1.isArray() && obj1.arrayGetLength() == 2) {
+    if (obj1.isArrayOfLength(2)) {
         t0A = obj1.arrayGet(0).getNumWithDefaultValue(0);
         t1A = obj1.arrayGet(1).getNumWithDefaultValue(1);
     }
@@ -4111,7 +4112,7 @@ std::unique_ptr<GfxRadialShading> GfxRadialShading::parse(GfxResources *res, Dic
 
     extend0A = extend1A = false;
     obj1 = dict->lookup("Extend");
-    if (obj1.isArray() && obj1.arrayGetLength() == 2) {
+    if (obj1.isArrayOfLength(2)) {
         extend0A = obj1.arrayGet(0).getBoolWithDefaultValue(false);
         extend1A = obj1.arrayGet(1).getBoolWithDefaultValue(false);
     }
@@ -4595,7 +4596,7 @@ std::unique_ptr<GfxGouraudTriangleShading> GfxGouraudTriangleShading::parse(GfxR
         }
     }
     obj1 = dict->lookup("Decode");
-    if (obj1.isArray() && obj1.arrayGetLength() >= 6) {
+    if (obj1.isArrayOfLengthAtLeast(6)) {
         bool decodeOk = true;
         xMin = obj1.arrayGet(0).getNum(&decodeOk);
         xMax = obj1.arrayGet(1).getNum(&decodeOk);
@@ -4922,7 +4923,7 @@ std::unique_ptr<GfxPatchMeshShading> GfxPatchMeshShading::parse(GfxResources *re
         return {};
     }
     obj1 = dict->lookup("Decode");
-    if (obj1.isArray() && obj1.arrayGetLength() >= 6) {
+    if (obj1.isArrayOfLengthAtLeast(6)) {
         bool decodeOk = true;
         xMin = obj1.arrayGet(0).getNum(&decodeOk);
         xMax = obj1.arrayGet(1).getNum(&decodeOk);

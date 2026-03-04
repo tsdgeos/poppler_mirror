@@ -22,7 +22,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 RM <rm+git@arcsin.org>
-// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -73,7 +73,7 @@ static void insertChildHelper(const std::string &itemTitle, int destPageNum, uns
         it = items.begin() + pos;
     }
 
-    auto *a = new Array(xref);
+    auto a = std::make_unique<Array>(xref);
     Ref *pageRef = doc->getCatalog()->getPageRef(destPageNum);
     if (pageRef != nullptr) {
         a->add(Object(*pageRef));
@@ -88,10 +88,10 @@ static void insertChildHelper(const std::string &itemTitle, int destPageNum, uns
     }
     a->add(Object(objName, "Fit"));
 
-    Object outlineItem = Object(new Dict(xref));
+    Object outlineItem = Object(std::make_unique<Dict>(xref));
 
     outlineItem.dictSet("Title", Object(std::make_unique<GooString>(itemTitle)));
-    outlineItem.dictSet("Dest", Object(a));
+    outlineItem.dictSet("Dest", Object(std::move(a)));
     outlineItem.dictSet("Count", Object(1));
     outlineItem.dictAdd("Parent", Object(parentObjRef));
 
@@ -276,7 +276,7 @@ int Outline::addOutlineTreeNodeList(const std::vector<OutlineTreeNode> &nodeList
 
     for (const auto &node : nodeList) {
 
-        auto *a = new Array(doc->getXRef());
+        auto a = std::make_unique<Array>(doc->getXRef());
         Ref *pageRef = doc->getCatalog()->getPageRef(node.destPageNum);
         if (pageRef != nullptr) {
             a->add(Object(*pageRef));
@@ -291,7 +291,7 @@ int Outline::addOutlineTreeNodeList(const std::vector<OutlineTreeNode> &nodeList
         }
         a->add(Object(objName, "Fit"));
 
-        Object outlineItem = Object(new Dict(doc->getXRef()));
+        Object outlineItem = Object(std::make_unique<Dict>(doc->getXRef()));
         Ref outlineItemRef = doc->getXRef()->addIndirectObject(outlineItem);
 
         if (firstRef == Ref::INVALID()) {
@@ -300,7 +300,7 @@ int Outline::addOutlineTreeNodeList(const std::vector<OutlineTreeNode> &nodeList
         lastRef = outlineItemRef;
 
         outlineItem.dictSet("Title", Object(std::make_unique<GooString>(node.title)));
-        outlineItem.dictSet("Dest", Object(a));
+        outlineItem.dictSet("Dest", Object(std::move(a)));
         itemCount++;
 
         if (prevNodeRef != Ref::INVALID()) {

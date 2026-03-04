@@ -182,7 +182,7 @@ public:
     };
 
     // Build a GfxFont object.
-    static std::unique_ptr<GfxFont> makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict);
+    static std::unique_ptr<GfxFont> makeFont(XRef *xref, const char *tagA, Ref idA, const Dict &fontDict);
 
     GfxFont(const GfxFont &) = delete;
     GfxFont &operator=(const GfxFont &other) = delete;
@@ -306,9 +306,9 @@ public:
 protected:
     GfxFont(const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA);
 
-    static GfxFontType getFontType(XRef *xref, Dict *fontDict, Ref *embID);
-    void readFontDescriptor(Dict *fontDict);
-    [[nodiscard]] std::unique_ptr<CharCodeToUnicode> readToUnicodeCMap(Dict *fontDict, int nBits, std::unique_ptr<CharCodeToUnicode> ctu);
+    static GfxFontType getFontType(XRef *xref, const Dict &fontDict, Ref *embID);
+    void readFontDescriptor(const Dict &fontDict);
+    [[nodiscard]] std::unique_ptr<CharCodeToUnicode> readToUnicodeCMap(const Dict &fontDict, int nBits, std::unique_ptr<CharCodeToUnicode> ctu);
     static std::optional<GfxFontLoc> getExternalFont(const std::string &path, bool cid);
 
     const std::string tag; // PDF font tag
@@ -338,7 +338,7 @@ protected:
 class POPPLER_PRIVATE_EXPORT Gfx8BitFont : public GfxFont
 {
 public:
-    Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict);
+    Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, const Dict &fontDict);
 
     int getNextChar(const char *s, int len, CharCode *code, Unicode const **u, int *uLen, double *dx, double *dy, double *ox, double *oy) const override;
 
@@ -398,7 +398,7 @@ private:
 class POPPLER_PRIVATE_EXPORT GfxCIDFont : public GfxFont
 {
 public:
-    GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict);
+    GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, const Dict &fontDict);
 
     bool isCIDFont() const override { return true; }
 
@@ -446,7 +446,7 @@ class GfxFontDict
 {
 public:
     // Build the font dictionary, given the PDF font dictionary.
-    GfxFontDict(XRef *xref, Ref fontDictRef, Dict *fontDict);
+    GfxFontDict(XRef *xref, Ref fontDictRef, const Dict &fontDict);
 
     GfxFontDict(const GfxFontDict &) = delete;
     GfxFontDict &operator=(const GfxFontDict &) = delete;

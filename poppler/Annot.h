@@ -45,7 +45,7 @@
 // Copyright (C) 2024 Erich E. Hoover <erich.e.hoover@gmail.com>
 // Copyright (C) 2024 Carsten Emde <ce@ceek.de>
 // Copyright (C) 2024, 2025 Lucas Baudin <lucas.baudin@ensae.fr>
-// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Juraj Šarinay <juraj@sarinay.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -759,7 +759,7 @@ public:
     void getRect(double *x1, double *y1, double *x2, double *y2) const;
     const GooString *getContents() const { return contents.get(); }
     int getPageNum() const { return page; }
-    const GooString *getName() const { return name.get(); }
+    const GooString *getUniqueName() const { return name.get(); }
     const GooString *getModified() const { return modified.get(); }
     unsigned int getFlags() const { return flags; }
     Object getAppearance() const;
@@ -790,9 +790,9 @@ private:
 
 protected:
     virtual void removeReferencedObjects(); // Called by Page::removeAnnot
-    Object createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Dict *resDict);
+    Object createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, std::unique_ptr<Dict> resDict);
     Object createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
-    Dict *createResourcesDict(const char *formName, Object &&formStream, const char *stateName, double opacity, const char *blendMode);
+    std::unique_ptr<Dict> createResourcesDict(const char *formName, Object &&formStream, const char *stateName, double opacity, const char *blendMode);
     bool isVisible(bool printing);
     int getRotation() const;
 
@@ -811,7 +811,6 @@ protected:
 
     // optional data
     std::unique_ptr<GooString> contents; // Contents
-    std::unique_ptr<GooString> name; // NM
     std::unique_ptr<GooString> modified; // M
     int page; // P
     unsigned int flags; // F (must be a 32 bit unsigned int)
@@ -834,6 +833,8 @@ protected:
 
     bool hasBeenUpdated = false;
     Ref updatedAppearanceStream = Ref::INVALID(); // {-1,-1} if updateAppearanceStream has never been called
+private:
+    std::unique_ptr<GooString> name; // NM
 };
 
 //------------------------------------------------------------------------
@@ -1406,7 +1407,7 @@ public:
 
     // getters
     Object *getFile() { return &file; }
-    const GooString *getName() const { return name.get(); }
+    const GooString *getIconName() const { return iconName.get(); }
 
 private:
     void initialize(Dict *dict);
@@ -1415,7 +1416,7 @@ private:
     Object file; // FS
 
     // optional
-    std::unique_ptr<GooString> name; // Name
+    std::unique_ptr<GooString> iconName; // Name
 };
 
 //------------------------------------------------------------------------
@@ -1433,7 +1434,7 @@ public:
 
     // getters
     Sound *getSound() { return sound.get(); }
-    const GooString *getName() const { return name.get(); }
+    const GooString *getIconName() const { return iconName.get(); }
 
 private:
     void initialize(Dict *dict);
@@ -1442,7 +1443,7 @@ private:
     std::unique_ptr<Sound> sound; // Sound
 
     // optional
-    std::unique_ptr<GooString> name; // Name
+    std::unique_ptr<GooString> iconName; // Name
 };
 
 //------------------------------------------------------------------------

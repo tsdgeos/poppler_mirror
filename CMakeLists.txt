@@ -40,7 +40,7 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "26")
-set(POPPLER_MINOR_VERSION_STRING "01")
+set(POPPLER_MINOR_VERSION_STRING "02")
 # We want the string version to have 08 but the integer version can't have a leading 0 since otherwise it's considered octal
 # So strip a leading 0 if found in POPPLER_MINOR_VERSION_STRING and store the result in POPPLER_MINOR_VERSION
 string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VERSION_STRING}")
@@ -83,7 +83,6 @@ option(ENABLE_NSS3 "Build the NSS backend for cryptographic support" ON)
 option(ENABLE_GPGME "Build the GPG backend for cryptographic support" ON)
 option(ENABLE_PGP_SIGNATURES "Enable pgp signatures in GPG backend by default" OFF)
 option(ENABLE_ZLIB_UNCOMPRESS "Use zlib to uncompress flate streams (not totally safe)." OFF)
-option(USE_FLOAT "Use single precision arithmetic in the Splash backend" OFF)
 option(BUILD_SHARED_LIBS "Build poppler as a shared library" ON)
 option(RUN_GPERF_IF_PRESENT "Run gperf if it is found" ON)
 option(INSTALL_GLIB_DEMO "Whether to install the poppler-glib-demo program." OFF)
@@ -630,7 +629,7 @@ ADD_GPERF_FILE(TimesItalicWidths)
 ADD_GPERF_FILE(TimesRomanWidths)
 ADD_GPERF_FILE(ZapfDingbatsWidths)
 
-set(POPPLER_SOVERSION_NUMBER "156")
+set(POPPLER_SOVERSION_NUMBER "157")
 
 set(LINKER_SCRIPT "${CMAKE_BINARY_DIR}/libpoppler.map")
 configure_file(

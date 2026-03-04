@@ -9,6 +9,7 @@
  * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2026 Adam Sampson <ats@offog.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -200,7 +201,7 @@ void OptContentModelPrivate::parseOrderArray(OptContentItem *parentNode, const A
                     qDebug() << "could not find group for object" << item.getRefNum();
                 }
             }
-        } else if ((orderItem.isArray()) && (orderItem.arrayGetLength() > 0)) {
+        } else if (orderItem.isArrayOfLengthAtLeast(1)) {
             parseOrderArray(lastItem, orderItem.getArray());
         } else if (orderItem.isString()) {
             const GooString *label = orderItem.getString();

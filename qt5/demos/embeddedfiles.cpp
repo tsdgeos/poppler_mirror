@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2026, Aditya Tiwari <adityatiwari342005@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,8 +50,8 @@ void EmbeddedFilesDock::fillInfo()
         m_table->setItem(i, 0, new QTableWidgetItem(file->name()));
         m_table->setItem(i, 1, new QTableWidgetItem(file->description()));
         m_table->setItem(i, 2, new QTableWidgetItem(QString::number(file->size())));
-        m_table->setItem(i, 3, new QTableWidgetItem(file->createDate().toString(Qt::SystemLocaleDate)));
-        m_table->setItem(i, 4, new QTableWidgetItem(file->modDate().toString(Qt::SystemLocaleDate)));
+        m_table->setItem(i, 3, new QTableWidgetItem(QLocale::system().toString(file->createDate(), QLocale::ShortFormat)));
+        m_table->setItem(i, 4, new QTableWidgetItem(QLocale::system().toString(file->modDate(), QLocale::ShortFormat)));
         const QByteArray checksum = file->checksum();
         const QString checksumString = !checksum.isEmpty() ? QString::fromLatin1(checksum.toHex()) : QStringLiteral("n/a");
         m_table->setItem(i, 5, new QTableWidgetItem(checksumString));

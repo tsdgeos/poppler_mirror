@@ -3,7 +3,7 @@
 // FontInfo.cc
 //
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2008, 2010, 2017-2020, 2023-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2008, 2010, 2017-2020, 2023-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2006 Kouhei Sutou <kou@cozmixng.org>
 // Copyright (C) 2009 Pino Toscano <pino@kde.org>
@@ -16,7 +16,7 @@
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019, 2021, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2023 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
-// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -51,7 +51,6 @@ FontInfoScanner::~FontInfoScanner() = default;
 std::vector<FontInfo *> FontInfoScanner::scan(int nPages)
 {
     Page *page;
-    Dict *resDict;
     Annots *annots;
     int lastPage;
 
@@ -73,9 +72,8 @@ std::vector<FontInfo *> FontInfoScanner::scan(int nPages)
             continue;
         }
 
-        if ((resDict = page->getResourceDictCopy(xrefA.get()))) {
-            scanFonts(xrefA.get(), resDict, &result);
-            delete resDict;
+        if (std::unique_ptr<Dict> resDict = page->getResourceDictCopy(xrefA.get())) {
+            scanFonts(xrefA.get(), resDict.get(), &result);
         }
         annots = page->getAnnots();
         for (const std::shared_ptr<Annot> &annot : annots->getAnnots()) {
@@ -97,7 +95,7 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo
     Ref fontDictRef;
     const Object &fontObj = resDict->lookup("Font", &fontDictRef);
     if (fontObj.isDict()) {
-        GfxFontDict gfxFontDict(xrefA, fontDictRef, fontObj.getDict());
+        GfxFontDict gfxFontDict(xrefA, fontDictRef, *fontObj.getDict());
         for (int i = 0; i < gfxFontDict.getNumFonts(); ++i) {
             if (const std::shared_ptr<GfxFont> &font = gfxFontDict.getFont(i)) {
                 Ref fontRef = *font->getID();

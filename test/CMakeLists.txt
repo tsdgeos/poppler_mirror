@@ -229,6 +229,32 @@ if(ENABLE_NSS3)
   set_tests_properties(nss-verify-rsa-moderatechain PROPERTIES RESOURCE_LOCK LOCK_NSSDB_VERIFY)
 
   add_test(
+      NAME nss-sign-rsa-longchain
+      COMMAND ${NSS_SIGNING_PATH} --sign ${NSSDIR_SIGN} "RSA test key 03" ${NSS_SIGNING_INPUT_FILE} ${NSS_SIGNING_WORKDIR}/nss-rsa-longchain.pdf
+  )
+  add_test(
+      NAME nss-verify-rsa-longchain
+      COMMAND ${NSS_SIGNING_PATH} --verify ${NSSDIR_VERIFY} ${NSS_SIGNING_WORKDIR}/nss-rsa-longchain.pdf
+  )
+  set_tests_properties(nss-sign-rsa-longchain PROPERTIES FIXTURES_SETUP FIX_RSA03)
+  set_tests_properties(nss-verify-rsa-longchain PROPERTIES FIXTURES_REQUIRED FIX_RSA03)
+  set_tests_properties(nss-sign-rsa-longchain PROPERTIES RESOURCE_LOCK LOCK_NSSDDB_SIGN)
+  set_tests_properties(nss-verify-rsa-longchain PROPERTIES RESOURCE_LOCK LOCK_NSSDB_VERIFY)
+
+  add_test(
+      NAME nss-sign-rsa-monster
+      COMMAND ${NSS_SIGNING_PATH} --sign ${NSSDIR_SIGN} "RSA test key 04" ${NSS_SIGNING_INPUT_FILE} ${NSS_SIGNING_WORKDIR}/nss-rsa-monster.pdf
+  )
+  add_test(
+      NAME nss-verify-rsa-monster
+      COMMAND ${NSS_SIGNING_PATH} --verify ${NSSDIR_VERIFY} ${NSS_SIGNING_WORKDIR}/nss-rsa-monster.pdf
+  )
+  set_tests_properties(nss-sign-rsa-monster PROPERTIES FIXTURES_SETUP FIX_RSA04)
+  set_tests_properties(nss-verify-rsa-monster PROPERTIES FIXTURES_REQUIRED FIX_RSA04)
+  set_tests_properties(nss-sign-rsa-monster PROPERTIES RESOURCE_LOCK LOCK_NSSDDB_SIGN)
+  set_tests_properties(nss-verify-rsa-monster PROPERTIES RESOURCE_LOCK LOCK_NSSDB_VERIFY)
+
+  add_test(
       NAME nss-sign-ecdsa-shortchain
       COMMAND ${NSS_SIGNING_PATH} --sign ${NSSDIR_SIGN} "ECDSA test key 01" ${NSS_SIGNING_INPUT_FILE} ${NSS_SIGNING_WORKDIR}/nss-ecdsa-shortchain.pdf
   )
@@ -266,5 +292,11 @@ if(ENABLE_NSS3)
   set_tests_properties(nss-verify-ecdsa-longchain PROPERTIES FIXTURES_REQUIRED FIX_ECDSA03)
   set_tests_properties(nss-sign-ecdsa-longchain PROPERTIES RESOURCE_LOCK LOCK_NSSDDB_SIGN)
   set_tests_properties(nss-verify-ecdsa-longchain PROPERTIES RESOURCE_LOCK LOCK_NSSDB_VERIFY)
+
+  add_test(
+      NAME nss-sign-ecdsa-compressed
+      COMMAND ${NSS_SIGNING_PATH} --sign ${NSSDIR_SIGN} "ECDSA test key 04" ${NSS_SIGNING_INPUT_FILE} ${NSS_SIGNING_WORKDIR}/nss-ecdsa-compressed.pdf
+  )
+  set_tests_properties(nss-sign-ecdsa-compressed PROPERTIES RESOURCE_LOCK LOCK_NSSDDB_SIGN)
 
 endif()

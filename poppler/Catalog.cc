@@ -45,6 +45,7 @@
 // Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Aaron Nguyen <aaron.nguyen@veeva.com>
 // Copyright (C) 2025 Trystan Mata <trystan.mata@tytanium.xyz>
+// Copyright (C) 2026 Adam Sampson <ats@offog.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -529,7 +530,7 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
     Object namesObj = catDict.getDict()->lookup("Names", &namesObjRef);
     if (!namesObj.isDict()) {
         // Need to create the names Dict
-        catDict.dictSet("Names", Object(new Dict(xref)));
+        catDict.dictSet("Names", Object(std::make_unique<Dict>(xref)));
         namesObj = catDict.getDict()->lookup("Names");
 
         // Trigger getting the names dict again when needed
@@ -539,10 +540,10 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
     Dict *namesDict = namesObj.getDict();
 
     // We create a new EmbeddedFiles nametree, this replaces the existing one (if any), but it's not a problem
-    Object embeddedFilesObj = Object(new Dict(xref));
+    Object embeddedFilesObj = Object(std::make_unique<Dict>(xref));
     const Ref embeddedFilesRef = xref->addIndirectObject(embeddedFilesObj);
 
-    auto *embeddedFilesNamesArray = new Array(xref);
+    auto embeddedFilesNamesArray = std::make_unique<Array>(xref);
 
     // This flattens out the existing EmbeddedFiles nametree (if any), should not be a problem
     NameTree *ef = getEmbeddedFileNameTree();
@@ -574,7 +575,7 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
         embeddedFilesNamesArray->add(Object(fileSpecRef));
     }
 
-    embeddedFilesObj.dictSet("Names", Object(embeddedFilesNamesArray));
+    embeddedFilesObj.dictSet("Names", Object(std::move(embeddedFilesNamesArray)));
     namesDict->set("EmbeddedFiles", Object(embeddedFilesRef));
 
     if (namesObjRef != Ref::INVALID()) {
@@ -1014,7 +1015,7 @@ Object *Catalog::getCreateOutline()
     }
 
     // setup an empty outline dict
-    outline = Object(new Dict(doc->getXRef()));
+    outline = Object(std::make_unique<Dict>(doc->getXRef()));
     outline.dictSet("Type", Object(objName, "Outlines"));
     outline.dictSet("Count", Object(0));
 
@@ -1086,8 +1087,8 @@ Form *Catalog::getCreateForm()
         }
 
         if (!acroForm.isDict()) {
-            acroForm = Object(new Dict(xref));
-            acroForm.dictSet("Fields", Object(new Array(xref)));
+            acroForm = Object(std::make_unique<Dict>(xref));
+            acroForm.dictSet("Fields", Object(std::make_unique<Array>(xref)));
 
             const Ref newFormRef = xref->addIndirectObject(acroForm);
             catDict.dictSet("AcroForm", Object(newFormRef));
@@ -1289,7 +1290,7 @@ GfxLCMSProfilePtr Catalog::getDisplayProfile()
     Object catDict = xref->getCatalog();
     if (catDict.isDict()) {
         Object outputIntents = catDict.dictLookup("OutputIntents");
-        if ((outputIntents.isArray() && outputIntents.arrayGetLength() == 1)) {
+        if (outputIntents.isArrayOfLength(1)) {
             Object firstElement = outputIntents.arrayGet(0);
             if (firstElement.isDict()) {
                 Object profile = firstElement.dictLookup("DestOutputProfile");

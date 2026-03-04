@@ -1,3 +1,16 @@
+Release 26.02.0:
+        core:
+         * Improvements in signature checking
+         * Improve rendering of files using the CalGray color space
+         * Internal code improvements
+         * Fix crashes in malformed documents
+
+        utils:
+         * pdftotext: Fix page level bounds calculation in tsv mode
+
+        build system:
+         * unmaintained value for some options has been replaced by UnmaintainedWillBeRemovedInJuly2026
+
 Release 26.01.0:
         core:
          * Improve signature compatibiluty on some files

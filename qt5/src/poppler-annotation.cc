@@ -560,7 +560,7 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
             auto *f = new FileAttachmentAnnotation();
             annotation = f;
             // -> fileIcon
-            f->setFileIconName(QString::fromLatin1(attachann->getName()->c_str()));
+            f->setFileIconName(QString::fromLatin1(attachann->getIconName()->c_str()));
             // -> embeddedFile
             auto filespec = std::make_unique<FileSpec>(attachann->getFile());
             f->setEmbeddedFile(new EmbeddedFile(*new EmbeddedFileData(std::move(filespec))));
@@ -576,7 +576,7 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
             annotation = s;
 
             // -> soundIcon
-            s->setSoundIconName(QString::fromLatin1(soundann->getName()->c_str()));
+            s->setSoundIconName(QString::fromLatin1(soundann->getIconName()->c_str()));
             // -> sound
             s->setSound(new SoundObject(soundann->getSound()));
             break;
@@ -1453,7 +1453,7 @@ QString Annotation::uniqueName() const
         return d->uniqueName;
     }
 
-    return UnicodeParsedString(d->pdfAnnot->getName());
+    return UnicodeParsedString(d->pdfAnnot->getUniqueName());
 }
 
 void Annotation::setUniqueName(const QString &uniqueName)

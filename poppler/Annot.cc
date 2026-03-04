@@ -62,6 +62,7 @@
 // Copyright (C) 2025 Juraj Šarinay <juraj@sarinay.com>
 // Copyright (C) 2025 Aditya Tiwari <suntiwari3495@gmail.com>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Adam Sampson <ats@offog.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -604,22 +605,22 @@ std::unique_ptr<AnnotBorder> AnnotBorderArray::copy() const
 
 Object AnnotBorderArray::writeToObject(XRef *xref) const
 {
-    auto *borderArray = new Array(xref);
+    auto borderArray = std::make_unique<Array>(xref);
     borderArray->add(Object(horizontalCorner));
     borderArray->add(Object(verticalCorner));
     borderArray->add(Object(width));
 
     if (!dash.empty()) {
-        auto *a = new Array(xref);
+        auto a = std::make_unique<Array>(xref);
 
         for (double d : dash) {
             a->add(Object(d));
         }
 
-        borderArray->add(Object(a));
+        borderArray->add(Object(std::move(a)));
     }
 
-    return Object(borderArray);
+    return Object(std::move(borderArray));
 }
 
 //------------------------------------------------------------------------
@@ -695,18 +696,18 @@ std::unique_ptr<AnnotBorder> AnnotBorderBS::copy() const
 
 Object AnnotBorderBS::writeToObject(XRef *xref) const
 {
-    Dict *dict = new Dict(xref);
+    auto dict = std::make_unique<Dict>(xref);
     dict->set("W", Object(width));
     dict->set("S", Object(objName, getStyleName()));
     if (style == borderDashed && !dash.empty()) {
-        auto *a = new Array(xref);
+        auto a = std::make_unique<Array>(xref);
 
         for (double d : dash) {
             a->add(Object(d));
         }
-        dict->set("D", Object(a));
+        dict->set("D", Object(std::move(a)));
     }
-    return Object(dict);
+    return Object(std::move(dict));
 }
 
 //------------------------------------------------------------------------
@@ -797,11 +798,11 @@ Object AnnotColor::writeToObject(XRef *xref) const
     if (length == 0) {
         return Object::null(); // Transparent (no color)
     }
-    auto *a = new Array(xref);
+    auto a = std::make_unique<Array>(xref);
     for (int i = 0; i < length; ++i) {
         a->add(Object(values[i]));
     }
-    return Object(a);
+    return Object(std::move(a));
 }
 
 //------------------------------------------------------------------------
@@ -914,7 +915,7 @@ AnnotIconFit::AnnotIconFit(Dict *dict)
     }
 
     obj1 = dict->lookup("A");
-    if (obj1.isArray() && obj1.arrayGetLength() == 2) {
+    if (obj1.isArrayOfLength(2)) {
         left = obj1.arrayGet(0).getNumWithDefaultValue(0);
         bottom = obj1.arrayGet(1).getNumWithDefaultValue(0);
 
@@ -1260,15 +1261,15 @@ Annot::Annot(PDFDoc *docA, PDFRectangle *rectA)
     flags = flagUnknown;
     type = typeUnknown;
 
-    auto *a = new Array(docA->getXRef());
+    auto a = std::make_unique<Array>(docA->getXRef());
     a->add(Object(rectA->x1));
     a->add(Object(rectA->y1));
     a->add(Object(rectA->x2));
     a->add(Object(rectA->y2));
 
-    annotObj = Object(new Dict(docA->getXRef()));
+    annotObj = Object(std::make_unique<Dict>(docA->getXRef()));
     annotObj.dictSet("Type", Object(objName, "Annot"));
-    annotObj.dictSet("Rect", Object(a));
+    annotObj.dictSet("Rect", Object(std::move(a)));
 
     ref = docA->getXRef()->addIndirectObject(annotObj);
 
@@ -1310,7 +1311,7 @@ void Annot::initialize(PDFDoc *docA, Dict *dict)
     //----- parse the rectangle
     rect = std::make_unique<PDFRectangle>();
     obj1 = dict->lookup("Rect");
-    if (obj1.isArray() && obj1.arrayGetLength() == 4) {
+    if (obj1.isArrayOfLength(4)) {
         rect->x1 = obj1.arrayGet(0).getNumWithDefaultValue(0);
         rect->y1 = obj1.arrayGet(1).getNumWithDefaultValue(0);
         rect->x2 = obj1.arrayGet(2).getNumWithDefaultValue(1);
@@ -1458,13 +1459,13 @@ void Annot::setRect(double x1, double y1, double x2, double y2)
         rect->y2 = y1;
     }
 
-    auto *a = new Array(doc->getXRef());
+    auto a = std::make_unique<Array>(doc->getXRef());
     a->add(Object(rect->x1));
     a->add(Object(rect->y1));
     a->add(Object(rect->x2));
     a->add(Object(rect->y2));
 
-    update("Rect", Object(a));
+    update("Rect", Object(std::move(a)));
     invalidateAppearance();
 }
 
@@ -1927,40 +1928,40 @@ double AnnotAppearanceBuilder::lineEndingXExtendBBox(AnnotLineEndingStyle ending
     return 0;
 }
 
-Object Annot::createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Dict *resDict)
+Object Annot::createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, std::unique_ptr<Dict> resDict)
 {
-    return createForm(appearBuf, bbox, transparencyGroup, resDict ? Object(resDict) : Object());
+    return createForm(appearBuf, bbox, transparencyGroup, resDict ? Object(std::move(resDict)) : Object());
 }
 
 Object Annot::createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Object &&resDictObject)
 {
-    Dict *appearDict = new Dict(doc->getXRef());
+    auto appearDict = std::make_unique<Dict>(doc->getXRef());
     appearDict->set("Length", Object(int(appearBuf->size())));
     appearDict->set("Subtype", Object(objName, "Form"));
 
-    auto *a = new Array(doc->getXRef());
+    auto a = std::make_unique<Array>(doc->getXRef());
     a->add(Object(bbox[0]));
     a->add(Object(bbox[1]));
     a->add(Object(bbox[2]));
     a->add(Object(bbox[3]));
-    appearDict->set("BBox", Object(a));
+    appearDict->set("BBox", Object(std::move(a)));
     if (transparencyGroup) {
-        Dict *d = new Dict(doc->getXRef());
+        auto d = std::make_unique<Dict>(doc->getXRef());
         d->set("S", Object(objName, "Transparency"));
-        appearDict->set("Group", Object(d));
+        appearDict->set("Group", Object(std::move(d)));
     }
     if (resDictObject.isDict()) {
         appearDict->set("Resources", std::move(resDictObject));
     }
 
     std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->size() };
-    auto mStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(appearDict));
+    auto mStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(std::move(appearDict)));
     return Object(std::move(mStream));
 }
 
-Dict *Annot::createResourcesDict(const char *formName, Object &&formStream, const char *stateName, double opacity, const char *blendMode)
+std::unique_ptr<Dict> Annot::createResourcesDict(const char *formName, Object &&formStream, const char *stateName, double opacity, const char *blendMode)
 {
-    Dict *gsDict = new Dict(doc->getXRef());
+    auto gsDict = std::make_unique<Dict>(doc->getXRef());
     if (opacity != 1) {
         gsDict->set("CA", Object(opacity));
         gsDict->set("ca", Object(opacity));
@@ -1968,14 +1969,16 @@ Dict *Annot::createResourcesDict(const char *formName, Object &&formStream, cons
     if (blendMode) {
         gsDict->set("BM", Object(objName, blendMode));
     }
-    Dict *stateDict = new Dict(doc->getXRef());
-    stateDict->set(stateName, Object(gsDict));
-    Dict *formDict = new Dict(doc->getXRef());
-    formDict->set(formName, std::move(formStream));
+    auto stateDict = std::make_unique<Dict>(doc->getXRef());
+    stateDict->set(stateName, Object(std::move(gsDict)));
 
-    Dict *resDict = new Dict(doc->getXRef());
-    resDict->set("ExtGState", Object(stateDict));
-    resDict->set("XObject", Object(formDict));
+    auto resDict = std::make_unique<Dict>(doc->getXRef());
+    resDict->set("ExtGState", Object(std::move(stateDict)));
+    if (formName) {
+        auto formDict = std::make_unique<Dict>(doc->getXRef());
+        formDict->set(formName, std::move(formStream));
+        resDict->set("XObject", Object(std::move(formDict)));
+    }
 
     return resDict;
 }
@@ -2056,7 +2059,7 @@ void Annot::setNewAppearance(Object &&newAppearance, bool keepAppearState)
 
         updatedAppearanceStream = doc->getXRef()->addIndirectObject(appearance);
 
-        Object obj1 = Object(new Dict(doc->getXRef()));
+        Object obj1 = Object(std::make_unique<Dict>(doc->getXRef()));
         obj1.dictAdd("N", Object(updatedAppearanceStream));
         update("AP", std::move(obj1));
         Object updatedAP = annotObj.dictLookup("AP");
@@ -2762,13 +2765,13 @@ void AnnotText::draw(Gfx *gfx, bool printing)
         appearBBox = std::make_unique<AnnotAppearanceBBox>(&fixedRect);
         const std::array<double, 4> bbox = appearBBox->getBBoxRect();
         if (ca == 1) {
-            appearance = createForm(appearBuilder.buffer(), bbox, false, nullptr);
+            appearance = createForm(appearBuilder.buffer(), bbox, false, Object {});
         } else {
-            Object aStream = createForm(appearBuilder.buffer(), bbox, true, nullptr);
+            Object aStream = createForm(appearBuilder.buffer(), bbox, true, Object {});
 
             GooString appearBuf("/GS0 gs\n/Fm0 Do");
-            Dict *resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-            appearance = createForm(&appearBuf, bbox, false, resDict);
+            std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
+            appearance = createForm(&appearBuf, bbox, false, std::move(resDict));
         }
     }
 
@@ -2916,7 +2919,7 @@ void AnnotFreeText::initialize(Dict *dict)
     }
 
     obj1 = dict->lookup("CL");
-    if (obj1.isArray() && obj1.arrayGetLength() >= 4) {
+    if (obj1.isArrayOfLengthAtLeast(4)) {
         const double x1 = obj1.arrayGet(0).getNumWithDefaultValue(0);
         const double y1 = obj1.arrayGet(1).getNumWithDefaultValue(0);
         const double x2 = obj1.arrayGet(2).getNumWithDefaultValue(0);
@@ -3018,7 +3021,7 @@ void AnnotFreeText::setCalloutLine(std::unique_ptr<AnnotCalloutLine> &&line)
     } else {
         double x1 = line->getX1(), y1 = line->getY1();
         double x2 = line->getX2(), y2 = line->getY2();
-        obj1 = Object(new Array(doc->getXRef()));
+        obj1 = Object(std::make_unique<Array>(doc->getXRef()));
         obj1.arrayAdd(Object(x1));
         obj1.arrayAdd(Object(y1));
         obj1.arrayAdd(Object(x2));
@@ -3061,7 +3064,7 @@ static std::unique_ptr<GfxFont> createAnnotDrawFont(XRef *xref, Dict *fontParent
 {
     const Ref dummyRef = { .num = -1, .gen = -1 };
 
-    Dict *fontDict = new Dict(xref);
+    auto fontDict = std::make_unique<Dict>(xref);
     fontDict->add("BaseFont", Object(objName, fontname));
     fontDict->add("Subtype", Object(objName, "Type1"));
     if ((strcmp(fontname, "ZapfDingbats") != 0) && (strcmp(fontname, "Symbol") != 0)) {
@@ -3070,13 +3073,13 @@ static std::unique_ptr<GfxFont> createAnnotDrawFont(XRef *xref, Dict *fontParent
 
     Object fontsDictObj = fontParentDict->lookup("Font");
     if (!fontsDictObj.isDict()) {
-        fontsDictObj = Object(new Dict(xref));
+        fontsDictObj = Object(std::make_unique<Dict>(xref));
         fontParentDict->add("Font", fontsDictObj.copy()); // This is not a copy it's a ref
     }
 
-    fontsDictObj.dictSet(resourceName, Object(fontDict));
-
-    return GfxFont::makeFont(xref, resourceName, dummyRef, fontDict);
+    auto font = GfxFont::makeFont(xref, resourceName, dummyRef, *fontDict);
+    fontsDictObj.dictSet(resourceName, Object(std::move(fontDict)));
+    return font;
 }
 
 class HorizontalTextLayouter
@@ -3376,7 +3379,7 @@ void AnnotFreeText::generateFreeTextAppearance()
             Object fontDictionary = fontResources.getDict()->lookup(da.getFontName(), &fontReference);
 
             if (fontDictionary.isDict()) {
-                font = GfxFont::makeFont(doc->getXRef(), da.getFontName().c_str(), fontReference, fontDictionary.getDict());
+                font = GfxFont::makeFont(doc->getXRef(), da.getFontName().c_str(), fontReference, *fontDictionary.getDict());
             } else {
                 error(errSyntaxWarning, -1, "Font dictionary is not a dictionary");
             }
@@ -3385,9 +3388,9 @@ void AnnotFreeText::generateFreeTextAppearance()
 
     // if fontname is not in the default resources, create a Helvetica fake font
     if (!font) {
-        Dict *fontResDict = new Dict(doc->getXRef());
-        resourceObj = Object(fontResDict);
-        font = createAnnotDrawFont(doc->getXRef(), fontResDict, da.getFontName().c_str());
+        auto fontResDict = std::make_unique<Dict>(doc->getXRef());
+        font = createAnnotDrawFont(doc->getXRef(), fontResDict.get(), da.getFontName().c_str());
+        resourceObj = Object(std::move(fontResDict));
     }
 
     // Set font state
@@ -3406,8 +3409,8 @@ void AnnotFreeText::generateFreeTextAppearance()
         Object aStream = createForm(appearBuilder.buffer(), bbox, true, std::move(resourceObj));
 
         GooString appearBuf("/GS0 gs\n/Fm0 Do");
-        Dict *resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-        newAppearance = createForm(&appearBuf, bbox, false, resDict);
+        std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
+        newAppearance = createForm(&appearBuf, bbox, false, std::move(resDict));
     }
     if (hasBeenUpdated) {
         // We should technically do this for all annots but AnnotFreeText
@@ -3470,7 +3473,7 @@ void AnnotLine::initialize(Dict *dict)
     Object obj1;
 
     obj1 = dict->lookup("L");
-    if (obj1.isArray() && obj1.arrayGetLength() == 4) {
+    if (obj1.isArrayOfLength(4)) {
         const double x1 = obj1.arrayGet(0).getNumWithDefaultValue(0);
         const double y1 = obj1.arrayGet(1).getNumWithDefaultValue(0);
         const double x2 = obj1.arrayGet(2).getNumWithDefaultValue(0);
@@ -3484,7 +3487,7 @@ void AnnotLine::initialize(Dict *dict)
     }
 
     obj1 = dict->lookup("LE");
-    if (obj1.isArray() && obj1.arrayGetLength() == 2) {
+    if (obj1.isArrayOfLength(2)) {
         Object obj2;
 
         obj2 = obj1.arrayGet(0);
@@ -3562,7 +3565,7 @@ void AnnotLine::initialize(Dict *dict)
     }
 
     obj1 = dict->lookup("CO");
-    if (obj1.isArray() && (obj1.arrayGetLength() == 2)) {
+    if (obj1.isArrayOfLength(2)) {
         captionTextHorizontal = obj1.arrayGet(0).getNumWithDefaultValue(0);
         captionTextVertical = obj1.arrayGet(1).getNumWithDefaultValue(0);
     } else {
@@ -3590,13 +3593,13 @@ void AnnotLine::setVertices(double x1, double y1, double x2, double y2)
     coord1 = std::make_unique<AnnotCoord>(x1, y1);
     coord2 = std::make_unique<AnnotCoord>(x2, y2);
 
-    auto *lArray = new Array(doc->getXRef());
+    auto lArray = std::make_unique<Array>(doc->getXRef());
     lArray->add(Object(x1));
     lArray->add(Object(y1));
     lArray->add(Object(x2));
     lArray->add(Object(y2));
 
-    update("L", Object(lArray));
+    update("L", Object(std::move(lArray)));
     invalidateAppearance();
 }
 
@@ -3605,11 +3608,11 @@ void AnnotLine::setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyl
     startStyle = start;
     endStyle = end;
 
-    auto *leArray = new Array(doc->getXRef());
+    auto leArray = std::make_unique<Array>(doc->getXRef());
     leArray->add(Object(objName, convertAnnotLineEndingStyle(startStyle)));
     leArray->add(Object(objName, convertAnnotLineEndingStyle(endStyle)));
 
-    update("LE", Object(leArray));
+    update("LE", Object(std::move(leArray)));
     invalidateAppearance();
 }
 
@@ -3705,13 +3708,13 @@ void AnnotLine::generateLineAppearance()
     const double captionmaxwidth = main_len - 2 * captionhmargin;
     const double lineendingSize = std::min(6. * borderWidth, main_len / 2);
 
-    Dict *fontResDict;
+    std::unique_ptr<Dict> fontResDict;
     std::unique_ptr<const GfxFont> font;
 
     // Calculate caption width and height
     if (caption) {
-        fontResDict = new Dict(doc->getXRef());
-        font = createAnnotDrawFont(doc->getXRef(), fontResDict);
+        fontResDict = std::make_unique<Dict>(doc->getXRef());
+        font = createAnnotDrawFont(doc->getXRef(), fontResDict.get());
         int lines = 0;
         size_t i = 0;
         while (i < contents->size()) {
@@ -3835,13 +3838,13 @@ void AnnotLine::generateLineAppearance()
 
     const std::array<double, 4> bbox = appearBBox->getBBoxRect();
     if (ca == 1) {
-        appearance = createForm(appearBuilder.buffer(), bbox, false, fontResDict);
+        appearance = createForm(appearBuilder.buffer(), bbox, false, std::move(fontResDict));
     } else {
-        Object aStream = createForm(appearBuilder.buffer(), bbox, true, fontResDict);
+        Object aStream = createForm(appearBuilder.buffer(), bbox, true, std::move(fontResDict));
 
         GooString appearBuf("/GS0 gs\n/Fm0 Do");
-        Dict *resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-        appearance = createForm(&appearBuf, bbox, false, resDict);
+        std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
+        appearance = createForm(&appearBuf, bbox, false, std::move(resDict));
     }
 }
 
@@ -3898,11 +3901,11 @@ AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rectA, AnnotSubtype
     }
 
     // Store dummy quadrilateral with null coordinates
-    auto *quadPoints = new Array(doc->getXRef());
+    auto quadPoints = std::make_unique<Array>(doc->getXRef());
     for (int i = 0; i < 4 * 2; ++i) {
         quadPoints->add(Object(0.));
     }
-    annotObj.dictSet("QuadPoints", Object(quadPoints));
+    annotObj.dictSet("QuadPoints", Object(std::move(quadPoints)));
 
     initialize(annotObj.getDict());
 }
@@ -3970,7 +3973,7 @@ void AnnotTextMarkup::setType(AnnotSubtype new_type)
 
 void AnnotTextMarkup::setQuadrilaterals(const AnnotQuadrilaterals &quadPoints)
 {
-    auto *a = new Array(doc->getXRef());
+    auto a = std::make_unique<Array>(doc->getXRef());
 
     for (int i = 0; i < quadPoints.getQuadrilateralsLength(); ++i) {
         a->add(Object(quadPoints.getX1(i)));
@@ -3985,7 +3988,7 @@ void AnnotTextMarkup::setQuadrilaterals(const AnnotQuadrilaterals &quadPoints)
 
     quadrilaterals = std::make_unique<AnnotQuadrilaterals>(*a);
 
-    annotObj.dictSet("QuadPoints", Object(a));
+    annotObj.dictSet("QuadPoints", Object(std::move(a)));
     invalidateAppearance();
 }
 
@@ -4153,17 +4156,17 @@ void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
         appearBuilder.append("Q\n");
 
         const std::array<double, 4> bbox = { appearBBox->getPageXMin(), appearBBox->getPageYMin(), appearBBox->getPageXMax(), appearBBox->getPageYMax() };
-        Object aStream = createForm(appearBuilder.buffer(), bbox, true, nullptr);
+        Object aStream = createForm(appearBuilder.buffer(), bbox, true, Object {});
 
         GooString appearBuf("/GS0 gs\n/Fm0 Do");
-        Dict *resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", 1, blendMultiply ? "Multiply" : nullptr);
+        std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", 1, blendMultiply ? "Multiply" : nullptr);
         if (ca == 1) {
-            appearance = createForm(&appearBuf, bbox, false, resDict);
+            appearance = createForm(&appearBuf, bbox, false, std::move(resDict));
         } else {
-            aStream = createForm(&appearBuf, bbox, true, resDict);
+            aStream = createForm(&appearBuf, bbox, true, std::move(resDict));
 
-            Dict *resDict2 = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-            appearance = createForm(&appearBuf, bbox, false, resDict2);
+            std::unique_ptr<Dict> resDict2 = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
+            appearance = createForm(&appearBuf, bbox, false, std::move(resDict2));
         }
     }
 
@@ -4272,7 +4275,7 @@ bool AnnotWidget::setFormAdditionalAction(FormAdditionalActionsType formAddition
     Object additionalActionsObject = additionalActions.fetch(doc->getXRef());
 
     if (!additionalActionsObject.isDict()) {
-        additionalActionsObject = Object(new Dict(doc->getXRef()));
+        additionalActionsObject = Object(std::make_unique<Dict>(doc->getXRef()));
         annotObj.dictSet("AA", additionalActionsObject.copy());
     }
 
@@ -5265,7 +5268,7 @@ static void setChildDictEntryValue(Dict *parentDict, const char *childDictName, 
 {
     Object childDictionaryObj = parentDict->lookup(childDictName);
     if (!childDictionaryObj.isDict()) {
-        childDictionaryObj = Object(new Dict(xref));
+        childDictionaryObj = Object(std::make_unique<Dict>(xref));
         parentDict->set(childDictName, childDictionaryObj.copy());
     }
     childDictionaryObj.dictSet(childDictEntryName, Object(childDictEntryValue));
@@ -5459,7 +5462,7 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
         da = form->getDefaultAppearance();
     }
 
-    Dict *appearDict = new Dict(doc->getXRef());
+    auto appearDict = std::make_unique<Dict>(doc->getXRef());
 
     // Let's init resourcesDictObj and resources.
     // In PDF 1.2, an additional entry in the field dictionary, DR, was defined.
@@ -5488,7 +5491,7 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
         }
     }
     if (!resourcesDictObj.isDict()) {
-        resourcesDictObj = Object(new Dict(doc->getXRef()));
+        resourcesDictObj = Object(std::make_unique<Dict>(doc->getXRef()));
     }
 
     const bool success = appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), resourcesDictObj.getDict());
@@ -5505,12 +5508,12 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
     // fill the appearance stream dictionary
     appearDict->add("Length", Object(int(appearBuf->size())));
     appearDict->add("Subtype", Object(objName, "Form"));
-    auto *bbox = new Array(doc->getXRef());
+    auto bbox = std::make_unique<Array>(doc->getXRef());
     bbox->add(Object(0));
     bbox->add(Object(0));
     bbox->add(Object(rect->x2 - rect->x1));
     bbox->add(Object(rect->y2 - rect->y1));
-    appearDict->add("BBox", Object(bbox));
+    appearDict->add("BBox", Object(std::move(bbox)));
 
     // set the resource dictionary
     if (resourcesDictObj.getDict()->getLength() > 0) {
@@ -5519,7 +5522,7 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
 
     // build the appearance stream
     std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->size() };
-    auto appearStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(appearDict));
+    auto appearStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(std::move(appearDict)));
     if (hasBeenUpdated) {
         // We should technically do this for all annots but AnnotFreeText
         // forms are particularly special since we're potentially embeddeing a font so we really need
@@ -5564,7 +5567,7 @@ void AnnotWidget::updateAppearanceStream()
         updatedAppearanceStream = doc->getXRef()->addIndirectObject(obj1);
 
         // Write the AP dictionary
-        obj1 = Object(new Dict(doc->getXRef()));
+        obj1 = Object(std::make_unique<Dict>(doc->getXRef()));
         obj1.dictAdd("N", Object(updatedAppearanceStream));
 
         // Update our internal pointers to the appearance dictionary
@@ -5601,17 +5604,16 @@ void AnnotWidget::draw(Gfx *gfx, bool printing)
         // We are forcing ZaDb but the font does not exist
         // so create a fake one
         // If refactoring this code remember to test issue #1642 afterwards
-        Dict *fontDict = new Dict(gfx->getXRef());
+        auto fontDict = std::make_unique<Dict>(gfx->getXRef());
         fontDict->add("BaseFont", Object(objName, "ZapfDingbats"));
         fontDict->add("Subtype", Object(objName, "Type1"));
 
-        Dict *fontsDict = new Dict(gfx->getXRef());
-        fontsDict->add("ZaDb", Object(fontDict));
+        auto fontsDict = std::make_unique<Dict>(gfx->getXRef());
+        fontsDict->add("ZaDb", Object(std::move(fontDict)));
 
-        Dict *dict = new Dict(gfx->getXRef());
-        dict->add("Font", Object(fontsDict));
-        gfx->pushResources(dict);
-        delete dict;
+        Dict dict(gfx->getXRef());
+        dict.add("Font", Object(std::move(fontsDict)));
+        gfx->pushResources(&dict);
     }
     gfx->drawAnnot(&obj, nullptr, color.get(), rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
     if (addedDingbatsResource) {
@@ -5687,40 +5689,40 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
             appearBuf->append("/MImg Do\n");
             appearBuf->append("Q\n");
 
-            Dict *imgDict = new Dict(gfx->getXRef());
+            auto imgDict = std::make_unique<Dict>(gfx->getXRef());
             imgDict->set("MImg", std::move(poster));
 
-            Dict *resDict = new Dict(gfx->getXRef());
-            resDict->set("XObject", Object(imgDict));
+            auto resDict = std::make_unique<Dict>(gfx->getXRef());
+            resDict->set("XObject", Object(std::move(imgDict)));
 
-            Dict *formDict = new Dict(gfx->getXRef());
+            auto formDict = std::make_unique<Dict>(gfx->getXRef());
             formDict->set("Length", Object(int(appearBuf->size())));
             formDict->set("Subtype", Object(objName, "Form"));
             formDict->set("Name", Object(objName, "FRM"));
-            auto *bboxArray = new Array(gfx->getXRef());
+            auto bboxArray = std::make_unique<Array>(gfx->getXRef());
             bboxArray->add(Object(0));
             bboxArray->add(Object(0));
             bboxArray->add(Object(width));
             bboxArray->add(Object(height));
-            formDict->set("BBox", Object(bboxArray));
-            auto *matrix = new Array(gfx->getXRef());
+            formDict->set("BBox", Object(std::move(bboxArray)));
+            auto matrix = std::make_unique<Array>(gfx->getXRef());
             matrix->add(Object(1));
             matrix->add(Object(0));
             matrix->add(Object(0));
             matrix->add(Object(1));
             matrix->add(Object(-width / 2));
             matrix->add(Object(-height / 2));
-            formDict->set("Matrix", Object(matrix));
-            formDict->set("Resources", Object(resDict));
+            formDict->set("Matrix", Object(std::move(matrix)));
+            formDict->set("Resources", Object(std::move(resDict)));
 
             std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->size() };
-            auto mStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(formDict));
+            auto mStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(std::move(formDict)));
 
-            Dict *dict = new Dict(gfx->getXRef());
+            auto dict = std::make_unique<Dict>(gfx->getXRef());
             dict->set("FRM", Object(std::move(mStream)));
 
-            Dict *resDict2 = new Dict(gfx->getXRef());
-            resDict2->set("XObject", Object(dict));
+            auto resDict2 = std::make_unique<Dict>(gfx->getXRef());
+            resDict2->set("XObject", Object(std::move(dict)));
 
             appearBuf = std::make_unique<GooString>();
             appearBuf->append("q\n");
@@ -5733,7 +5735,7 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
             appearBuf->append("Q\n");
 
             const std::array<double, 4> bbox = { 0, 0, static_cast<double>(width), static_cast<double>(height) };
-            appearance = createForm(appearBuf.get(), bbox, false, resDict2);
+            appearance = createForm(appearBuf.get(), bbox, false, std::move(resDict2));
         }
     }
 
@@ -5841,11 +5843,11 @@ void AnnotStamp::generateStampCustomAppearance()
     appearBuilder.append(" Do\n");
     appearBuilder.append("Q\n");
 
-    Dict *resDict = createResourcesDict(imgStrName.c_str(), Object(imgRef), "GS0", opacity, nullptr);
+    std::unique_ptr<Dict> resDict = createResourcesDict(imgStrName.c_str(), Object(imgRef), "GS0", opacity, nullptr);
 
     const std::array<double, 4> bboxArray = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
     const GooString *appearBuf = appearBuilder.buffer();
-    appearance = createForm(appearBuf, bboxArray, false, resDict);
+    appearance = createForm(appearBuf, bboxArray, false, std::move(resDict));
 
     if (updatedAppearanceStream == Ref::INVALID()) {
         updatedAppearanceStream = doc->getXRef()->addIndirectObject(appearance);
@@ -5854,7 +5856,7 @@ void AnnotStamp::generateStampCustomAppearance()
         doc->getXRef()->setModifiedObject(&obj1, updatedAppearanceStream);
     }
 
-    Object obj1 = Object(new Dict(doc->getXRef()));
+    Object obj1 = Object(std::make_unique<Dict>(doc->getXRef()));
     obj1.dictAdd("N", Object(updatedAppearanceStream));
     update("AP", std::move(obj1));
 }
@@ -5879,7 +5881,7 @@ Object AnnotStamp::getAppearanceResDict()
 
 void AnnotStamp::generateStampDefaultAppearance()
 {
-    Dict *extGStateDict = nullptr;
+    std::unique_ptr<Dict> extGStateDict;
     AnnotAppearanceBuilder defaultAppearanceBuilder;
 
     double stampUnscaledWidth;
@@ -5963,15 +5965,15 @@ void AnnotStamp::generateStampDefaultAppearance()
     defaultAppearanceBuilder.append(stampCode);
     defaultAppearanceBuilder.append("Q\n");
 
-    Dict *resDict = new Dict(doc->getXRef());
-    resDict->add("ExtGState", Object(extGStateDict));
+    auto resDict = std::make_unique<Dict>(doc->getXRef());
+    resDict->add("ExtGState", Object(std::move(extGStateDict)));
 
-    Object aStream = createForm(defaultAppearanceBuilder.buffer(), bboxArray, true, resDict);
+    Object aStream = createForm(defaultAppearanceBuilder.buffer(), bboxArray, true, std::move(resDict));
 
     AnnotAppearanceBuilder appearanceBuilder;
     appearanceBuilder.append("/GS0 gs\n/Fm0 Do");
     resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", opacity, nullptr);
-    appearance = createForm(appearanceBuilder.buffer(), bboxArray, false, resDict);
+    appearance = createForm(appearanceBuilder.buffer(), bboxArray, false, std::move(resDict));
 }
 
 void AnnotStamp::draw(Gfx *gfx, bool printing)
@@ -6164,13 +6166,13 @@ void AnnotGeometry::draw(Gfx *gfx, bool printing)
 
         const std::array<double, 4> bbox = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
         if (ca == 1) {
-            appearance = createForm(appearBuilder.buffer(), bbox, false, nullptr);
+            appearance = createForm(appearBuilder.buffer(), bbox, false, Object {});
         } else {
-            Object aStream = createForm(appearBuilder.buffer(), bbox, true, nullptr);
+            Object aStream = createForm(appearBuilder.buffer(), bbox, true, Object {});
 
             GooString appearBuf("/GS0 gs\n/Fm0 Do");
-            Dict *resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-            appearance = createForm(&appearBuf, bbox, false, resDict);
+            std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
+            appearance = createForm(&appearBuf, bbox, false, std::move(resDict));
         }
     }
 
@@ -6196,10 +6198,10 @@ AnnotPolygon::AnnotPolygon(PDFDoc *docA, PDFRectangle *rectA, AnnotSubtype subTy
     }
 
     // Store dummy path with one null vertex only
-    auto *a = new Array(doc->getXRef());
+    auto a = std::make_unique<Array>(doc->getXRef());
     a->add(Object(0.));
     a->add(Object(0.));
-    annotObj.dictSet("Vertices", Object(a));
+    annotObj.dictSet("Vertices", Object(std::move(a)));
 
     initialize(annotObj.getDict());
 }
@@ -6236,7 +6238,7 @@ void AnnotPolygon::initialize(Dict *dict)
     }
 
     obj1 = dict->lookup("LE");
-    if (obj1.isArray() && obj1.arrayGetLength() == 2) {
+    if (obj1.isArrayOfLength(2)) {
         Object obj2 = obj1.arrayGet(0);
         if (obj2.isName()) {
             startStyle = parseAnnotLineEndingStyle(obj2);
@@ -6308,7 +6310,7 @@ void AnnotPolygon::setType(AnnotSubtype new_type)
 
 void AnnotPolygon::setVertices(const AnnotPath &path)
 {
-    auto *a = new Array(doc->getXRef());
+    auto a = std::make_unique<Array>(doc->getXRef());
     for (int i = 0; i < path.getCoordsLength(); i++) {
         a->add(Object(path.getX(i)));
         a->add(Object(path.getY(i)));
@@ -6316,7 +6318,7 @@ void AnnotPolygon::setVertices(const AnnotPath &path)
 
     vertices = std::make_unique<AnnotPath>(*a);
 
-    update("Vertices", Object(a));
+    update("Vertices", Object(std::move(a)));
     invalidateAppearance();
 }
 
@@ -6325,11 +6327,11 @@ void AnnotPolygon::setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingS
     startStyle = start;
     endStyle = end;
 
-    auto *a = new Array(doc->getXRef());
+    auto a = std::make_unique<Array>(doc->getXRef());
     a->add(Object(objName, convertAnnotLineEndingStyle(startStyle)));
     a->add(Object(objName, convertAnnotLineEndingStyle(endStyle)));
 
-    update("LE", Object(a));
+    update("LE", Object(std::move(a)));
     invalidateAppearance();
 }
 
@@ -6491,13 +6493,13 @@ void AnnotPolygon::draw(Gfx *gfx, bool printing)
 
         const std::array<double, 4> bbox = appearBBox->getBBoxRect();
         if (ca == 1) {
-            appearance = createForm(appearBuilder.buffer(), bbox, false, nullptr);
+            appearance = createForm(appearBuilder.buffer(), bbox, false, Object {});
         } else {
-            Object aStream = createForm(appearBuilder.buffer(), bbox, true, nullptr);
+            Object aStream = createForm(appearBuilder.buffer(), bbox, true, Object {});
 
             GooString appearBuf("/GS0 gs\n/Fm0 Do");
-            Dict *resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-            appearance = createForm(&appearBuf, bbox, false, resDict);
+            std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
+            appearance = createForm(&appearBuf, bbox, false, std::move(resDict));
         }
     }
 
@@ -6566,12 +6568,12 @@ AnnotInk::AnnotInk(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rectA)
     annotObj.dictSet("Subtype", Object(objName, "Ink"));
 
     // Store dummy path with one null vertex only
-    auto *inkListArray = new Array(doc->getXRef());
-    auto *vList = new Array(doc->getXRef());
+    auto inkListArray = std::make_unique<Array>(doc->getXRef());
+    auto vList = std::make_unique<Array>(doc->getXRef());
     vList->add(Object(0.));
     vList->add(Object(0.));
-    inkListArray->add(Object(vList));
-    annotObj.dictSet("InkList", Object(inkListArray));
+    inkListArray->add(Object(std::move(vList)));
+    annotObj.dictSet("InkList", Object(std::move(inkListArray)));
 
     drawBelow = false;
 
@@ -6632,12 +6634,12 @@ void AnnotInk::initialize(Dict *dict)
 void AnnotInk::writeInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths, Array *dest_array)
 {
     for (const auto &path : paths) {
-        auto *a = new Array(doc->getXRef());
+        auto a = std::make_unique<Array>(doc->getXRef());
         for (int j = 0; j < path->getCoordsLength(); ++j) {
             a->add(Object(path->getX(j)));
             a->add(Object(path->getY(j)));
         }
-        dest_array->add(Object(a));
+        dest_array->add(Object(std::move(a)));
     }
 }
 
@@ -6658,11 +6660,11 @@ void AnnotInk::parseInkList(const Array &array)
 
 void AnnotInk::setInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths)
 {
-    auto *a = new Array(doc->getXRef());
-    writeInkList(paths, a);
+    auto a = std::make_unique<Array>(doc->getXRef());
+    writeInkList(paths, a.get());
 
     parseInkList(*a);
-    annotObj.dictSet("InkList", Object(a));
+    annotObj.dictSet("InkList", Object(std::move(a)));
     invalidateAppearance();
     generateInkAppearance();
 }
@@ -6686,6 +6688,9 @@ void AnnotInk::generateInkAppearance()
     appearBBox = std::make_unique<AnnotAppearanceBBox>(rect.get());
 
     AnnotAppearanceBuilder appearBuilder;
+    if (opacity != 1 || drawBelow) {
+        appearBuilder.append("/GS0 gs\n");
+    }
     appearBuilder.append("q\n");
 
     if (color) {
@@ -6727,14 +6732,10 @@ void AnnotInk::generateInkAppearance()
     const std::array<double, 4> bbox = appearBBox->getBBoxRect();
 
     if (opacity == 1 && !drawBelow) {
-        newAppearance = createForm(appearBuilder.buffer(), bbox, false, nullptr);
+        newAppearance = createForm(appearBuilder.buffer(), bbox, false, Object {});
     } else {
-        Object aStream = createForm(appearBuilder.buffer(), bbox, true, nullptr);
-
-        GooString appearBuf("/GS0 gs\n/Fm0 Do");
-
-        Dict *resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", opacity, drawBelow ? "Multiply" : nullptr);
-        newAppearance = createForm(&appearBuf, bbox, false, resDict);
+        std::unique_ptr<Dict> resDict = createResourcesDict(nullptr, Object::null(), "GS0", opacity, drawBelow ? "Multiply" : nullptr);
+        newAppearance = createForm(appearBuilder.buffer(), bbox, false, std::move(resDict));
     }
 
     /* If the annotation is drawn below (highlighting), we must save the
@@ -6799,9 +6800,9 @@ void AnnotFileAttachment::initialize(Dict *dict)
 
     Object objName = dict->lookup("Name");
     if (objName.isName()) {
-        name = std::make_unique<GooString>(objName.getNameString());
+        iconName = std::make_unique<GooString>(objName.getNameString());
     } else {
-        name = std::make_unique<GooString>("PushPin");
+        iconName = std::make_unique<GooString>("PushPin");
     }
 }
 
@@ -6937,26 +6938,26 @@ void AnnotFileAttachment::draw(Gfx *gfx, bool printing)
         } else {
             appearBuilder.append("1 1 1 rg\n");
         }
-        if (!name->compare("PushPin")) {
+        if (!iconName->compare("PushPin")) {
             appearBuilder.append(ANNOT_FILE_ATTACHMENT_AP_PUSHPIN);
-        } else if (!name->compare("Paperclip")) {
+        } else if (!iconName->compare("Paperclip")) {
             appearBuilder.append(ANNOT_FILE_ATTACHMENT_AP_PAPERCLIP);
-        } else if (!name->compare("Graph")) {
+        } else if (!iconName->compare("Graph")) {
             appearBuilder.append(ANNOT_FILE_ATTACHMENT_AP_GRAPH);
-        } else if (!name->compare("Tag")) {
+        } else if (!iconName->compare("Tag")) {
             appearBuilder.append(ANNOT_FILE_ATTACHMENT_AP_TAG);
         }
         appearBuilder.append("Q\n");
 
         static constexpr std::array<double, 4> bbox = { 0, 0, 24, 24 };
         if (ca == 1) {
-            appearance = createForm(appearBuilder.buffer(), bbox, false, nullptr);
+            appearance = createForm(appearBuilder.buffer(), bbox, false, Object {});
         } else {
-            Object aStream = createForm(appearBuilder.buffer(), bbox, true, nullptr);
+            Object aStream = createForm(appearBuilder.buffer(), bbox, true, Object {});
 
             GooString appearBuf("/GS0 gs\n/Fm0 Do");
-            Dict *resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-            appearance = createForm(&appearBuf, bbox, false, resDict);
+            std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
+            appearance = createForm(&appearBuf, bbox, false, std::move(resDict));
         }
     }
 
@@ -6998,9 +6999,9 @@ void AnnotSound::initialize(Dict *dict)
 
     obj1 = dict->lookup("Name");
     if (obj1.isName()) {
-        name = std::make_unique<GooString>(obj1.getName());
+        iconName = std::make_unique<GooString>(obj1.getName());
     } else {
-        name = std::make_unique<GooString>("Speaker");
+        iconName = std::make_unique<GooString>("Speaker");
     }
 }
 
@@ -7088,22 +7089,22 @@ void AnnotSound::draw(Gfx *gfx, bool printing)
         } else {
             appearBuilder.append("1 1 1 rg\n");
         }
-        if (!name->compare("Speaker")) {
+        if (!iconName->compare("Speaker")) {
             appearBuilder.append(ANNOT_SOUND_AP_SPEAKER);
-        } else if (!name->compare("Mic")) {
+        } else if (!iconName->compare("Mic")) {
             appearBuilder.append(ANNOT_SOUND_AP_MIC);
         }
         appearBuilder.append("Q\n");
 
         static constexpr std::array<double, 4> bbox = { 0, 0, 24, 24 };
         if (ca == 1) {
-            appearance = createForm(appearBuilder.buffer(), bbox, false, nullptr);
+            appearance = createForm(appearBuilder.buffer(), bbox, false, Object {});
         } else {
-            Object aStream = createForm(appearBuilder.buffer(), bbox, true, nullptr);
+            Object aStream = createForm(appearBuilder.buffer(), bbox, true, Object {});
 
             GooString appearBuf("/GS0 gs\n/Fm0 Do");
-            Dict *resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-            appearance = createForm(&appearBuf, bbox, false, resDict);
+            std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
+            appearance = createForm(&appearBuf, bbox, false, std::move(resDict));
         }
     }
 

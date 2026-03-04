@@ -1071,7 +1071,7 @@ gchar *poppler_annot_get_name(PopplerAnnot *poppler_annot)
 
     g_return_val_if_fail(POPPLER_IS_ANNOT(poppler_annot), NULL);
 
-    name = poppler_annot->annot->getName();
+    name = poppler_annot->annot->getUniqueName();
 
     return name ? _poppler_goo_string_to_utf8(name) : nullptr;
 }
@@ -2158,7 +2158,7 @@ gchar *poppler_annot_file_attachment_get_name(PopplerAnnotFileAttachment *popple
     g_return_val_if_fail(POPPLER_IS_ANNOT_FILE_ATTACHMENT(poppler_annot), NULL);
 
     annot = static_cast<AnnotFileAttachment *>(POPPLER_ANNOT(poppler_annot)->annot.get());
-    name = annot->getName();
+    name = annot->getIconName();
 
     return name ? _poppler_goo_string_to_utf8(name) : nullptr;
 }

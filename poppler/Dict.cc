@@ -23,7 +23,7 @@
 // Copyright (C) 2014 Scott West <scott.gregory.west@gmail.com>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -62,7 +62,7 @@ Dict::Dict(XRef *xrefA)
     sorted = false;
 }
 
-Dict::Dict(const Dict *dictA)
+Dict::Dict(const Dict *dictA, PrivateTag /*unused*/)
 {
     xref = dictA->xref;
     ref = 1;
@@ -75,10 +75,10 @@ Dict::Dict(const Dict *dictA)
     sorted = dictA->sorted.load();
 }
 
-Dict *Dict::copy(XRef *xrefA) const
+std::unique_ptr<Dict> Dict::copy(XRef *xrefA) const
 {
     dictLocker();
-    Dict *dictA = new Dict(this);
+    auto dictA = std::make_unique<Dict>(this);
     dictA->xref = xrefA;
     for (auto &entry : dictA->entries) {
         if (entry.second.getType() == objDict) {
@@ -88,10 +88,10 @@ Dict *Dict::copy(XRef *xrefA) const
     return dictA;
 }
 
-Dict *Dict::deepCopy() const
+std::unique_ptr<Dict> Dict::deepCopy() const
 {
     dictLocker();
-    Dict *dictA = new Dict(xref);
+    auto dictA = std::make_unique<Dict>(xref);
 
     dictA->entries.reserve(entries.size());
     for (const auto &entry : entries) {

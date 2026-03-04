@@ -17,6 +17,7 @@
 // Copyright (C) 2019, 2023 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2022 crt <chluo@cse.cuhk.edu.hk>
 // Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Adam Sampson <ats@offog.org>
 //
 //========================================================================
 
@@ -38,7 +39,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
     Object mergeNameArray = mergeNameTree->lookup("Names");
     Object srcNameArray = srcNameTree->lookup("Names");
     if (mergeNameArray.isArray() && srcNameArray.isArray()) {
-        auto *newNameArray = new Array(srcXRef);
+        auto newNameArray = std::make_unique<Array>(srcXRef);
         int j = 0;
         for (int i = 0; i < srcNameArray.arrayGetLength() - 1; i += 2) {
             const Object &key = srcNameArray.arrayGetNF(i);
@@ -74,10 +75,10 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
             }
             j += 2;
         }
-        srcNameTree->set("Names", Object(newNameArray));
+        srcNameTree->set("Names", Object(std::move(newNameArray)));
         doc->markPageObjects(mergeNameTree, srcXRef, countRef, numOffset, oldRefNum, newRefNum);
     } else if (srcNameArray.isNull() && mergeNameArray.isArray()) {
-        auto *newNameArray = new Array(srcXRef);
+        auto newNameArray = std::make_unique<Array>(srcXRef);
         for (int i = 0; i < mergeNameArray.arrayGetLength() - 1; i += 2) {
             const Object &key = mergeNameArray.arrayGetNF(i);
             const Object &value = mergeNameArray.arrayGetNF(i + 1);
@@ -86,7 +87,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
                 newNameArray->add(Object(Ref { .num = value.getRef().num + numOffset, .gen = value.getRef().gen }));
             }
         }
-        srcNameTree->add("Names", Object(newNameArray));
+        srcNameTree->add("Names", Object(std::move(newNameArray)));
         doc->markPageObjects(mergeNameTree, srcXRef, countRef, numOffset, oldRefNum, newRefNum);
     }
 }
@@ -100,7 +101,7 @@ static void doMergeNameDict(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
         if (srcNameTree.isDict() && mergeNameTree.isDict()) {
             doMergeNameTree(doc, srcXRef, countRef, oldRefNum, newRefNum, srcNameTree.getDict(), mergeNameTree.getDict(), numOffset);
         } else if (srcNameTree.isNull() && mergeNameTree.isDict()) {
-            Object newNameTree(new Dict(srcXRef));
+            Object newNameTree(std::make_unique<Dict>(srcXRef));
             doMergeNameTree(doc, srcXRef, countRef, oldRefNum, newRefNum, newNameTree.getDict(), mergeNameTree.getDict(), numOffset);
             srcNameDict->add(key, std::move(newNameTree));
         }
@@ -227,12 +228,12 @@ int main(int argc, char *argv[])
         if (!names.isNull() && names.isDict() && refPage) {
             docs[0]->markPageObjects(names.getDict(), yRef, countRef, 0, refPage->num, refPage->num);
         }
-        if (intents.isArray() && intents.arrayGetLength() > 0) {
+        if (intents.isArrayOfLengthAtLeast(1)) {
             for (size_t i = 1; i < docs.size(); i++) {
                 Object pagecatObj = docs[i]->getXRef()->getCatalog();
                 Dict *pagecatDict = pagecatObj.getDict();
                 Object pageintents = pagecatDict->lookup("OutputIntents");
-                if (pageintents.isArray() && pageintents.arrayGetLength() > 0) {
+                if (pageintents.isArrayOfLengthAtLeast(1)) {
                     for (int j = intents.arrayGetLength() - 1; j >= 0; j--) {
                         Object intent = intents.arrayGet(j, 0);
                         if (intent.isDict()) {
@@ -271,7 +272,7 @@ int main(int argc, char *argv[])
                 }
             }
         }
-        if (intents.isArray() && intents.arrayGetLength() > 0) {
+        if (intents.isArrayOfLengthAtLeast(1)) {
             for (int j = intents.arrayGetLength() - 1; j >= 0; j--) {
                 Object intent = intents.arrayGet(j, 0);
                 if (intent.isDict()) {
@@ -329,7 +330,7 @@ int main(int argc, char *argv[])
         Object pageNames = pageCatDict->lookup("Names");
         if (!pageNames.isNull() && pageNames.isDict()) {
             if (!names.isDict()) {
-                names = Object(new Dict(yRef));
+                names = Object(std::make_unique<Dict>(yRef));
             }
             doMergeNameDict(docs[i].get(), yRef, countRef, 0, 0, names.getDict(), pageNames.getDict(), numOffset);
         }
@@ -356,7 +357,7 @@ int main(int argc, char *argv[])
     outStr->printf("%d 0 obj\n", rootNum);
     outStr->printf("<< /Type /Catalog /Pages %d 0 R", rootNum + 1);
     // insert OutputIntents
-    if (intents.isArray() && intents.arrayGetLength() > 0) {
+    if (intents.isArrayOfLengthAtLeast(1)) {
         outStr->printf(" /OutputIntents [");
         for (int j = 0; j < intents.arrayGetLength(); j++) {
             Object intent = intents.arrayGet(j, 0);

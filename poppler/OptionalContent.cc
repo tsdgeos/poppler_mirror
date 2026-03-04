@@ -10,6 +10,7 @@
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2026 Adam Sampson <ats@offog.org>
 //
 // Released under the GPL (version 2, or later, at your option)
 //
@@ -191,7 +192,7 @@ bool OCGs::evalOCVisibilityExpr(const Object *expr, int recursion) const
         }
     }
     Object expr2 = expr->fetch(m_xref);
-    if (!expr2.isArray() || expr2.arrayGetLength() < 1) {
+    if (!expr2.isArrayOfLengthAtLeast(1)) {
         error(errSyntaxError, -1, "Invalid optional content visibility expression");
         return true;
     }

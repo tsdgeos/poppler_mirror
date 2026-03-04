@@ -4,7 +4,8 @@
 //
 // Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021, 2025 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Malika Asman <asmanodeny@gmail.com>
 //
 // Licensed under GPLv2 or later
 //
@@ -17,34 +18,25 @@
 #include "Dict.h"
 
 AnnotStampImageHelper::AnnotStampImageHelper(PDFDoc *docA, int widthA, int heightA, ColorSpace colorSpace, int bitsPerComponent, char *data, int dataLength)
+    : AnnotStampImageHelper(docA, widthA, heightA, colorSpace, bitsPerComponent, data, dataLength, Ref::INVALID())
 {
-    initialize(docA, widthA, heightA, colorSpace, bitsPerComponent, data, dataLength);
 }
 
 AnnotStampImageHelper::AnnotStampImageHelper(PDFDoc *docA, int widthA, int heightA, ColorSpace colorSpace, int bitsPerComponent, char *data, int dataLength, Ref softMaskRef)
 {
-    initialize(docA, widthA, heightA, colorSpace, bitsPerComponent, data, dataLength);
-
-    sMaskRef = softMaskRef;
-    Dict *dict = imgObj.streamGetDict();
-    dict->add("SMask", Object(sMaskRef));
-}
-
-void AnnotStampImageHelper::initialize(PDFDoc *docA, int widthA, int heightA, ColorSpace colorSpace, int bitsPerComponent, char *data, int dataLength)
-{
     doc = docA;
     width = widthA;
     height = heightA;
-    sMaskRef = Ref::INVALID();
+    sMaskRef = softMaskRef;
 
-    Dict *dict = new Dict(docA->getXRef());
+    auto dict = std::make_unique<Dict>(docA->getXRef());
     dict->add("Type", Object(objName, "XObject"));
     dict->add("Subtype", Object(objName, "Image"));
     dict->add("Width", Object(width));
     dict->add("Height", Object(height));
     dict->add("ImageMask", Object(false));
     dict->add("BitsPerComponent", Object(bitsPerComponent));
-    dict->add("Length", Object(dataLength));
+    // Note: "Length" is added automatically by addStreamObject
 
     switch (colorSpace) {
     case ColorSpace::DeviceGray:
@@ -58,11 +50,14 @@ void AnnotStampImageHelper::initialize(PDFDoc *docA, int widthA, int heightA, Co
         break;
     }
 
+    // Add soft mask reference if provided and must be done before addStreamObject
+    if (sMaskRef != Ref::INVALID()) {
+        dict->add("SMask", Object(sMaskRef));
+    }
+
     std::vector<char> dataCopied { data, data + dataLength };
 
-    auto dataStream = std::make_unique<AutoFreeMemStream>(std::move(dataCopied), Object(dict));
-    imgObj = Object(std::move(dataStream));
-    ref = doc->getXRef()->addIndirectObject(imgObj);
+    ref = doc->getXRef()->addStreamObject(std::move(dict), std::move(dataCopied), StreamCompression::Compress);
 }
 
 void AnnotStampImageHelper::removeAnnotStampImageObject()

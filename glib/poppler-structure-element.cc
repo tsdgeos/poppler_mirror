@@ -3,6 +3,7 @@
  * Copyright (C) 2013 Igalia S.L.
  * Copyright (C) 2018, 2025 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2026 Adam Sampson <ats@offog.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -685,7 +686,7 @@ void poppler_structure_element_iter_free(PopplerStructureElementIter *iter)
  * }
  * </programlisting></informalexample>
  *
- * Return value: (transfer full): a new #PopplerStructureElementIter, or %NULL if document
+ * Return value: (nullable) (transfer full): a new #PopplerStructureElementIter, or %NULL if document
  *    doesn't have structure tree.
  *
  * Since: 0.26
@@ -1149,7 +1150,7 @@ static inline void convert_doubles_array(const Object *object, gdouble **values,
 static inline void convert_color(const Object *object, PopplerColor *color)
 {
     g_assert(color != nullptr);
-    g_assert(object->isArray() && object->arrayGetLength() != 3);
+    g_assert(object->isArrayOfLength(3));
 
     color->red = object->arrayGet(0).getNum() * 65535;
     color->green = object->arrayGet(1).getNum() * 65535;

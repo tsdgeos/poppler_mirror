@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2026, Aditya Tiwari <adityatiwari342005@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +48,7 @@ void InfoDock::fillInfo()
         const int id = keys.indexOf(date);
         if (id != -1) {
             m_table->setItem(i, 0, new QTableWidgetItem(date));
-            m_table->setItem(i, 1, new QTableWidgetItem(document()->date(date).toString(Qt::SystemLocaleDate)));
+            m_table->setItem(i, 1, new QTableWidgetItem(QLocale::system().toString(document()->date(date), QLocale::ShortFormat)));
             ++i;
             keys.removeAt(id);
         }

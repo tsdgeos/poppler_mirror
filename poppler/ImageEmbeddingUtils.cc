@@ -6,7 +6,7 @@
 // Copyright (C) 2021, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2021 Marco Genasci <fedeliallalinea@gmail.com>
 // Copyright (C) 2023 Jordan Abrahams-Whitehead <ajordanr@google.com>
-// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // This file is licensed under the GPLv2 or later
 //
@@ -58,9 +58,9 @@ protected:
     ImageEmbedder(const int width, const int height) : m_width(width), m_height(height) { }
 
     // Creates an object of type XObject. You own the returned ptr.
-    static Dict *createImageDict(XRef *xref, const char *colorSpace, const int width, const int height, const int bitsPerComponent)
+    static std::unique_ptr<Dict> createImageDict(XRef *xref, const char *colorSpace, const int width, const int height, const int bitsPerComponent)
     {
-        Dict *imageDict = new Dict(xref);
+        auto imageDict = std::make_unique<Dict>(xref);
         imageDict->add("Type", Object(objName, "XObject"));
         imageDict->add("Subtype", Object(objName, "Image"));
         imageDict->add("ColorSpace", Object(objName, colorSpace));
@@ -287,13 +287,13 @@ Ref PngEmbedder::embedImage(XRef *xref)
 
     // Create a mask XObject and a main XObject.
     const char *colorSpace = ((m_type == PNG_COLOR_TYPE_GRAY) || (m_type == PNG_COLOR_TYPE_GRAY_ALPHA)) ? DEVICE_GRAY : DEVICE_RGB;
-    Dict *baseImageDict = createImageDict(xref, colorSpace, m_width, m_height, m_bitDepth);
+    std::unique_ptr<Dict> baseImageDict = createImageDict(xref, colorSpace, m_width, m_height, m_bitDepth);
     if (m_hasAlpha) {
-        Dict *maskImageDict = createImageDict(xref, DEVICE_GRAY, m_width, m_height, m_bitDepth);
-        Ref maskImageRef = xref->addStreamObject(maskImageDict, std::move(maskBuffer), StreamCompression::Compress);
+        std::unique_ptr<Dict> maskImageDict = createImageDict(xref, DEVICE_GRAY, m_width, m_height, m_bitDepth);
+        Ref maskImageRef = xref->addStreamObject(std::move(maskImageDict), std::move(maskBuffer), StreamCompression::Compress);
         baseImageDict->add("SMask", Object(maskImageRef));
     }
-    return xref->addStreamObject(baseImageDict, std::move(mainBuffer), StreamCompression::Compress);
+    return xref->addStreamObject(std::move(baseImageDict), std::move(mainBuffer), StreamCompression::Compress);
 }
 #endif
 
@@ -364,9 +364,9 @@ Ref JpegEmbedder::embedImage(XRef *xref)
     if (m_fileContent.empty()) {
         return Ref::INVALID();
     }
-    Dict *baseImageDict = createImageDict(xref, DEVICE_RGB, m_width, m_height, 8);
+    std::unique_ptr<Dict> baseImageDict = createImageDict(xref, DEVICE_RGB, m_width, m_height, 8);
     baseImageDict->add("Filter", Object(objName, "DCTDecode"));
-    Ref baseImageRef = xref->addStreamObject(baseImageDict, std::move(m_fileContent), StreamCompression::None);
+    Ref baseImageRef = xref->addStreamObject(std::move(baseImageDict), std::move(m_fileContent), StreamCompression::None);
     return baseImageRef;
 }
 #endif

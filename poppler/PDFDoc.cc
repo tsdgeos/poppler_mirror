@@ -45,7 +45,7 @@
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
-// Copyright (C) 2020 Adam Sampson <ats@offog.org>
+// Copyright (C) 2020, 2026 Adam Sampson <ats@offog.org>
 // Copyright (C) 2021-2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021 RM <rm+git@arcsin.org>
@@ -776,7 +776,7 @@ bool PDFDoc::getID(GooString *permanent_id, GooString *update_id) const
 {
     Object obj = xref->getTrailerDict()->dictLookup("ID");
 
-    if (obj.isArray() && obj.arrayGetLength() == 2) {
+    if (obj.isArrayOfLength(2)) {
         if (permanent_id) {
             Object obj2 = obj.arrayGet(0);
             if (obj2.isString()) {
@@ -1532,7 +1532,7 @@ void PDFDoc::writeObjectFooter(OutStream *outStr)
 
 Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxRef, Ref *root, XRef *xRef, const char *fileName, Goffset fileSize)
 {
-    Dict *trailerDict = new Dict(xRef);
+    auto trailerDict = std::make_unique<Dict>(xRef);
     trailerDict->set("Size", Object(uxrefSize));
 
     // build a new ID, as recommended in the reference, uses:
@@ -1588,18 +1588,18 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
                 error(errSyntaxWarning, -1, "PDFDoc::createTrailerDict original file's ID entry isn't an array. Trying to continue");
             }
         } else {
-            auto *array = new Array(xRef);
+            auto array = std::make_unique<Array>(xRef);
             // Get the first part of the ID
             array->add(obj4.arrayGet(0));
             array->add(Object(std::make_unique<GooString>((const char *)digest, 16)));
-            trailerDict->set("ID", Object(array));
+            trailerDict->set("ID", Object(std::move(array)));
         }
     } else {
         // new file => same values for the two identifiers
-        auto *array = new Array(xRef);
+        auto array = std::make_unique<Array>(xRef);
         array->add(Object(std::make_unique<GooString>((const char *)digest, 16)));
         array->add(Object(std::make_unique<GooString>((const char *)digest, 16)));
-        trailerDict->set("ID", Object(array));
+        trailerDict->set("ID", Object(std::move(array)));
     }
 
     trailerDict->set("Root", Object(*root));
@@ -1615,7 +1615,7 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
         }
     }
 
-    return Object(trailerDict);
+    return Object(std::move(trailerDict));
 }
 
 void PDFDoc::writeXRefTableTrailer(Object &&trailerDict, XRef *uxref, bool writeAllEntries, Goffset uxrefOffset, OutStream *outStr, XRef *xRef)
@@ -1791,21 +1791,21 @@ bool PDFDoc::replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBo
     pageDict->remove("BleedBox");
     pageDict->remove("TrimBox");
     pageDict->remove("Rotate");
-    auto *mediaBoxArray = new Array(getXRef());
+    auto mediaBoxArray = std::make_unique<Array>(getXRef());
     mediaBoxArray->add(Object(mediaBox->x1));
     mediaBoxArray->add(Object(mediaBox->y1));
     mediaBoxArray->add(Object(mediaBox->x2));
     mediaBoxArray->add(Object(mediaBox->y2));
-    Object mediaBoxObject(mediaBoxArray);
+    Object mediaBoxObject(std::move(mediaBoxArray));
     Object trimBoxObject = mediaBoxObject.copy();
     pageDict->add("MediaBox", std::move(mediaBoxObject));
     if (cropBox != nullptr) {
-        auto *cropBoxArray = new Array(getXRef());
+        auto cropBoxArray = std::make_unique<Array>(getXRef());
         cropBoxArray->add(Object(cropBox->x1));
         cropBoxArray->add(Object(cropBox->y1));
         cropBoxArray->add(Object(cropBox->x2));
         cropBoxArray->add(Object(cropBox->y2));
-        Object cropBoxObject(cropBoxArray);
+        Object cropBoxObject(std::move(cropBoxArray));
         trimBoxObject = cropBoxObject.copy();
         pageDict->add("CropBox", std::move(cropBoxObject));
     }
@@ -2203,17 +2203,17 @@ std::variant<PDFDoc::SignatureData, CryptoSign::SigningErrorMessage> PDFDoc::cre
 
     Form *form = catalog->getCreateForm();
 
-    Object annotObj = Object(new Dict(getXRef()));
+    Object annotObj = Object(std::make_unique<Dict>(getXRef()));
     annotObj.dictSet("Type", Object(objName, "Annot"));
     annotObj.dictSet("Subtype", Object(objName, "Widget"));
     annotObj.dictSet("FT", Object(objName, "Sig"));
     annotObj.dictSet("T", Object(std::move(partialFieldName)));
-    auto *rectArray = new Array(getXRef());
+    auto rectArray = std::make_unique<Array>(getXRef());
     rectArray->add(Object(rect.x1));
     rectArray->add(Object(rect.y1));
     rectArray->add(Object(rect.x2));
     rectArray->add(Object(rect.y2));
-    annotObj.dictSet("Rect", Object(rectArray));
+    annotObj.dictSet("Rect", Object(std::move(rectArray)));
 
     if (!signatureText.empty() || !signatureTextLeft.empty()) {
         const std::string pdfFontName = form->findPdfFontNameToUseForSigning();

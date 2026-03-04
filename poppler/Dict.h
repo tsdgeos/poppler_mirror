@@ -22,6 +22,7 @@
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
+// Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -47,13 +48,17 @@
 
 class POPPLER_PRIVATE_EXPORT Dict
 {
+    class PrivateTag
+    {
+    };
+
 public:
     // Constructor.
     explicit Dict(XRef *xrefA);
-    explicit Dict(const Dict *dictA);
-    Dict *copy(XRef *xrefA) const;
+    explicit Dict(const Dict *dictA, PrivateTag /*unused*/ = {});
+    std::unique_ptr<Dict> copy(XRef *xrefA) const;
 
-    Dict *deepCopy() const;
+    std::unique_ptr<Dict> deepCopy() const;
 
     Dict(const Dict &) = delete;
     Dict &operator=(const Dict &) = delete;

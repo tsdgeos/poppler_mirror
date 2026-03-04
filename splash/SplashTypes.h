@@ -34,11 +34,7 @@
 // coordinates
 //------------------------------------------------------------------------
 
-#if USE_FLOAT
-using SplashCoord = float;
-#else
 using SplashCoord = double;
-#endif
 
 //------------------------------------------------------------------------
 // antialiasing

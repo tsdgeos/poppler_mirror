@@ -47,10 +47,10 @@ Array::Array(XRef *xrefA)
 
 Array::~Array() = default;
 
-Array *Array::copy(XRef *xrefA) const
+std::unique_ptr<Array> Array::copy(XRef *xrefA) const
 {
     arrayLocker();
-    auto *a = new Array(xrefA);
+    auto a = std::make_unique<Array>(xrefA);
     a->elems.reserve(elems.size());
     for (const auto &elem : elems) {
         a->elems.push_back(elem.copy());
@@ -58,10 +58,10 @@ Array *Array::copy(XRef *xrefA) const
     return a;
 }
 
-Array *Array::deepCopy() const
+std::unique_ptr<Array> Array::deepCopy() const
 {
     arrayLocker();
-    auto *a = new Array(xref);
+    auto a = std::make_unique<Array>(xref);
     a->elems.reserve(elems.size());
     for (const auto &elem : elems) {
         a->elems.push_back(elem.deepCopy());

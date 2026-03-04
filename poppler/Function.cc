@@ -22,6 +22,7 @@
 // Copyright (C) 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Adam Sampson <ats@offog.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -248,7 +249,7 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) : cacheOut {}
 
     //----- Size
     obj1 = dict->lookup("Size");
-    if (!obj1.isArray() || obj1.arrayGetLength() != m) {
+    if (!obj1.isArrayOfLength(m)) {
         error(errSyntaxError, -1, "Function has missing or invalid size array");
         return;
     }
@@ -298,7 +299,7 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) : cacheOut {}
 
     //----- Encode
     obj1 = dict->lookup("Encode");
-    if (obj1.isArray() && obj1.arrayGetLength() == 2 * m) {
+    if (obj1.isArrayOfLength(2 * m)) {
         for (i = 0; i < m; ++i) {
             Object obj2 = obj1.arrayGet(2 * i);
             if (!obj2.isNum()) {
@@ -329,7 +330,7 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) : cacheOut {}
 
     //----- Decode
     obj1 = dict->lookup("Decode");
-    if (obj1.isArray() && obj1.arrayGetLength() == 2 * n) {
+    if (obj1.isArrayOfLength(2 * n)) {
         for (i = 0; i < n; ++i) {
             Object obj2 = obj1.arrayGet(2 * i);
             if (!obj2.isNum()) {
@@ -711,7 +712,7 @@ StitchingFunction::StitchingFunction(Dict *dict, RefRecursionChecker &usedParent
 
     //----- Bounds
     obj1 = dict->lookup("Bounds");
-    if (!obj1.isArray() || obj1.arrayGetLength() != k - 1) {
+    if (!obj1.isArrayOfLength(k - 1)) {
         error(errSyntaxError, -1, "Missing or invalid 'Bounds' entry in stitching function");
         return;
     }
@@ -728,7 +729,7 @@ StitchingFunction::StitchingFunction(Dict *dict, RefRecursionChecker &usedParent
 
     //----- Encode
     obj1 = dict->lookup("Encode");
-    if (!obj1.isArray() || obj1.arrayGetLength() != 2 * k) {
+    if (!obj1.isArrayOfLength(2 * k)) {
         error(errSyntaxError, -1, "Missing or invalid 'Encode' entry in stitching function");
         return;
     }

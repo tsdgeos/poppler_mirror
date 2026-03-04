@@ -12,6 +12,7 @@
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Adam Sampson <ats@offog.org>
 //
 //========================================================================
 
@@ -109,7 +110,7 @@ static bool isTableScopeName(Object *value)
 
 static bool isRGBColor(Object *value)
 {
-    if (!value->isArray() || value->arrayGetLength() != 3) {
+    if (!value->isArrayOfLength(3)) {
         return false;
     }
 

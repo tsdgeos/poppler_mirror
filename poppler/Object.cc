@@ -17,7 +17,7 @@
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Jakub Alba <jakubalba@gmail.com>
-// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -89,10 +89,10 @@ Object Object::deepCopy() const
         obj.cString = copyString(cString);
         break;
     case objArray:
-        obj.array = array->deepCopy();
+        obj.array = array->deepCopy().release();
         break;
     case objDict:
-        obj.dict = dict->deepCopy();
+        obj.dict = dict->deepCopy().release();
         break;
     case objStream:
         stream->incRef();
