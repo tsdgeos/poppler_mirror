@@ -4760,6 +4760,11 @@ void Gfx::doForm(Object *str)
         error(errSyntaxError, getPos(), "Unknown form type");
     }
 
+    Object lengthObj = dict->lookup("Length");
+    if (lengthObj.isInt() && (lengthObj.getInt() == 0)) {
+        return;
+    }
+
     // check for optional content key
     ocSaved = ocState;
     const Object &objOC = dict->lookupNF("OC");
