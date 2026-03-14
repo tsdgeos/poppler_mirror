@@ -19,7 +19,7 @@
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2008 Adam Batkin <adam@batkin.net>
 // Copyright (C) 2008, 2010, 2012, 2013 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2009, 2012, 2014, 2017, 2018, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2014, 2017, 2018, 2021, 2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2013, 2018 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -62,31 +62,19 @@ using namespace std::string_literals;
 
 namespace {
 
-template<typename...>
-struct void_type
+template<typename Stat>
+const struct timespec &mtim(const Stat &stbuf)
+    requires requires { stbuf.st_mtim; }
 {
-    using type = void;
-};
-
-template<typename... Args>
-using void_t = typename void_type<Args...>::type;
-
-template<typename Stat, typename = void_t<>>
-struct StatMtim
-{
-    static const struct timespec &value(const Stat &stbuf) { return stbuf.st_mtim; }
-};
+    return stbuf.st_mtim;
+}
 
 // Mac OS X uses a different field name than POSIX and this detects it.
 template<typename Stat>
-struct StatMtim<Stat, void_t<decltype(Stat::st_mtimespec)>>
+const struct timespec &mtim(const Stat &stbuf)
+    requires requires { stbuf.st_mtimespec; }
 {
-    static const struct timespec &value(const Stat &stbuf) { return stbuf.st_mtimespec; }
-};
-
-inline const struct timespec &mtim(const struct stat &stbuf)
-{
-    return StatMtim<struct stat>::value(stbuf);
+    return stbuf.st_mtimespec;
 }
 
 }
