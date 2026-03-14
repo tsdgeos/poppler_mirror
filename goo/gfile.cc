@@ -64,17 +64,15 @@ namespace {
 
 template<typename Stat>
 const struct timespec &mtim(const Stat &stbuf)
-    requires requires { stbuf.st_mtim; }
 {
-    return stbuf.st_mtim;
-}
-
-// Mac OS X uses a different field name than POSIX and this detects it.
-template<typename Stat>
-const struct timespec &mtim(const Stat &stbuf)
-    requires requires { stbuf.st_mtimespec; }
-{
-    return stbuf.st_mtimespec;
+    if constexpr (requires { stbuf.st_mtim; }) {
+        return stbuf.st_mtim;
+    } else if constexpr (requires { stbuf.st_mtimespec; }) {
+        // Mac OS X uses a different field name than POSIX and this makes it work
+        return stbuf.st_mtimespec;
+    } else {
+        static_assert(false);
+    }
 }
 
 }
