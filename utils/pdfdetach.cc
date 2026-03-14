@@ -58,19 +58,19 @@ static char userPassword[33] = "\001";
 static bool printVersion = false;
 static bool printHelp = false;
 
-static const ArgDesc argDesc[] = { { "-list", argFlag, &doList, 0, "list all embedded files" },
-                                   { "-save", argInt, &saveNum, 0, "save the specified embedded file (file number)" },
-                                   { "-savefile", argString, &saveFile, sizeof(saveFile), "save the specified embedded file (file name)" },
-                                   { "-saveall", argFlag, &saveAll, 0, "save all embedded files" },
-                                   { "-o", argString, savePath, sizeof(savePath), "file name for the saved embedded file" },
-                                   { "-enc", argString, textEncName, sizeof(textEncName), "output text encoding name" },
-                                   { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
-                                   { "-upw", argString, userPassword, sizeof(userPassword), "user password (for encrypted files)" },
-                                   { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
-                                   { "-h", argFlag, &printHelp, 0, "print usage information" },
-                                   { "-help", argFlag, &printHelp, 0, "print usage information" },
-                                   { "--help", argFlag, &printHelp, 0, "print usage information" },
-                                   { "-?", argFlag, &printHelp, 0, "print usage information" },
+static const ArgDesc argDesc[] = { { .arg = "-list", .kind = argFlag, .val = &doList, .size = 0, .usage = "list all embedded files" },
+                                   { .arg = "-save", .kind = argInt, .val = &saveNum, .size = 0, .usage = "save the specified embedded file (file number)" },
+                                   { .arg = "-savefile", .kind = argString, .val = &saveFile, .size = sizeof(saveFile), .usage = "save the specified embedded file (file name)" },
+                                   { .arg = "-saveall", .kind = argFlag, .val = &saveAll, .size = 0, .usage = "save all embedded files" },
+                                   { .arg = "-o", .kind = argString, .val = savePath, .size = sizeof(savePath), .usage = "file name for the saved embedded file" },
+                                   { .arg = "-enc", .kind = argString, .val = textEncName, .size = sizeof(textEncName), .usage = "output text encoding name" },
+                                   { .arg = "-opw", .kind = argString, .val = ownerPassword, .size = sizeof(ownerPassword), .usage = "owner password (for encrypted files)" },
+                                   { .arg = "-upw", .kind = argString, .val = userPassword, .size = sizeof(userPassword), .usage = "user password (for encrypted files)" },
+                                   { .arg = "-v", .kind = argFlag, .val = &printVersion, .size = 0, .usage = "print copyright and version info" },
+                                   { .arg = "-h", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+                                   { .arg = "-help", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+                                   { .arg = "--help", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+                                   { .arg = "-?", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
                                    {} };
 
 static std::string getFileName(const GooString &s, const UnicodeMap &uMap)

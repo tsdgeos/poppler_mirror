@@ -2733,7 +2733,7 @@ static void poppler_annot_ink_init(PopplerAnnotInk * /*poppler_annot*/) { }
 void poppler_annot_ink_set_ink_list(PopplerAnnotInk *annot, PopplerPath **ink_list, gsize n_paths)
 {
     double border_width;
-    PopplerRectangle r = { G_MAXDOUBLE, G_MAXDOUBLE, 0, 0 };
+    PopplerRectangle r = { .x1 = G_MAXDOUBLE, .y1 = G_MAXDOUBLE, .x2 = 0, .y2 = 0 };
     const PDFRectangle *crop_box;
     const PDFRectangle zerobox = PDFRectangle();
     Page *page = nullptr;

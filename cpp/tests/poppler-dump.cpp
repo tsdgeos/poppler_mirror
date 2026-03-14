@@ -65,22 +65,22 @@ bool show_text_list = false;
 bool show_text_list_with_font = false;
 poppler::page::text_layout_enum show_text_layout = poppler::page::physical_layout;
 
-static const ArgDesc the_args[] = { { "--show-all", argFlag, &show_all, 0, "show all the available information" },
-                                    { "--show-info", argFlag, &show_info, 0, "show general document information" },
-                                    { "--show-perm", argFlag, &show_perm, 0, "show document permissions" },
-                                    { "--show-metadata", argFlag, &show_metadata, 0, "show document metadata" },
-                                    { "--show-toc", argFlag, &show_toc, 0, "show the TOC" },
-                                    { "--show-fonts", argFlag, &show_fonts, 0, "show the document fonts" },
-                                    { "--show-embedded-files", argFlag, &show_embedded_files, 0, "show the document-level embedded files" },
-                                    { "--show-pages", argFlag, &show_pages, 0, "show pages information" },
-                                    { "--show-destinations", argFlag, &show_destinations, 0, "show named destinations" },
-                                    { "--show-text", argString, &show_text, sizeof(show_text), "show text (physical|raw|none) extracted from all pages" },
-                                    { "--show-text-list", argFlag, &show_text_list, 0, "show text list (experimental)" },
-                                    { "--show-text-list-with-font", argFlag, &show_text_list_with_font, 0, "show text list with font info (experimental)" },
-                                    { "-h", argFlag, &show_help, 0, "print usage information" },
-                                    { "--help", argFlag, &show_help, 0, "print usage information" },
-                                    { "--version", argFlag, &show_version, 0, "print poppler version" },
-                                    { nullptr, argFlag, nullptr, 0, nullptr } };
+static const ArgDesc the_args[] = { { .arg = "--show-all", .kind = argFlag, .val = &show_all, .size = 0, .usage = "show all the available information" },
+                                    { .arg = "--show-info", .kind = argFlag, .val = &show_info, .size = 0, .usage = "show general document information" },
+                                    { .arg = "--show-perm", .kind = argFlag, .val = &show_perm, .size = 0, .usage = "show document permissions" },
+                                    { .arg = "--show-metadata", .kind = argFlag, .val = &show_metadata, .size = 0, .usage = "show document metadata" },
+                                    { .arg = "--show-toc", .kind = argFlag, .val = &show_toc, .size = 0, .usage = "show the TOC" },
+                                    { .arg = "--show-fonts", .kind = argFlag, .val = &show_fonts, .size = 0, .usage = "show the document fonts" },
+                                    { .arg = "--show-embedded-files", .kind = argFlag, .val = &show_embedded_files, .size = 0, .usage = "show the document-level embedded files" },
+                                    { .arg = "--show-pages", .kind = argFlag, .val = &show_pages, .size = 0, .usage = "show pages information" },
+                                    { .arg = "--show-destinations", .kind = argFlag, .val = &show_destinations, .size = 0, .usage = "show named destinations" },
+                                    { .arg = "--show-text", .kind = argString, .val = &show_text, .size = sizeof(show_text), .usage = "show text (physical|raw|none) extracted from all pages" },
+                                    { .arg = "--show-text-list", .kind = argFlag, .val = &show_text_list, .size = 0, .usage = "show text list (experimental)" },
+                                    { .arg = "--show-text-list-with-font", .kind = argFlag, .val = &show_text_list_with_font, .size = 0, .usage = "show text list with font info (experimental)" },
+                                    { .arg = "-h", .kind = argFlag, .val = &show_help, .size = 0, .usage = "print usage information" },
+                                    { .arg = "--help", .kind = argFlag, .val = &show_help, .size = 0, .usage = "print usage information" },
+                                    { .arg = "--version", .kind = argFlag, .val = &show_version, .size = 0, .usage = "print poppler version" },
+                                    { .arg = nullptr, .kind = argFlag, .val = nullptr, .size = 0, .usage = nullptr } };
 
 static void error(const std::string &msg)
 {

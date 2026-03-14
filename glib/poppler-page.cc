@@ -564,7 +564,7 @@ void poppler_page_render_selection(PopplerPage *page, cairo_t *cairo, PopplerRec
  **/
 void poppler_page_render_transparent_selection(PopplerPage *page, cairo_t *cairo, PopplerRectangle *selection, PopplerRectangle * /*old_selection*/, PopplerSelectionStyle style, PopplerColor *background_color, double background_opacity)
 {
-    PopplerColor glyph_color = { 0, 0, 0 };
+    PopplerColor glyph_color = { .red = 0, .green = 0, .blue = 0 };
 
     render_selection(page, cairo, selection, style, &glyph_color, background_color, background_opacity, FALSE);
 }
@@ -806,7 +806,7 @@ char *poppler_page_get_selected_text(PopplerPage *page, PopplerSelectionStyle st
  **/
 char *poppler_page_get_text(PopplerPage *page)
 {
-    PopplerRectangle rectangle = { 0, 0, 0, 0 };
+    PopplerRectangle rectangle = { .x1 = 0, .y1 = 0, .x2 = 0, .y2 = 0 };
 
     g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
 
@@ -2362,7 +2362,7 @@ gboolean poppler_page_get_bounding_box(PopplerPage *page, PopplerRectangle *rect
  **/
 gboolean poppler_page_get_text_layout(PopplerPage *page, PopplerRectangle **rectangles, guint *n_rectangles)
 {
-    PopplerRectangle selection = { 0, 0, 0, 0 };
+    PopplerRectangle selection = { .x1 = 0, .y1 = 0, .x2 = 0, .y2 = 0 };
 
     g_return_val_if_fail(POPPLER_IS_PAGE(page), FALSE);
 
@@ -2530,7 +2530,7 @@ static gboolean word_text_attributes_equal(const TextWord *a, gint ai, const Tex
  **/
 GList *poppler_page_get_text_attributes(PopplerPage *page)
 {
-    PopplerRectangle selection = { 0, 0, 0, 0 };
+    PopplerRectangle selection = { .x1 = 0, .y1 = 0, .x2 = 0, .y2 = 0 };
 
     g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
 
