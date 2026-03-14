@@ -50,16 +50,16 @@ static char userPassword[33] = "\001";
 static bool printVersion = false;
 static bool printHelp = false;
 
-static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to examine" },
-                                   { "-l", argInt, &lastPage, 0, "last page to examine" },
-                                   { "-subst", argFlag, &showSubst, 0, "show font substitutions" },
-                                   { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
-                                   { "-upw", argString, userPassword, sizeof(userPassword), "user password (for encrypted files)" },
-                                   { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
-                                   { "-h", argFlag, &printHelp, 0, "print usage information" },
-                                   { "-help", argFlag, &printHelp, 0, "print usage information" },
-                                   { "--help", argFlag, &printHelp, 0, "print usage information" },
-                                   { "-?", argFlag, &printHelp, 0, "print usage information" },
+static const ArgDesc argDesc[] = { { .arg = "-f", .kind = argInt, .val = &firstPage, .size = 0, .usage = "first page to examine" },
+                                   { .arg = "-l", .kind = argInt, .val = &lastPage, .size = 0, .usage = "last page to examine" },
+                                   { .arg = "-subst", .kind = argFlag, .val = &showSubst, .size = 0, .usage = "show font substitutions" },
+                                   { .arg = "-opw", .kind = argString, .val = ownerPassword, .size = sizeof(ownerPassword), .usage = "owner password (for encrypted files)" },
+                                   { .arg = "-upw", .kind = argString, .val = userPassword, .size = sizeof(userPassword), .usage = "user password (for encrypted files)" },
+                                   { .arg = "-v", .kind = argFlag, .val = &printVersion, .size = 0, .usage = "print copyright and version info" },
+                                   { .arg = "-h", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+                                   { .arg = "-help", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+                                   { .arg = "--help", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+                                   { .arg = "-?", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
                                    {} };
 
 int main(int argc, char *argv[])

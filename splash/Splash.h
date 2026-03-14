@@ -109,6 +109,7 @@ public:
     const SplashClip &getClip() const;
     SplashBitmap *getSoftMask();
     bool getInNonIsolatedGroup();
+    bool getInKnockoutGroup();
 
     //----- state write
 
@@ -138,7 +139,7 @@ public:
     // NB: uses untransformed coordinates.
     SplashError clipToPath(const SplashPath &path, bool eo);
     void setSoftMask(SplashBitmap *softMask);
-    void setInNonIsolatedGroup(SplashBitmap *alpha0BitmapA, int alpha0XA, int alpha0YA);
+    void setInTransparencyGroup(SplashBitmap *groupBackBitmapA, int groupBackXA, int groupBackYA, bool nonIsolated, bool knockout);
     void setTransfer(unsigned char *red, unsigned char *green, unsigned char *blue, unsigned char *gray);
     void setOverprintMask(unsigned int overprintMask, bool additive);
 
@@ -210,6 +211,11 @@ public:
     // zero.
     SplashError blitTransparent(const SplashBitmap &src, int xSrc, int ySrc, int xDest, int yDest, int w, int h);
     void blitImage(const SplashBitmap &src, bool srcAlpha, int xDest, int yDest);
+
+    // Copy a rectangular region from the current bitmap to <dest>,
+    // correcting the alpha values for a non-isolated transparency group
+    // nested inside another non-isolated group.
+    SplashError blitCorrectedAlpha(SplashBitmap *dest, int xSrc, int ySrc, int xDest, int yDest, int w, int h);
 
     //----- misc
 
@@ -323,6 +329,8 @@ private:
     SplashCoord minLineWidth;
     SplashThinLineMode thinLineMode;
     SplashClipResult opClipRes;
+    SplashBitmap *groupBackBitmap; // backdrop bitmap for knockout/non-isolated groups
+    int groupBackX, groupBackY; // offset within groupBackBitmap
     bool vectorAntialias;
     bool inShading;
     bool debugMode;

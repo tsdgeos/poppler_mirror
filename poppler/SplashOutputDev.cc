@@ -1211,6 +1211,7 @@ struct SplashTransparencyGroup
     //----- saved state
     SplashBitmap *origBitmap;
     Splash *origSplash;
+    SplashBitmap *backdropBitmap;
 
     SplashTransparencyGroup *next;
 };
@@ -3903,6 +3904,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const std::array<d
     transpGroup->shape = (knockout && !isolated) ? SplashBitmap::copy(bitmap) : nullptr;
     transpGroup->knockout = (knockout && isolated);
     transpGroup->knockoutOpacity = 1.0;
+    transpGroup->backdropBitmap = nullptr;
     transpGroup->next = transpGroupStack;
     transpGroupStack = transpGroup;
 
@@ -3934,9 +3936,6 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const std::array<d
         bitmap = new SplashBitmap(w, h, bitmapRowPad, colorMode, true, bitmapTopDown);
     }
     splash = new Splash(bitmap, vectorAntialias, transpGroup->origSplash->getScreen());
-    if (transpGroup->next != nullptr && transpGroup->next->knockout) {
-        fontEngine->setAA(false);
-    }
     splash->setThinLineMode(transpGroup->origSplash->getThinLineMode());
     splash->setMinLineWidth(s_minLineWidth);
     //~ Acrobat apparently copies at least the fill and stroke colors, and
@@ -3951,12 +3950,24 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const std::array<d
             color[3] = 255;
         }
         splash->clear(color, 0);
+        if (knockout) {
+            splash->setInTransparencyGroup(transpGroup->origBitmap, tx, ty, false, true);
+        }
     } else {
-        SplashBitmap *shape = (knockout) ? transpGroup->shape : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->shape : transpGroup->origBitmap;
-        int shapeTx = (knockout) ? tx : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->tx + tx : tx;
-        int shapeTy = (knockout) ? ty : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->ty + ty : ty;
         splash->blitTransparent(*transpGroup->origBitmap, tx, ty, 0, 0, w, h);
-        splash->setInNonIsolatedGroup(shape, shapeTx, shapeTy);
+        if (!isolated && transpGroup->origBitmap->getAlphaPtr() && transpGroup->origSplash->getInNonIsolatedGroup()) {
+            // when drawing a non-isolated group into another non-isolated group,
+            // compute a backdrop bitmap with corrected alpha values
+            auto *backdropBitmap = new SplashBitmap(w, h, bitmapRowPad, colorMode, true, bitmapTopDown);
+            transpGroup->origSplash->blitCorrectedAlpha(backdropBitmap, tx, ty, 0, 0, w, h);
+            transpGroup->backdropBitmap = backdropBitmap;
+            splash->setInTransparencyGroup(backdropBitmap, 0, 0, true, knockout);
+        } else {
+            SplashBitmap *shape = (knockout) ? transpGroup->shape : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->shape : transpGroup->origBitmap;
+            int shapeTx = (knockout) ? tx : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->tx + tx : tx;
+            int shapeTy = (knockout) ? ty : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->ty + ty : ty;
+            splash->setInTransparencyGroup(shape, shapeTx, shapeTy, true, knockout);
+        }
     }
     transpGroup->tBitmap = bitmap;
     state->shiftCTMAndClip(-tx, -ty);
@@ -4005,6 +4016,7 @@ void SplashOutputDev::paintTransparencyGroup(GfxState * /*state*/, const std::ar
         transpGroupStack->knockoutOpacity = transpGroup->knockoutOpacity;
     }
     delete transpGroup->shape;
+    delete transpGroup->backdropBitmap;
     delete transpGroup;
 
     delete tBitmap;
@@ -4140,6 +4152,7 @@ void SplashOutputDev::setSoftMask(GfxState * /*state*/, const std::array<double,
     // pop the stack
     transpGroup = transpGroupStack;
     transpGroupStack = transpGroup->next;
+    delete transpGroup->backdropBitmap;
     delete transpGroup;
 
     delete tBitmap;

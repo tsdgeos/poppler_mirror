@@ -30,15 +30,15 @@ static bool smask = false;
 static bool fail = false;
 static bool printHelp = false;
 
-static const ArgDesc argDesc[] = { { "-depth", argInt, &depth, 0, "XObject's property 'BitsPerComponent'" },
-                                   { "-colorspace", argGooString, &colorSpace, 0, "XObject's property 'ColorSpace'" },
-                                   { "-filter", argGooString, &filter, 0, "XObject's property 'Filter'" },
-                                   { "-smask", argFlag, &smask, 0, "SMask should exist" },
-                                   { "-fail", argFlag, &fail, 0, "the image embedding API is expected to fail" },
-                                   { "-h", argFlag, &printHelp, 0, "print usage information" },
-                                   { "-help", argFlag, &printHelp, 0, "print usage information" },
-                                   { "--help", argFlag, &printHelp, 0, "print usage information" },
-                                   { "-?", argFlag, &printHelp, 0, "print usage information" },
+static const ArgDesc argDesc[] = { { .arg = "-depth", .kind = argInt, .val = &depth, .size = 0, .usage = "XObject's property 'BitsPerComponent'" },
+                                   { .arg = "-colorspace", .kind = argGooString, .val = &colorSpace, .size = 0, .usage = "XObject's property 'ColorSpace'" },
+                                   { .arg = "-filter", .kind = argGooString, .val = &filter, .size = 0, .usage = "XObject's property 'Filter'" },
+                                   { .arg = "-smask", .kind = argFlag, .val = &smask, .size = 0, .usage = "SMask should exist" },
+                                   { .arg = "-fail", .kind = argFlag, .val = &fail, .size = 0, .usage = "the image embedding API is expected to fail" },
+                                   { .arg = "-h", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+                                   { .arg = "-help", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+                                   { .arg = "--help", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+                                   { .arg = "-?", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
                                    {} };
 
 int main(int argc, char *argv[])

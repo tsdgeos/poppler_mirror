@@ -238,7 +238,7 @@ void TestForms::testSetAppearanceText()
         strObject.getStream()->fillGooString(&s);
 
         const QString textToFind = QStringLiteral("\n(%1) Tj\n").arg(textToSet);
-        QVERIFY(s.toStr().find(textToFind.toStdString()) != std::string::npos);
+        QVERIFY(s.toStr().contains(textToFind.toStdString()));
     }
 
     QCOMPARE(nTextForms, 5);

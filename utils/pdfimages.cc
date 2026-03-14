@@ -64,30 +64,30 @@ static bool quiet = false;
 static bool printVersion = false;
 static bool printHelp = false;
 
-static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to convert" },
-                                   { "-l", argInt, &lastPage, 0, "last page to convert" },
+static const ArgDesc argDesc[] = { { .arg = "-f", .kind = argInt, .val = &firstPage, .size = 0, .usage = "first page to convert" },
+                                   { .arg = "-l", .kind = argInt, .val = &lastPage, .size = 0, .usage = "last page to convert" },
 #if ENABLE_LIBPNG
-                                   { "-png", argFlag, &enablePNG, 0, "change the default output format to PNG" },
+                                   { .arg = "-png", .kind = argFlag, .val = &enablePNG, .size = 0, .usage = "change the default output format to PNG" },
 #endif
 #if ENABLE_LIBTIFF
-                                   { "-tiff", argFlag, &enableTiff, 0, "change the default output format to TIFF" },
+                                   { .arg = "-tiff", .kind = argFlag, .val = &enableTiff, .size = 0, .usage = "change the default output format to TIFF" },
 #endif
-                                   { "-j", argFlag, &dumpJPEG, 0, "write JPEG images as JPEG files" },
-                                   { "-jp2", argFlag, &dumpJP2, 0, "write JPEG2000 images as JP2 files" },
-                                   { "-jbig2", argFlag, &dumpJBIG2, 0, "write JBIG2 images as JBIG2 files" },
-                                   { "-ccitt", argFlag, &dumpCCITT, 0, "write CCITT images as CCITT files" },
-                                   { "-all", argFlag, &allFormats, 0, "equivalent to -png -tiff -j -jp2 -jbig2 -ccitt" },
-                                   { "-list", argFlag, &listImages, 0, "print list of images instead of saving" },
-                                   { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
-                                   { "-upw", argString, userPassword, sizeof(userPassword), "user password (for encrypted files)" },
-                                   { "-p", argFlag, &pageNames, 0, "include page numbers in output file names" },
-                                   { "-print-filenames", argFlag, &printFilenames, 0, "print image filenames to stdout" },
-                                   { "-q", argFlag, &quiet, 0, "don't print any messages or errors" },
-                                   { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
-                                   { "-h", argFlag, &printHelp, 0, "print usage information" },
-                                   { "-help", argFlag, &printHelp, 0, "print usage information" },
-                                   { "--help", argFlag, &printHelp, 0, "print usage information" },
-                                   { "-?", argFlag, &printHelp, 0, "print usage information" },
+                                   { .arg = "-j", .kind = argFlag, .val = &dumpJPEG, .size = 0, .usage = "write JPEG images as JPEG files" },
+                                   { .arg = "-jp2", .kind = argFlag, .val = &dumpJP2, .size = 0, .usage = "write JPEG2000 images as JP2 files" },
+                                   { .arg = "-jbig2", .kind = argFlag, .val = &dumpJBIG2, .size = 0, .usage = "write JBIG2 images as JBIG2 files" },
+                                   { .arg = "-ccitt", .kind = argFlag, .val = &dumpCCITT, .size = 0, .usage = "write CCITT images as CCITT files" },
+                                   { .arg = "-all", .kind = argFlag, .val = &allFormats, .size = 0, .usage = "equivalent to -png -tiff -j -jp2 -jbig2 -ccitt" },
+                                   { .arg = "-list", .kind = argFlag, .val = &listImages, .size = 0, .usage = "print list of images instead of saving" },
+                                   { .arg = "-opw", .kind = argString, .val = ownerPassword, .size = sizeof(ownerPassword), .usage = "owner password (for encrypted files)" },
+                                   { .arg = "-upw", .kind = argString, .val = userPassword, .size = sizeof(userPassword), .usage = "user password (for encrypted files)" },
+                                   { .arg = "-p", .kind = argFlag, .val = &pageNames, .size = 0, .usage = "include page numbers in output file names" },
+                                   { .arg = "-print-filenames", .kind = argFlag, .val = &printFilenames, .size = 0, .usage = "print image filenames to stdout" },
+                                   { .arg = "-q", .kind = argFlag, .val = &quiet, .size = 0, .usage = "don't print any messages or errors" },
+                                   { .arg = "-v", .kind = argFlag, .val = &printVersion, .size = 0, .usage = "print copyright and version info" },
+                                   { .arg = "-h", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+                                   { .arg = "-help", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+                                   { .arg = "--help", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+                                   { .arg = "-?", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
                                    {} };
 
 int main(int argc, char *argv[])

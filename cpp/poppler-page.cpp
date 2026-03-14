@@ -286,10 +286,10 @@ static void appendToGooString(void *stream, const char *text, int len)
  */
 ustring page::text(const rectf &r, text_layout_enum layout_mode) const
 {
-    std::unique_ptr<GooString> out(new GooString());
+    GooString out;
     const bool use_raw_order = (layout_mode == raw_order_layout);
     const bool use_physical_layout = (layout_mode == physical_layout);
-    TextOutputDev td(&appendToGooString, out.get(), use_physical_layout, 0, use_raw_order, false);
+    TextOutputDev td(&appendToGooString, &out, use_physical_layout, 0, use_raw_order, false);
     if (r.is_empty()) {
         d->doc->doc->displayPage(&td, d->index + 1, 72, 72, 0, false, true, false);
     } else {
@@ -299,7 +299,7 @@ ustring page::text(const rectf &r, text_layout_enum layout_mode) const
         }
         d->doc->doc->displayPageSlice(&td, d->index + 1, 72, 72, 0, false, true, false, r.left(), r.top(), r.width(), r.height());
     }
-    return ustring::from_utf8(out->c_str());
+    return ustring::from_utf8(out.c_str());
 }
 
 /*
@@ -419,18 +419,16 @@ std::vector<text_box> page::text_list(int opt_flag) const
 
         text_box tb { new text_box_data { .text = ustr, .bbox = { xMin, yMin, xMax - xMin, yMax - yMin }, .rotation = word->getRotation(), .char_bboxes = {}, .has_space_after = word->hasSpaceAfter(), .text_box_font = nullptr } };
 
-        std::unique_ptr<text_box_font_info_data> tb_font_info = nullptr;
+        std::unique_ptr<text_box_font_info_data> tb_font_info;
         if (opt_flag & page::text_list_include_font) {
             d->init_font_info_cache();
 
-            std::unique_ptr<text_box_font_info_data> tb_font { new text_box_font_info_data {
+            tb_font_info = std::make_unique<text_box_font_info_data>(text_box_font_info_data {
                     .font_size = word->getFontSize(), // double font_size
                     .wmodes = {}, // std::vector<text_box::writing_mode> wmodes;
                     .font_info_cache = d->font_info_cache, // std::vector<font_info> font_info_cache;
                     .glyph_to_cache_index = {} // std::vector<int> glyph_to_cache_index;
-            } };
-
-            tb_font_info = std::move(tb_font);
+            });
         };
 
         tb.m_data->char_bboxes.reserve(word->getLength());

@@ -239,13 +239,12 @@ public:
             png_destroy_read_struct(&png, nullptr, nullptr);
             return nullptr;
         }
+        auto stream = std::make_unique<LibpngInputStream>(std::move(fileContent));
         if (setjmp(png_jmpbuf(png))) {
-            error(errInternal, -1, "Couldn't load PNG. Failed to set up error handling for reading PNG");
+            error(errInternal, -1, "Couldn't load PNG. libpng error while reading PNG info");
             png_destroy_read_struct(&png, &info, nullptr);
             return nullptr;
         }
-
-        auto stream = std::make_unique<LibpngInputStream>(std::move(fileContent));
         png_set_read_fn(png, stream.get(), LibpngInputStream::readCallback);
         png_read_info(png, info);
         fixPng(png, info);

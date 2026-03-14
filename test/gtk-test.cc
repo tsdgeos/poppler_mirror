@@ -25,14 +25,16 @@ static gboolean splash_output = FALSE;
 static gboolean args_are_fds = FALSE;
 #endif
 static const char **file_arguments = nullptr;
-static const GOptionEntry options[] = { { "cairo", 'c', 0, G_OPTION_ARG_NONE, &cairo_output, "Cairo Output Device", nullptr },
-                                        { "splash", 's', 0, G_OPTION_ARG_NONE, &splash_output, "Splash Output Device", nullptr },
-                                        { "page", 'p', 0, G_OPTION_ARG_INT, &requested_page, "Page number", "PAGE" },
+static const GOptionEntry options[] = {
+    { .long_name = "cairo", .short_name = 'c', .flags = 0, .arg = G_OPTION_ARG_NONE, .arg_data = &cairo_output, .description = "Cairo Output Device", .arg_description = nullptr },
+    { .long_name = "splash", .short_name = 's', .flags = 0, .arg = G_OPTION_ARG_NONE, .arg_data = &splash_output, .description = "Splash Output Device", .arg_description = nullptr },
+    { .long_name = "page", .short_name = 'p', .flags = 0, .arg = G_OPTION_ARG_INT, .arg_data = &requested_page, .description = "Page number", .arg_description = "PAGE" },
 #ifndef G_OS_WIN32
-                                        { "fd", 'f', 0, G_OPTION_ARG_NONE, &args_are_fds, "File descriptors", nullptr },
+    { .long_name = "fd", .short_name = 'f', .flags = 0, .arg = G_OPTION_ARG_NONE, .arg_data = &args_are_fds, .description = "File descriptors", .arg_description = nullptr },
 #endif
-                                        { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, static_cast<void *>(&file_arguments), nullptr, "PDF-FILES…" },
-                                        {} };
+    { .long_name = G_OPTION_REMAINING, .short_name = 0, .flags = 0, .arg = G_OPTION_ARG_FILENAME_ARRAY, .arg_data = static_cast<void *>(&file_arguments), .description = nullptr, .arg_description = "PDF-FILES…" },
+    {}
+};
 
 static GList *view_list = nullptr;
 

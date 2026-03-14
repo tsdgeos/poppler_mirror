@@ -35,13 +35,13 @@ char out_filename[4096];
 int doc_page = 0;
 bool read_to_memory = false;
 
-static const ArgDesc the_args[] = { { "-f", argFlag, &show_formats, 0, "show supported output image formats" },
-                                    { "--page", argInt, &doc_page, 0, "select page to render" },
-                                    { "-o", argString, &out_filename, sizeof(out_filename), "output filename for the resulting PNG image" },
-                                    { "-m", argFlag, &read_to_memory, 0, "reds file into memory first" },
-                                    { "-h", argFlag, &show_help, 0, "print usage information" },
-                                    { "--help", argFlag, &show_help, 0, "print usage information" },
-                                    { nullptr, argFlag, nullptr, 0, nullptr } };
+static const ArgDesc the_args[] = { { .arg = "-f", .kind = argFlag, .val = &show_formats, .size = 0, .usage = "show supported output image formats" },
+                                    { .arg = "--page", .kind = argInt, .val = &doc_page, .size = 0, .usage = "select page to render" },
+                                    { .arg = "-o", .kind = argString, .val = &out_filename, .size = sizeof(out_filename), .usage = "output filename for the resulting PNG image" },
+                                    { .arg = "-m", .kind = argFlag, .val = &read_to_memory, .size = 0, .usage = "reds file into memory first" },
+                                    { .arg = "-h", .kind = argFlag, .val = &show_help, .size = 0, .usage = "print usage information" },
+                                    { .arg = "--help", .kind = argFlag, .val = &show_help, .size = 0, .usage = "print usage information" },
+                                    { .arg = nullptr, .kind = argFlag, .val = nullptr, .size = 0, .usage = nullptr } };
 
 static void error(const std::string &msg)
 {

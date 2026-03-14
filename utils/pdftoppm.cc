@@ -144,71 +144,71 @@ static bool progress = false;
 static bool printVersion = false;
 static bool printHelp = false;
 
-static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to print" },
-                                   { "-l", argInt, &lastPage, 0, "last page to print" },
-                                   { "-o", argFlag, &printOnlyOdd, 0, "print only odd pages" },
-                                   { "-e", argFlag, &printOnlyEven, 0, "print only even pages" },
-                                   { "-singlefile", argFlag, &singleFile, 0, "write only the first page and do not add digits" },
-                                   { "-scale-dimension-before-rotation", argFlag, &scaleDimensionBeforeRotation, 0, "for rotated pdf, resize dimensions before the rotation" },
+static const ArgDesc argDesc[] = { { .arg = "-f", .kind = argInt, .val = &firstPage, .size = 0, .usage = "first page to print" },
+                                   { .arg = "-l", .kind = argInt, .val = &lastPage, .size = 0, .usage = "last page to print" },
+                                   { .arg = "-o", .kind = argFlag, .val = &printOnlyOdd, .size = 0, .usage = "print only odd pages" },
+                                   { .arg = "-e", .kind = argFlag, .val = &printOnlyEven, .size = 0, .usage = "print only even pages" },
+                                   { .arg = "-singlefile", .kind = argFlag, .val = &singleFile, .size = 0, .usage = "write only the first page and do not add digits" },
+                                   { .arg = "-scale-dimension-before-rotation", .kind = argFlag, .val = &scaleDimensionBeforeRotation, .size = 0, .usage = "for rotated pdf, resize dimensions before the rotation" },
 
-                                   { "-r", argFP, &resolution, 0, "resolution, in DPI (default is 150)" },
-                                   { "-rx", argFP, &x_resolution, 0, "X resolution, in DPI (default is 150)" },
-                                   { "-ry", argFP, &y_resolution, 0, "Y resolution, in DPI (default is 150)" },
-                                   { "-scale-to", argInt, &scaleTo, 0, "scales each page to fit within scale-to*scale-to pixel box" },
-                                   { "-scale-to-x", argInt, &x_scaleTo, 0, "scales each page horizontally to fit in scale-to-x pixels" },
-                                   { "-scale-to-y", argInt, &y_scaleTo, 0, "scales each page vertically to fit in scale-to-y pixels" },
+                                   { .arg = "-r", .kind = argFP, .val = &resolution, .size = 0, .usage = "resolution, in DPI (default is 150)" },
+                                   { .arg = "-rx", .kind = argFP, .val = &x_resolution, .size = 0, .usage = "X resolution, in DPI (default is 150)" },
+                                   { .arg = "-ry", .kind = argFP, .val = &y_resolution, .size = 0, .usage = "Y resolution, in DPI (default is 150)" },
+                                   { .arg = "-scale-to", .kind = argInt, .val = &scaleTo, .size = 0, .usage = "scales each page to fit within scale-to*scale-to pixel box" },
+                                   { .arg = "-scale-to-x", .kind = argInt, .val = &x_scaleTo, .size = 0, .usage = "scales each page horizontally to fit in scale-to-x pixels" },
+                                   { .arg = "-scale-to-y", .kind = argInt, .val = &y_scaleTo, .size = 0, .usage = "scales each page vertically to fit in scale-to-y pixels" },
 
-                                   { "-x", argInt, &param_x, 0, "x-coordinate of the crop area top left corner" },
-                                   { "-y", argInt, &param_y, 0, "y-coordinate of the crop area top left corner" },
-                                   { "-W", argInt, &param_w, 0, "width of crop area in pixels (default is 0)" },
-                                   { "-H", argInt, &param_h, 0, "height of crop area in pixels (default is 0)" },
-                                   { "-sz", argInt, &sz, 0, "size of crop square in pixels (sets W and H)" },
-                                   { "-cropbox", argFlag, &useCropBox, 0, "use the crop box rather than media box" },
-                                   { "-hide-annotations", argFlag, &hideAnnotations, 0, "do not show annotations" },
+                                   { .arg = "-x", .kind = argInt, .val = &param_x, .size = 0, .usage = "x-coordinate of the crop area top left corner" },
+                                   { .arg = "-y", .kind = argInt, .val = &param_y, .size = 0, .usage = "y-coordinate of the crop area top left corner" },
+                                   { .arg = "-W", .kind = argInt, .val = &param_w, .size = 0, .usage = "width of crop area in pixels (default is 0)" },
+                                   { .arg = "-H", .kind = argInt, .val = &param_h, .size = 0, .usage = "height of crop area in pixels (default is 0)" },
+                                   { .arg = "-sz", .kind = argInt, .val = &sz, .size = 0, .usage = "size of crop square in pixels (sets W and H)" },
+                                   { .arg = "-cropbox", .kind = argFlag, .val = &useCropBox, .size = 0, .usage = "use the crop box rather than media box" },
+                                   { .arg = "-hide-annotations", .kind = argFlag, .val = &hideAnnotations, .size = 0, .usage = "do not show annotations" },
 
-                                   { "-mono", argFlag, &mono, 0, "generate a monochrome PBM file" },
-                                   { "-gray", argFlag, &gray, 0, "generate a grayscale PGM file" },
+                                   { .arg = "-mono", .kind = argFlag, .val = &mono, .size = 0, .usage = "generate a monochrome PBM file" },
+                                   { .arg = "-gray", .kind = argFlag, .val = &gray, .size = 0, .usage = "generate a grayscale PGM file" },
 #if USE_CMS
-                                   { "-displayprofile", argGooString, &displayprofilename, 0, "ICC color profile to use as the display profile" },
-                                   { "-defaultgrayprofile", argGooString, &defaultgrayprofilename, 0, "ICC color profile to use as the DefaultGray color space" },
-                                   { "-defaultrgbprofile", argGooString, &defaultrgbprofilename, 0, "ICC color profile to use as the DefaultRGB color space" },
-                                   { "-defaultcmykprofile", argGooString, &defaultcmykprofilename, 0, "ICC color profile to use as the DefaultCMYK color space" },
+                                   { .arg = "-displayprofile", .kind = argGooString, .val = &displayprofilename, .size = 0, .usage = "ICC color profile to use as the display profile" },
+                                   { .arg = "-defaultgrayprofile", .kind = argGooString, .val = &defaultgrayprofilename, .size = 0, .usage = "ICC color profile to use as the DefaultGray color space" },
+                                   { .arg = "-defaultrgbprofile", .kind = argGooString, .val = &defaultrgbprofilename, .size = 0, .usage = "ICC color profile to use as the DefaultRGB color space" },
+                                   { .arg = "-defaultcmykprofile", .kind = argGooString, .val = &defaultcmykprofilename, .size = 0, .usage = "ICC color profile to use as the DefaultCMYK color space" },
 #endif
-                                   { "-sep", argString, sep, sizeof(sep), "single character separator between name and page number, default - " },
-                                   { "-forcenum", argFlag, &forceNum, 0, "force page number even if there is only one page " },
+                                   { .arg = "-sep", .kind = argString, .val = sep, .size = sizeof(sep), .usage = "single character separator between name and page number, default - " },
+                                   { .arg = "-forcenum", .kind = argFlag, .val = &forceNum, .size = 0, .usage = "force page number even if there is only one page " },
 #if ENABLE_LIBPNG
-                                   { "-png", argFlag, &png, 0, "generate a PNG file" },
+                                   { .arg = "-png", .kind = argFlag, .val = &png, .size = 0, .usage = "generate a PNG file" },
 #endif
 #if ENABLE_LIBJPEG
-                                   { "-jpeg", argFlag, &jpeg, 0, "generate a JPEG file" },
-                                   { "-jpegcmyk", argFlag, &jpegcmyk, 0, "generate a CMYK JPEG file" },
-                                   { "-jpegopt", argGooString, &jpegOpt, 0, "jpeg options, with format <opt1>=<val1>[,<optN>=<valN>]*" },
+                                   { .arg = "-jpeg", .kind = argFlag, .val = &jpeg, .size = 0, .usage = "generate a JPEG file" },
+                                   { .arg = "-jpegcmyk", .kind = argFlag, .val = &jpegcmyk, .size = 0, .usage = "generate a CMYK JPEG file" },
+                                   { .arg = "-jpegopt", .kind = argGooString, .val = &jpegOpt, .size = 0, .usage = "jpeg options, with format <opt1>=<val1>[,<optN>=<valN>]*" },
 #endif
-                                   { "-overprint", argFlag, &overprint, 0, "enable overprint" },
+                                   { .arg = "-overprint", .kind = argFlag, .val = &overprint, .size = 0, .usage = "enable overprint" },
 #if ENABLE_LIBTIFF
-                                   { "-tiff", argFlag, &tiff, 0, "generate a TIFF file" },
-                                   { "-tiffcompression", argString, TiffCompressionStr, sizeof(TiffCompressionStr), "set TIFF compression: none, packbits, jpeg, lzw, deflate" },
+                                   { .arg = "-tiff", .kind = argFlag, .val = &tiff, .size = 0, .usage = "generate a TIFF file" },
+                                   { .arg = "-tiffcompression", .kind = argString, .val = TiffCompressionStr, .size = sizeof(TiffCompressionStr), .usage = "set TIFF compression: none, packbits, jpeg, lzw, deflate" },
 #endif
-                                   { "-freetype", argString, enableFreeTypeStr, sizeof(enableFreeTypeStr), "enable FreeType font rasterizer: yes, no" },
-                                   { "-thinlinemode", argString, thinLineModeStr, sizeof(thinLineModeStr), "set thin line mode: none, solid, shape. Default: none" },
+                                   { .arg = "-freetype", .kind = argString, .val = enableFreeTypeStr, .size = sizeof(enableFreeTypeStr), .usage = "enable FreeType font rasterizer: yes, no" },
+                                   { .arg = "-thinlinemode", .kind = argString, .val = thinLineModeStr, .size = sizeof(thinLineModeStr), .usage = "set thin line mode: none, solid, shape. Default: none" },
 
-                                   { "-aa", argString, antialiasStr, sizeof(antialiasStr), "enable font anti-aliasing: yes, no" },
-                                   { "-aaVector", argString, vectorAntialiasStr, sizeof(vectorAntialiasStr), "enable vector anti-aliasing: yes, no" },
+                                   { .arg = "-aa", .kind = argString, .val = antialiasStr, .size = sizeof(antialiasStr), .usage = "enable font anti-aliasing: yes, no" },
+                                   { .arg = "-aaVector", .kind = argString, .val = vectorAntialiasStr, .size = sizeof(vectorAntialiasStr), .usage = "enable vector anti-aliasing: yes, no" },
 
-                                   { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
-                                   { "-upw", argString, userPassword, sizeof(userPassword), "user password (for encrypted files)" },
+                                   { .arg = "-opw", .kind = argString, .val = ownerPassword, .size = sizeof(ownerPassword), .usage = "owner password (for encrypted files)" },
+                                   { .arg = "-upw", .kind = argString, .val = userPassword, .size = sizeof(userPassword), .usage = "user password (for encrypted files)" },
 
 #ifdef UTILS_USE_PTHREADS
                                    { "-j", argInt, &numberOfJobs, 0, "number of jobs to run concurrently" },
 #endif // UTILS_USE_PTHREADS
 
-                                   { "-q", argFlag, &quiet, 0, "don't print any messages or errors" },
-                                   { "-progress", argFlag, &progress, 0, "print progress info" },
-                                   { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
-                                   { "-h", argFlag, &printHelp, 0, "print usage information" },
-                                   { "-help", argFlag, &printHelp, 0, "print usage information" },
-                                   { "--help", argFlag, &printHelp, 0, "print usage information" },
-                                   { "-?", argFlag, &printHelp, 0, "print usage information" },
+                                   { .arg = "-q", .kind = argFlag, .val = &quiet, .size = 0, .usage = "don't print any messages or errors" },
+                                   { .arg = "-progress", .kind = argFlag, .val = &progress, .size = 0, .usage = "print progress info" },
+                                   { .arg = "-v", .kind = argFlag, .val = &printVersion, .size = 0, .usage = "print copyright and version info" },
+                                   { .arg = "-h", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+                                   { .arg = "-help", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+                                   { .arg = "--help", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+                                   { .arg = "-?", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
                                    {} };
 
 static constexpr int kOtherError = 99;

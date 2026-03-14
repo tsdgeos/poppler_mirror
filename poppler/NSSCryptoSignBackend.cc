@@ -6,7 +6,7 @@
 //
 // Copyright 2015, 2016 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2016, 2018, 2019, 2021-2023, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2016, 2018, 2019, 2021-2023, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Markus Kilås <digital@markuspage.com>
 // Copyright 2017 Sebastian Rasmussen <sebras@gmail.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
@@ -15,7 +15,7 @@
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
-// Copyright 2021, 2025 Marek Kasik <mkasik@redhat.com>
+// Copyright 2021, 2025, 2026 Marek Kasik <mkasik@redhat.com>
 // Copyright 2022 Erich E. Hoover <erich.e.hoover@gmail.com>
 // Copyright 2023 Tobias Deiminger <tobias.deiminger@posteo.de>
 // Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -111,12 +111,16 @@ struct SigningCertificateV2
  *      registeredID                    [8]     OBJECT IDENTIFIER
  * }
  */
-const SEC_ASN1Template GeneralNameTemplate[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(GeneralName) }, { SEC_ASN1_INLINE, offsetof(GeneralName, name), SEC_ASN1_GET(CERT_NameTemplate), 0 }, { 0, 0, nullptr, 0 } };
+const SEC_ASN1Template GeneralNameTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(GeneralName) },
+                                                 { .kind = SEC_ASN1_INLINE, .offset = offsetof(GeneralName, name), .sub = SEC_ASN1_GET(CERT_NameTemplate), .size = 0 },
+                                                 { .kind = 0, .offset = 0, .sub = nullptr, .size = 0 } };
 
 /**
  * GeneralNames ::= SEQUENCE SIZE (1..MAX) OF GeneralName
  */
-const SEC_ASN1Template GeneralNamesTemplate[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(GeneralNames) }, { SEC_ASN1_INLINE | SEC_ASN1_CONTEXT_SPECIFIC | 4, offsetof(GeneralNames, names), GeneralNameTemplate, 0 }, { 0, 0, nullptr, 0 } };
+const SEC_ASN1Template GeneralNamesTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(GeneralNames) },
+                                                  { .kind = SEC_ASN1_INLINE | SEC_ASN1_CONTEXT_SPECIFIC | 4, .offset = offsetof(GeneralNames, names), .sub = GeneralNameTemplate, .size = 0 },
+                                                  { .kind = 0, .offset = 0, .sub = nullptr, .size = 0 } };
 
 /**
  * IssuerSerial ::= SEQUENCE {
@@ -124,9 +128,10 @@ const SEC_ASN1Template GeneralNamesTemplate[] = { { SEC_ASN1_SEQUENCE, 0, nullpt
  *     serialNumber CertificateSerialNumber
  * }
  */
-const SEC_ASN1Template IssuerSerialTemplate[] = {
-    { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(IssuerSerial) }, { SEC_ASN1_INLINE, offsetof(IssuerSerial, issuer), GeneralNamesTemplate, 0 }, { SEC_ASN1_INTEGER, offsetof(IssuerSerial, serialNumber), nullptr, 0 }, { 0, 0, nullptr, 0 }
-};
+const SEC_ASN1Template IssuerSerialTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(IssuerSerial) },
+                                                  { .kind = SEC_ASN1_INLINE, .offset = offsetof(IssuerSerial, issuer), .sub = GeneralNamesTemplate, .size = 0 },
+                                                  { .kind = SEC_ASN1_INTEGER, .offset = offsetof(IssuerSerial, serialNumber), .sub = nullptr, .size = 0 },
+                                                  { .kind = 0, .offset = 0, .sub = nullptr, .size = 0 } };
 
 /**
  * Hash ::= OCTET STRING
@@ -138,39 +143,41 @@ const SEC_ASN1Template IssuerSerialTemplate[] = {
  * }
  */
 
-const SEC_ASN1Template ESSCertIDv2Template[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(ESSCertIDv2) },
-                                                 { SEC_ASN1_INLINE, offsetof(ESSCertIDv2, hashAlgorithm), SEC_ASN1_GET(SECOID_AlgorithmIDTemplate), 0 },
-                                                 { SEC_ASN1_OCTET_STRING, offsetof(ESSCertIDv2, certHash), nullptr, 0 },
-                                                 { SEC_ASN1_INLINE, offsetof(ESSCertIDv2, issuerSerial), IssuerSerialTemplate, 0 },
-                                                 { 0, 0, nullptr, 0 } };
+const SEC_ASN1Template ESSCertIDv2Template[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(ESSCertIDv2) },
+                                                 { .kind = SEC_ASN1_INLINE, .offset = offsetof(ESSCertIDv2, hashAlgorithm), .sub = SEC_ASN1_GET(SECOID_AlgorithmIDTemplate), .size = 0 },
+                                                 { .kind = SEC_ASN1_OCTET_STRING, .offset = offsetof(ESSCertIDv2, certHash), .sub = nullptr, .size = 0 },
+                                                 { .kind = SEC_ASN1_INLINE, .offset = offsetof(ESSCertIDv2, issuerSerial), .sub = IssuerSerialTemplate, .size = 0 },
+                                                 { .kind = 0, .offset = 0, .sub = nullptr, .size = 0 } };
 
 /**
  * SigningCertificateV2 ::= SEQUENCE {
  * }
  */
-const SEC_ASN1Template SigningCertificateV2Template[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(SigningCertificateV2) }, { SEC_ASN1_SEQUENCE_OF, offsetof(SigningCertificateV2, certs), ESSCertIDv2Template, 0 }, { 0, 0, nullptr, 0 } };
+const SEC_ASN1Template SigningCertificateV2Template[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(SigningCertificateV2) },
+                                                          { .kind = SEC_ASN1_SEQUENCE_OF, .offset = offsetof(SigningCertificateV2, certs), .sub = ESSCertIDv2Template, .size = 0 },
+                                                          { .kind = 0, .offset = 0, .sub = nullptr, .size = 0 } };
 
 // SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL and SEC_ASN1EncodeItem() do not work well together within NSS.
 // An additional template is necessary to accept attributes without the two optional fields.
-const SEC_ASN1Template ESSCertIDv2DecodingTemplate[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(ESSCertIDv2) },
-                                                         { SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL, offsetof(ESSCertIDv2, hashAlgorithm), SEC_ASN1_GET(SECOID_AlgorithmIDTemplate), 0 },
-                                                         { SEC_ASN1_OCTET_STRING, offsetof(ESSCertIDv2, certHash), nullptr, 0 },
-                                                         { SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL | SEC_ASN1_SKIP, offsetof(ESSCertIDv2, issuerSerial), IssuerSerialTemplate, 0 },
-                                                         { 0, 0, nullptr, 0 } };
+const SEC_ASN1Template ESSCertIDv2DecodingTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(ESSCertIDv2) },
+                                                         { .kind = SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL, .offset = offsetof(ESSCertIDv2, hashAlgorithm), .sub = SEC_ASN1_GET(SECOID_AlgorithmIDTemplate), .size = 0 },
+                                                         { .kind = SEC_ASN1_OCTET_STRING, .offset = offsetof(ESSCertIDv2, certHash), .sub = nullptr, .size = 0 },
+                                                         { .kind = SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL | SEC_ASN1_SKIP, .offset = offsetof(ESSCertIDv2, issuerSerial), .sub = IssuerSerialTemplate, .size = 0 },
+                                                         { .kind = 0, .offset = 0, .sub = nullptr, .size = 0 } };
 
-const SEC_ASN1Template SigningCertificateV2DecodingTemplate[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(SigningCertificateV2) },
-                                                                  { SEC_ASN1_SEQUENCE_OF, offsetof(SigningCertificateV2, certs), ESSCertIDv2DecodingTemplate, 0 },
-                                                                  { 0, 0, nullptr, 0 } };
+const SEC_ASN1Template SigningCertificateV2DecodingTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(SigningCertificateV2) },
+                                                                  { .kind = SEC_ASN1_SEQUENCE_OF, .offset = offsetof(SigningCertificateV2, certs), .sub = ESSCertIDv2DecodingTemplate, .size = 0 },
+                                                                  { .kind = 0, .offset = 0, .sub = nullptr, .size = 0 } };
 // policies omitted on purpose. If present, decoding fails and the attribute is considered invalid, as required by ETSI EN 319 122-1 (CAdES).
 
-const SEC_ASN1Template ESSCertIDDecodingTemplate[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(ESSCertIDv2) },
-                                                       { SEC_ASN1_OCTET_STRING, offsetof(ESSCertIDv2, certHash), nullptr, 0 },
-                                                       { SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL | SEC_ASN1_SKIP, offsetof(ESSCertIDv2, issuerSerial), IssuerSerialTemplate, 0 },
-                                                       { 0, 0, nullptr, 0 } };
+const SEC_ASN1Template ESSCertIDDecodingTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(ESSCertIDv2) },
+                                                       { .kind = SEC_ASN1_OCTET_STRING, .offset = offsetof(ESSCertIDv2, certHash), .sub = nullptr, .size = 0 },
+                                                       { .kind = SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL | SEC_ASN1_SKIP, .offset = offsetof(ESSCertIDv2, issuerSerial), .sub = IssuerSerialTemplate, .size = 0 },
+                                                       { .kind = 0, .offset = 0, .sub = nullptr, .size = 0 } };
 
-const SEC_ASN1Template SigningCertificateDecodingTemplate[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(SigningCertificateV2) },
-                                                                { SEC_ASN1_SEQUENCE_OF, offsetof(SigningCertificateV2, certs), ESSCertIDDecodingTemplate, 0 },
-                                                                { 0, 0, nullptr, 0 } };
+const SEC_ASN1Template SigningCertificateDecodingTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(SigningCertificateV2) },
+                                                                { .kind = SEC_ASN1_SEQUENCE_OF, .offset = offsetof(SigningCertificateV2, certs), .sub = ESSCertIDDecodingTemplate, .size = 0 },
+                                                                { .kind = 0, .offset = 0, .sub = nullptr, .size = 0 } };
 // policies omitted on purpose. If present, decoding fails and the attribute is considered invalid, as required by ETSI EN 319 122-1 (CAdES).
 
 /*
@@ -678,7 +685,7 @@ static std::optional<std::string> getDefaultFirefoxCertDB()
     std::filesystem::file_time_type latestWriteTime;
     for (const std::string &firefoxPath : firefoxPaths) {
         for (const auto &entry : std::filesystem::directory_iterator { firefoxPath, ec }) {
-            if (entry.is_directory() && entry.path().string().find("default") != std::string::npos) {
+            if (entry.is_directory() && entry.path().string().contains("default")) {
                 const auto certPath = entry.path() / "cert9.db";
                 if (std::filesystem::exists(certPath, ec) && std::filesystem::is_regular_file(certPath, ec)) {
                     const auto writeTime = std::filesystem::last_write_time(certPath, ec);

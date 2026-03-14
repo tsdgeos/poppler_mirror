@@ -323,13 +323,13 @@ SplashPath *SplashFTFont::getGlyphPath(int c)
         (int (*)(FT_Vector *, FT_Vector *, void *))&glyphPathConicTo,
         (int (*)(FT_Vector *, FT_Vector *, FT_Vector *, void *))&glyphPathCubicTo,
 #else
-        &glyphPathMoveTo,
-        &glyphPathLineTo,
-        &glyphPathConicTo,
-        &glyphPathCubicTo,
+        .move_to = &glyphPathMoveTo,
+        .line_to = &glyphPathLineTo,
+        .conic_to = &glyphPathConicTo,
+        .cubic_to = &glyphPathCubicTo,
 #endif
-        0,
-        0
+        .shift = 0,
+        .delta = 0
     };
     SplashFTFontFile *ff;
     SplashFTFontPath path;

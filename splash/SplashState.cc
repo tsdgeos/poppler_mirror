@@ -69,6 +69,7 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
     softMask = nullptr;
     deleteSoftMask = false;
     inNonIsolatedGroup = false;
+    inKnockoutGroup = false;
     fillOverprint = false;
     strokeOverprint = false;
     overprintMode = 0;
@@ -122,6 +123,7 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, const Spla
     softMask = nullptr;
     deleteSoftMask = false;
     inNonIsolatedGroup = false;
+    inKnockoutGroup = false;
     fillOverprint = false;
     strokeOverprint = false;
     overprintMode = 0;
@@ -167,6 +169,7 @@ SplashState::SplashState(const SplashState *state)
     softMask = state->softMask;
     deleteSoftMask = false;
     inNonIsolatedGroup = state->inNonIsolatedGroup;
+    inKnockoutGroup = state->inKnockoutGroup;
     fillOverprint = state->fillOverprint;
     strokeOverprint = state->strokeOverprint;
     overprintMode = state->overprintMode;

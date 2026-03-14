@@ -97,6 +97,7 @@ private:
     SplashBitmap *softMask;
     bool deleteSoftMask;
     bool inNonIsolatedGroup;
+    bool inKnockoutGroup;
     bool fillOverprint;
     bool strokeOverprint;
     int overprintMode;

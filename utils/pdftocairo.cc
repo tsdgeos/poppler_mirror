@@ -154,25 +154,25 @@ static bool setupdlg = false;
 
 static const ArgDesc argDesc[] = {
 #if ENABLE_LIBPNG
-    { "-png", argFlag, &png, 0, "generate a PNG file" },
+    { .arg = "-png", .kind = argFlag, .val = &png, .size = 0, .usage = "generate a PNG file" },
 #endif
 #if ENABLE_LIBJPEG
-    { "-jpeg", argFlag, &jpeg, 0, "generate a JPEG file" },
-    { "-jpegopt", argGooString, &jpegOpt, 0, "jpeg options, with format <opt1>=<val1>[,<optN>=<valN>]*" },
+    { .arg = "-jpeg", .kind = argFlag, .val = &jpeg, .size = 0, .usage = "generate a JPEG file" },
+    { .arg = "-jpegopt", .kind = argGooString, .val = &jpegOpt, .size = 0, .usage = "jpeg options, with format <opt1>=<val1>[,<optN>=<valN>]*" },
 #endif
 #if ENABLE_LIBTIFF
-    { "-tiff", argFlag, &tiff, 0, "generate a TIFF file" },
-    { "-tiffcompression", argString, tiffCompressionStr, sizeof(tiffCompressionStr), "set TIFF compression: none, packbits, jpeg, lzw, deflate" },
+    { .arg = "-tiff", .kind = argFlag, .val = &tiff, .size = 0, .usage = "generate a TIFF file" },
+    { .arg = "-tiffcompression", .kind = argString, .val = tiffCompressionStr, .size = sizeof(tiffCompressionStr), .usage = "set TIFF compression: none, packbits, jpeg, lzw, deflate" },
 #endif
 #ifdef CAIRO_HAS_PS_SURFACE
-    { "-ps", argFlag, &ps, 0, "generate PostScript file" },
-    { "-eps", argFlag, &eps, 0, "generate Encapsulated PostScript (EPS)" },
+    { .arg = "-ps", .kind = argFlag, .val = &ps, .size = 0, .usage = "generate PostScript file" },
+    { .arg = "-eps", .kind = argFlag, .val = &eps, .size = 0, .usage = "generate Encapsulated PostScript (EPS)" },
 #endif
 #ifdef CAIRO_HAS_PDF_SURFACE
-    { "-pdf", argFlag, &pdf, 0, "generate a PDF file" },
+    { .arg = "-pdf", .kind = argFlag, .val = &pdf, .size = 0, .usage = "generate a PDF file" },
 #endif
 #ifdef CAIRO_HAS_SVG_SURFACE
-    { "-svg", argFlag, &svg, 0, "generate a Scalable Vector Graphics (SVG) file" },
+    { .arg = "-svg", .kind = argFlag, .val = &svg, .size = 0, .usage = "generate a Scalable Vector Graphics (SVG) file" },
 #endif
 #ifdef CAIRO_HAS_WIN32_SURFACE
     { "-print", argFlag, &printToWin32, 0, "print to a Windows printer" },
@@ -182,59 +182,59 @@ static const ArgDesc argDesc[] = {
     { "-setupdlg", argFlag, &setupdlg, 0, "show printer setup dialog before printing" },
 #endif
 
-    { "-f", argInt, &firstPage, 0, "first page to print" },
-    { "-l", argInt, &lastPage, 0, "last page to print" },
-    { "-o", argFlag, &printOnlyOdd, 0, "print only odd pages" },
-    { "-e", argFlag, &printOnlyEven, 0, "print only even pages" },
-    { "-singlefile", argFlag, &singleFile, 0, "write only the first page and do not add digits" },
+    { .arg = "-f", .kind = argInt, .val = &firstPage, .size = 0, .usage = "first page to print" },
+    { .arg = "-l", .kind = argInt, .val = &lastPage, .size = 0, .usage = "last page to print" },
+    { .arg = "-o", .kind = argFlag, .val = &printOnlyOdd, .size = 0, .usage = "print only odd pages" },
+    { .arg = "-e", .kind = argFlag, .val = &printOnlyEven, .size = 0, .usage = "print only even pages" },
+    { .arg = "-singlefile", .kind = argFlag, .val = &singleFile, .size = 0, .usage = "write only the first page and do not add digits" },
 
-    { "-r", argFP, &resolution, 0, "resolution, in PPI (default is 150)" },
-    { "-rx", argFP, &x_resolution, 0, "X resolution, in PPI (default is 150)" },
-    { "-ry", argFP, &y_resolution, 0, "Y resolution, in PPI (default is 150)" },
-    { "-scale-to", argInt, &scaleTo, 0, "scales each page to fit within scale-to*scale-to pixel box" },
-    { "-scale-to-x", argInt, &x_scaleTo, 0, "scales each page horizontally to fit in scale-to-x pixels" },
-    { "-scale-to-y", argInt, &y_scaleTo, 0, "scales each page vertically to fit in scale-to-y pixels" },
+    { .arg = "-r", .kind = argFP, .val = &resolution, .size = 0, .usage = "resolution, in PPI (default is 150)" },
+    { .arg = "-rx", .kind = argFP, .val = &x_resolution, .size = 0, .usage = "X resolution, in PPI (default is 150)" },
+    { .arg = "-ry", .kind = argFP, .val = &y_resolution, .size = 0, .usage = "Y resolution, in PPI (default is 150)" },
+    { .arg = "-scale-to", .kind = argInt, .val = &scaleTo, .size = 0, .usage = "scales each page to fit within scale-to*scale-to pixel box" },
+    { .arg = "-scale-to-x", .kind = argInt, .val = &x_scaleTo, .size = 0, .usage = "scales each page horizontally to fit in scale-to-x pixels" },
+    { .arg = "-scale-to-y", .kind = argInt, .val = &y_scaleTo, .size = 0, .usage = "scales each page vertically to fit in scale-to-y pixels" },
 
-    { "-x", argInt, &crop_x, 0, "x-coordinate of the crop area top left corner" },
-    { "-y", argInt, &crop_y, 0, "y-coordinate of the crop area top left corner" },
-    { "-W", argInt, &crop_w, 0, "width of crop area in pixels (default is 0)" },
-    { "-H", argInt, &crop_h, 0, "height of crop area in pixels (default is 0)" },
-    { "-sz", argInt, &sz, 0, "size of crop square in pixels (sets W and H)" },
-    { "-cropbox", argFlag, &useCropBox, 0, "use the crop box rather than media box" },
+    { .arg = "-x", .kind = argInt, .val = &crop_x, .size = 0, .usage = "x-coordinate of the crop area top left corner" },
+    { .arg = "-y", .kind = argInt, .val = &crop_y, .size = 0, .usage = "y-coordinate of the crop area top left corner" },
+    { .arg = "-W", .kind = argInt, .val = &crop_w, .size = 0, .usage = "width of crop area in pixels (default is 0)" },
+    { .arg = "-H", .kind = argInt, .val = &crop_h, .size = 0, .usage = "height of crop area in pixels (default is 0)" },
+    { .arg = "-sz", .kind = argInt, .val = &sz, .size = 0, .usage = "size of crop square in pixels (sets W and H)" },
+    { .arg = "-cropbox", .kind = argFlag, .val = &useCropBox, .size = 0, .usage = "use the crop box rather than media box" },
 
-    { "-mono", argFlag, &mono, 0, "generate a monochrome image file (PNG, JPEG)" },
-    { "-gray", argFlag, &gray, 0, "generate a grayscale image file (PNG, JPEG)" },
-    { "-transp", argFlag, &transp, 0, "use a transparent background instead of white (PNG)" },
-    { "-antialias", argGooString, &antialias, 0, "set cairo antialias option" },
+    { .arg = "-mono", .kind = argFlag, .val = &mono, .size = 0, .usage = "generate a monochrome image file (PNG, JPEG)" },
+    { .arg = "-gray", .kind = argFlag, .val = &gray, .size = 0, .usage = "generate a grayscale image file (PNG, JPEG)" },
+    { .arg = "-transp", .kind = argFlag, .val = &transp, .size = 0, .usage = "use a transparent background instead of white (PNG)" },
+    { .arg = "-antialias", .kind = argGooString, .val = &antialias, .size = 0, .usage = "set cairo antialias option" },
 #if USE_CMS
-    { "-icc", argGooString, &icc, 0, "ICC color profile to use" },
+    { .arg = "-icc", .kind = argGooString, .val = &icc, .size = 0, .usage = "ICC color profile to use" },
 #endif
 
-    { "-level2", argFlag, &level2, 0, "generate Level 2 PostScript (PS, EPS)" },
-    { "-level3", argFlag, &level3, 0, "generate Level 3 PostScript (PS, EPS)" },
-    { "-origpagesizes", argFlag, &origPageSizes, 0, "conserve original page sizes (PS, PDF, SVG)" },
-    { "-paper", argString, paperSize, sizeof(paperSize), "paper size (letter, legal, A4, A3, match)" },
-    { "-paperw", argInt, &paperWidth, 0, "paper width, in points" },
-    { "-paperh", argInt, &paperHeight, 0, "paper height, in points" },
-    { "-nocrop", argFlag, &noCrop, 0, "don't crop pages to CropBox" },
-    { "-expand", argFlag, &expand, 0, "expand pages smaller than the paper size" },
-    { "-noshrink", argFlag, &noShrink, 0, "don't shrink pages larger than the paper size" },
-    { "-nocenter", argFlag, &noCenter, 0, "don't center pages smaller than the paper size" },
-    { "-duplex", argFlag, &duplex, 0, "enable duplex printing" },
+    { .arg = "-level2", .kind = argFlag, .val = &level2, .size = 0, .usage = "generate Level 2 PostScript (PS, EPS)" },
+    { .arg = "-level3", .kind = argFlag, .val = &level3, .size = 0, .usage = "generate Level 3 PostScript (PS, EPS)" },
+    { .arg = "-origpagesizes", .kind = argFlag, .val = &origPageSizes, .size = 0, .usage = "conserve original page sizes (PS, PDF, SVG)" },
+    { .arg = "-paper", .kind = argString, .val = paperSize, .size = sizeof(paperSize), .usage = "paper size (letter, legal, A4, A3, match)" },
+    { .arg = "-paperw", .kind = argInt, .val = &paperWidth, .size = 0, .usage = "paper width, in points" },
+    { .arg = "-paperh", .kind = argInt, .val = &paperHeight, .size = 0, .usage = "paper height, in points" },
+    { .arg = "-nocrop", .kind = argFlag, .val = &noCrop, .size = 0, .usage = "don't crop pages to CropBox" },
+    { .arg = "-expand", .kind = argFlag, .val = &expand, .size = 0, .usage = "expand pages smaller than the paper size" },
+    { .arg = "-noshrink", .kind = argFlag, .val = &noShrink, .size = 0, .usage = "don't shrink pages larger than the paper size" },
+    { .arg = "-nocenter", .kind = argFlag, .val = &noCenter, .size = 0, .usage = "don't center pages smaller than the paper size" },
+    { .arg = "-duplex", .kind = argFlag, .val = &duplex, .size = 0, .usage = "enable duplex printing" },
 
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
-    { "-struct", argFlag, &docStruct, 0, "enable logical document structure" },
+    { .arg = "-struct", .kind = argFlag, .val = &docStruct, .size = 0, .usage = "enable logical document structure" },
 #endif
 
-    { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
-    { "-upw", argString, userPassword, sizeof(userPassword), "user password (for encrypted files)" },
+    { .arg = "-opw", .kind = argString, .val = ownerPassword, .size = sizeof(ownerPassword), .usage = "owner password (for encrypted files)" },
+    { .arg = "-upw", .kind = argString, .val = userPassword, .size = sizeof(userPassword), .usage = "user password (for encrypted files)" },
 
-    { "-q", argFlag, &quiet, 0, "don't print any messages or errors" },
-    { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
-    { "-h", argFlag, &printHelp, 0, "print usage information" },
-    { "-help", argFlag, &printHelp, 0, "print usage information" },
-    { "--help", argFlag, &printHelp, 0, "print usage information" },
-    { "-?", argFlag, &printHelp, 0, "print usage information" },
+    { .arg = "-q", .kind = argFlag, .val = &quiet, .size = 0, .usage = "don't print any messages or errors" },
+    { .arg = "-v", .kind = argFlag, .val = &printVersion, .size = 0, .usage = "print copyright and version info" },
+    { .arg = "-h", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+    { .arg = "-help", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+    { .arg = "--help", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
+    { .arg = "-?", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
     {}
 };
 

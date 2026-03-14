@@ -83,8 +83,20 @@ void TestInternalOutline::testSetOutline()
     QVERIFY(outlineItems == nullptr);
 
     // create an outline and save the file
-    outline->setOutline(
-            { { "1", 1, { { "1.1", 1, {} }, { "1.2", 2, {} }, { "1.3", 3, { { "1.3.1", 1, {} }, { "1.3.2", 2, {} }, { "1.3.3", 3, {} }, { "1.3.4", 4, {} } } }, { "1.4", 4, {} } } }, { "2", 2, {} }, { "3", 3, {} }, { "4", 4, {} } });
+    outline->setOutline({ { .title = "1",
+                            .destPageNum = 1,
+                            .children = { { .title = "1.1", .destPageNum = 1, .children = {} },
+                                          { .title = "1.2", .destPageNum = 2, .children = {} },
+                                          { .title = "1.3",
+                                            .destPageNum = 3,
+                                            .children = { { .title = "1.3.1", .destPageNum = 1, .children = {} },
+                                                          { .title = "1.3.2", .destPageNum = 2, .children = {} },
+                                                          { .title = "1.3.3", .destPageNum = 3, .children = {} },
+                                                          { .title = "1.3.4", .destPageNum = 4, .children = {} } } },
+                                          { .title = "1.4", .destPageNum = 4, .children = {} } } },
+                          { .title = "2", .destPageNum = 2, .children = {} },
+                          { .title = "3", .destPageNum = 3, .children = {} },
+                          { .title = "4", .destPageNum = 4, .children = {} } });
     outlineItems = outline->getItems();
     QVERIFY(outlineItems != nullptr);
     doc->saveAs(tempFileName);
@@ -275,10 +287,21 @@ void TestInternalOutline::testRemoveChild()
     QVERIFY(outlineItems == nullptr);
 
     // create an outline and save the file
-    outline->setOutline({ { "1", 1, { { "1.1", 1, {} }, { "1.2", 2, {} }, { "1.3", 3, { { "1.3.1", 1, {} }, { "1.3.2", 2, {} }, { "1.3.3", 3, {} }, { "1.3.4", 4, {} } } }, { "1.4", 4, {} } } },
-                          { "2", 2, { { "2.1", 1, {} } } },
-                          { "3", 3, { { "3.1", 1, {} }, { "3.2", 2, { { "3.2.1", 1, {} } } } } },
-                          { "4", 4, {} } });
+    outline->setOutline(
+            { { .title = "1",
+                .destPageNum = 1,
+                .children = { { .title = "1.1", .destPageNum = 1, .children = {} },
+                              { .title = "1.2", .destPageNum = 2, .children = {} },
+                              { .title = "1.3",
+                                .destPageNum = 3,
+                                .children = { { .title = "1.3.1", .destPageNum = 1, .children = {} },
+                                              { .title = "1.3.2", .destPageNum = 2, .children = {} },
+                                              { .title = "1.3.3", .destPageNum = 3, .children = {} },
+                                              { .title = "1.3.4", .destPageNum = 4, .children = {} } } },
+                              { .title = "1.4", .destPageNum = 4, .children = {} } } },
+              { .title = "2", .destPageNum = 2, .children = { { .title = "2.1", .destPageNum = 1, .children = {} } } },
+              { .title = "3", .destPageNum = 3, .children = { { .title = "3.1", .destPageNum = 1, .children = {} }, { .title = "3.2", .destPageNum = 2, .children = { { .title = "3.2.1", .destPageNum = 1, .children = {} } } } } },
+              { .title = "4", .destPageNum = 4, .children = {} } });
     outlineItems = outline->getItems();
     QVERIFY(outlineItems != nullptr);
     doc->saveAs(tempFileName);
@@ -369,10 +392,21 @@ void TestInternalOutline::testSetTitleAndSetPageDest()
     QVERIFY(outlineItems == nullptr);
 
     // create an outline and save the file
-    outline->setOutline({ { "1", 1, { { "1.1", 1, {} }, { "1.2", 2, {} }, { "1.3", 3, { { "1.3.1", 1, {} }, { "1.3.2", 2, {} }, { "1.3.3", 3, {} }, { "1.3.4", 4, {} } } }, { "1.4", 4, {} } } },
-                          { "2", 2, { { "2.1", 1, {} } } },
-                          { "3", 3, { { "3.1", 1, {} }, { "3.2", 2, { { "3.2.1", 1, {} } } } } },
-                          { "4", 4, {} } });
+    outline->setOutline(
+            { { .title = "1",
+                .destPageNum = 1,
+                .children = { { .title = "1.1", .destPageNum = 1, .children = {} },
+                              { .title = "1.2", .destPageNum = 2, .children = {} },
+                              { .title = "1.3",
+                                .destPageNum = 3,
+                                .children = { { .title = "1.3.1", .destPageNum = 1, .children = {} },
+                                              { .title = "1.3.2", .destPageNum = 2, .children = {} },
+                                              { .title = "1.3.3", .destPageNum = 3, .children = {} },
+                                              { .title = "1.3.4", .destPageNum = 4, .children = {} } } },
+                              { .title = "1.4", .destPageNum = 4, .children = {} } } },
+              { .title = "2", .destPageNum = 2, .children = { { .title = "2.1", .destPageNum = 1, .children = {} } } },
+              { .title = "3", .destPageNum = 3, .children = { { .title = "3.1", .destPageNum = 1, .children = {} }, { .title = "3.2", .destPageNum = 2, .children = { { .title = "3.2.1", .destPageNum = 1, .children = {} } } } } },
+              { .title = "4", .destPageNum = 4, .children = {} } });
     outlineItems = outline->getItems();
     QVERIFY(outlineItems != nullptr);
     doc->saveAs(tempFileName);
