@@ -219,7 +219,7 @@ inline void Splash::pipeInit(SplashPipe *pipe, int x, int y, SplashPattern *patt
     pipe->knockoutOpacity = knockoutOpacity;
 
     // result alpha
-    pipe->noTransparency = aInput == 255 && !state->softMask && !usesShape && !state->inNonIsolatedGroup && !nonIsolatedGroup;
+    pipe->noTransparency = aInput == 255 && !state->softMask && !usesShape && !state->inNonIsolatedGroup && !state->inKnockoutGroup && !nonIsolatedGroup;
 
     // result color
     if (pipe->noTransparency) {
@@ -383,30 +383,53 @@ void Splash::pipeRun(SplashPipe *pipe)
 
         //----- read destination pixel
 
-        unsigned char *destColorPtr;
-        if (pipe->shape && state->blendFunc && pipe->knockout && alpha0Bitmap != nullptr) {
-            destColorPtr = alpha0Bitmap->data + (alpha0Y + pipe->y) * alpha0Bitmap->rowSize;
+        unsigned char *destColorPtr = pipe->destColorPtr;
+        unsigned char *backColorPtr;
+        if (state->inKnockoutGroup && groupBackBitmap != nullptr) {
+            // read from the group backdrop
+            backColorPtr = groupBackBitmap->data + (groupBackY + pipe->y) * groupBackBitmap->rowSize;
             switch (bitmap->mode) {
             case splashModeMono1:
-                destColorPtr += (alpha0X + pipe->x) / 8;
+                backColorPtr += (groupBackX + pipe->x) / 8;
                 break;
             case splashModeMono8:
-                destColorPtr += (alpha0X + pipe->x);
+                backColorPtr += (groupBackX + pipe->x);
                 break;
             case splashModeRGB8:
             case splashModeBGR8:
-                destColorPtr += (alpha0X + pipe->x) * 3;
+                backColorPtr += (groupBackX + pipe->x) * 3;
                 break;
             case splashModeXBGR8:
             case splashModeCMYK8:
-                destColorPtr += (alpha0X + pipe->x) * 4;
+                backColorPtr += (groupBackX + pipe->x) * 4;
                 break;
             case splashModeDeviceN8:
-                destColorPtr += (alpha0X + pipe->x) * (SPOT_NCOMPS + 4);
+                backColorPtr += (groupBackX + pipe->x) * (SPOT_NCOMPS + 4);
+                break;
+            }
+        } else if (pipe->shape && state->blendFunc && pipe->knockout && alpha0Bitmap != nullptr) {
+            backColorPtr = alpha0Bitmap->data + (alpha0Y + pipe->y) * alpha0Bitmap->rowSize;
+            switch (bitmap->mode) {
+            case splashModeMono1:
+                backColorPtr += (alpha0X + pipe->x) / 8;
+                break;
+            case splashModeMono8:
+                backColorPtr += (alpha0X + pipe->x);
+                break;
+            case splashModeRGB8:
+            case splashModeBGR8:
+                backColorPtr += (alpha0X + pipe->x) * 3;
+                break;
+            case splashModeXBGR8:
+            case splashModeCMYK8:
+                backColorPtr += (alpha0X + pipe->x) * 4;
+                break;
+            case splashModeDeviceN8:
+                backColorPtr += (alpha0X + pipe->x) * (SPOT_NCOMPS + 4);
                 break;
             }
         } else {
-            destColorPtr = pipe->destColorPtr;
+            backColorPtr = pipe->destColorPtr;
         }
         switch (bitmap->mode) {
         case splashModeMono1:
@@ -443,6 +466,44 @@ void Splash::pipeRun(SplashPipe *pipe)
             }
             break;
         }
+
+        SplashColor cBack;
+        switch (bitmap->mode) {
+        case splashModeMono1:
+            cBack[0] = (*backColorPtr & pipe->destColorMask) ? 0xff : 0x00;
+            break;
+        case splashModeMono8:
+            cBack[0] = *backColorPtr;
+            break;
+        case splashModeRGB8:
+            cBack[0] = backColorPtr[0];
+            cBack[1] = backColorPtr[1];
+            cBack[2] = backColorPtr[2];
+            break;
+        case splashModeXBGR8:
+            cBack[0] = backColorPtr[2];
+            cBack[1] = backColorPtr[1];
+            cBack[2] = backColorPtr[0];
+            cBack[3] = 255;
+            break;
+        case splashModeBGR8:
+            cBack[0] = backColorPtr[2];
+            cBack[1] = backColorPtr[1];
+            cBack[2] = backColorPtr[0];
+            break;
+        case splashModeCMYK8:
+            cBack[0] = backColorPtr[0];
+            cBack[1] = backColorPtr[1];
+            cBack[2] = backColorPtr[2];
+            cBack[3] = backColorPtr[3];
+            break;
+        case splashModeDeviceN8:
+            for (cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
+                cBack[cp] = backColorPtr[cp];
+            }
+            break;
+        }
+
         if (pipe->destAlphaPtr) {
             aDest = *pipe->destAlphaPtr;
         } else {
@@ -517,23 +578,36 @@ void Splash::pipeRun(SplashPipe *pipe)
                     cBlend[k] = 0;
                 }
             }
-            (*state->blendFunc)(cSrc, cDest, cBlend, bitmap->mode);
+            (*state->blendFunc)(cSrc, cBack, cBlend, bitmap->mode);
         }
 
         //----- result alpha and non-isolated group element correction
 
         if (pipe->noTransparency) {
             alphaI = alphaIm1 = aResult = 255;
-        } else {
-            aResult = aSrc + aDest - div255(aSrc * aDest);
-
-            // alphaI = alpha_i
-            // alphaIm1 = alpha_(i-1)
-            if (pipe->alpha0Ptr) {
+        } else if (pipe->alpha0Ptr) {
+            if (state->inKnockoutGroup) {
+                // non-isolated, knockout
+                aResult = aSrc + div255(aDest * (255 - pipe->shape));
+                alpha0 = *pipe->alpha0Ptr++;
+                alphaI = aResult + alpha0 - div255(aResult * alpha0);
+                alphaIm1 = alpha0;
+            } else {
+                // non-isolated, non-knockout
+                aResult = aSrc + aDest - div255(aSrc * aDest);
                 alpha0 = *pipe->alpha0Ptr++;
                 alphaI = aResult + alpha0 - div255(aResult * alpha0);
                 alphaIm1 = alpha0 + aDest - div255(alpha0 * aDest);
+            }
+        } else {
+            if (state->inKnockoutGroup) {
+                // isolated, knockout
+                aResult = aSrc + div255(aDest * (255 - pipe->shape));
+                alphaI = aResult;
+                alphaIm1 = 0;
             } else {
+                // isolated, non-knockout
+                aResult = aSrc + aDest - div255(aSrc * aDest);
                 alphaI = aResult;
                 alphaIm1 = aDest;
             }
@@ -1441,6 +1515,9 @@ Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, SplashScreenParams 
     thinLineMode = splashThinLineDefault;
     debugMode = false;
     alpha0Bitmap = nullptr;
+    groupBackBitmap = nullptr;
+    groupBackX = 0;
+    groupBackY = 0;
 }
 
 Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, const SplashScreen &screenA)
@@ -1463,6 +1540,9 @@ Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, const SplashScreen 
     thinLineMode = splashThinLineDefault;
     debugMode = false;
     alpha0Bitmap = nullptr;
+    groupBackBitmap = nullptr;
+    groupBackX = 0;
+    groupBackY = 0;
 }
 
 Splash::~Splash()
@@ -1561,6 +1641,11 @@ SplashBitmap *Splash::getSoftMask()
 bool Splash::getInNonIsolatedGroup()
 {
     return state->inNonIsolatedGroup;
+}
+
+bool Splash::getInKnockoutGroup()
+{
+    return state->inKnockoutGroup;
 }
 
 //------------------------------------------------------------------------
@@ -1685,12 +1770,16 @@ void Splash::setSoftMask(SplashBitmap *softMask)
     state->setSoftMask(softMask);
 }
 
-void Splash::setInNonIsolatedGroup(SplashBitmap *alpha0BitmapA, int alpha0XA, int alpha0YA)
+void Splash::setInTransparencyGroup(SplashBitmap *groupBackBitmapA, int groupBackXA, int groupBackYA, bool nonIsolated, bool knockout)
 {
-    alpha0Bitmap = alpha0BitmapA;
-    alpha0X = alpha0XA;
-    alpha0Y = alpha0YA;
-    state->inNonIsolatedGroup = true;
+    groupBackBitmap = groupBackBitmapA;
+    groupBackX = groupBackXA;
+    groupBackY = groupBackYA;
+    alpha0Bitmap = groupBackBitmapA;
+    alpha0X = groupBackXA;
+    alpha0Y = groupBackYA;
+    state->inNonIsolatedGroup = nonIsolated;
+    state->inKnockoutGroup = knockout;
 }
 
 void Splash::setTransfer(unsigned char *red, unsigned char *green, unsigned char *blue, unsigned char *gray)
@@ -5900,6 +5989,95 @@ SplashError Splash::blitTransparent(const SplashBitmap &src, int xSrc, int ySrc,
         for (y = 0; y < height; ++y) {
             q = &bitmap->alpha[(yDest + y) * bitmap->width + xDest];
             memset(q, 0x00, width);
+        }
+    }
+
+    return SplashError::NoError;
+}
+
+SplashError Splash::blitCorrectedAlpha(SplashBitmap *dest, int xSrc, int ySrc, int xDest, int yDest, int w, int h)
+{
+    SplashColorPtr p, q;
+    unsigned char *alpha0Ptr;
+    unsigned char alpha0, aSrc;
+    int x, y;
+
+    if (bitmap->mode != dest->mode || !bitmap->alpha || !dest->alpha || !groupBackBitmap) {
+        return SplashError::ModeMismatch;
+    }
+
+    // copy color data
+    switch (bitmap->mode) {
+    case splashModeMono1:
+        for (y = 0; y < h; ++y) {
+            p = &dest->data[(yDest + y) * dest->rowSize + (xDest >> 3)];
+            int mask = 0x80 >> (xDest & 7);
+            q = &bitmap->data[(ySrc + y) * bitmap->rowSize + (xSrc >> 3)];
+            int srcMask = 0x80 >> (xSrc & 7);
+            for (x = 0; x < w; ++x) {
+                if (*q & srcMask) {
+                    *p |= mask;
+                } else {
+                    *p &= ~mask;
+                }
+                if (!(mask >>= 1)) {
+                    mask = 0x80;
+                    ++p;
+                }
+                if (!(srcMask >>= 1)) {
+                    srcMask = 0x80;
+                    ++q;
+                }
+            }
+        }
+        break;
+    case splashModeMono8:
+        for (y = 0; y < h; ++y) {
+            p = &dest->data[(yDest + y) * dest->rowSize + xDest];
+            q = &bitmap->data[(ySrc + y) * bitmap->rowSize + xSrc];
+            memcpy(p, q, w);
+        }
+        break;
+    case splashModeRGB8:
+    case splashModeBGR8:
+        for (y = 0; y < h; ++y) {
+            p = &dest->data[(yDest + y) * dest->rowSize + 3 * xDest];
+            q = &bitmap->data[(ySrc + y) * bitmap->rowSize + 3 * xSrc];
+            memcpy(p, q, 3 * w);
+        }
+        break;
+    case splashModeXBGR8:
+        for (y = 0; y < h; ++y) {
+            p = &dest->data[(yDest + y) * dest->rowSize + 4 * xDest];
+            q = &bitmap->data[(ySrc + y) * bitmap->rowSize + 4 * xSrc];
+            memcpy(p, q, 4 * w);
+        }
+        break;
+    case splashModeCMYK8:
+        for (y = 0; y < h; ++y) {
+            p = &dest->data[(yDest + y) * dest->rowSize + 4 * xDest];
+            q = &bitmap->data[(ySrc + y) * bitmap->rowSize + 4 * xSrc];
+            memcpy(p, q, 4 * w);
+        }
+        break;
+    case splashModeDeviceN8:
+        for (y = 0; y < h; ++y) {
+            p = &dest->data[(yDest + y) * dest->rowSize + (SPOT_NCOMPS + 4) * xDest];
+            q = &bitmap->data[(ySrc + y) * bitmap->rowSize + (SPOT_NCOMPS + 4) * xSrc];
+            memcpy(p, q, (SPOT_NCOMPS + 4) * w);
+        }
+        break;
+    }
+
+    // alpha = alpha0 + aSrc - div255(alpha0 * aSrc)
+    for (y = 0; y < h; ++y) {
+        p = &dest->alpha[(yDest + y) * dest->width + xDest];
+        q = &bitmap->alpha[(ySrc + y) * bitmap->width + xSrc];
+        alpha0Ptr = &groupBackBitmap->alpha[(groupBackY + ySrc + y) * groupBackBitmap->width + (groupBackX + xSrc)];
+        for (x = 0; x < w; ++x) {
+            alpha0 = *alpha0Ptr++;
+            aSrc = *q++;
+            *p++ = (unsigned char)(alpha0 + aSrc - div255(alpha0 * aSrc));
         }
     }
 
