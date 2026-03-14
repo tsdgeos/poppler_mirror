@@ -6,7 +6,7 @@
 //
 // Copyright 2015, 2016 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2016, 2018, 2019, 2021-2023, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2016, 2018, 2019, 2021-2023, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Markus Kilås <digital@markuspage.com>
 // Copyright 2017 Sebastian Rasmussen <sebras@gmail.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
@@ -685,7 +685,7 @@ static std::optional<std::string> getDefaultFirefoxCertDB()
     std::filesystem::file_time_type latestWriteTime;
     for (const std::string &firefoxPath : firefoxPaths) {
         for (const auto &entry : std::filesystem::directory_iterator { firefoxPath, ec }) {
-            if (entry.is_directory() && entry.path().string().find("default") != std::string::npos) {
+            if (entry.is_directory() && entry.path().string().contains("default")) {
                 const auto certPath = entry.path() / "cert9.db";
                 if (std::filesystem::exists(certPath, ec) && std::filesystem::is_regular_file(certPath, ec)) {
                     const auto writeTime = std::filesystem::last_write_time(certPath, ec);

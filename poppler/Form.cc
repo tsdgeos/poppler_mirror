@@ -2810,7 +2810,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
 
             // a bit arbirary but the Flags field is mandatory...
             const std::string lowerCaseFontFamily = GooString::toLowerCase(fontFamily);
-            if (lowerCaseFontFamily.find("serif") != std::string::npos && lowerCaseFontFamily.find("sans") == std::string::npos) {
+            if (lowerCaseFontFamily.contains("serif") && !lowerCaseFontFamily.contains("sans")) {
                 fontDescriptor->set("Flags", Object(2)); // Serif
             } else {
                 fontDescriptor->set("Flags", Object(0)); // Sans Serif
