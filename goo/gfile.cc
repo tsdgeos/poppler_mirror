@@ -62,16 +62,22 @@ using namespace std::string_literals;
 
 namespace {
 
+template<class T>
+inline constexpr bool has_st_mtim = requires(const T &s) { s.st_mtim; };
+
+template<class T>
+inline constexpr bool has_st_mtimespec = requires(const T &s) { s.st_mtimespec; };
+
 template<typename Stat>
 const struct timespec &mtim(const Stat &stbuf)
 {
-    if constexpr (requires { stbuf.st_mtim; }) {
+    static_assert(has_st_mtim<Stat> || has_st_mtimespec<Stat>, "stat must contain st_mtim or st_mtimespec");
+
+    if constexpr (has_st_mtim<Stat>) {
         return stbuf.st_mtim;
-    } else if constexpr (requires { stbuf.st_mtimespec; }) {
+    } else {
         // Mac OS X uses a different field name than POSIX and this makes it work
         return stbuf.st_mtimespec;
-    } else {
-        static_assert(false);
     }
 }
 
