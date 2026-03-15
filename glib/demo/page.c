@@ -99,10 +99,10 @@ static void image_set_from_surface(GtkImage *gtkimage, cairo_surface_t *surface)
             tmp = p[0];
             p[0] = p[2];
             p[2] = tmp;
-            p[3] = (has_alpha) ? p[3] : 0xff;
+            p[3] = has_alpha ? p[3] : 0xff;
 #    else
             tmp = p[0];
-            p[0] = (has_alpha) ? p[3] : 0xff;
+            p[0] = has_alpha ? p[3] : 0xff;
             p[3] = p[2];
             p[2] = p[1];
             p[1] = tmp;

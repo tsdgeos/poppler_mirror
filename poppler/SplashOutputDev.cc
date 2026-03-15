@@ -3963,9 +3963,9 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const std::array<d
             transpGroup->backdropBitmap = backdropBitmap;
             splash->setInTransparencyGroup(backdropBitmap, 0, 0, true, knockout);
         } else {
-            SplashBitmap *shape = (knockout) ? transpGroup->shape : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->shape : transpGroup->origBitmap;
-            int shapeTx = (knockout) ? tx : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->tx + tx : tx;
-            int shapeTy = (knockout) ? ty : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->ty + ty : ty;
+            SplashBitmap *shape = knockout ? transpGroup->shape : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->shape : transpGroup->origBitmap;
+            int shapeTx = knockout ? tx : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->tx + tx : tx;
+            int shapeTy = knockout ? ty : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->ty + ty : ty;
             splash->setInTransparencyGroup(shape, shapeTx, shapeTy, true, knockout);
         }
     }

@@ -153,7 +153,7 @@ static inline unsigned char colToByte(GfxColorComp x)
 
 static inline unsigned short colToShort(GfxColorComp x)
 {
-    return (unsigned short)(x);
+    return static_cast<unsigned short>(x);
 }
 
 //------------------------------------------------------------------------

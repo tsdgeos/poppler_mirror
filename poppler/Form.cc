@@ -103,7 +103,7 @@ std::string pdfDocEncodingToUTF16(const std::string &orig)
     result.push_back('\xfe');
     result.push_back('\xff');
     // convert to utf16
-    for (int i = 2, j = 0; i < (length); i += 2, j++) {
+    for (int i = 2, j = 0; i < length; i += 2, j++) {
         Unicode u = pdfDocEncoding[(unsigned int)((unsigned char)orig[j])] & 0xffff;
         result.push_back((u >> 8) & 0xff);
         result.push_back(u & 0xff);

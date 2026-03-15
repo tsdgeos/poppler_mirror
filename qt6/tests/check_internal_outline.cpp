@@ -60,7 +60,7 @@ static std::string getTitle(const OutlineItem *item)
     const std::vector<Unicode> &u = item->getTitle();
     std::string s;
     for (const auto &c : u) {
-        s.append(1, (char)(c));
+        s.append(1, static_cast<char>(c));
     }
     return s;
 }

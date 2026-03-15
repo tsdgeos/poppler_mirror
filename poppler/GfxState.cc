@@ -4162,9 +4162,9 @@ inline void radialEdge(double num, double den, double delta, double lower, doubl
 {
     if (fabs(den) >= RADIAL_EPSILON) {
         double t_edge, v;
-        t_edge = (num) / (den);
-        v = t_edge * (delta);
-        if (t_edge * dr >= mindr && (lower) <= v && v <= (upper)) {
+        t_edge = num / den;
+        v = t_edge * delta;
+        if (t_edge * dr >= mindr && lower <= v && v <= upper) {
             valid = radialExtendRange(range, t_edge, valid);
         }
     }
@@ -4172,12 +4172,12 @@ inline void radialEdge(double num, double den, double delta, double lower, doubl
 
 inline void radialCorner1(double x, double y, double &b, double dx, double dy, double cr, double dr, double mindr, bool &valid, double *range)
 {
-    b = (x)*dx + (y)*dy + cr * dr;
+    b = x * dx + y * dy + cr * dr;
     if (fabs(b) >= RADIAL_EPSILON) {
         double t_corner;
-        double x2 = (x) * (x);
-        double y2 = (y) * (y);
-        double cr2 = (cr) * (cr);
+        double x2 = x * x;
+        double y2 = y * y;
+        double cr2 = cr * cr;
         double c = x2 + y2 - cr2;
 
         t_corner = 0.5 * c / b;
@@ -4189,8 +4189,8 @@ inline void radialCorner1(double x, double y, double &b, double dx, double dy, d
 
 inline void radialCorner2(double x, double y, double a, double &b, double &c, double &d, double dx, double dy, double cr, double inva, double dr, double mindr, bool &valid, double *range)
 {
-    b = (x)*dx + (y)*dy + cr * dr;
-    c = (x) * (x) + (y) * (y)-cr * cr;
+    b = x * dx + y * dy + cr * dr;
+    c = x * x + y * y - cr * cr;
     d = b * b - a * c;
     if (d >= 0) {
         double t_corner;

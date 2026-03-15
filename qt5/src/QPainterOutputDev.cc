@@ -583,7 +583,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
         case fontTrueTypeOT: {
             auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str(), fontLoc->fontNum) : FoFiTrueType::make(std::span(fontBuffer), fontLoc->fontNum);
 
-            m_codeToGIDCache[id] = (ff) ? ((Gfx8BitFont *)gfxFont.get())->getCodeToGIDMap(ff.get()) : std::vector<int> {};
+            m_codeToGIDCache[id] = ff ? ((Gfx8BitFont *)gfxFont.get())->getCodeToGIDMap(ff.get()) : std::vector<int> {};
 
             break;
         }
@@ -595,7 +595,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
             if (!m_useCIDs) {
                 auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? std::unique_ptr<FoFiType1C>(FoFiType1C::load(fontLoc->path.c_str())) : std::unique_ptr<FoFiType1C>(FoFiType1C::make(std::span(fontBuffer)));
 
-                cidToGIDMap = (ff) ? ff->getCIDToGIDMap() : std::vector<int> {};
+                cidToGIDMap = ff ? ff->getCIDToGIDMap() : std::vector<int> {};
             }
 
             m_codeToGIDCache[id] = cidToGIDMap;
@@ -989,7 +989,7 @@ void QPainterOutputDev::drawImageMask(GfxState * /*state*/, Object * /*ref*/, St
         for (int x = 0; x < width; x++) {
 
             bool opaque = ((bool)pix[x]) == invert;
-            dest[x] = (opaque) ? fillColor : 0;
+            dest[x] = opaque ? fillColor : 0;
         }
     }
 

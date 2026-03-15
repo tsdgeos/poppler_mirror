@@ -5103,7 +5103,7 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs)
                 Object markedContent = res->lookupMarkedContentNF(name1);
                 if (!markedContent.isNull()) {
                     bool visible = contentConfig->optContentIsVisible(&markedContent);
-                    mc->ocSuppressed = !(visible);
+                    mc->ocSuppressed = !visible;
                 } else {
                     error(errSyntaxError, getPos(), "DID NOT find {0:s}", name1);
                 }

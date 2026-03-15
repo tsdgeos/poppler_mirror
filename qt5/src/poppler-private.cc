@@ -114,7 +114,7 @@ QString unicodeToQString(const std::vector<Unicode> &u)
 
 QString UnicodeParsedString(const GooString *s1)
 {
-    return (s1) ? UnicodeParsedString(s1->toStr()) : QString();
+    return s1 ? UnicodeParsedString(s1->toStr()) : QString();
 }
 
 QString UnicodeParsedString(const std::string &s1)

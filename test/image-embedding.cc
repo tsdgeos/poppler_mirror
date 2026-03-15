@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     const bool ok = parseArgs(argDesc, &argc, argv);
     if (!ok || (argc != 3) || printHelp) {
         printUsage(argv[0], "PDF-FILE IMAGE-FILE", argDesc);
-        return (printHelp) ? 0 : 1;
+        return printHelp ? 0 : 1;
     }
     const GooString docPath(argv[1]);
     const GooString imagePath(argv[2]);

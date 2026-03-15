@@ -377,7 +377,7 @@ gboolean poppler_attachment_save_to_callback(PopplerAttachment *attachment, Popp
         }
 
         if (i > 0) {
-            if (!(save_func)(buf, i, user_data, error)) {
+            if (!save_func(buf, i, user_data, error)) {
                 return FALSE;
             }
         }

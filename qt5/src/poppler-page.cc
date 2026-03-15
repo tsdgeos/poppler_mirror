@@ -509,7 +509,7 @@ static bool renderToQPainter(QImageDumpingQPainterOutputDev *qpainter_output, QP
 
     OutputDevCallbackHelper *abortHelper = qpainter_output;
     page->parentDoc->doc->displayPageSlice(qpainter_output, page->index + 1, xres, yres, (int)rotate * 90, false, true, false, x, y, w, h, abortHelper->shouldAbortRenderCallback ? shouldAbortRenderInternalCallback : nullAbortCallBack,
-                                           abortHelper, (hideAnnotations) ? annotDisplayDecideCbk : nullAnnotCallBack, nullptr, true);
+                                           abortHelper, hideAnnotations ? annotDisplayDecideCbk : nullAnnotCallBack, nullptr, true);
     if (savePainter) {
         painter->restore();
     }
@@ -604,7 +604,7 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
 
         OutputDevCallbackHelper *abortHelper = &splash_output;
         m_page->parentDoc->doc->displayPageSlice(&splash_output, m_page->index + 1, xres, yres, rotation, false, true, false, xPos, yPos, w, h, shouldAbortRenderCallback ? shouldAbortRenderInternalCallback : nullAbortCallBack, abortHelper,
-                                                 (hideAnnotations) ? annotDisplayDecideCbk : nullAnnotCallBack, nullptr, true);
+                                                 hideAnnotations ? annotDisplayDecideCbk : nullAnnotCallBack, nullptr, true);
 
         img = splash_output.getXBGRImage(true /* takeImageData */);
         break;

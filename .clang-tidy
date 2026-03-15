@@ -29,7 +29,6 @@ Checks:  >
     -readability-avoid-unconditional-preprocessor-if,
     -readability-suspicious-call-argument,
     -readability-string-compare,
-    -readability-redundant-parentheses,
     modernize-*,
     -modernize-macro-to-enum,
     -modernize-use-trailing-return-type,
@@ -61,4 +60,6 @@ CheckOptions:
     value:           '1'
   - key:             readability-named-parameter.InsertPlainNamesInForwardDecls
     value:           '1'
+  - key:             readability-redundant-parentheses.AllowedDecls
+    value:           'std::max;std::min;std::numeric_limits<.*>::max;std::numeric_limits<.*>::min'
 ...

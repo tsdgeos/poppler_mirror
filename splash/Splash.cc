@@ -1471,7 +1471,7 @@ inline void Splash::drawAALine(SplashPipe *pipe, int x0, int x1, int y, bool adj
 #endif
 
         if (t != 0) {
-            pipe->shape = (adjustLine) ? div255(static_cast<int>((int)lineOpacity * (double)aaGamma[t])) : (int)aaGamma[t];
+            pipe->shape = adjustLine ? div255(static_cast<int>((int)lineOpacity * (double)aaGamma[t])) : (int)aaGamma[t];
             (this->*pipe->run)(pipe);
         } else {
             pipeIncX(pipe);
@@ -6530,7 +6530,7 @@ SplashError Splash::shadedFill(const SplashPath &path, bool hasBBox, SplashPatte
             yMaxI = state->clip->getYMaxI();
         }
 
-        unsigned char alpha = splashRound((clipToStrokePath) ? state->strokeAlpha * 255 : state->fillAlpha * 255);
+        unsigned char alpha = splashRound(clipToStrokePath ? state->strokeAlpha * 255 : state->fillAlpha * 255);
         pipeInit(&pipe, 0, yMinI, pattern, nullptr, alpha, vectorAntialias && !hasBBox, false);
 
         // draw the spans
