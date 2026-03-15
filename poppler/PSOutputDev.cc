@@ -1092,22 +1092,6 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA, char *psTitleA, con
     if (!strcmp(fileName, "-")) {
         fileTypeA = psStdout;
         f = stdout;
-    } else if (fileName[0] == '|') {
-        fileTypeA = psPipe;
-#if HAVE_POPEN
-#    ifndef _WIN32
-        signal(SIGPIPE, static_cast<SignalFunc> SIG_IGN);
-#    endif
-        if (!(f = popen(fileName + 1, "w"))) {
-            error(errIO, -1, "Couldn't run print command '{0:s}'", fileName);
-            ok = false;
-            return;
-        }
-#else
-        error(errIO, -1, "Print commands are not supported ('{0:s}')", fileName);
-        ok = false;
-        return;
-#endif
     } else {
         fileTypeA = psFile;
         if (!(f = openFile(fileName, "w"))) {
@@ -1486,14 +1470,6 @@ PSOutputDev::~PSOutputDev()
         if (fileType == psFile) {
             fclose(static_cast<FILE *>(outputStream));
         }
-#if HAVE_POPEN
-        else if (fileType == psPipe) {
-            pclose(static_cast<FILE *>(outputStream));
-#    ifndef _WIN32
-            signal(SIGPIPE, static_cast<SignalFunc> SIG_DFL);
-#    endif
-        }
-#endif
     }
     if (font16Enc) {
         for (i = 0; i < font16EncLen; ++i) {

@@ -93,7 +93,6 @@ enum PSOutMode
 enum PSFileType
 {
     psFile, // write to file
-    psPipe, // write to pipe
     psStdout, // write to stdout
     psGeneric // write to a generic stream
 };

@@ -56,9 +56,6 @@
 /* Defines if strtok_r is available on your system */
 #cmakedefine01 HAVE_STRTOK_R
 
-/* Define to 1 if you have the `popen' function. */
-#cmakedefine01 HAVE_POPEN
-
 /* Define to 1 if you have a big endian machine */
 #cmakedefine01 WORDS_BIGENDIAN
 

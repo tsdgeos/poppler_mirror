@@ -26,7 +26,6 @@ check_function_exists(lseek64 HAVE_LSEEK64)
 check_function_exists(gmtime_r HAVE_GMTIME_R)
 check_function_exists(timegm HAVE_TIMEGM)
 check_function_exists(localtime_r HAVE_LOCALTIME_R)
-check_function_exists(popen HAVE_POPEN)
 check_function_exists(strtok_r HAVE_STRTOK_R)
 
 cmake_pop_check_state()
