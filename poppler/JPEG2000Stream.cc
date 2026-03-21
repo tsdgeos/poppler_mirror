@@ -57,7 +57,7 @@ static inline int doLookChar(JPXStreamPrivate *priv)
         return EOF;
     }
 
-    return ((unsigned char *)priv->image->comps[priv->ccounter].data)[priv->counter];
+    return (reinterpret_cast<unsigned char *>(priv->image->comps[priv->ccounter].data))[priv->counter];
 }
 
 static inline int doGetChar(JPXStreamPrivate *priv)
@@ -202,10 +202,10 @@ constexpr int BUFFER_INITIAL_SIZE = 4096;
 
 static OPJ_SIZE_T jpxRead_callback(void *p_buffer, OPJ_SIZE_T p_nb_bytes, void *p_user_data)
 {
-    auto *jpxData = (JPXData *)p_user_data;
+    auto *jpxData = static_cast<JPXData *>(p_user_data);
 
     if (unlikely(jpxData->size <= jpxData->pos)) {
-        return (OPJ_SIZE_T)-1; /* End of file! */
+        return static_cast<OPJ_SIZE_T>(-1); /* End of file! */
     }
     OPJ_SIZE_T len = jpxData->size - jpxData->pos;
     if (len > p_nb_bytes) {
@@ -218,7 +218,7 @@ static OPJ_SIZE_T jpxRead_callback(void *p_buffer, OPJ_SIZE_T p_nb_bytes, void *
 
 static OPJ_OFF_T jpxSkip_callback(OPJ_OFF_T skip, void *p_user_data)
 {
-    auto *jpxData = (JPXData *)p_user_data;
+    auto *jpxData = static_cast<JPXData *>(p_user_data);
 
     jpxData->pos += (skip > jpxData->size - jpxData->pos) ? jpxData->size - jpxData->pos : skip;
     /* Always return input value to avoid "Problem with skipping JPEG2000 box, stream error" */
@@ -227,7 +227,7 @@ static OPJ_OFF_T jpxSkip_callback(OPJ_OFF_T skip, void *p_user_data)
 
 static OPJ_BOOL jpxSeek_callback(OPJ_OFF_T seek_pos, void *p_user_data)
 {
-    auto *jpxData = (JPXData *)p_user_data;
+    auto *jpxData = static_cast<JPXData *>(p_user_data);
 
     if (seek_pos > jpxData->size) {
         return OPJ_FALSE;
@@ -296,7 +296,7 @@ void JPXStream::init()
                 close();
                 break;
             }
-            auto *cdata = (unsigned char *)priv->image->comps[component].data;
+            auto *cdata = reinterpret_cast<unsigned char *>(priv->image->comps[component].data);
             int adjust = 0;
             int depth = priv->image->comps[component].prec;
             if (priv->image->comps[component].prec > 8) {

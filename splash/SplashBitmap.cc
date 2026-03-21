@@ -110,14 +110,14 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA, SplashColorMode
         rowSize += rowPad - 1;
         rowSize -= rowSize % rowPad;
     }
-    data = (SplashColorPtr)gmallocn_checkoverflow(rowSize, height);
+    data = static_cast<SplashColorPtr>(gmallocn_checkoverflow(rowSize, height));
     if (data != nullptr) {
         if (!topDown) {
             data += (height - 1) * rowSize;
             rowSize = -rowSize;
         }
         if (alphaA) {
-            alpha = (unsigned char *)gmallocn_checkoverflow(width, height);
+            alpha = static_cast<unsigned char *>(gmallocn_checkoverflow(width, height));
         } else {
             alpha = nullptr;
         }
@@ -418,7 +418,7 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, do
             writer = new TiffWriter();
         }
         if (writer && params) {
-            ((TiffWriter *)writer)->setCompressionString(params->tiffCompression.c_str());
+            (static_cast<TiffWriter *>(writer))->setCompressionString(params->tiffCompression.c_str());
         }
         break;
 #else
@@ -562,7 +562,7 @@ void SplashBitmap::getXBGRLine(int yl, SplashColorPtr line, ConversionMode conve
 
 static inline unsigned char div255(int x)
 {
-    return (unsigned char)((x + (x >> 8) + 0x80) >> 8);
+    return static_cast<unsigned char>((x + (x >> 8) + 0x80) >> 8);
 }
 
 bool SplashBitmap::convertToXBGR(ConversionMode conversionMode)
@@ -597,7 +597,7 @@ bool SplashBitmap::convertToXBGR(ConversionMode conversionMode)
     }
 
     int newrowSize = width * 4;
-    auto *newdata = (SplashColorPtr)gmallocn_checkoverflow(newrowSize, height);
+    auto *newdata = static_cast<SplashColorPtr>(gmallocn_checkoverflow(newrowSize, height));
     if (newdata != nullptr) {
         for (int y = 0; y < height; y++) {
             unsigned char *row = newdata + y * newrowSize;

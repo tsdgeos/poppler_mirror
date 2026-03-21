@@ -60,7 +60,7 @@ void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...)
 
     GooString sanitized;
     for (const char c : s) {
-        if (c < (char)0x20 || c >= (char)0x7f) {
+        if (c < static_cast<char>(0x20) || c >= static_cast<char>(0x7f)) {
             sanitized.appendf("<{0:02x}>", c & 0xff);
         } else {
             sanitized.push_back(c);
@@ -71,7 +71,7 @@ void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...)
         (*errorCbk)(category, pos, sanitized.c_str());
     } else {
         if (pos >= 0) {
-            fprintf(stderr, "%s (%lld): %s\n", errorCategoryNames[category], (long long)pos, sanitized.c_str());
+            fprintf(stderr, "%s (%lld): %s\n", errorCategoryNames[category], static_cast<long long>(pos), sanitized.c_str());
         } else {
             fprintf(stderr, "%s: %s\n", errorCategoryNames[category], sanitized.c_str());
         }

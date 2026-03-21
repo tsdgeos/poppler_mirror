@@ -87,9 +87,9 @@ void SplashFont::initCache()
     } else {
         cacheSets = 1;
     }
-    cache = (unsigned char *)gmallocn_checkoverflow(cacheSets * cacheAssoc, glyphSize);
+    cache = static_cast<unsigned char *>(gmallocn_checkoverflow(cacheSets * cacheAssoc, glyphSize));
     if (cache != nullptr) {
-        cacheTags = (SplashFontCacheTag *)gmallocn(cacheSets * cacheAssoc, sizeof(SplashFontCacheTag));
+        cacheTags = static_cast<SplashFontCacheTag *>(gmallocn(cacheSets * cacheAssoc, sizeof(SplashFontCacheTag)));
         for (i = 0; i < cacheSets * cacheAssoc; ++i) {
             cacheTags[i].mru = i & (cacheAssoc - 1);
         }
@@ -124,7 +124,7 @@ bool SplashFont::getGlyph(int c, int xFrac, int yFrac, SplashGlyphBitmap *bitmap
     // check the cache
     i = (c & (cacheSets - 1)) * cacheAssoc;
     for (j = 0; j < cacheAssoc; ++j) {
-        if ((cacheTags[i + j].mru & 0x80000000) && cacheTags[i + j].c == c && (int)cacheTags[i + j].xFrac == xFrac && (int)cacheTags[i + j].yFrac == yFrac) {
+        if ((cacheTags[i + j].mru & 0x80000000) && cacheTags[i + j].c == c && static_cast<int>(cacheTags[i + j].xFrac) == xFrac && static_cast<int>(cacheTags[i + j].yFrac) == yFrac) {
             bitmap->x = cacheTags[i + j].x;
             bitmap->y = cacheTags[i + j].y;
             bitmap->w = cacheTags[i + j].w;
@@ -180,8 +180,8 @@ bool SplashFont::getGlyph(int c, int xFrac, int yFrac, SplashGlyphBitmap *bitmap
             if ((cacheTags[i + j].mru & 0x7fffffff) == cacheAssoc - 1) {
                 cacheTags[i + j].mru = 0x80000000;
                 cacheTags[i + j].c = c;
-                cacheTags[i + j].xFrac = (short)xFrac;
-                cacheTags[i + j].yFrac = (short)yFrac;
+                cacheTags[i + j].xFrac = static_cast<short>(xFrac);
+                cacheTags[i + j].yFrac = static_cast<short>(yFrac);
                 cacheTags[i + j].x = bitmap2.x;
                 cacheTags[i + j].y = bitmap2.y;
                 cacheTags[i + j].w = bitmap2.w;

@@ -139,8 +139,8 @@ std::unique_ptr<GooString> QStringToUnicodeGooString(const QString &s)
     int len = s.length() * 2 + 2;
     std::string string;
     string.reserve(len);
-    string.push_back((char)0xfe);
-    string.push_back((char)0xff);
+    string.push_back(static_cast<char>(0xfe));
+    string.push_back(static_cast<char>(0xff));
     for (auto element : s) {
         string.push_back(element.row());
         string.push_back(element.cell());
@@ -151,7 +151,7 @@ std::unique_ptr<GooString> QStringToUnicodeGooString(const QString &s)
 std::unique_ptr<GooString> QStringToGooString(const QString &s)
 {
     int len = s.length();
-    char *cstring = (char *)gmallocn(s.length(), sizeof(char));
+    char *cstring = static_cast<char *>(gmallocn(s.length(), sizeof(char)));
     for (int i = 0; i < len; ++i) {
         cstring[i] = s.at(i).unicode();
     }
@@ -260,7 +260,7 @@ static void linkActionToTocItem(const ::LinkAction *a, DocumentData *doc, QDomEl
 DocumentData::~DocumentData()
 {
     qDeleteAll(m_embeddedFiles);
-    delete (OptContentModel *)m_optContentModel;
+    delete m_optContentModel.data();
 }
 
 void DocumentData::init()

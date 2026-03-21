@@ -464,7 +464,7 @@ static PDFSubtypePart pdfPartFromString(PDFSubtype subtype, const std::string &p
             }
             break;
         default:
-            subtypePart = (PDFSubtypePart)part;
+            subtypePart = static_cast<PDFSubtypePart>(part);
             break;
         }
     }
@@ -1210,7 +1210,7 @@ std::string PDFDoc::sanitizedName(const std::string &name)
     std::string sanitizedName;
 
     for (const auto c : name) {
-        if (c <= (char)0x20 || c >= (char)0x7f || c == ' ' || c == '(' || c == ')' || c == '<' || c == '>' || c == '[' || c == ']' || c == '{' || c == '}' || c == '/' || c == '%' || c == '#') {
+        if (c <= static_cast<char>(0x20) || c >= static_cast<char>(0x7f) || c == ' ' || c == '(' || c == ')' || c == '<' || c == '>' || c == '[' || c == ']' || c == '{' || c == '}' || c == '/' || c == '%' || c == '#') {
             char buf[8];
             sprintf(buf, "#%02x", c & 0xff);
             sanitizedName.append(buf);
@@ -1309,7 +1309,7 @@ void PDFDoc::writeString(const std::string &s, OutStream *outStr, const unsigned
             return;
         }
         while ((c = enc->getChar()) != EOF) {
-            sEnc.push_back((char)c);
+            sEnc.push_back(static_cast<char>(c));
         }
 
         delete enc;
@@ -1325,7 +1325,7 @@ void PDFDoc::writeString(const std::string &s, OutStream *outStr, const unsigned
         std::stringstream stream;
         stream << std::setfill('0') << std::hex;
         for (size_t i = 0; i < sCopy.size(); i++) {
-            stream << std::setw(2) << (0xff & (unsigned int)*(c + i));
+            stream << std::setw(2) << (0xff & static_cast<unsigned int>(*(c + i)));
         }
         outStr->printf("<");
         outStr->printf("%s", stream.str().c_str());
@@ -1544,14 +1544,14 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
     // - values of entry in information dictionary
     GooString message;
     char buffer[256];
-    sprintf(buffer, "%i", (int)time(nullptr));
+    sprintf(buffer, "%i", static_cast<int>(time(nullptr)));
     message.append(buffer);
 
     if (fileName) {
         message.append(fileName);
     }
 
-    sprintf(buffer, "%lli", (long long)fileSize);
+    sprintf(buffer, "%lli", static_cast<long long>(fileSize));
     message.append(buffer);
 
     // info dict -- only use text string
@@ -1578,7 +1578,7 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
 
     // calculate md5 digest
     unsigned char digest[16];
-    md5((unsigned char *)message.c_str(), message.size(), digest);
+    md5(reinterpret_cast<const unsigned char *>(message.c_str()), message.size(), digest);
 
     // create ID array
     // In case of encrypted files, the ID must not be changed because it's used to calculate the key
@@ -1593,14 +1593,14 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
             auto array = std::make_unique<Array>(xRef);
             // Get the first part of the ID
             array->add(obj4.arrayGet(0));
-            array->add(Object(std::make_unique<GooString>((const char *)digest, 16)));
+            array->add(Object(std::make_unique<GooString>(reinterpret_cast<const char *>(digest), 16)));
             trailerDict->set("ID", Object(std::move(array)));
         }
     } else {
         // new file => same values for the two identifiers
         auto array = std::make_unique<Array>(xRef);
-        array->add(Object(std::make_unique<GooString>((const char *)digest, 16)));
-        array->add(Object(std::make_unique<GooString>((const char *)digest, 16)));
+        array->add(Object(std::make_unique<GooString>(reinterpret_cast<const char *>(digest), 16)));
+        array->add(Object(std::make_unique<GooString>(reinterpret_cast<const char *>(digest), 16)));
         trailerDict->set("ID", Object(std::move(array)));
     }
 
@@ -1744,7 +1744,7 @@ bool PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int nu
         }
     } break;
     case objRef: {
-        if (obj->getRef().num + (int)numOffset >= xRef->getNumObjects() || xRef->getEntry(obj->getRef().num + numOffset)->type == xrefEntryFree) {
+        if (obj->getRef().num + static_cast<int>(numOffset) >= xRef->getNumObjects() || xRef->getEntry(obj->getRef().num + numOffset)->type == xrefEntryFree) {
             if (getXRef()->getEntry(obj->getRef().num)->type == xrefEntryFree) {
                 return true; // already marked as free => should be replaced
             }
@@ -1756,7 +1756,7 @@ bool PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int nu
                 xRef->getEntry(obj->getRef().num + numOffset)->type = xrefEntryCompressed;
             }
         }
-        if (obj->getRef().num + (int)numOffset >= countRef->getNumObjects() || countRef->getEntry(obj->getRef().num + numOffset)->type == xrefEntryFree) {
+        if (obj->getRef().num + static_cast<int>(numOffset) >= countRef->getNumObjects() || countRef->getEntry(obj->getRef().num + numOffset)->type == xrefEntryFree) {
             countRef->add(obj->getRef().num + numOffset, 1, 0, true);
         } else {
             XRefEntry *entry = countRef->getEntry(obj->getRef().num + numOffset);
@@ -1889,7 +1889,7 @@ bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, unsi
             }
             obj1 = array->getNF(i).copy();
             if (obj1.isRef()) {
-                if (obj1.getRef().num + (int)numOffset >= xRef->getNumObjects() || xRef->getEntry(obj1.getRef().num + numOffset)->type == xrefEntryFree) {
+                if (obj1.getRef().num + static_cast<int>(numOffset) >= xRef->getNumObjects() || xRef->getEntry(obj1.getRef().num + numOffset)->type == xrefEntryFree) {
                     if (getXRef()->getEntry(obj1.getRef().num)->type == xrefEntryFree) {
                         continue; // already marked as free => should be replaced
                     }
@@ -1898,7 +1898,7 @@ bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, unsi
                         xRef->getEntry(obj1.getRef().num + numOffset)->type = xrefEntryCompressed;
                     }
                 }
-                if (obj1.getRef().num + (int)numOffset >= countRef->getNumObjects() || countRef->getEntry(obj1.getRef().num + numOffset)->type == xrefEntryFree) {
+                if (obj1.getRef().num + static_cast<int>(numOffset) >= countRef->getNumObjects() || countRef->getEntry(obj1.getRef().num + numOffset)->type == xrefEntryFree) {
                     countRef->add(obj1.getRef().num + numOffset, 1, 0, true);
                 } else {
                     XRefEntry *entry = countRef->getEntry(obj1.getRef().num + numOffset);
@@ -1908,7 +1908,7 @@ bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, unsi
         }
     }
     if (annotsObj->isRef()) {
-        if (annotsObj->getRef().num + (int)numOffset >= xRef->getNumObjects() || xRef->getEntry(annotsObj->getRef().num + numOffset)->type == xrefEntryFree) {
+        if (annotsObj->getRef().num + static_cast<int>(numOffset) >= xRef->getNumObjects() || xRef->getEntry(annotsObj->getRef().num + numOffset)->type == xrefEntryFree) {
             if (getXRef()->getEntry(annotsObj->getRef().num)->type == xrefEntryFree) {
                 return modified; // already marked as free => should be replaced
             }
@@ -1917,7 +1917,7 @@ bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, unsi
                 xRef->getEntry(annotsObj->getRef().num + numOffset)->type = xrefEntryCompressed;
             }
         }
-        if (annotsObj->getRef().num + (int)numOffset >= countRef->getNumObjects() || countRef->getEntry(annotsObj->getRef().num + numOffset)->type == xrefEntryFree) {
+        if (annotsObj->getRef().num + static_cast<int>(numOffset) >= countRef->getNumObjects() || countRef->getEntry(annotsObj->getRef().num + numOffset)->type == xrefEntryFree) {
             countRef->add(annotsObj->getRef().num + numOffset, 1, 0, true);
         } else {
             XRefEntry *entry = countRef->getEntry(annotsObj->getRef().num + numOffset);
@@ -1945,7 +1945,7 @@ void PDFDoc::markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, unsigned in
         }
     }
     if (afObj->isRef()) {
-        if (afObj->getRef().num + (int)numOffset >= xRef->getNumObjects() || xRef->getEntry(afObj->getRef().num + numOffset)->type == xrefEntryFree) {
+        if (afObj->getRef().num + static_cast<int>(numOffset) >= xRef->getNumObjects() || xRef->getEntry(afObj->getRef().num + numOffset)->type == xrefEntryFree) {
             if (getXRef()->getEntry(afObj->getRef().num)->type == xrefEntryFree) {
                 return; // already marked as free => should be replaced
             }
@@ -1954,7 +1954,7 @@ void PDFDoc::markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, unsigned in
                 xRef->getEntry(afObj->getRef().num + numOffset)->type = xrefEntryCompressed;
             }
         }
-        if (afObj->getRef().num + (int)numOffset >= countRef->getNumObjects() || countRef->getEntry(afObj->getRef().num + numOffset)->type == xrefEntryFree) {
+        if (afObj->getRef().num + static_cast<int>(numOffset) >= countRef->getNumObjects() || countRef->getEntry(afObj->getRef().num + numOffset)->type == xrefEntryFree) {
             countRef->add(afObj->getRef().num + numOffset, 1, 0, true);
         } else {
             XRefEntry *entry = countRef->getEntry(afObj->getRef().num + numOffset);

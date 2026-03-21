@@ -312,8 +312,8 @@ std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> GpgSig
         // the size of the comment packet prefix and size is the first 6 bytes.
         static const int prefixandsize = 6;
         std::string prefix { std::initializer_list<char> {
-                (char)0xfd,
-                (char)0xff,
+                static_cast<char>(0xfd),
+                static_cast<char>(0xff),
         } };
 
         if (CryptoSign::defaultMaxSignatureSize - prefixandsize <= signatureString.size()) {

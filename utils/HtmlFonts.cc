@@ -95,16 +95,16 @@ std::string HtmlFontColor::convtoX(unsigned int xcol)
     unsigned int k;
     k = (xcol / 16);
     if (k < 10) {
-        tmp = (char)('0' + k);
+        tmp = static_cast<char>('0' + k);
     } else {
-        tmp = (char)('a' + k - 10);
+        tmp = static_cast<char>('a' + k - 10);
     }
     xret.push_back(tmp);
     k = (xcol % 16);
     if (k < 10) {
-        tmp = (char)('0' + k);
+        tmp = static_cast<char>('0' + k);
     } else {
-        tmp = (char)('a' + k - 10);
+        tmp = static_cast<char>('a' + k - 10);
     }
     xret.push_back(tmp);
     return xret;
@@ -250,7 +250,7 @@ int HtmlFontAccu::AddFont(const HtmlFont &font)
     std::vector<HtmlFont>::iterator i;
     for (i = accu.begin(); i != accu.end(); ++i) {
         if (font.isEqual(*i)) {
-            return (int)(i - (accu.begin()));
+            return static_cast<int>(i - (accu.begin()));
         }
     }
 

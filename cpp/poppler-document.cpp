@@ -334,12 +334,12 @@ bool document::set_info_key(const std::string &key, const ustring &val)
 time_t document::info_date_t(const std::string &key) const
 {
     if (d->is_locked) {
-        return time_t(-1);
+        return static_cast<time_t>(-1);
     }
 
     std::unique_ptr<GooString> goo_date(d->doc->getDocInfoStringEntry(key.c_str()));
     if (!goo_date) {
-        return time_t(-1);
+        return static_cast<time_t>(-1);
     }
 
     return dateStringToTime(goo_date->toStr());
@@ -360,7 +360,7 @@ bool document::set_info_date_t(const std::string &key, time_t val)
 
     std::unique_ptr<GooString> goo_date;
 
-    if (val != time_t(-1)) {
+    if (val != static_cast<time_t>(-1)) {
         goo_date = timeToDateString(&val);
     }
 
@@ -629,12 +629,12 @@ bool document::set_producer(const ustring &producer)
 time_t document::get_creation_date_t() const
 {
     if (d->is_locked) {
-        return time_t(-1);
+        return static_cast<time_t>(-1);
     }
 
     std::unique_ptr<GooString> goo_creation_date(d->doc->getDocInfoCreatDate());
     if (!goo_creation_date) {
-        return time_t(-1);
+        return static_cast<time_t>(-1);
     }
 
     return dateStringToTime(goo_creation_date->toStr());
@@ -654,7 +654,7 @@ bool document::set_creation_date_t(time_t creation_date)
 
     std::unique_ptr<GooString> goo_creation_date;
 
-    if (creation_date != time_t(-1)) {
+    if (creation_date != static_cast<time_t>(-1)) {
         goo_creation_date = timeToDateString(&creation_date);
     }
 
@@ -671,12 +671,12 @@ bool document::set_creation_date_t(time_t creation_date)
 time_t document::get_modification_date_t() const
 {
     if (d->is_locked) {
-        return time_t(-1);
+        return static_cast<time_t>(-1);
     }
 
     std::unique_ptr<GooString> goo_modification_date(d->doc->getDocInfoModDate());
     if (!goo_modification_date) {
-        return time_t(-1);
+        return static_cast<time_t>(-1);
     }
 
     return dateStringToTime(goo_modification_date->toStr());
@@ -696,7 +696,7 @@ bool document::set_modification_date_t(time_t mod_date)
 
     std::unique_ptr<GooString> goo_mod_date;
 
-    if (mod_date != time_t(-1)) {
+    if (mod_date != static_cast<time_t>(-1)) {
         goo_mod_date = timeToDateString(&mod_date);
     }
 

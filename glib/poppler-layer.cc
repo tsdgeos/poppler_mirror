@@ -74,7 +74,7 @@ PopplerLayer *_poppler_layer_new(PopplerDocument *document, Layer *layer, GList 
 
     poppler_layer = POPPLER_LAYER(g_object_new(POPPLER_TYPE_LAYER, nullptr));
 
-    poppler_layer->document = (PopplerDocument *)g_object_ref(document);
+    poppler_layer->document = static_cast<PopplerDocument *> g_object_ref(document);
     poppler_layer->layer = layer;
     poppler_layer->rbgroup = rbgroup;
     layer_name = layer->oc->getName();
@@ -142,7 +142,7 @@ void poppler_layer_show(PopplerLayer *poppler_layer)
     layer->oc->setState(OptionalContentGroup::On);
 
     for (l = poppler_layer->rbgroup; l && l->data; l = g_list_next(l)) {
-        auto *oc = (OptionalContentGroup *)l->data;
+        auto *oc = static_cast<OptionalContentGroup *>(l->data);
 
         if (oc != layer->oc) {
             oc->setState(OptionalContentGroup::Off);

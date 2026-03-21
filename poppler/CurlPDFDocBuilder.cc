@@ -27,7 +27,7 @@ std::unique_ptr<PDFDoc> CurlPDFDocBuilder::buildPDFDoc(const GooString &uri, con
 {
     auto cachedFile = std::make_shared<CachedFile>(std::make_unique<CurlCachedFileLoader>(uri.toStr()));
 
-    if (cachedFile->getLength() == ((unsigned int)-1)) {
+    if (cachedFile->getLength() == (static_cast<unsigned int>(-1))) {
         return PDFDoc::ErrorPDFDoc(errOpenFile, uri.copy());
     }
 

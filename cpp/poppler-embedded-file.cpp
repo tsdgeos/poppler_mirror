@@ -183,7 +183,7 @@ byte_array embedded_file::data() const
         if (data_len == ret.size()) {
             ret.resize(ret.size() * 2);
         }
-        ret[data_len] = (char)i;
+        ret[data_len] = static_cast<char>(i);
         ++data_len;
     }
     ret.resize(data_len);

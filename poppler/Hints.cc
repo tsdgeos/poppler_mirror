@@ -50,7 +50,7 @@ public:
         if (inputBits == 0) {
             if ((c = str->getChar()) == EOF) {
                 isAtEof = true;
-                return (unsigned int)-1;
+                return static_cast<unsigned int>(-1);
             }
             bitsBuffer = c;
             inputBits = 8;
@@ -120,17 +120,17 @@ Hints::Hints(BaseStream *str, Linearization *linearization, XRef *xref, Security
         pageOffsetFirst = pageObjectFirstXRefEntry->offset;
     }
 
-    if (nPages >= INT_MAX / (int)sizeof(unsigned int)) {
+    if (nPages >= INT_MAX / static_cast<int>(sizeof(unsigned int))) {
         error(errSyntaxWarning, -1, "Invalid number of pages ({0:d}) for hints table", nPages);
         nPages = 0;
     }
-    nObjects = (unsigned int *)gmallocn_checkoverflow(nPages, sizeof(unsigned int));
-    pageObjectNum = (int *)gmallocn_checkoverflow(nPages, sizeof(int));
-    xRefOffset = (unsigned int *)gmallocn_checkoverflow(nPages, sizeof(unsigned int));
-    pageLength = (unsigned int *)gmallocn_checkoverflow(nPages, sizeof(unsigned int));
-    pageOffset = (Goffset *)gmallocn_checkoverflow(nPages, sizeof(Goffset));
-    numSharedObject = (unsigned int *)gmallocn_checkoverflow(nPages, sizeof(unsigned int));
-    sharedObjectId = (unsigned int **)gmallocn_checkoverflow(nPages, sizeof(unsigned int *));
+    nObjects = static_cast<unsigned int *>(gmallocn_checkoverflow(nPages, sizeof(unsigned int)));
+    pageObjectNum = static_cast<int *>(gmallocn_checkoverflow(nPages, sizeof(int)));
+    xRefOffset = static_cast<unsigned int *>(gmallocn_checkoverflow(nPages, sizeof(unsigned int)));
+    pageLength = static_cast<unsigned int *>(gmallocn_checkoverflow(nPages, sizeof(unsigned int)));
+    pageOffset = static_cast<Goffset *>(gmallocn_checkoverflow(nPages, sizeof(Goffset)));
+    numSharedObject = static_cast<unsigned int *>(gmallocn_checkoverflow(nPages, sizeof(unsigned int)));
+    sharedObjectId = static_cast<unsigned int **>(gmallocn_checkoverflow(nPages, sizeof(unsigned int *)));
     if (!nObjects || !pageObjectNum || !xRefOffset || !pageLength || !pageOffset || !numSharedObject || !sharedObjectId) {
         error(errSyntaxWarning, -1, "Failed to allocate memory for hints table");
         nPages = 0;
@@ -353,12 +353,12 @@ bool Hints::readPageOffsetTable(Stream *str)
     sharedObjectId[0] = nullptr;
     for (int i = 1; i < nPages && !sbr.atEOF(); i++) {
         numSharedObject[i] = sbr.readBits(nBitsNumShared);
-        if (numSharedObject[i] >= INT_MAX / (int)sizeof(unsigned int)) {
+        if (numSharedObject[i] >= INT_MAX / static_cast<int>(sizeof(unsigned int))) {
             error(errSyntaxWarning, -1, "Invalid number of shared objects");
             numSharedObject[i] = 0;
             return false;
         }
-        sharedObjectId[i] = (unsigned int *)gmallocn_checkoverflow(numSharedObject[i], sizeof(unsigned int));
+        sharedObjectId[i] = static_cast<unsigned int *>(gmallocn_checkoverflow(numSharedObject[i], sizeof(unsigned int)));
         if (numSharedObject[i] && !sharedObjectId[i]) {
             error(errSyntaxWarning, -1, "Failed to allocate memory for shared object IDs");
             numSharedObject[i] = 0;
@@ -403,7 +403,7 @@ bool Hints::readSharedObjectsTable(Stream *str)
 
     const unsigned int nBitsDiffGroupLength = sbr.readBits(16);
 
-    if ((!nSharedGroups) || (nSharedGroups >= INT_MAX / (int)sizeof(unsigned int))) {
+    if ((!nSharedGroups) || (nSharedGroups >= INT_MAX / static_cast<int>(sizeof(unsigned int)))) {
         error(errSyntaxWarning, -1, "Invalid number of shared object groups");
         return false;
     }
@@ -416,11 +416,11 @@ bool Hints::readSharedObjectsTable(Stream *str)
         return false;
     }
 
-    groupLength = (unsigned int *)gmallocn_checkoverflow(nSharedGroups, sizeof(unsigned int));
-    groupOffset = (unsigned int *)gmallocn_checkoverflow(nSharedGroups, sizeof(unsigned int));
-    groupHasSignature = (unsigned int *)gmallocn_checkoverflow(nSharedGroups, sizeof(unsigned int));
-    groupNumObjects = (unsigned int *)gmallocn_checkoverflow(nSharedGroups, sizeof(unsigned int));
-    groupXRefOffset = (unsigned int *)gmallocn_checkoverflow(nSharedGroups, sizeof(unsigned int));
+    groupLength = static_cast<unsigned int *>(gmallocn_checkoverflow(nSharedGroups, sizeof(unsigned int)));
+    groupOffset = static_cast<unsigned int *>(gmallocn_checkoverflow(nSharedGroups, sizeof(unsigned int)));
+    groupHasSignature = static_cast<unsigned int *>(gmallocn_checkoverflow(nSharedGroups, sizeof(unsigned int)));
+    groupNumObjects = static_cast<unsigned int *>(gmallocn_checkoverflow(nSharedGroups, sizeof(unsigned int)));
+    groupXRefOffset = static_cast<unsigned int *>(gmallocn_checkoverflow(nSharedGroups, sizeof(unsigned int)));
     if (!groupLength || !groupOffset || !groupHasSignature || !groupNumObjects || !groupXRefOffset) {
         error(errSyntaxWarning, -1, "Failed to allocate memory for shared object groups");
         return false;

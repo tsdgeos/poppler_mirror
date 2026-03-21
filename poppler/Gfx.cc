@@ -871,7 +871,7 @@ void Gfx::opSetDash(Object args[], int /*numArgs*/)
 
 void Gfx::opSetFlat(Object args[], int /*numArgs*/)
 {
-    state->setFlatness((int)args[0].getNum());
+    state->setFlatness(static_cast<int>(args[0].getNum()));
     out->updateFlatness(state);
 }
 
@@ -1559,7 +1559,7 @@ void Gfx::opSetFillColorN(Object args[], int numArgs)
 
     if (state->getFillColorSpace()->getMode() == csPattern) {
         if (numArgs > 1) {
-            if (!((GfxPatternColorSpace *)state->getFillColorSpace())->getUnder() || numArgs - 1 != ((GfxPatternColorSpace *)state->getFillColorSpace())->getUnder()->getNComps()) {
+            if (!(static_cast<GfxPatternColorSpace *>(state->getFillColorSpace()))->getUnder() || numArgs - 1 != (static_cast<GfxPatternColorSpace *>(state->getFillColorSpace()))->getUnder()->getNComps()) {
                 error(errSyntaxError, getPos(), "Incorrect number of arguments in 'scn' command");
                 return;
             }
@@ -1609,7 +1609,7 @@ void Gfx::opSetStrokeColorN(Object args[], int numArgs)
 
     if (state->getStrokeColorSpace()->getMode() == csPattern) {
         if (numArgs > 1) {
-            if (!((GfxPatternColorSpace *)state->getStrokeColorSpace())->getUnder() || numArgs - 1 != ((GfxPatternColorSpace *)state->getStrokeColorSpace())->getUnder()->getNComps()) {
+            if (!(static_cast<GfxPatternColorSpace *>(state->getStrokeColorSpace()))->getUnder() || numArgs - 1 != (static_cast<GfxPatternColorSpace *>(state->getStrokeColorSpace()))->getUnder()->getNComps()) {
                 error(errSyntaxError, getPos(), "Incorrect number of arguments in 'SCN' command");
                 return;
             }
@@ -1935,10 +1935,10 @@ void Gfx::doPatternFill(bool eoFill)
     }
     switch (pattern->getType()) {
     case 1:
-        doTilingPatternFill((GfxTilingPattern *)pattern, false, eoFill, false);
+        doTilingPatternFill(static_cast<GfxTilingPattern *>(pattern), false, eoFill, false);
         break;
     case 2:
-        doShadingPatternFill((GfxShadingPattern *)pattern, false, eoFill, false);
+        doShadingPatternFill(static_cast<GfxShadingPattern *>(pattern), false, eoFill, false);
         break;
     default:
         error(errSyntaxError, getPos(), "Unknown pattern type ({0:d}) in fill", pattern->getType());
@@ -1962,10 +1962,10 @@ void Gfx::doPatternStroke()
     }
     switch (pattern->getType()) {
     case 1:
-        doTilingPatternFill((GfxTilingPattern *)pattern, true, false, false);
+        doTilingPatternFill(static_cast<GfxTilingPattern *>(pattern), true, false, false);
         break;
     case 2:
-        doShadingPatternFill((GfxShadingPattern *)pattern, true, false, false);
+        doShadingPatternFill(static_cast<GfxShadingPattern *>(pattern), true, false, false);
         break;
     default:
         error(errSyntaxError, getPos(), "Unknown pattern type ({0:d}) in stroke", pattern->getType());
@@ -1989,10 +1989,10 @@ void Gfx::doPatternText()
     }
     switch (pattern->getType()) {
     case 1:
-        doTilingPatternFill((GfxTilingPattern *)pattern, false, false, true);
+        doTilingPatternFill(static_cast<GfxTilingPattern *>(pattern), false, false, true);
         break;
     case 2:
-        doShadingPatternFill((GfxShadingPattern *)pattern, false, false, true);
+        doShadingPatternFill(static_cast<GfxShadingPattern *>(pattern), false, false, true);
         break;
     default:
         error(errSyntaxError, getPos(), "Unknown pattern type ({0:d}) in fill", pattern->getType());
@@ -2033,7 +2033,7 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
     int i;
 
     // get color space
-    patCS = (GfxPatternColorSpace *)(stroke ? state->getStrokeColorSpace() : state->getFillColorSpace());
+    patCS = static_cast<GfxPatternColorSpace *>(stroke ? state->getStrokeColorSpace() : state->getFillColorSpace());
 
     // construct a (pattern space) -> (current space) transform matrix
     const std::array<double, 6> &ctm = state->getCTM();
@@ -2185,18 +2185,18 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
         goto restore;
     }
     if (tPat->getBBox()[0] < tPat->getBBox()[2]) {
-        xi0 = (int)ceil((xMin - tPat->getBBox()[2]) / xstep);
-        xi1 = (int)floor((xMax - tPat->getBBox()[0]) / xstep) + 1;
+        xi0 = static_cast<int>(ceil((xMin - tPat->getBBox()[2]) / xstep));
+        xi1 = static_cast<int>(floor((xMax - tPat->getBBox()[0]) / xstep)) + 1;
     } else {
-        xi0 = (int)ceil((xMin - tPat->getBBox()[0]) / xstep);
-        xi1 = (int)floor((xMax - tPat->getBBox()[2]) / xstep) + 1;
+        xi0 = static_cast<int>(ceil((xMin - tPat->getBBox()[0]) / xstep));
+        xi1 = static_cast<int>(floor((xMax - tPat->getBBox()[2]) / xstep)) + 1;
     }
     if (tPat->getBBox()[1] < tPat->getBBox()[3]) {
-        yi0 = (int)ceil((yMin - tPat->getBBox()[3]) / ystep);
-        yi1 = (int)floor((yMax - tPat->getBBox()[1]) / ystep) + 1;
+        yi0 = static_cast<int>(ceil((yMin - tPat->getBBox()[3]) / ystep));
+        yi1 = static_cast<int>(floor((yMax - tPat->getBBox()[1]) / ystep)) + 1;
     } else {
-        yi0 = (int)ceil((yMin - tPat->getBBox()[1]) / ystep);
-        yi1 = (int)floor((yMax - tPat->getBBox()[3]) / ystep) + 1;
+        yi0 = static_cast<int>(ceil((yMin - tPat->getBBox()[1]) / ystep));
+        yi1 = static_cast<int>(floor((yMax - tPat->getBBox()[3]) / ystep)) + 1;
     }
     for (i = 0; i < 4; ++i) {
         m1[i] = m[i];
@@ -2346,21 +2346,21 @@ void Gfx::doShadingPatternFill(GfxShadingPattern *sPat, bool stroke, bool eoFill
     // do shading type-specific operations
     switch (shading->getType()) {
     case GfxShading::FunctionBasedShading:
-        doFunctionShFill((GfxFunctionShading *)shading);
+        doFunctionShFill(static_cast<GfxFunctionShading *>(shading));
         break;
     case GfxShading::AxialShading:
-        doAxialShFill((GfxAxialShading *)shading);
+        doAxialShFill(static_cast<GfxAxialShading *>(shading));
         break;
     case GfxShading::RadialShading:
-        doRadialShFill((GfxRadialShading *)shading);
+        doRadialShFill(static_cast<GfxRadialShading *>(shading));
         break;
     case GfxShading::FreeFormGouraudShadedTriangleMesh:
     case GfxShading::LatticeFormGouraudShadedTriangleMesh:
-        doGouraudTriangleShFill((GfxGouraudTriangleShading *)shading);
+        doGouraudTriangleShFill(static_cast<GfxGouraudTriangleShading *>(shading));
         break;
     case GfxShading::CoonsPatchMesh:
     case GfxShading::TensorProductPatchMesh:
-        doPatchMeshShFill((GfxPatchMeshShading *)shading);
+        doPatchMeshShFill(static_cast<GfxPatchMeshShading *>(shading));
         break;
     }
 
@@ -2418,21 +2418,21 @@ void Gfx::opShFill(Object args[], int /*numArgs*/)
     // do shading type-specific operations
     switch (shading->getType()) {
     case GfxShading::FunctionBasedShading:
-        doFunctionShFill((GfxFunctionShading *)shading.get());
+        doFunctionShFill(static_cast<GfxFunctionShading *>(shading.get()));
         break;
     case GfxShading::AxialShading:
-        doAxialShFill((GfxAxialShading *)shading.get());
+        doAxialShFill(static_cast<GfxAxialShading *>(shading.get()));
         break;
     case GfxShading::RadialShading:
-        doRadialShFill((GfxRadialShading *)shading.get());
+        doRadialShFill(static_cast<GfxRadialShading *>(shading.get()));
         break;
     case GfxShading::FreeFormGouraudShadedTriangleMesh:
     case GfxShading::LatticeFormGouraudShadedTriangleMesh:
-        doGouraudTriangleShFill((GfxGouraudTriangleShading *)shading.get());
+        doGouraudTriangleShFill(static_cast<GfxGouraudTriangleShading *>(shading.get()));
         break;
     case GfxShading::CoonsPatchMesh:
     case GfxShading::TensorProductPatchMesh:
-        doPatchMeshShFill((GfxPatchMeshShading *)shading.get());
+        doPatchMeshShFill(static_cast<GfxPatchMeshShading *>(shading.get()));
         break;
     }
 
@@ -2771,7 +2771,7 @@ void Gfx::doAxialShFill(GfxAxialShading *shading)
                 // What we do to ensure that we pass a line through this points
                 // is making sure use the exact bboxIntersections[] value as one of the used ta[] values
                 if (!doneBBox1 && ta[i] < bboxIntersections[1] && ta[j] > bboxIntersections[1]) {
-                    int teoricalj = (int)((bboxIntersections[1] - tMin) * axialMaxSplits / (tMax - tMin));
+                    int teoricalj = static_cast<int>((bboxIntersections[1] - tMin) * axialMaxSplits / (tMax - tMin));
                     if (teoricalj <= i) {
                         teoricalj = i + 1;
                     }
@@ -2786,7 +2786,7 @@ void Gfx::doAxialShFill(GfxAxialShading *shading)
                     doneBBox1 = true;
                 }
                 if (!doneBBox2 && ta[i] < bboxIntersections[2] && ta[j] > bboxIntersections[2]) {
-                    int teoricalj = (int)((bboxIntersections[2] - tMin) * axialMaxSplits / (tMax - tMin));
+                    int teoricalj = static_cast<int>((bboxIntersections[2] - tMin) * axialMaxSplits / (tMax - tMin));
                     if (teoricalj <= i) {
                         teoricalj = i + 1;
                     }
@@ -3061,7 +3061,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
         if (unlikely(tmp == 1)) {
             n = 200;
         } else {
-            n = (int)(std::numbers::pi / acos(tmp));
+            n = static_cast<int>(std::numbers::pi / acos(tmp));
         }
         if (n < 3) {
             n = 3;
@@ -3100,7 +3100,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
                 // same color does not mean all the areas in between have the same color too
                 int ic = ia + 1;
                 for (; ic <= ib; ic++) {
-                    const double sc = sMin + ((double)ic / (double)radialMaxSplits) * (sMax - sMin);
+                    const double sc = sMin + (static_cast<double>(ic) / static_cast<double>(radialMaxSplits)) * (sMax - sMin);
                     const double tc = t0 + sc * (t1 - t0);
                     getShadingColorRadialHelper(t0, t1, tc, shading, &colorC);
                     if (!isSameGfxColor(colorC, colorA, nComps, radialColorDelta)) {
@@ -3108,13 +3108,13 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
                     }
                 }
                 ib = (ic > ia + 1) ? ic - 1 : ia + 1;
-                sb = sMin + ((double)ib / (double)radialMaxSplits) * (sMax - sMin);
+                sb = sMin + (static_cast<double>(ib) / static_cast<double>(radialMaxSplits)) * (sMax - sMin);
                 tb = t0 + sb * (t1 - t0);
                 getShadingColorRadialHelper(t0, t1, tb, shading, &colorB);
                 break;
             }
             ib = (ia + ib) / 2;
-            sb = sMin + ((double)ib / (double)radialMaxSplits) * (sMax - sMin);
+            sb = sMin + (static_cast<double>(ib) / static_cast<double>(radialMaxSplits)) * (sMax - sMin);
             tb = t0 + sb * (t1 - t0);
             getShadingColorRadialHelper(t0, t1, tb, shading, &colorB);
         }
@@ -3140,7 +3140,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
                 // construct path for first circle (counterclockwise)
                 state->moveTo(xa + ra, ya);
                 for (k = 1; k < n; ++k) {
-                    angle = ((double)k / (double)n) * 2 * std::numbers::pi;
+                    angle = (static_cast<double>(k) / static_cast<double>(n)) * 2 * std::numbers::pi;
                     state->lineTo(xa + ra * cos(angle), ya + ra * sin(angle));
                 }
                 state->closePath();
@@ -3148,7 +3148,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
                 // construct and append path for second circle (clockwise)
                 state->moveTo(xb + rb, yb);
                 for (k = 1; k < n; ++k) {
-                    angle = -((double)k / (double)n) * 2 * std::numbers::pi;
+                    angle = -(static_cast<double>(k) / static_cast<double>(n)) * 2 * std::numbers::pi;
                     state->lineTo(xb + rb * cos(angle), yb + rb * sin(angle));
                 }
                 state->closePath();
@@ -3156,11 +3156,11 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
                 // construct the first subpath (clockwise)
                 state->moveTo(xa + ra * cos(alpha + theta + 0.5 * std::numbers::pi), ya + ra * sin(alpha + theta + 0.5 * std::numbers::pi));
                 for (k = 0; k < n; ++k) {
-                    angle = alpha + theta + 0.5 * std::numbers::pi - ((double)k / (double)n) * (2 * theta + std::numbers::pi);
+                    angle = alpha + theta + 0.5 * std::numbers::pi - (static_cast<double>(k) / static_cast<double>(n)) * (2 * theta + std::numbers::pi);
                     state->lineTo(xb + rb * cos(angle), yb + rb * sin(angle));
                 }
                 for (k = 0; k < n; ++k) {
-                    angle = alpha - theta - 0.5 * std::numbers::pi + ((double)k / (double)n) * (2 * theta - std::numbers::pi);
+                    angle = alpha - theta - 0.5 * std::numbers::pi + (static_cast<double>(k) / static_cast<double>(n)) * (2 * theta - std::numbers::pi);
                     state->lineTo(xa + ra * cos(angle), ya + ra * sin(angle));
                 }
                 state->closePath();
@@ -3168,11 +3168,11 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
                 // construct the second subpath (counterclockwise)
                 state->moveTo(xa + ra * cos(alpha + theta + 0.5 * std::numbers::pi), ya + ra * sin(alpha + theta + 0.5 * std::numbers::pi));
                 for (k = 0; k < n; ++k) {
-                    angle = alpha + theta + 0.5 * std::numbers::pi + ((double)k / (double)n) * (-2 * theta + std::numbers::pi);
+                    angle = alpha + theta + 0.5 * std::numbers::pi + (static_cast<double>(k) / static_cast<double>(n)) * (-2 * theta + std::numbers::pi);
                     state->lineTo(xb + rb * cos(angle), yb + rb * sin(angle));
                 }
                 for (k = 0; k < n; ++k) {
-                    angle = alpha - theta - 0.5 * std::numbers::pi + ((double)k / (double)n) * (2 * theta + std::numbers::pi);
+                    angle = alpha - theta - 0.5 * std::numbers::pi + (static_cast<double>(k) / static_cast<double>(n)) * (2 * theta + std::numbers::pi);
                     state->lineTo(xa + ra * cos(angle), ya + ra * sin(angle));
                 }
                 state->closePath();
@@ -3234,7 +3234,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
             out->updateFillColor(state);
             state->moveTo(xa + ra, ya);
             for (k = 1; k < n; ++k) {
-                angle = ((double)k / (double)n) * 2 * std::numbers::pi;
+                angle = (static_cast<double>(k) / static_cast<double>(n)) * 2 * std::numbers::pi;
                 state->lineTo(xa + ra * cos(angle), ya + ra * sin(angle));
             }
             state->closePath();
@@ -3265,7 +3265,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
             state->closePath();
             state->moveTo(xa + ra, ya);
             for (k = 1; k < n; ++k) {
-                angle = ((double)k / (double)n) * 2 * std::numbers::pi;
+                angle = (static_cast<double>(k) / static_cast<double>(n)) * 2 * std::numbers::pi;
                 state->lineTo(xa + ra * cos(angle), ya + ra * sin(angle));
             }
             state->closePath();
@@ -3497,7 +3497,7 @@ void Gfx::fillPatch(const GfxPatch *patch, int colorComps, int patchColorComps, 
         } else {
             for (i = 0; i < colorComps; ++i) {
                 // simply cast to the desired type; that's all what is needed.
-                flatColor.c[i] = GfxColorComp(patch->color[0][0].c[i]);
+                flatColor.c[i] = static_cast<GfxColorComp>(patch->color[0][0].c[i]);
             }
         }
         state->setFillColor(&flatColor);
@@ -3951,13 +3951,13 @@ void Gfx::doShowText(const std::string &s)
             out->updateCTM(state, 1, 0, 0, 1, 0, 0);
             state->transformDelta(dx, dy, &ddx, &ddy);
             if (!out->beginType3Char(state, curX + riseX, curY + riseY, ddx, ddy, code, u, uLen)) {
-                Object charProc = ((Gfx8BitFont *)font)->getCharProcNF(code);
+                Object charProc = (static_cast<Gfx8BitFont *>(font))->getCharProcNF(code);
                 int refNum = -1;
                 if (charProc.isRef()) {
                     refNum = charProc.getRef().num;
-                    charProc = charProc.fetch(((Gfx8BitFont *)font)->getCharProcs()->getXRef());
+                    charProc = charProc.fetch((static_cast<Gfx8BitFont *>(font))->getCharProcs()->getXRef());
                 }
-                if ((resDict = ((Gfx8BitFont *)font)->getResources())) {
+                if ((resDict = (static_cast<Gfx8BitFont *>(font))->getResources())) {
                     pushResources(resDict);
                 }
                 if (charProc.isStream()) {
@@ -4248,7 +4248,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
     if (obj1.isInt()) {
         width = obj1.getInt();
     } else if (obj1.isReal()) {
-        width = (int)obj1.getReal();
+        width = static_cast<int>(obj1.getReal());
     } else {
         goto err1;
     }
@@ -4259,7 +4259,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
     if (obj1.isInt()) {
         height = obj1.getInt();
     } else if (obj1.isReal()) {
-        height = (int)obj1.getReal();
+        height = static_cast<int>(obj1.getReal());
     } else {
         goto err1;
     }
@@ -4573,7 +4573,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                     maskColors[i] = obj1.getInt();
                 } else if (obj1.isReal()) {
                     error(errSyntaxError, -1, "Mask entry should be an integer but it's a real, trying to use it");
-                    maskColors[i] = (int)obj1.getReal();
+                    maskColors[i] = static_cast<int>(obj1.getReal());
                 } else {
                     error(errSyntaxError, -1, "Mask entry should be an integer but it's of type {0:d}", obj1.getType());
                     goto err1;

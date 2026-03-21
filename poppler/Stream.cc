@@ -148,9 +148,9 @@ unsigned int Stream::discardChars(unsigned int n)
     count = 0;
     while (count < n) {
         if ((i = n - count) > sizeof(buf)) {
-            i = (unsigned int)sizeof(buf);
+            i = static_cast<unsigned int>(sizeof(buf));
         }
-        j = (unsigned int)doGetChars((int)i, buf);
+        j = static_cast<unsigned int>(doGetChars(static_cast<int>(i), buf));
         count += j;
         if (j != i) {
             break;
@@ -544,7 +544,7 @@ int BaseSeekInputStream::getChars(int nChars, unsigned char *buffer)
                 break;
             }
         }
-        m = (int)(bufEnd - bufPtr);
+        m = static_cast<int>(bufEnd - bufPtr);
         if (m > nChars - n) {
             m = nChars - n;
         }
@@ -598,7 +598,7 @@ ImageStream::ImageStream(Stream *strA, int widthA, int nCompsA, int nBitsA)
     if (nComps <= 0 || nBits <= 0 || nVals > INT_MAX / nBits - 7 || width > INT_MAX / nComps) {
         inputLineSize = -1;
     }
-    inputLine = (unsigned char *)gmallocn_checkoverflow(inputLineSize, sizeof(char));
+    inputLine = static_cast<unsigned char *>(gmallocn_checkoverflow(inputLineSize, sizeof(char)));
     if (nBits == 8) {
         imgLine = inputLine;
     } else {
@@ -610,7 +610,7 @@ ImageStream::ImageStream(Stream *strA, int widthA, int nCompsA, int nBitsA)
         if (nComps <= 0 || width > INT_MAX / nComps) {
             imgLineSize = -1;
         }
-        imgLine = (unsigned char *)gmallocn_checkoverflow(imgLineSize, sizeof(unsigned char));
+        imgLine = static_cast<unsigned char *>(gmallocn_checkoverflow(imgLineSize, sizeof(unsigned char)));
     }
     imgIdx = nVals;
 }
@@ -666,14 +666,14 @@ unsigned char *ImageStream::getLine()
         unsigned char *p = inputLine;
         for (int i = 0; i < nVals; i += 8) {
             const int c = *p++;
-            imgLine[i + 0] = (unsigned char)((c >> 7) & 1);
-            imgLine[i + 1] = (unsigned char)((c >> 6) & 1);
-            imgLine[i + 2] = (unsigned char)((c >> 5) & 1);
-            imgLine[i + 3] = (unsigned char)((c >> 4) & 1);
-            imgLine[i + 4] = (unsigned char)((c >> 3) & 1);
-            imgLine[i + 5] = (unsigned char)((c >> 2) & 1);
-            imgLine[i + 6] = (unsigned char)((c >> 1) & 1);
-            imgLine[i + 7] = (unsigned char)(c & 1);
+            imgLine[i + 0] = static_cast<unsigned char>((c >> 7) & 1);
+            imgLine[i + 1] = static_cast<unsigned char>((c >> 6) & 1);
+            imgLine[i + 2] = static_cast<unsigned char>((c >> 5) & 1);
+            imgLine[i + 3] = static_cast<unsigned char>((c >> 4) & 1);
+            imgLine[i + 4] = static_cast<unsigned char>((c >> 3) & 1);
+            imgLine[i + 5] = static_cast<unsigned char>((c >> 2) & 1);
+            imgLine[i + 6] = static_cast<unsigned char>((c >> 1) & 1);
+            imgLine[i + 7] = static_cast<unsigned char>(c & 1);
         }
     } else if (nBits == 8) {
         // special case: imgLine == inputLine
@@ -697,7 +697,7 @@ unsigned char *ImageStream::getLine()
                 buf = (buf << 8) | (*p++ & 0xff);
                 bits += 8;
             }
-            imgLine[i] = (unsigned char)((buf >> (bits - nBits)) & bitMask);
+            imgLine[i] = static_cast<unsigned char>((buf >> (bits - nBits)) & bitMask);
             bits -= nBits;
         }
     }
@@ -731,7 +731,7 @@ StreamPredictor::StreamPredictor(Stream *strA, int predictorA, int widthA, int n
     }
     pixBytes = (nComps * nBits + 7) >> 3;
     rowBytes = ((nVals * nBits + 7) >> 3) + pixBytes;
-    predLine = (unsigned char *)gmalloc(rowBytes);
+    predLine = static_cast<unsigned char *>(gmalloc(rowBytes));
     memset(predLine, 0, rowBytes);
     predIdx = rowBytes;
 
@@ -826,13 +826,13 @@ bool StreamPredictor::getNextLine()
         }
         switch (curPred) {
         case 11: // PNG sub
-            predLine[i] = predLine[i - pixBytes] + (unsigned char)c;
+            predLine[i] = predLine[i - pixBytes] + static_cast<unsigned char>(c);
             break;
         case 12: // PNG up
-            predLine[i] = predLine[i] + (unsigned char)c;
+            predLine[i] = predLine[i] + static_cast<unsigned char>(c);
             break;
         case 13: // PNG average
-            predLine[i] = ((predLine[i - pixBytes] + predLine[i]) >> 1) + (unsigned char)c;
+            predLine[i] = ((predLine[i - pixBytes] + predLine[i]) >> 1) + static_cast<unsigned char>(c);
             break;
         case 14: // PNG Paeth
             left = predLine[i - pixBytes];
@@ -849,16 +849,16 @@ bool StreamPredictor::getNextLine()
                 pc = -pc;
             }
             if (pa <= pb && pa <= pc) {
-                predLine[i] = left + (unsigned char)c;
+                predLine[i] = left + static_cast<unsigned char>(c);
             } else if (pb <= pc) {
-                predLine[i] = up + (unsigned char)c;
+                predLine[i] = up + static_cast<unsigned char>(c);
             } else {
-                predLine[i] = upLeft + (unsigned char)c;
+                predLine[i] = upLeft + static_cast<unsigned char>(c);
             }
             break;
         case 10: // PNG none
         default: // no predictor or TIFF predictor
-            predLine[i] = (unsigned char)c;
+            predLine[i] = static_cast<unsigned char>(c);
             break;
         }
     }
@@ -892,18 +892,18 @@ bool StreamPredictor::getNextLine()
                         inBuf = (inBuf << 8) | (predLine[j++] & 0xff);
                         inBits += 8;
                     }
-                    upLeftBuf[kk] = (unsigned char)((upLeftBuf[kk] + (inBuf >> (inBits - nBits))) & bitMask);
+                    upLeftBuf[kk] = static_cast<unsigned char>((upLeftBuf[kk] + (inBuf >> (inBits - nBits))) & bitMask);
                     inBits -= nBits;
                     outBuf = (outBuf << nBits) | upLeftBuf[kk];
                     outBits += nBits;
                     if (outBits >= 8) {
-                        predLine[k++] = (unsigned char)(outBuf >> (outBits - 8));
+                        predLine[k++] = static_cast<unsigned char>(outBuf >> (outBits - 8));
                         outBits -= 8;
                     }
                 }
             }
             if (outBits > 0) {
-                predLine[k++] = (unsigned char)((outBuf << (8 - outBits)) + (inBuf & ((1 << (8 - outBits)) - 1)));
+                predLine[k++] = static_cast<unsigned char>((outBuf << (8 - outBits)) + (inBuf & ((1 << (8 - outBits)) - 1)));
             }
         }
     }
@@ -1045,7 +1045,7 @@ std::unique_ptr<Stream> CachedFileStream::makeSubStream(Goffset startA, bool lim
 
 bool CachedFileStream::rewind()
 {
-    savePos = (unsigned int)cc->tell();
+    savePos = static_cast<unsigned int>(cc->tell());
     cc->seek(start, SEEK_SET);
 
     saved = true;
@@ -1091,19 +1091,19 @@ void CachedFileStream::setPos(Goffset pos, int dir)
             bufPos = pos;
         } else {
             cc->seek(0, SEEK_END);
-            bufPos = pos = (unsigned int)cc->tell();
+            bufPos = pos = static_cast<unsigned int>(cc->tell());
             error(errInternal, pos, "CachedFileStream: Seek beyond end attempted, capped to file size");
         }
     } else {
         cc->seek(0, SEEK_END);
-        size = (unsigned int)cc->tell();
+        size = static_cast<unsigned int>(cc->tell());
 
         if (pos > size) {
             pos = size;
         }
 
-        cc->seek(-(int)pos, SEEK_END);
-        bufPos = (unsigned int)cc->tell();
+        cc->seek(-static_cast<int>(pos), SEEK_END);
+        bufPos = static_cast<unsigned int>(cc->tell());
     }
 
     bufPtr = bufEnd = buf;
@@ -1140,7 +1140,7 @@ EmbedStream::EmbedStream(Stream *strA, Object &&dictA, bool limitedA, Goffset le
     length = lengthA;
     replay = false;
     if (reusable) {
-        bufData = (unsigned char *)gmalloc(16384);
+        bufData = static_cast<unsigned char *>(gmalloc(16384));
         bufMax = 16384;
         bufLen = 0;
     }
@@ -1210,7 +1210,7 @@ int EmbedStream::getChar()
         bufLen++;
         if (bufLen >= bufMax) {
             bufMax *= 2;
-            bufData = (unsigned char *)grealloc(bufData, bufMax);
+            bufData = static_cast<unsigned char *>(grealloc(bufData, bufMax));
         }
     }
     return c;
@@ -1258,7 +1258,7 @@ int EmbedStream::getChars(int nChars, unsigned char *buffer)
             while (bufLen + len >= bufMax) {
                 bufMax *= 2;
             }
-            bufData = (unsigned char *)grealloc(bufData, bufMax);
+            bufData = static_cast<unsigned char *>(grealloc(bufData, bufMax));
         }
         memcpy(bufData + bufLen, buffer, len);
         bufLen += len;
@@ -1438,7 +1438,7 @@ int ASCII85Stream::lookChar()
                 t = t * 85 + (c[k] - 0x21);
             }
             for (k = 3; k >= 0; --k) {
-                b[k] = (int)(t & 0xff);
+                b[k] = static_cast<int>(t & 0xff);
                 t >>= 8;
             }
         }
@@ -1722,7 +1722,7 @@ int RunLengthStream::getChars(int nChars, unsigned char *buffer)
                 break;
             }
         }
-        m = (int)(bufEnd - bufPtr);
+        m = static_cast<int>(bufEnd - bufPtr);
         if (m > nChars - n) {
             m = nChars - n;
         }
@@ -1768,13 +1768,13 @@ bool RunLengthStream::fillBuf()
     if (c < 0x80) {
         n = c + 1;
         for (i = 0; i < n; ++i) {
-            buf[i] = (char)str->getChar();
+            buf[i] = static_cast<char>(str->getChar());
         }
     } else {
         n = 0x101 - c;
         c = str->getChar();
         for (i = 0; i < n; ++i) {
-            buf[i] = (char)c;
+            buf[i] = static_cast<char>(c);
         }
     }
     bufPtr = buf;
@@ -1805,8 +1805,8 @@ CCITTFaxStream::CCITTFaxStream(std::unique_ptr<Stream> strA, int encodingA, bool
     // ---> max codingLine size = columns + 1
     // refLine has one extra guard entry at the end
     // ---> max refLine size = columns + 2
-    codingLine = (int *)gmallocn_checkoverflow(columns + 1, sizeof(int));
-    refLine = (int *)gmallocn_checkoverflow(columns + 2, sizeof(int));
+    codingLine = static_cast<int *>(gmallocn_checkoverflow(columns + 1, sizeof(int)));
+    refLine = static_cast<int *>(gmallocn_checkoverflow(columns + 2, sizeof(int)));
 
     if (codingLine != nullptr && refLine != nullptr) {
         eof = false;
@@ -4569,7 +4569,7 @@ FlateCode *FlateStream::compHuffmanCodes(const int *lengths, int n, int *maxLen)
 
     // allocate the table
     const int tabSize = 1 << *maxLen;
-    auto *codes = (FlateCode *)gmallocn(tabSize, sizeof(FlateCode));
+    auto *codes = static_cast<FlateCode *>(gmallocn(tabSize, sizeof(FlateCode)));
 
     // clear the table
     for (i = 0; i < tabSize; ++i) {
@@ -4592,8 +4592,8 @@ FlateCode *FlateStream::compHuffmanCodes(const int *lengths, int n, int *maxLen)
 
                 // fill in the table entries
                 for (i = code2; i < tabSize; i += skip) {
-                    codes[i].len = (unsigned short)len;
-                    codes[i].val = (unsigned short)val;
+                    codes[i].len = static_cast<unsigned short>(len);
+                    codes[i].val = static_cast<unsigned short>(val);
                 }
 
                 ++code;
@@ -4622,7 +4622,7 @@ int FlateStream::getHuffmanCodeWord(FlateHuffmanTab *tab)
     }
     codeBuf >>= code->len;
     codeSize -= code->len;
-    return (int)code->val;
+    return static_cast<int>(code->val);
 }
 
 int FlateStream::getCodeWord(int bits)
@@ -4658,7 +4658,7 @@ EOFStream::~EOFStream() = default;
 BufStream::BufStream(std::unique_ptr<Stream> strA, int bufSizeA) : OwnedFilterStream(std::move(strA))
 {
     bufSize = bufSizeA;
-    buf = (int *)gmallocn(bufSize, sizeof(int));
+    buf = static_cast<int *>(gmallocn(bufSize, sizeof(int)));
 }
 
 BufStream::~BufStream()
@@ -4860,7 +4860,7 @@ bool ASCII85Encoder::fillBuf()
                 t = (c0 << 24) | (c1 << 16) | (c2 << 8);
             }
             for (i = 4; i >= 0; --i) {
-                buf1[i] = (char)(t % 85 + 0x21);
+                buf1[i] = static_cast<char>(t % 85 + 0x21);
                 t /= 85;
             }
             for (i = 0; i <= n; ++i) {
@@ -4884,7 +4884,7 @@ bool ASCII85Encoder::fillBuf()
             }
         } else {
             for (i = 4; i >= 0; --i) {
-                buf1[i] = (char)(t % 85 + 0x21);
+                buf1[i] = static_cast<char>(t % 85 + 0x21);
                 t /= 85;
             }
             for (i = 0; i <= 4; ++i) {
@@ -4971,7 +4971,7 @@ bool RunLengthEncoder::fillBuf()
         while (n < 128 && (c = str->getChar()) == c1) {
             ++n;
         }
-        buf[0] = (char)(257 - n);
+        buf[0] = static_cast<char>(257 - n);
         buf[1] = c1;
         bufEnd = &buf[2];
         if (c == EOF) {
@@ -5000,11 +5000,11 @@ bool RunLengthEncoder::fillBuf()
             }
         }
         if (buf[n] == buf[n - 1]) {
-            buf[0] = (char)(n - 2 - 1);
+            buf[0] = static_cast<char>(n - 2 - 1);
             bufEnd = &buf[n - 1];
             nextEnd = &buf[n + 1];
         } else {
-            buf[0] = (char)(n - 1);
+            buf[0] = static_cast<char>(n - 1);
             bufEnd = nextEnd = &buf[n + 1];
         }
     }
@@ -5119,7 +5119,7 @@ void LZWEncoder::fillBuf()
         p0 = p1;
         ++seqLen;
     }
-    code = (int)(p0 - table);
+    code = static_cast<int>(p0 - table);
 
     // generate an output code
     outBuf = (outBuf << codeLen) | code;
@@ -5208,7 +5208,7 @@ bool CMYKGrayEncoder::fillBuf()
         i = 255;
     }
     bufPtr = bufEnd = buf;
-    *bufEnd++ = (char)i;
+    *bufEnd++ = static_cast<char>(i);
     return true;
 }
 
@@ -5257,7 +5257,7 @@ bool RGBGrayEncoder::fillBuf()
         i = 0;
     }
     bufPtr = bufEnd = buf;
-    *bufEnd++ = (char)i;
+    *bufEnd++ = static_cast<char>(i);
     return true;
 }
 
@@ -5267,7 +5267,7 @@ bool RGBGrayEncoder::fillBuf()
 
 SplashBitmapCMYKEncoder::SplashBitmapCMYKEncoder(SplashBitmap *bitmapA) : bitmap(bitmapA)
 {
-    width = (size_t)4 * bitmap->getWidth();
+    width = static_cast<size_t>(4) * bitmap->getWidth();
     height = bitmap->getHeight();
     buf.resize(width);
     bufPtr = width;

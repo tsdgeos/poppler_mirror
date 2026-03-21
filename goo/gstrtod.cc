@@ -99,7 +99,7 @@ double gstrtod(const char *nptr, char **endptr)
         char *copy, *c;
 
         /* We need to convert the '.' to the locale specific decimal point */
-        copy = (char *)malloc(end - nptr + 1 + decimal_point_len);
+        copy = static_cast<char *>(malloc(end - nptr + 1 + decimal_point_len));
 
         c = copy;
         memcpy(c, nptr, decimal_point_pos - nptr);
@@ -116,9 +116,9 @@ double gstrtod(const char *nptr, char **endptr)
 
         if (fail_pos) {
             if (fail_pos - copy > decimal_point_pos - nptr) {
-                fail_pos = (char *)nptr + (fail_pos - copy) - (decimal_point_len - 1);
+                fail_pos = const_cast<char *>(nptr) + (fail_pos - copy) - (decimal_point_len - 1);
             } else {
-                fail_pos = (char *)nptr + (fail_pos - copy);
+                fail_pos = const_cast<char *>(nptr) + (fail_pos - copy);
             }
         }
 
@@ -126,16 +126,16 @@ double gstrtod(const char *nptr, char **endptr)
     } else if (end) {
         char *copy;
 
-        copy = (char *)malloc(end - (char *)nptr + 1);
+        copy = static_cast<char *>(malloc(end - const_cast<char *>(nptr) + 1));
         memcpy(copy, nptr, end - nptr);
-        *(copy + (end - (char *)nptr)) = 0;
+        *(copy + (end - const_cast<char *>(nptr))) = 0;
 
         errno = 0;
         val = strtod(copy, &fail_pos);
         strtod_errno = errno;
 
         if (fail_pos) {
-            fail_pos = (char *)nptr + (fail_pos - copy);
+            fail_pos = const_cast<char *>(nptr) + (fail_pos - copy);
         }
 
         free(copy);

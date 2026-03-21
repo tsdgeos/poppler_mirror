@@ -282,13 +282,13 @@ static auto annotDisplayDecideCbk = [](Annot * /*annot*/, void * /*user_data*/) 
 static void savePageSlice(PDFDoc *doc, SplashOutputDev *splashOut, int pg, int x, int y, int w, int h, double pg_w, double pg_h, char *ppmFile)
 {
     if (w == 0) {
-        w = (int)ceil(pg_w);
+        w = static_cast<int>(ceil(pg_w));
     }
     if (h == 0) {
-        h = (int)ceil(pg_h);
+        h = static_cast<int>(ceil(pg_h));
     }
-    w = (x + w > pg_w ? (int)ceil(pg_w - x) : w);
-    h = (y + h > pg_h ? (int)ceil(pg_h - y) : h);
+    w = (x + w > pg_w ? static_cast<int>(ceil(pg_w - x)) : w);
+    h = (y + h > pg_h ? static_cast<int>(ceil(pg_h - y)) : h);
     doc->displayPageSlice(splashOut, pg, x_resolution, y_resolution, 0, !useCropBox, false, false, x, y, w, h, nullptr, nullptr, annotDisplayDecideCbk, nullptr);
 
     SplashBitmap *bitmap = splashOut->getBitmap();

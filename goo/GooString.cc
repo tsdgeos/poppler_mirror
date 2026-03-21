@@ -223,7 +223,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
                 } else {
                     prec = 0;
                 }
-                for (ft = (GooStringFormatType)0; formatStrings[ft]; ft = (GooStringFormatType)(ft + 1)) {
+                for (ft = static_cast<GooStringFormatType>(0); formatStrings[ft]; ft = static_cast<GooStringFormatType>(ft + 1)) {
                     if (!strncmp(p0, formatStrings[ft], strlen(formatStrings[ft]))) {
                         break;
                     }
@@ -245,10 +245,10 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
                     if (argsLen == argsSize) {
                         argsSize *= 2;
                         if (args == argsBuf) {
-                            args = (GooStringFormatArg *)gmallocn(argsSize, sizeof(GooStringFormatArg));
+                            args = static_cast<GooStringFormatArg *>(gmallocn(argsSize, sizeof(GooStringFormatArg)));
                             memcpy(args, argsBuf, argsLen * sizeof(GooStringFormatArg));
                         } else {
-                            args = (GooStringFormatArg *)greallocn(args, argsSize, sizeof(GooStringFormatArg));
+                            args = static_cast<GooStringFormatArg *>(greallocn(args, argsSize, sizeof(GooStringFormatArg)));
                         }
                     }
                     switch (ft) {
@@ -301,7 +301,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
                         args[argsLen].f = va_arg(argList, double);
                         break;
                     case fmtChar:
-                        args[argsLen].c = (char)va_arg(argList, int);
+                        args[argsLen].c = static_cast<char>(va_arg(argList, int));
                         break;
                     case fmtString:
                         args[argsLen].s = va_arg(argList, char *);
@@ -580,7 +580,7 @@ void formatDouble(double x, char *buf, int bufSize, int prec, bool trim, const c
     started = !trim;
     for (j = 0; j < prec && i > 1; ++j) {
         x2 = floor(0.1 * (x + 0.5));
-        d = (int)floor(x - 10 * x2 + 0.5);
+        d = static_cast<int>(floor(x - 10 * x2 + 0.5));
         if (started || d != 0) {
             buf[--i] = '0' + d;
             started = true;
@@ -593,7 +593,7 @@ void formatDouble(double x, char *buf, int bufSize, int prec, bool trim, const c
     if (i > 1) {
         do {
             x2 = floor(0.1 * (x + 0.5));
-            d = (int)floor(x - 10 * x2 + 0.5);
+            d = static_cast<int>(floor(x - 10 * x2 + 0.5));
             buf[--i] = '0' + d;
             x = x2;
         } while (i > 1 && x);

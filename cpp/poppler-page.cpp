@@ -222,7 +222,7 @@ bool page::search(const ustring &text, rectf &r, search_direction_enum direction
     }
 
     const bool sCase = case_sensitivity == case_sensitive;
-    const int rotation_value = (int)rotation * 90;
+    const int rotation_value = static_cast<int>(rotation) * 90;
 
     bool found = false;
     double rect_left = r.left();
@@ -269,7 +269,7 @@ ustring page::text(const rectf &r) const
 
 static void appendToGooString(void *stream, const char *text, int len)
 {
-    ((GooString *)stream)->append(text, len);
+    (static_cast<GooString *>(stream))->append(text, len);
 }
 
 /**

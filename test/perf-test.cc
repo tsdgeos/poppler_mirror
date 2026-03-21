@@ -190,7 +190,7 @@ static char *str_cat4(const char *str1, const char *str2, const char *str3, cons
         str4_len = strlen(str4);
     }
 
-    str = (char *)zmalloc(str1_len + str2_len + str3_len + str4_len + 1);
+    str = static_cast<char *>(zmalloc(str1_len + str2_len + str3_len + str4_len + 1));
     if (!str) {
         return nullptr;
     }
@@ -351,8 +351,8 @@ SplashBitmap *PdfEnginePoppler::renderBitmap(int pageNo, double zoomReal, int ro
         return nullptr;
     }
 
-    double hDPI = (double)PDF_FILE_DPI * zoomReal * 0.01;
-    double vDPI = (double)PDF_FILE_DPI * zoomReal * 0.01;
+    double hDPI = static_cast<double>(PDF_FILE_DPI) * zoomReal * 0.01;
+    double vDPI = static_cast<double>(PDF_FILE_DPI) * zoomReal * 0.01;
     bool useMediaBox = false;
     bool crop = true;
     bool doLinks = true;
@@ -386,7 +386,7 @@ static int StrList_InsertAndOwn(StrList **root, char *txt)
         return false;
     }
 
-    el = (StrList *)malloc(sizeof(StrList));
+    el = static_cast<StrList *>(malloc(sizeof(StrList)));
     if (!el) {
         return false;
     }
@@ -410,7 +410,7 @@ static int StrList_Insert(StrList **root, char *txt)
     }
 
     if (!StrList_InsertAndOwn(root, txtDup)) {
-        free((void *)txtDup);
+        free(reinterpret_cast<void *>(txtDup));
         return false;
     }
     return true;
@@ -421,8 +421,8 @@ static void StrList_FreeElement(StrList *el)
     if (!el) {
         return;
     }
-    free((void *)el->str);
-    free((void *)el);
+    free(reinterpret_cast<void *>(el->str));
+    free(reinterpret_cast<void *>(el));
 }
 
 static void StrList_Destroy(StrList **root)

@@ -99,7 +99,7 @@ ustring detail::unicode_to_ustring(const Unicode *u, int length)
     ustring::iterator it = str.begin();
     const Unicode *uu = u;
     for (int i = 0; i < length; ++i) {
-        *it++ = ustring::value_type(*uu++ & 0xffff);
+        *it++ = static_cast<ustring::value_type>(*uu++ & 0xffff);
     }
     return str;
 }
@@ -109,8 +109,8 @@ std::unique_ptr<GooString> detail::ustring_to_unicode_GooString(const ustring &s
     const size_t len = str.size() * 2 + 2;
     const ustring::value_type *me = str.data();
     byte_array ba(len);
-    ba[0] = (char)0xfe;
-    ba[1] = (char)0xff;
+    ba[0] = static_cast<char>(0xfe);
+    ba[1] = static_cast<char>(0xff);
     for (size_t i = 0; i < str.size(); ++i, ++me) {
         ba[i * 2 + 2] = ((*me >> 8) & 0xff);
         ba[i * 2 + 3] = (*me & 0xff);

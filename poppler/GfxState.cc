@@ -786,7 +786,7 @@ void GfxCalGrayColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
     }
 #endif
     getRGB(color, &rgb);
-    *gray = clip01((GfxColorComp)(0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b + 0.5));
+    *gray = clip01(static_cast<GfxColorComp>(0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b + 0.5));
 }
 
 void GfxCalGrayColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
@@ -893,7 +893,7 @@ std::unique_ptr<GfxColorSpace> GfxDeviceRGBColorSpace::copy() const
 
 void GfxDeviceRGBColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
 {
-    *gray = clip01((GfxColorComp)(0.3 * color->c[0] + 0.59 * color->c[1] + 0.11 * color->c[2] + 0.5));
+    *gray = clip01(static_cast<GfxColorComp>(0.3 * color->c[0] + 0.59 * color->c[1] + 0.11 * color->c[2] + 0.5));
 }
 
 void GfxDeviceRGBColorSpace::getGrayLine(unsigned char *in, unsigned char *out, int length)
@@ -1175,7 +1175,7 @@ void GfxCalRGBColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
     }
 #endif
     getRGB(color, &rgb);
-    *gray = clip01((GfxColorComp)(0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b + 0.5));
+    *gray = clip01(static_cast<GfxColorComp>(0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b + 0.5));
 }
 
 void GfxCalRGBColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
@@ -1285,7 +1285,7 @@ std::unique_ptr<GfxColorSpace> GfxDeviceCMYKColorSpace::copy() const
 
 void GfxDeviceCMYKColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
 {
-    *gray = clip01((GfxColorComp)(gfxColorComp1 - color->c[3] - 0.3 * color->c[0] - 0.59 * color->c[1] - 0.11 * color->c[2] + 0.5));
+    *gray = clip01(static_cast<GfxColorComp>(gfxColorComp1 - color->c[3] - 0.3 * color->c[0] - 0.59 * color->c[1] - 0.11 * color->c[2] + 0.5));
 }
 
 void GfxDeviceCMYKColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
@@ -1501,7 +1501,7 @@ void GfxLabColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
     }
 #endif
     getRGB(color, &rgb);
-    *gray = clip01((GfxColorComp)(0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b + 0.5));
+    *gray = clip01(static_cast<GfxColorComp>(0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b + 0.5));
 }
 
 // convert L*a*b* to media XYZ color space
@@ -1892,7 +1892,7 @@ void GfxICCBasedColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
     } else {
         GfxRGB rgb;
         getRGB(color, &rgb);
-        *gray = clip01((GfxColorComp)(0.3 * rgb.r + 0.59 * rgb.g + 0.11 * rgb.b + 0.5));
+        *gray = clip01(static_cast<GfxColorComp>(0.3 * rgb.r + 0.59 * rgb.g + 0.11 * rgb.b + 0.5));
     }
 #else
     alt->getGray(color, gray);
@@ -2002,7 +2002,7 @@ void GfxICCBasedColorSpace::getRGBLine(unsigned char *in, unsigned int *out, int
 {
 #if USE_CMS
     if (lineTransform != nullptr && lineTransform->getTransformPixelType() == PT_RGB) {
-        auto *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
+        auto *tmp = static_cast<unsigned char *>(gmallocn(3 * length, sizeof(unsigned char)));
         lineTransform->doTransform(in, tmp, length);
         for (int i = 0; i < length; ++i) {
             unsigned char *current = tmp + (i * 3);
@@ -2021,7 +2021,7 @@ void GfxICCBasedColorSpace::getRGBLine(unsigned char *in, unsigned char *out, in
 {
 #if USE_CMS
     if (lineTransform != nullptr && lineTransform->getTransformPixelType() == PT_RGB) {
-        auto *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
+        auto *tmp = static_cast<unsigned char *>(gmallocn(3 * length, sizeof(unsigned char)));
         lineTransform->doTransform(in, tmp, length);
         unsigned char *current = tmp;
         for (int i = 0; i < length; ++i) {
@@ -2031,7 +2031,7 @@ void GfxICCBasedColorSpace::getRGBLine(unsigned char *in, unsigned char *out, in
         }
         gfree(tmp);
     } else if (lineTransform != nullptr && lineTransform->getTransformPixelType() == PT_CMYK) {
-        auto *tmp = (unsigned char *)gmallocn(4 * length, sizeof(unsigned char));
+        auto *tmp = static_cast<unsigned char *>(gmallocn(4 * length, sizeof(unsigned char)));
         lineTransform->doTransform(in, tmp, length);
         unsigned char *current = tmp;
         double c, m, y, k, c1, m1, y1, k1, r, g, b;
@@ -2062,7 +2062,7 @@ void GfxICCBasedColorSpace::getRGBXLine(unsigned char *in, unsigned char *out, i
 {
 #if USE_CMS
     if (lineTransform != nullptr && lineTransform->getTransformPixelType() == PT_RGB) {
-        auto *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
+        auto *tmp = static_cast<unsigned char *>(gmallocn(3 * length, sizeof(unsigned char)));
         lineTransform->doTransform(in, tmp, length);
         unsigned char *current = tmp;
         for (int i = 0; i < length; ++i) {
@@ -2087,7 +2087,7 @@ void GfxICCBasedColorSpace::getCMYKLine(unsigned char *in, unsigned char *out, i
         transform->doTransform(in, out, length);
     } else if (lineTransform != nullptr && nComps != 4) {
         GfxColorComp c, m, y, k;
-        auto *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
+        auto *tmp = static_cast<unsigned char *>(gmallocn(3 * length, sizeof(unsigned char)));
         getRGBLine(in, tmp, length);
         unsigned char *p = tmp;
         for (int i = 0; i < length; i++) {
@@ -2119,7 +2119,7 @@ void GfxICCBasedColorSpace::getDeviceNLine(unsigned char *in, unsigned char *out
 {
 #if USE_CMS
     if (lineTransform != nullptr && lineTransform->getTransformPixelType() == PT_CMYK) {
-        auto *tmp = (unsigned char *)gmallocn(4 * length, sizeof(unsigned char));
+        auto *tmp = static_cast<unsigned char *>(gmallocn(4 * length, sizeof(unsigned char)));
         transform->doTransform(in, tmp, length);
         unsigned char *p = tmp;
         for (int i = 0; i < length; i++) {
@@ -2133,7 +2133,7 @@ void GfxICCBasedColorSpace::getDeviceNLine(unsigned char *in, unsigned char *out
         gfree(tmp);
     } else if (lineTransform != nullptr && nComps != 4) {
         GfxColorComp c, m, y, k;
-        auto *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
+        auto *tmp = static_cast<unsigned char *>(gmallocn(3 * length, sizeof(unsigned char)));
         getRGBLine(in, tmp, length);
         unsigned char *p = tmp;
         for (int i = 0; i < length; i++) {
@@ -2324,7 +2324,7 @@ char *GfxICCBasedColorSpace::getPostScriptCSA()
         return nullptr;
     }
 
-    psCSA = (char *)gmalloc(size + 1);
+    psCSA = static_cast<char *>(gmalloc(size + 1));
     cmsGetPostScriptCSA(cmsGetProfileContextID(rawprofile), rawprofile, getIntent(), 0, psCSA, size);
     psCSA[size] = 0;
 
@@ -2339,7 +2339,7 @@ char *GfxICCBasedColorSpace::getPostScriptCSA()
 GfxIndexedColorSpace::GfxIndexedColorSpace(std::unique_ptr<GfxColorSpace> &&baseA, int indexHighA) : base(std::move(baseA))
 {
     indexHigh = indexHighA;
-    lookup = (unsigned char *)gmallocn((indexHigh + 1) * base->getNComps(), sizeof(unsigned char));
+    lookup = static_cast<unsigned char *>(gmallocn((indexHigh + 1) * base->getNComps(), sizeof(unsigned char)));
     overprintMask = base->getOverprintMask();
 }
 
@@ -2405,14 +2405,14 @@ std::unique_ptr<GfxColorSpace> GfxIndexedColorSpace::parse(GfxResources *res, co
         }
         obj1.streamClose();
     } else if (obj1.isString()) {
-        if (obj1.getString().size() < size_t(indexHighA + 1) * n) {
+        if (obj1.getString().size() < static_cast<size_t>(indexHighA + 1) * n) {
             error(errSyntaxWarning, -1, "Bad Indexed color space (lookup table string too short)");
             goto err3;
         }
         s = obj1.getString().c_str();
         for (i = 0; i <= indexHighA; ++i) {
             for (j = 0; j < n; ++j) {
-                cs->lookup[i * n + j] = (unsigned char)*s++;
+                cs->lookup[i * n + j] = static_cast<unsigned char>(*s++);
             }
         }
     } else {
@@ -2433,7 +2433,7 @@ GfxColor *GfxIndexedColorSpace::mapColorToBase(const GfxColor *color, GfxColor *
 
     n = base->getNComps();
     base->getDefaultRanges(low, range, indexHigh);
-    const int idx = (int)(colToDbl(color->c[0]) + 0.5) * n;
+    const int idx = static_cast<int>(colToDbl(color->c[0]) + 0.5) * n;
     if (likely((idx + n - 1 < (indexHigh + 1) * base->getNComps()) && idx >= 0)) {
         p = &lookup[idx];
         for (i = 0; i < n; ++i) {
@@ -2467,7 +2467,7 @@ void GfxIndexedColorSpace::getRGBLine(unsigned char *in, unsigned int *out, int 
     int i, j, n;
 
     n = base->getNComps();
-    line = (unsigned char *)gmallocn(length, n);
+    line = static_cast<unsigned char *>(gmallocn(length, n));
     for (i = 0; i < length; i++) {
         for (j = 0; j < n; j++) {
             line[i * n + j] = lookup[in[i] * n + j];
@@ -2485,7 +2485,7 @@ void GfxIndexedColorSpace::getRGBLine(unsigned char *in, unsigned char *out, int
     int i, j, n;
 
     n = base->getNComps();
-    line = (unsigned char *)gmallocn(length, n);
+    line = static_cast<unsigned char *>(gmallocn(length, n));
     for (i = 0; i < length; i++) {
         for (j = 0; j < n; j++) {
             line[i * n + j] = lookup[in[i] * n + j];
@@ -2503,7 +2503,7 @@ void GfxIndexedColorSpace::getRGBXLine(unsigned char *in, unsigned char *out, in
     int i, j, n;
 
     n = base->getNComps();
-    line = (unsigned char *)gmallocn(length, n);
+    line = static_cast<unsigned char *>(gmallocn(length, n));
     for (i = 0; i < length; i++) {
         for (j = 0; j < n; j++) {
             line[i * n + j] = lookup[in[i] * n + j];
@@ -2521,7 +2521,7 @@ void GfxIndexedColorSpace::getCMYKLine(unsigned char *in, unsigned char *out, in
     int i, j, n;
 
     n = base->getNComps();
-    line = (unsigned char *)gmallocn(length, n);
+    line = static_cast<unsigned char *>(gmallocn(length, n));
     for (i = 0; i < length; i++) {
         for (j = 0; j < n; j++) {
             line[i * n + j] = lookup[in[i] * n + j];
@@ -2539,7 +2539,7 @@ void GfxIndexedColorSpace::getDeviceNLine(unsigned char *in, unsigned char *out,
     int i, j, n;
 
     n = base->getNComps();
-    line = (unsigned char *)gmallocn(length, n);
+    line = static_cast<unsigned char *>(gmallocn(length, n));
     for (i = 0; i < length; i++) {
         for (j = 0; j < n; j++) {
             line[i * n + j] = lookup[in[i] * n + j];
@@ -3782,7 +3782,7 @@ void GfxUnivariateShading::setupCache(const Matrix *ctm, double xMin, double yMi
         tMax = t0 + sMin * (t1 - t0);
     }
 
-    cacheBounds = (double *)gmallocn_checkoverflow(maxSize, sizeof(double) * (nComps + 2));
+    cacheBounds = static_cast<double *>(gmallocn_checkoverflow(maxSize, sizeof(double) * (nComps + 2)));
     if (unlikely(!cacheBounds)) {
         return;
     }
@@ -4522,10 +4522,10 @@ GfxGouraudTriangleShading::GfxGouraudTriangleShading(int typeA, GfxGouraudVertex
 GfxGouraudTriangleShading::GfxGouraudTriangleShading(const GfxGouraudTriangleShading *shading) : GfxShading(shading)
 {
     nVertices = shading->nVertices;
-    vertices = (GfxGouraudVertex *)gmallocn(nVertices, sizeof(GfxGouraudVertex));
+    vertices = static_cast<GfxGouraudVertex *>(gmallocn(nVertices, sizeof(GfxGouraudVertex)));
     memcpy(vertices, shading->vertices, nVertices * sizeof(GfxGouraudVertex));
     nTriangles = shading->nTriangles;
-    triangles = (int (*)[3])gmallocn(nTriangles * 3, sizeof(int));
+    triangles = static_cast<int (*)[3]>(gmallocn(nTriangles * 3, sizeof(int)));
     memcpy(triangles, shading->triangles, nTriangles * 3 * sizeof(int));
     for (const auto &f : shading->funcs) {
         funcs.emplace_back(f->copy());
@@ -4607,7 +4607,7 @@ std::unique_ptr<GfxGouraudTriangleShading> GfxGouraudTriangleShading::parse(GfxR
         for (i = 0; 5 + 2 * i < obj1.arrayGetLength() && i < gfxColorMaxComps; ++i) {
             cMin[i] = obj1.arrayGet(4 + 2 * i).getNum(&decodeOk);
             cMax[i] = obj1.arrayGet(5 + 2 * i).getNum(&decodeOk);
-            cMul[i] = (cMax[i] - cMin[i]) / (double)((1U << compBits) - 1);
+            cMul[i] = (cMax[i] - cMin[i]) / static_cast<double>((1U << compBits) - 1);
         }
         nComps = i;
 
@@ -4672,7 +4672,7 @@ std::unique_ptr<GfxGouraudTriangleShading> GfxGouraudTriangleShading::parse(GfxR
         if (nVerticesA == vertSize) {
             int oldVertSize = vertSize;
             vertSize = (vertSize == 0) ? 16 : 2 * vertSize;
-            verticesA = (GfxGouraudVertex *)greallocn_checkoverflow(verticesA, vertSize, sizeof(GfxGouraudVertex));
+            verticesA = static_cast<GfxGouraudVertex *>(greallocn_checkoverflow(verticesA, vertSize, sizeof(GfxGouraudVertex)));
             if (unlikely(!verticesA)) {
                 error(errSyntaxWarning, -1, "GfxGouraudTriangleShading::parse: vertices size overflow");
                 gfree(trianglesA);
@@ -4681,10 +4681,10 @@ std::unique_ptr<GfxGouraudTriangleShading> GfxGouraudTriangleShading::parse(GfxR
             }
             memset(verticesA + oldVertSize, 0, (vertSize - oldVertSize) * sizeof(GfxGouraudVertex));
         }
-        verticesA[nVerticesA].x = xMin + xMul * (double)x;
-        verticesA[nVerticesA].y = yMin + yMul * (double)y;
+        verticesA[nVerticesA].x = xMin + xMul * static_cast<double>(x);
+        verticesA[nVerticesA].y = yMin + yMul * static_cast<double>(y);
         for (i = 0; i < nComps; ++i) {
-            verticesA[nVerticesA].color.c[i] = dblToCol(cMin[i] + cMul[i] * (double)c[i]);
+            verticesA[nVerticesA].color.c[i] = dblToCol(cMin[i] + cMul[i] * static_cast<double>(c[i]));
         }
         ++nVerticesA;
         bitBuf->flushBits();
@@ -4694,7 +4694,7 @@ std::unique_ptr<GfxGouraudTriangleShading> GfxGouraudTriangleShading::parse(GfxR
             } else if (state == 2 || flag > 0) {
                 if (nTrianglesA == triSize) {
                     triSize = (triSize == 0) ? 16 : 2 * triSize;
-                    trianglesA = (int (*)[3])greallocn(trianglesA, triSize * 3, sizeof(int));
+                    trianglesA = static_cast<int (*)[3]>(greallocn(trianglesA, triSize * 3, sizeof(int)));
                 }
                 if (state == 2) {
                     trianglesA[nTrianglesA][0] = nVerticesA - 3;
@@ -4720,7 +4720,7 @@ std::unique_ptr<GfxGouraudTriangleShading> GfxGouraudTriangleShading::parse(GfxR
     if (typeA == 5 && nVerticesA > 0 && vertsPerRow > 0) {
         nRows = nVerticesA / vertsPerRow;
         nTrianglesA = (nRows - 1) * 2 * (vertsPerRow - 1);
-        trianglesA = (int (*)[3])gmallocn_checkoverflow(nTrianglesA * 3, sizeof(int));
+        trianglesA = static_cast<int (*)[3]>(gmallocn_checkoverflow(nTrianglesA * 3, sizeof(int)));
         if (unlikely(!trianglesA)) {
             gfree(verticesA);
             return nullptr;
@@ -4863,7 +4863,7 @@ GfxPatchMeshShading::GfxPatchMeshShading(int typeA, GfxPatch *patchesA, int nPat
 GfxPatchMeshShading::GfxPatchMeshShading(const GfxPatchMeshShading *shading) : GfxShading(shading)
 {
     nPatches = shading->nPatches;
-    patches = (GfxPatch *)gmallocn(nPatches, sizeof(GfxPatch));
+    patches = static_cast<GfxPatch *>(gmallocn(nPatches, sizeof(GfxPatch)));
     memcpy(patches, shading->patches, nPatches * sizeof(GfxPatch));
     for (const auto &f : shading->funcs) {
         funcs.emplace_back(f->copy());
@@ -4934,7 +4934,7 @@ std::unique_ptr<GfxPatchMeshShading> GfxPatchMeshShading::parse(GfxResources *re
         for (i = 0; 5 + 2 * i < obj1.arrayGetLength() && i < gfxColorMaxComps; ++i) {
             cMin[i] = obj1.arrayGet(4 + 2 * i).getNum(&decodeOk);
             cMax[i] = obj1.arrayGet(5 + 2 * i).getNum(&decodeOk);
-            cMul[i] = (cMax[i] - cMin[i]) / (double)((1U << compBits) - 1);
+            cMul[i] = (cMax[i] - cMin[i]) / static_cast<double>((1U << compBits) - 1);
         }
         nComps = i;
 
@@ -5013,8 +5013,8 @@ std::unique_ptr<GfxPatchMeshShading> GfxPatchMeshShading::parse(GfxResources *re
             if (!bitBuf->getBits(coordBits, &xi) || !bitBuf->getBits(coordBits, &yi)) {
                 break;
             }
-            x[i] = xMin + xMul * (double)xi;
-            y[i] = yMin + yMul * (double)yi;
+            x[i] = xMin + xMul * static_cast<double>(xi);
+            y[i] = yMin + yMul * static_cast<double>(yi);
         }
         if (i < nPts) {
             break;
@@ -5024,7 +5024,7 @@ std::unique_ptr<GfxPatchMeshShading> GfxPatchMeshShading::parse(GfxResources *re
                 if (!bitBuf->getBits(compBits, &ci)) {
                     break;
                 }
-                c[i][j] = cMin[j] + cMul[j] * (double)ci;
+                c[i][j] = cMin[j] + cMul[j] * static_cast<double>(ci);
                 if (funcsA.empty()) {
                     // ... and colorspace values can also be stored into doubles.
                     // They will be casted later.
@@ -5041,7 +5041,7 @@ std::unique_ptr<GfxPatchMeshShading> GfxPatchMeshShading::parse(GfxResources *re
         if (nPatchesA == patchesSize) {
             int oldPatchesSize = patchesSize;
             patchesSize = (patchesSize == 0) ? 16 : 2 * patchesSize;
-            patchesA = (GfxPatch *)greallocn_checkoverflow(patchesA, patchesSize, sizeof(GfxPatch));
+            patchesA = static_cast<GfxPatch *>(greallocn_checkoverflow(patchesA, patchesSize, sizeof(GfxPatch)));
             if (unlikely(!patchesA)) {
                 return {};
             }
@@ -5523,7 +5523,7 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode, std::unique_ptr<Gf
     // values for each component, i.e., the result of applying the
     // decode mapping to each possible image pixel component value.
     for (k = 0; k < nComps; ++k) {
-        lookup[k] = (GfxColorComp *)gmallocn(maxPixel + 1, sizeof(GfxColorComp));
+        lookup[k] = static_cast<GfxColorComp *>(gmallocn(maxPixel + 1, sizeof(GfxColorComp)));
         for (i = 0; i <= maxPixel; ++i) {
             lookup[k][i] = dblToCol(decodeLow[k] + (i * decodeRange[k]) / maxPixel);
         }
@@ -5540,20 +5540,20 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode, std::unique_ptr<Gf
         // Note that indexHigh may not be the same as maxPixel --
         // Distiller will remove unused palette entries, resulting in
         // indexHigh < maxPixel.
-        auto *indexedCS = (GfxIndexedColorSpace *)colorSpace.get();
+        auto *indexedCS = static_cast<GfxIndexedColorSpace *>(colorSpace.get());
         colorSpace2 = indexedCS->getBase();
         indexHigh = indexedCS->getIndexHigh();
         nComps2 = colorSpace2->getNComps();
         indexedLookup = indexedCS->getLookup();
         colorSpace2->getDefaultRanges(x, y, indexHigh);
         if (colorSpace2->useGetGrayLine() || colorSpace2->useGetRGBLine() || colorSpace2->useGetCMYKLine() || colorSpace2->useGetDeviceNLine()) {
-            byte_lookup = (unsigned char *)gmallocn((maxPixel + 1), nComps2);
+            byte_lookup = static_cast<unsigned char *>(gmallocn((maxPixel + 1), nComps2));
             useByteLookup = true;
         }
         for (k = 0; k < nComps2; ++k) {
-            lookup2[k] = (GfxColorComp *)gmallocn(maxPixel + 1, sizeof(GfxColorComp));
+            lookup2[k] = static_cast<GfxColorComp *>(gmallocn(maxPixel + 1, sizeof(GfxColorComp)));
             for (i = 0; i <= maxPixel; ++i) {
-                j = (int)(decodeLow[0] + (i * decodeRange[0]) / maxPixel + 0.5);
+                j = static_cast<int>(decodeLow[0] + (i * decodeRange[0]) / maxPixel + 0.5);
                 if (j < 0) {
                     j = 0;
                 } else if (j > indexHigh) {
@@ -5563,29 +5563,29 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode, std::unique_ptr<Gf
                 mapped = x[k] + (indexedLookup[j * nComps2 + k] / 255.0) * y[k];
                 lookup2[k][i] = dblToCol(mapped);
                 if (useByteLookup) {
-                    byte_lookup[i * nComps2 + k] = (unsigned char)(mapped * 255);
+                    byte_lookup[i * nComps2 + k] = static_cast<unsigned char>(mapped * 255);
                 }
             }
         }
         break;
     }
     case csSeparation: {
-        auto *sepCS = (GfxSeparationColorSpace *)colorSpace.get();
+        auto *sepCS = static_cast<GfxSeparationColorSpace *>(colorSpace.get());
         colorSpace2 = sepCS->getAlt();
         nComps2 = colorSpace2->getNComps();
         sepFunc = sepCS->getFunc();
         if (colorSpace2->useGetGrayLine() || colorSpace2->useGetRGBLine() || colorSpace2->useGetCMYKLine() || colorSpace2->useGetDeviceNLine()) {
-            byte_lookup = (unsigned char *)gmallocn((maxPixel + 1), nComps2);
+            byte_lookup = static_cast<unsigned char *>(gmallocn((maxPixel + 1), nComps2));
             useByteLookup = true;
         }
         for (k = 0; k < nComps2; ++k) {
-            lookup2[k] = (GfxColorComp *)gmallocn(maxPixel + 1, sizeof(GfxColorComp));
+            lookup2[k] = static_cast<GfxColorComp *>(gmallocn(maxPixel + 1, sizeof(GfxColorComp)));
             for (i = 0; i <= maxPixel; ++i) {
                 x[0] = decodeLow[0] + (i * decodeRange[0]) / maxPixel;
                 sepFunc->transform(x, y);
                 lookup2[k][i] = dblToCol(y[k]);
                 if (useByteLookup) {
-                    byte_lookup[i * nComps2 + k] = (unsigned char)(y[k] * 255);
+                    byte_lookup[i * nComps2 + k] = static_cast<unsigned char>(y[k] * 255);
                 }
             }
         }
@@ -5593,18 +5593,18 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode, std::unique_ptr<Gf
     }
     default:
         if ((!decode->isNull() || maxPixel != 255) && (colorSpace->useGetGrayLine() || (colorSpace->useGetRGBLine() && !decode->isNull()) || colorSpace->useGetCMYKLine() || colorSpace->useGetDeviceNLine())) {
-            byte_lookup = (unsigned char *)gmallocn((maxPixel + 1), nComps);
+            byte_lookup = static_cast<unsigned char *>(gmallocn((maxPixel + 1), nComps));
             useByteLookup = true;
         }
         for (k = 0; k < nComps; ++k) {
-            lookup2[k] = (GfxColorComp *)gmallocn(maxPixel + 1, sizeof(GfxColorComp));
+            lookup2[k] = static_cast<GfxColorComp *>(gmallocn(maxPixel + 1, sizeof(GfxColorComp)));
             for (i = 0; i <= maxPixel; ++i) {
                 mapped = decodeLow[k] + (i * decodeRange[k]) / maxPixel;
                 lookup2[k][i] = dblToCol(mapped);
                 if (useByteLookup) {
                     int byte;
 
-                    byte = (int)(mapped * 255.0 + 0.5);
+                    byte = static_cast<int>(mapped * 255.0 + 0.5);
                     if (byte < 0) {
                         byte = 0;
                     } else if (byte > 255) {
@@ -5640,31 +5640,31 @@ GfxImageColorMap::GfxImageColorMap(const GfxImageColorMap *colorMap)
     byte_lookup = nullptr;
     n = 1 << bits;
     for (k = 0; k < nComps; ++k) {
-        lookup[k] = (GfxColorComp *)gmallocn(n, sizeof(GfxColorComp));
+        lookup[k] = static_cast<GfxColorComp *>(gmallocn(n, sizeof(GfxColorComp)));
         memcpy(lookup[k], colorMap->lookup[k], n * sizeof(GfxColorComp));
     }
     if (colorSpace->getMode() == csIndexed) {
-        colorSpace2 = ((GfxIndexedColorSpace *)colorSpace.get())->getBase();
+        colorSpace2 = (static_cast<GfxIndexedColorSpace *>(colorSpace.get()))->getBase();
         for (k = 0; k < nComps2; ++k) {
-            lookup2[k] = (GfxColorComp *)gmallocn(n, sizeof(GfxColorComp));
+            lookup2[k] = static_cast<GfxColorComp *>(gmallocn(n, sizeof(GfxColorComp)));
             memcpy(lookup2[k], colorMap->lookup2[k], n * sizeof(GfxColorComp));
         }
     } else if (colorSpace->getMode() == csSeparation) {
-        colorSpace2 = ((GfxSeparationColorSpace *)colorSpace.get())->getAlt();
+        colorSpace2 = (static_cast<GfxSeparationColorSpace *>(colorSpace.get()))->getAlt();
         for (k = 0; k < nComps2; ++k) {
-            lookup2[k] = (GfxColorComp *)gmallocn(n, sizeof(GfxColorComp));
+            lookup2[k] = static_cast<GfxColorComp *>(gmallocn(n, sizeof(GfxColorComp)));
             memcpy(lookup2[k], colorMap->lookup2[k], n * sizeof(GfxColorComp));
         }
     } else {
         for (k = 0; k < nComps; ++k) {
-            lookup2[k] = (GfxColorComp *)gmallocn(n, sizeof(GfxColorComp));
+            lookup2[k] = static_cast<GfxColorComp *>(gmallocn(n, sizeof(GfxColorComp)));
             memcpy(lookup2[k], colorMap->lookup2[k], n * sizeof(GfxColorComp));
         }
     }
     if (colorMap->byte_lookup) {
         int nc = colorSpace2 ? nComps2 : nComps;
 
-        byte_lookup = (unsigned char *)gmallocn(n, nc);
+        byte_lookup = static_cast<unsigned char *>(gmallocn(n, nc));
         memcpy(byte_lookup, colorMap->byte_lookup, n * nc);
     }
     for (i = 0; i < nComps; ++i) {
@@ -5741,7 +5741,7 @@ void GfxImageColorMap::getGrayLine(unsigned char *in, unsigned char *out, int le
     switch (colorSpace->getMode()) {
     case csIndexed:
     case csSeparation:
-        tmp_line = (unsigned char *)gmallocn(length, nComps2);
+        tmp_line = static_cast<unsigned char *>(gmallocn(length, nComps2));
         for (i = 0; i < length; i++) {
             for (j = 0; j < nComps2; j++) {
                 unsigned char c = in[i];
@@ -5781,7 +5781,7 @@ void GfxImageColorMap::getRGBLine(unsigned char *in, unsigned int *out, int leng
         inp = in;
         for (i = 0; i < length; i++) {
             getRGB(inp, &rgb);
-            out[i] = ((int)colToByte(rgb.r) << 16) | ((int)colToByte(rgb.g) << 8) | ((int)colToByte(rgb.b) << 0);
+            out[i] = (static_cast<int>(colToByte(rgb.r)) << 16) | (static_cast<int>(colToByte(rgb.g)) << 8) | (static_cast<int>(colToByte(rgb.b)) << 0);
             inp += nComps;
         }
         return;
@@ -5790,7 +5790,7 @@ void GfxImageColorMap::getRGBLine(unsigned char *in, unsigned int *out, int leng
     switch (colorSpace->getMode()) {
     case csIndexed:
     case csSeparation:
-        tmp_line = (unsigned char *)gmallocn(length, nComps2);
+        tmp_line = static_cast<unsigned char *>(gmallocn(length, nComps2));
         for (i = 0; i < length; i++) {
             for (j = 0; j < nComps2; j++) {
                 unsigned char c = in[i];
@@ -5841,7 +5841,7 @@ void GfxImageColorMap::getRGBLine(unsigned char *in, unsigned char *out, int len
     switch (colorSpace->getMode()) {
     case csIndexed:
     case csSeparation:
-        tmp_line = (unsigned char *)gmallocn(length, nComps2);
+        tmp_line = static_cast<unsigned char *>(gmallocn(length, nComps2));
         for (i = 0; i < length; i++) {
             for (j = 0; j < nComps2; j++) {
                 unsigned char c = in[i];
@@ -5893,7 +5893,7 @@ void GfxImageColorMap::getRGBXLine(unsigned char *in, unsigned char *out, int le
     switch (colorSpace->getMode()) {
     case csIndexed:
     case csSeparation:
-        tmp_line = (unsigned char *)gmallocn(length, nComps2);
+        tmp_line = static_cast<unsigned char *>(gmallocn(length, nComps2));
         for (i = 0; i < length; i++) {
             for (j = 0; j < nComps2; j++) {
                 unsigned char c = in[i];
@@ -5945,7 +5945,7 @@ void GfxImageColorMap::getCMYKLine(unsigned char *in, unsigned char *out, int le
     switch (colorSpace->getMode()) {
     case csIndexed:
     case csSeparation:
-        tmp_line = (unsigned char *)gmallocn(length, nComps2);
+        tmp_line = static_cast<unsigned char *>(gmallocn(length, nComps2));
         for (i = 0; i < length; i++) {
             for (j = 0; j < nComps2; j++) {
                 unsigned char c = in[i];
@@ -5995,7 +5995,7 @@ void GfxImageColorMap::getDeviceNLine(unsigned char *in, unsigned char *out, int
     switch (colorSpace->getMode()) {
     case csIndexed:
     case csSeparation:
-        tmp_line = (unsigned char *)gmallocn(length, nComps2);
+        tmp_line = static_cast<unsigned char *>(gmallocn(length, nComps2));
         for (int i = 0; i < length; i++) {
             for (int j = 0; j < nComps2; j++) {
                 unsigned char c = in[i];
@@ -6077,9 +6077,9 @@ void GfxImageColorMap::getColor(const unsigned char *x, GfxColor *color)
 GfxSubpath::GfxSubpath(double x1, double y1)
 {
     size = 16;
-    x = (double *)gmallocn(size, sizeof(double));
-    y = (double *)gmallocn(size, sizeof(double));
-    curve = (bool *)gmallocn(size, sizeof(bool));
+    x = static_cast<double *>(gmallocn(size, sizeof(double)));
+    y = static_cast<double *>(gmallocn(size, sizeof(double)));
+    curve = static_cast<bool *>(gmallocn(size, sizeof(bool)));
     n = 1;
     x[0] = x1;
     y[0] = y1;
@@ -6099,9 +6099,9 @@ GfxSubpath::GfxSubpath(const GfxSubpath *subpath)
 {
     size = subpath->size;
     n = subpath->n;
-    x = (double *)gmallocn(size, sizeof(double));
-    y = (double *)gmallocn(size, sizeof(double));
-    curve = (bool *)gmallocn(size, sizeof(bool));
+    x = static_cast<double *>(gmallocn(size, sizeof(double)));
+    y = static_cast<double *>(gmallocn(size, sizeof(double)));
+    curve = static_cast<bool *>(gmallocn(size, sizeof(bool)));
     memcpy(x, subpath->x, n * sizeof(double));
     memcpy(y, subpath->y, n * sizeof(double));
     memcpy(curve, subpath->curve, n * sizeof(bool));
@@ -6112,9 +6112,9 @@ void GfxSubpath::lineTo(double x1, double y1)
 {
     if (n >= size) {
         size *= 2;
-        x = (double *)greallocn(x, size, sizeof(double));
-        y = (double *)greallocn(y, size, sizeof(double));
-        curve = (bool *)greallocn(curve, size, sizeof(bool));
+        x = static_cast<double *>(greallocn(x, size, sizeof(double)));
+        y = static_cast<double *>(greallocn(y, size, sizeof(double)));
+        curve = static_cast<bool *>(greallocn(curve, size, sizeof(bool)));
     }
     x[n] = x1;
     y[n] = y1;
@@ -6126,9 +6126,9 @@ void GfxSubpath::curveTo(double x1, double y1, double x2, double y2, double x3, 
 {
     if (n + 3 > size) {
         size *= 2;
-        x = (double *)greallocn(x, size, sizeof(double));
-        y = (double *)greallocn(y, size, sizeof(double));
-        curve = (bool *)greallocn(curve, size, sizeof(bool));
+        x = static_cast<double *>(greallocn(x, size, sizeof(double)));
+        y = static_cast<double *>(greallocn(y, size, sizeof(double)));
+        curve = static_cast<bool *>(greallocn(curve, size, sizeof(bool)));
     }
     x[n] = x1;
     y[n] = y1;
@@ -6165,7 +6165,7 @@ GfxPath::GfxPath()
     size = 16;
     n = 0;
     firstX = firstY = 0;
-    subpaths = (GfxSubpath **)gmallocn(size, sizeof(GfxSubpath *));
+    subpaths = static_cast<GfxSubpath **>(gmallocn(size, sizeof(GfxSubpath *)));
 }
 
 GfxPath::~GfxPath()
@@ -6188,7 +6188,7 @@ GfxPath::GfxPath(bool justMoved1, double firstX1, double firstY1, GfxSubpath **s
     firstY = firstY1;
     size = size1;
     n = n1;
-    subpaths = (GfxSubpath **)gmallocn(size, sizeof(GfxSubpath *));
+    subpaths = static_cast<GfxSubpath **>(gmallocn(size, sizeof(GfxSubpath *)));
     for (i = 0; i < n; ++i) {
         subpaths[i] = subpaths1[i]->copy();
     }
@@ -6206,7 +6206,7 @@ void GfxPath::lineTo(double x, double y)
     if (justMoved || (n > 0 && subpaths[n - 1]->isClosed())) {
         if (n >= size) {
             size *= 2;
-            subpaths = (GfxSubpath **)greallocn(static_cast<void *>(subpaths), size, sizeof(GfxSubpath *));
+            subpaths = static_cast<GfxSubpath **>(greallocn(static_cast<void *>(subpaths), size, sizeof(GfxSubpath *)));
         }
         if (justMoved) {
             subpaths[n] = new GfxSubpath(firstX, firstY);
@@ -6224,7 +6224,7 @@ void GfxPath::curveTo(double x1, double y1, double x2, double y2, double x3, dou
     if (justMoved || (n > 0 && subpaths[n - 1]->isClosed())) {
         if (n >= size) {
             size *= 2;
-            subpaths = (GfxSubpath **)greallocn(static_cast<void *>(subpaths), size, sizeof(GfxSubpath *));
+            subpaths = static_cast<GfxSubpath **>(greallocn(static_cast<void *>(subpaths), size, sizeof(GfxSubpath *)));
         }
         if (justMoved) {
             subpaths[n] = new GfxSubpath(firstX, firstY);
@@ -6244,7 +6244,7 @@ void GfxPath::close()
     if (justMoved) {
         if (n >= size) {
             size *= 2;
-            subpaths = (GfxSubpath **)greallocn(static_cast<void *>(subpaths), size, sizeof(GfxSubpath *));
+            subpaths = static_cast<GfxSubpath **>(greallocn(static_cast<void *>(subpaths), size, sizeof(GfxSubpath *)));
         }
         subpaths[n] = new GfxSubpath(firstX, firstY);
         ++n;
@@ -6259,7 +6259,7 @@ void GfxPath::append(GfxPath *path)
 
     if (n + path->n > size) {
         size = n + path->n;
-        subpaths = (GfxSubpath **)greallocn(static_cast<void *>(subpaths), size, sizeof(GfxSubpath *));
+        subpaths = static_cast<GfxSubpath **>(greallocn(static_cast<void *>(subpaths), size, sizeof(GfxSubpath *)));
     }
     for (i = 0; i < path->n; ++i) {
         subpaths[n++] = path->subpaths[i]->copy();

@@ -191,8 +191,8 @@ static void view_set_page(View *view, int page)
 
         poppler_page = poppler_document_get_page(view->doc, page);
         poppler_page_get_size(poppler_page, &width, &height);
-        w = (int)ceil(width);
-        h = (int)ceil(height);
+        w = static_cast<int>(ceil(width));
+        h = static_cast<int>(ceil(height));
 
         if (view->surface) {
             cairo_surface_destroy(view->surface);
@@ -221,7 +221,7 @@ static void view_set_page(View *view, int page)
 
 static void redraw_callback(void *data)
 {
-    View *view = (View *)data;
+    View *view = static_cast<View *>(data);
 
     gtk_widget_queue_draw(view->drawing_area);
 }
@@ -277,7 +277,7 @@ static View *view_new(PopplerDocument *doc)
         double width, height;
 
         poppler_page_get_size(page, &width, &height);
-        gtk_window_set_default_size(GTK_WINDOW(window), (gint)width, (gint)height);
+        gtk_window_set_default_size(GTK_WINDOW(window), static_cast<gint>(width), static_cast<gint>(height));
         g_object_unref(page);
     }
 
@@ -312,7 +312,7 @@ static View *view_new(PopplerDocument *doc)
     if (!cairo_output) {
         SplashColor sc = { 255, 255, 255 };
 
-        view->out = new GDKSplashOutputDev(gtk_widget_get_screen(window), redraw_callback, (void *)view, sc);
+        view->out = new GDKSplashOutputDev(gtk_widget_get_screen(window), redraw_callback, reinterpret_cast<void *>(view), sc);
         view->out->startDoc(view->doc->doc.get());
     }
 
@@ -362,7 +362,7 @@ int main(int argc, char *argv[])
             if (errno || end == arg || v == -1 || v < G_MININT || v > G_MAXINT) {
                 g_set_error(&error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE, "Failed to parse \"%s\" as file descriptor number", arg);
             } else {
-                doc = poppler_document_new_from_fd(int(v), nullptr, &error);
+                doc = poppler_document_new_from_fd(static_cast<int>(v), nullptr, &error);
             }
         } else
 #endif /* !G_OS_WIN32 */

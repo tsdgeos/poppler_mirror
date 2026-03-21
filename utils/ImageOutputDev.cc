@@ -58,7 +58,7 @@ ImageOutputDev::ImageOutputDev(char *fileRootA, bool pageNamesA, bool listImages
     listImages = listImagesA;
     if (!listImages) {
         fileRoot = copyString(fileRootA);
-        fileName = (char *)gmalloc(strlen(fileRoot) + 45);
+        fileName = static_cast<char *>(gmalloc(strlen(fileRoot) + 45));
     }
     outputPNG = false;
     outputTiff = false;
@@ -255,9 +255,9 @@ void ImageOutputDev::listImage(GfxState *state, Object *ref, Stream *str, int wi
 
     long long imageSize = 0;
     if (colorMap && colorMap->isOk()) {
-        imageSize = ((long long)width * height * colorMap->getNumPixelComps() * colorMap->getBits()) / 8;
+        imageSize = (static_cast<long long>(width) * height * colorMap->getNumPixelComps() * colorMap->getBits()) / 8;
     } else {
-        imageSize = (long long)width * height / 8; // mask
+        imageSize = static_cast<long long>(width) * height / 8; // mask
     }
 
     double ratio = -1.0;
@@ -323,7 +323,7 @@ long ImageOutputDev::getInlineImageLength(Stream *str, int width, int height, Gf
         }
     }
 
-    auto *embedStr = (EmbedStream *)(str->getBaseStream());
+    auto *embedStr = static_cast<EmbedStream *>(str->getBaseStream());
     if (!embedStr->rewind()) {
         return 0;
     }
@@ -417,7 +417,7 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
         }
     }
 
-    auto *row = (unsigned char *)gmallocn_checkoverflow(width, pixelSize);
+    auto *row = static_cast<unsigned char *>(gmallocn_checkoverflow(width, pixelSize));
     if (!row) {
         error(errIO, -1, "Image data for '{0:s}' is too big. {1:d} width with {2:d} bytes per pixel", fileName, width, pixelSize);
         errorCode = 99;

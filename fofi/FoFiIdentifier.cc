@@ -170,7 +170,7 @@ bool FileReader::cmp(int pos, const char *s)
 {
     int n;
 
-    n = (int)strlen(s);
+    n = static_cast<int>(strlen(s));
     if (!fillBuf(pos, n)) {
         return false;
     }
@@ -190,7 +190,7 @@ bool FileReader::fillBuf(int pos, int len)
         return false;
     }
     bufPos = pos;
-    bufLen = (int)fread(buf, 1, sizeof(buf), f);
+    bufLen = static_cast<int>(fread(buf, 1, sizeof(buf), f));
     return bufLen >= len;
 }
 
@@ -291,7 +291,7 @@ bool StreamReader::getUVarBE(int pos, int size, unsigned int *val)
 
 bool StreamReader::cmp(int pos, const char *s)
 {
-    const int n = (int)strlen(s);
+    const int n = static_cast<int>(strlen(s));
     if (!fillBuf(pos, n)) {
         return false;
     }
@@ -340,7 +340,7 @@ bool StreamReader::fillBuf(int pos, int len)
         if ((c = (*getChar)(data)) < 0) {
             return false;
         }
-        buf[bufLen++] = (char)c;
+        buf[bufLen++] = static_cast<char>(c);
     }
 
     return true;
@@ -431,8 +431,8 @@ static FoFiIdentifierType identifyOpenType(Reader *reader)
     }
     for (i = 0; i < nTables; ++i) {
         if (reader->cmp(12 + i * 16, "CFF ")) {
-            if (reader->getU32BE(12 + i * 16 + 8, &offset) && offset < (unsigned int)INT_MAX) {
-                type = identifyCFF(reader, (int)offset);
+            if (reader->getU32BE(12 + i * 16 + 8, &offset) && offset < static_cast<unsigned int>(INT_MAX)) {
+                type = identifyCFF(reader, static_cast<int>(offset));
                 if (type == fofiIdCFF8Bit) {
                     type = fofiIdOpenTypeCFF8Bit;
                 } else if (type == fofiIdCFFCID) {
@@ -476,10 +476,10 @@ static FoFiIdentifierType identifyCFF(Reader *reader, int start)
         if ((offSize1 = reader->getByte(pos + 2)) < 1 || offSize1 > 4) {
             return fofiIdUnknown;
         }
-        if (!reader->getUVarBE(pos + 3 + n * offSize1, offSize1, &offset1) || offset1 > (unsigned int)INT_MAX) {
+        if (!reader->getUVarBE(pos + 3 + n * offSize1, offSize1, &offset1) || offset1 > static_cast<unsigned int>(INT_MAX)) {
             return fofiIdUnknown;
         }
-        pos += 3 + (n + 1) * offSize1 + (int)offset1 - 1;
+        pos += 3 + (n + 1) * offSize1 + static_cast<int>(offset1) - 1;
     }
     if (pos < 0) {
         return fofiIdUnknown;
@@ -492,10 +492,10 @@ static FoFiIdentifierType identifyCFF(Reader *reader, int start)
     if ((offSize1 = reader->getByte(pos + 2)) < 1 || offSize1 > 4) {
         return fofiIdUnknown;
     }
-    if (!reader->getUVarBE(pos + 3, offSize1, &offset0) || offset0 > (unsigned int)INT_MAX || !reader->getUVarBE(pos + 3 + offSize1, offSize1, &offset1) || offset1 > (unsigned int)INT_MAX || offset0 > offset1) {
+    if (!reader->getUVarBE(pos + 3, offSize1, &offset0) || offset0 > static_cast<unsigned int>(INT_MAX) || !reader->getUVarBE(pos + 3 + offSize1, offSize1, &offset1) || offset1 > static_cast<unsigned int>(INT_MAX) || offset0 > offset1) {
         return fofiIdUnknown;
     }
-    if (checkedAdd(pos + 3 + (n + 1) * offSize1, (int)offset0 - 1, &pos) || checkedAdd(pos + 3 + (n + 1) * offSize1, (int)offset1 - 1, &endPos) || pos < 0 || endPos < 0 || pos > endPos) {
+    if (checkedAdd(pos + 3 + (n + 1) * offSize1, static_cast<int>(offset0) - 1, &pos) || checkedAdd(pos + 3 + (n + 1) * offSize1, static_cast<int>(offset1) - 1, &endPos) || pos < 0 || endPos < 0 || pos > endPos) {
         return fofiIdUnknown;
     }
 

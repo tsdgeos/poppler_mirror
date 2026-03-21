@@ -228,10 +228,10 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
                 // Adobe apparently zero-pads the U value (and maybe the O value?)
                 // if it's short
                 while (ownerKey->size() < 32) {
-                    ownerKey->push_back((char)0x00);
+                    ownerKey->push_back(static_cast<char>(0x00));
                 }
                 while (userKey->size() < 32) {
-                    userKey->push_back((char)0x00);
+                    userKey->push_back(static_cast<char>(0x00));
                 }
             }
         } else {
@@ -262,7 +262,7 @@ void *StandardSecurityHandler::makeAuthData(const std::optional<GooString> &owne
 
 void StandardSecurityHandler::freeAuthData(void *authData)
 {
-    delete (StandardAuthData *)authData;
+    delete static_cast<StandardAuthData *>(authData);
 }
 
 bool StandardSecurityHandler::authorize(void *authData)
@@ -273,8 +273,8 @@ bool StandardSecurityHandler::authorize(void *authData)
         return false;
     }
     if (authData) {
-        ownerPassword = ((StandardAuthData *)authData)->ownerPassword.get();
-        userPassword = ((StandardAuthData *)authData)->userPassword.get();
+        ownerPassword = (static_cast<StandardAuthData *>(authData))->ownerPassword.get();
+        userPassword = (static_cast<StandardAuthData *>(authData))->userPassword.get();
     } else {
         ownerPassword = nullptr;
         userPassword = nullptr;

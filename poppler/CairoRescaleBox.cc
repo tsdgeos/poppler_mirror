@@ -194,7 +194,7 @@ static int compute_coverage(int coverage[], int src_length, int dest_length)
        pixel * 1/num == pixel * dest_length / src_length
     */
     /* the average contribution of each source pixel */
-    int ratio = ((1 << 24) * (long long int)dest_length) / src_length;
+    int ratio = ((1 << 24) * static_cast<long long int>(dest_length)) / src_length;
     /* because ((1 << 24)*(long long int)dest_length) won't always be divisible by src_length
      * we'll need someplace to put the other bits.
      *
@@ -203,7 +203,7 @@ static int compute_coverage(int coverage[], int src_length, int dest_length)
      * 1<<24
      * */
 
-    double scale = (double)src_length / dest_length;
+    double scale = static_cast<double>(src_length) / dest_length;
 
     /* for each destination pixel compute the coverage of the left most pixel included in the box */
     /* I have a proof of this, which this margin is too narrow to contain */
@@ -263,10 +263,10 @@ bool CairoRescaleBox::downScaleImage(unsigned orig_width, unsigned orig_height, 
     dest = reinterpret_cast<unsigned int *>(cairo_image_surface_get_data(dest_surface));
     dst_stride = cairo_image_surface_get_stride(dest_surface);
 
-    scanline = (uint32_t *)gmallocn(orig_width, sizeof(int));
+    scanline = static_cast<uint32_t *>(gmallocn(orig_width, sizeof(int)));
 
-    x_coverage = (int *)gmallocn(orig_width, sizeof(int));
-    y_coverage = (int *)gmallocn(orig_height, sizeof(int));
+    x_coverage = static_cast<int *>(gmallocn(orig_width, sizeof(int)));
+    y_coverage = static_cast<int *>(gmallocn(orig_height, sizeof(int)));
 
     /* we need to allocate enough room for ceil(src_height/dest_height)+1
        Example:
@@ -283,7 +283,7 @@ bool CairoRescaleBox::downScaleImage(unsigned orig_width, unsigned orig_height, 
        need to sample 4 pixels
     */
 
-    temp_buf = (uint32_t *)gmallocn3((orig_height + scaled_height - 1) / scaled_height + 1, scaled_width, sizeof(uint32_t));
+    temp_buf = static_cast<uint32_t *>(gmallocn3((orig_height + scaled_height - 1) / scaled_height + 1, scaled_width, sizeof(uint32_t)));
 
     if (!x_coverage || !y_coverage || !scanline || !temp_buf) {
         goto cleanup;

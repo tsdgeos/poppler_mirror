@@ -190,7 +190,7 @@ Page *Catalog::getPage(int i)
     }
 
     catalogLocker();
-    if (std::size_t(i) > pages.size()) {
+    if (static_cast<std::size_t>(i) > pages.size()) {
         bool cached = cachePageTree(i);
         if (!cached) {
             return nullptr;
@@ -206,7 +206,7 @@ Ref *Catalog::getPageRef(int i)
     }
 
     catalogLocker();
-    if (std::size_t(i) > pages.size()) {
+    if (static_cast<std::size_t>(i) > pages.size()) {
         bool cached = cachePageTree(i);
         if (!cached) {
             return nullptr;
@@ -293,7 +293,7 @@ bool Catalog::cachePageTree(int page)
 
     while (true) {
 
-        if (std::size_t(page) <= pages.size()) {
+        if (static_cast<std::size_t>(page) <= pages.size()) {
             return true;
         }
 
@@ -381,7 +381,7 @@ bool Catalog::cacheSubTree()
             return false;
         }
 
-        if (pages.size() >= std::size_t(numPages)) {
+        if (pages.size() >= static_cast<std::size_t>(numPages)) {
             error(errSyntaxError, -1, "Page count in top-level pages object is incorrect");
             return false;
         }
@@ -779,7 +779,7 @@ Object NameTree::lookup(const GooString *name)
 
 Object *NameTree::getValue(int index)
 {
-    if (size_t(index) < entries.size()) {
+    if (static_cast<size_t>(index) < entries.size()) {
         return &entries[index]->value;
     }
     return nullptr;
@@ -787,7 +787,7 @@ Object *NameTree::getValue(int index)
 
 const GooString *NameTree::getName(int index) const
 {
-    if (size_t(index) < entries.size()) {
+    if (static_cast<size_t>(index) < entries.size()) {
         return &entries[index]->name;
     }
     return nullptr;

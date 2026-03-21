@@ -210,7 +210,7 @@ public:
         }
         isEmbedded = fi->getEmbedded();
         isSubset = fi->getSubset();
-        type = (Poppler::FontInfo::Type)fi->getType();
+        type = static_cast<Poppler::FontInfo::Type>(fi->getType());
         embRef = fi->getEmbRef();
     }
 

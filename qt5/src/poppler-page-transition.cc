@@ -65,7 +65,7 @@ PageTransition &PageTransition::operator=(const PageTransition &other)
 
 PageTransition::Type PageTransition::type() const
 {
-    return (Poppler::PageTransition::Type)data->pt->getType();
+    return static_cast<Poppler::PageTransition::Type>(data->pt->getType());
 }
 
 int PageTransition::duration() const
@@ -80,12 +80,12 @@ double PageTransition::durationReal() const
 
 PageTransition::Alignment PageTransition::alignment() const
 {
-    return (Poppler::PageTransition::Alignment)data->pt->getAlignment();
+    return static_cast<Poppler::PageTransition::Alignment>(data->pt->getAlignment());
 }
 
 PageTransition::Direction PageTransition::direction() const
 {
-    return (Poppler::PageTransition::Direction)data->pt->getDirection();
+    return static_cast<Poppler::PageTransition::Direction>(data->pt->getDirection());
 }
 
 int PageTransition::angle() const

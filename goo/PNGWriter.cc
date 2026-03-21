@@ -62,7 +62,7 @@ PNGWriter::~PNGWriter()
 
 void PNGWriter::setICCProfile(const char *name, unsigned char *data, int size)
 {
-    priv->icc_data = (unsigned char *)gmalloc(size);
+    priv->icc_data = static_cast<unsigned char *>(gmalloc(size));
     memcpy(priv->icc_data, data, size);
     priv->icc_data_size = size;
     priv->icc_name = strdup(name);

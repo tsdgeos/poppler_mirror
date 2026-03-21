@@ -76,7 +76,7 @@ void TestGooString::testFormat()
         QCOMPARE(goo.c_str(), "-10,-a,-A,-12,-1010");
     }
     {
-        const std::string goo(GooString::format("{0:c}{1:c}{2:c}{3:c}", 'T', 'E', (short)'S', (int)'T'));
+        const std::string goo(GooString::format("{0:c}{1:c}{2:c}{3:c}", 'T', 'E', static_cast<short>('S'), static_cast<int>('T')));
         QCOMPARE(goo.c_str(), "TEST");
 
         GooString gooGoo(goo);

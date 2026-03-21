@@ -568,7 +568,7 @@ static X509CertificateInfo::EntityInfo getEntityInfo(CERTName *entityName)
 static GooString SECItemToGooString(const SECItem &secItem)
 {
     // TODO do we need to handle secItem.type;
-    return GooString((const char *)secItem.data, secItem.len);
+    return GooString(reinterpret_cast<const char *>(secItem.data), secItem.len);
 }
 
 static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromCERT(CERTCertificate *cert)
@@ -908,7 +908,7 @@ static NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg)
         return nullptr;
     }
 
-    auto *signedData = (NSSCMSSignedData *)NSS_CMSContentInfo_GetContent(cinfo);
+    auto *signedData = static_cast<NSSCMSSignedData *>(NSS_CMSContentInfo_GetContent(cinfo));
     if (!signedData) {
         error(errInternal, 0, "CError in NSS_CMSContentInfo_GetContent()");
         return nullptr;
@@ -919,7 +919,7 @@ static NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg)
         for (i = 0; signedData->rawCerts[i]; ++i) { } // just count the length of the certificate chain
 
         // tempCerts field needs to be filled for complete memory release by NSSCMSSignedData_Destroy
-        signedData->tempCerts = (CERTCertificate **)gmallocn(i + 1, sizeof(CERTCertificate *));
+        signedData->tempCerts = static_cast<CERTCertificate **>(gmallocn(i + 1, sizeof(CERTCertificate *)));
         memset(static_cast<void *>(signedData->tempCerts), 0, (i + 1) * sizeof(CERTCertificate *));
         // store the addresses of these temporary certificates for future release
         for (i = 0; signedData->rawCerts[i]; ++i) {
@@ -1034,7 +1034,7 @@ void NSSSignatureVerification::validateCertificateAsync(std::chrono::system_cloc
 
     PRTime vTime = 0; // time in microseconds since the epoch, special value 0 means now
     if (validation_time > std::chrono::system_clock::time_point {}) {
-        vTime = 1000000 * (PRTime)std::chrono::system_clock::to_time_t(validation_time);
+        vTime = 1000000 * static_cast<PRTime>(std::chrono::system_clock::to_time_t(validation_time));
     }
     CERTValInParam inParams[4];
     inParams[0].type = cert_pi_revocationFlags;

@@ -213,14 +213,14 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     Link *popplerLink = nullptr;
     switch (a->getKind()) {
     case actionGoTo: {
-        auto *g = (LinkGoTo *)a;
+        auto *g = static_cast<LinkGoTo *>(a);
         const LinkDestinationData ldd(g->getDest(), g->getNamedDest(), parentDoc, false);
         // create link: no ext file, namedDest, object pointer
         popplerLink = new LinkGoto(linkArea, QString(), LinkDestination(ldd));
     } break;
 
     case actionGoToR: {
-        auto *g = (LinkGoToR *)a;
+        auto *g = static_cast<LinkGoToR *>(a);
         // copy link file
         const QString fileName = UnicodeParsedString(g->getFileName());
         const LinkDestinationData ldd(g->getDest(), g->getNamedDest(), parentDoc, !fileName.isEmpty());
@@ -229,13 +229,13 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     } break;
 
     case actionLaunch: {
-        auto *e = (LinkLaunch *)a;
+        auto *e = static_cast<LinkLaunch *>(a);
         const GooString *p = e->getParams();
         popplerLink = new LinkExecute(linkArea, UnicodeParsedString(e->getFileName()), p ? QString::fromStdString(p->toStr()) : QString {});
     } break;
 
     case actionNamed: {
-        const std::string &name = ((LinkNamed *)a)->getName();
+        const std::string &name = (static_cast<LinkNamed *>(a))->getName();
         if (name == "NextPage") {
             popplerLink = new LinkAction(linkArea, LinkAction::PageNext);
         } else if (name == "PrevPage") {
@@ -271,21 +271,21 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     } break;
 
     case actionURI: {
-        popplerLink = new LinkBrowse(linkArea, QString::fromStdString(((LinkURI *)a)->getURI()));
+        popplerLink = new LinkBrowse(linkArea, QString::fromStdString((static_cast<LinkURI *>(a))->getURI()));
     } break;
 
     case actionSound: {
-        auto *ls = (::LinkSound *)a;
+        auto *ls = static_cast<::LinkSound *>(a);
         popplerLink = new LinkSound(linkArea, ls->getVolume(), ls->getSynchronous(), ls->getRepeat(), ls->getMix(), new SoundObject(ls->getSound()));
     } break;
 
     case actionJavaScript: {
-        auto *ljs = (::LinkJavaScript *)a;
+        auto *ljs = static_cast<::LinkJavaScript *>(a);
         popplerLink = new LinkJavaScript(linkArea, UnicodeParsedString(ljs->getScript()));
     } break;
 
     case actionMovie: {
-        auto *lm = (::LinkMovie *)a;
+        auto *lm = static_cast<::LinkMovie *>(a);
 
         const QString title = (lm->hasAnnotTitle() ? UnicodeParsedString(lm->getAnnotTitle()) : QString());
 
@@ -314,7 +314,7 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     } break;
 
     case actionRendition: {
-        auto *lrn = (::LinkRendition *)a;
+        auto *lrn = static_cast<::LinkRendition *>(a);
 
         Ref reference = Ref::INVALID();
         if (lrn->hasScreenAnnot()) {
@@ -325,21 +325,21 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     } break;
 
     case actionOCGState: {
-        auto *plocg = (::LinkOCGState *)a;
+        auto *plocg = static_cast<::LinkOCGState *>(a);
 
         auto *locgp = new LinkOCGStatePrivate(linkArea, plocg->getStateList(), plocg->getPreserveRB());
         popplerLink = new LinkOCGState(locgp);
     } break;
 
     case actionHide: {
-        auto *lh = (::LinkHide *)a;
+        auto *lh = static_cast<::LinkHide *>(a);
 
         auto *lhp = new LinkHidePrivate(linkArea, lh->hasTargetName() ? UnicodeParsedString(lh->getTargetName()) : QString(), lh->isShowAction());
         popplerLink = new LinkHide(lhp);
     } break;
 
     case actionResetForm: {
-        auto *lrf = (::LinkResetForm *)a;
+        auto *lrf = static_cast<::LinkResetForm *>(a);
         std::vector<std::string> stdStringFields = lrf->getFields();
         QStringList qStringFields;
         for (const std::string &str : stdStringFields) {
@@ -349,7 +349,7 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
         popplerLink = new LinkResetForm(lrfp);
     } break;
     case actionSubmitForm: {
-        auto *lsf = (::LinkSubmitForm *)a;
+        auto *lsf = static_cast<::LinkSubmitForm *>(a);
         const std::vector<std::string> &stdStringFields = lsf->getFields();
         QVector<int> fieldIds;
         fieldIds.reserve(stdStringFields.size());
@@ -391,7 +391,7 @@ inline std::unique_ptr<TextPage> PageData::prepareTextSearch(const QString &text
 {
     *u = text.toUcs4();
 
-    const int rotation = (int)rotate * 90;
+    const int rotation = static_cast<int>(rotate) * 90;
 
     // fetch ourselves a textpage
     TextOutputDev td(nullptr, true, 0, false, false);
@@ -509,8 +509,8 @@ static bool renderToQPainter(QImageDumpingQPainterOutputDev *qpainter_output, QP
     const bool hideAnnotations = page->parentDoc->m_hints & Document::HideAnnotations;
 
     OutputDevCallbackHelper *abortHelper = qpainter_output;
-    page->parentDoc->doc->displayPageSlice(qpainter_output, page->index + 1, xres, yres, (int)rotate * 90, false, true, false, x, y, w, h, abortHelper->shouldAbortRenderCallback ? shouldAbortRenderInternalCallback : nullAbortCallBack,
-                                           abortHelper, hideAnnotations ? annotDisplayDecideCbk : nullAnnotCallBack, nullptr, true);
+    page->parentDoc->doc->displayPageSlice(qpainter_output, page->index + 1, xres, yres, static_cast<int>(rotate) * 90, false, true, false, x, y, w, h,
+                                           abortHelper->shouldAbortRenderCallback ? shouldAbortRenderInternalCallback : nullAbortCallBack, abortHelper, hideAnnotations ? annotDisplayDecideCbk : nullAnnotCallBack, nullptr, true);
     if (savePainter) {
         painter->restore();
     }
@@ -543,7 +543,7 @@ static QFont::HintingPreference QFontHintingFromPopplerHinting(int renderHints)
 QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, int h, Rotation rotate, RenderToImagePartialUpdateFunc partialUpdateCallback, ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback,
                            ShouldAbortQueryFunc shouldAbortRenderCallback, const QVariant &payload) const
 {
-    int rotation = (int)rotate * 90;
+    int rotation = static_cast<int>(rotate) * 90;
     QImage img;
     switch (m_page->parentDoc->m_backend) {
     case Poppler::Document::SplashBackend: {
@@ -775,7 +775,7 @@ QList<TextBox *> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbor
 
     TextOutputDev output_dev(nullptr, false, 0, false, false);
 
-    int rotation = (int)rotate * 90;
+    int rotation = static_cast<int>(rotate) * 90;
 
     TextExtractionAbortHelper abortHelper(shouldAbortExtractionCallback, closure);
     m_page->parentDoc->doc->displayPageSlice(&output_dev, m_page->index + 1, 72, 72, rotation, false, false, false, -1, -1, -1, -1, shouldAbortExtractionCallback ? shouldAbortExtractionInternalCallback : nullAbortCallBack, &abortHelper,
@@ -840,7 +840,7 @@ Link *Page::action(PageAction act) const
         }
         Dict *dict = o.getDict();
         const char *key = act == Page::Opening ? "O" : "C";
-        Object o2 = dict->lookup((char *)key);
+        Object o2 = dict->lookup(const_cast<char *>(key));
         std::unique_ptr<::LinkAction> lact = ::LinkAction::parseAction(&o2, m_page->parentDoc->doc->getCatalog()->getBaseURI());
         Link *popplerLink = nullptr;
         if (lact != nullptr) {

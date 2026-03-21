@@ -154,7 +154,7 @@ time_t dateStringToTime(const std::string &dateString)
 
     /* compute tm_wday and tm_yday and check date */
     time = timegm(&tm);
-    if (time == (time_t)-1) {
+    if (time == static_cast<time_t>(-1)) {
         return time;
     }
 

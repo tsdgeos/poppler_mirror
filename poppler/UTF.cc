@@ -195,7 +195,7 @@ static const uint8_t decodeUtf8Table[] = {
 // errors.
 inline uint32_t decodeUtf8(uint32_t *state, uint32_t *codep, char byte)
 {
-    uint32_t b = (unsigned char)byte;
+    uint32_t b = static_cast<unsigned char>(byte);
     uint32_t type = decodeUtf8Table[b];
 
     *codep = (*state != UTF8_ACCEPT) ? (b & 0x3fU) | (*codep << 6) : (0xff >> type) & b;
@@ -272,10 +272,10 @@ std::u16string utf8ToUtf16(std::string_view utf8)
         decodeUtf8(&state, &codepoint, c);
         if (state == UTF8_ACCEPT) {
             if (codepoint < 0x10000) {
-                utf16.push_back((uint16_t)codepoint);
+                utf16.push_back(static_cast<uint16_t>(codepoint));
             } else if (codepoint <= UCS4_MAX) {
-                utf16.push_back((uint16_t)(0xD7C0 + (codepoint >> 10)));
-                utf16.push_back((uint16_t)(0xDC00 + (codepoint & 0x3FF)));
+                utf16.push_back(static_cast<uint16_t>(0xD7C0 + (codepoint >> 10)));
+                utf16.push_back(static_cast<uint16_t>(0xDC00 + (codepoint & 0x3FF)));
             } else {
                 utf16.push_back(REPLACEMENT_CHAR);
                 state = 0;
@@ -297,7 +297,7 @@ std::string utf8ToUtf16WithBom(std::string_view utf8)
         return {};
     }
     std::u16string utf16 = utf8ToUtf16(utf8);
-    char *tmp_str = (char *)utf16.data();
+    char *tmp_str = reinterpret_cast<char *>(utf16.data());
 #if !WORDS_BIGENDIAN
     for (size_t i = 0; i < utf16.size(); i++) {
         std::swap(tmp_str[i * 2], tmp_str[i * 2 + 1]);
@@ -417,7 +417,7 @@ void unicodeToAscii7(std::span<const Unicode> in, Unicode **ucs4_out, int *out_l
         if (!in_idx) {
             indices = nullptr;
         } else {
-            idx = (int *)gmallocn(in.size() * 8 + 1, sizeof(int));
+            idx = static_cast<int *>(gmallocn(in.size() * 8 + 1, sizeof(int)));
         }
     }
 
@@ -445,7 +445,7 @@ void unicodeToAscii7(std::span<const Unicode> in, Unicode **ucs4_out, int *out_l
 
     std::vector<Unicode> ucs4 = TextStringToUCS4(str);
     *out_len = ucs4.size();
-    *ucs4_out = (Unicode *)gmallocn(ucs4.size(), sizeof(Unicode));
+    *ucs4_out = static_cast<Unicode *>(gmallocn(ucs4.size(), sizeof(Unicode)));
     memcpy(*ucs4_out, ucs4.data(), ucs4.size() * sizeof(Unicode));
 
     if (indices) {

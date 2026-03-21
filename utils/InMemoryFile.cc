@@ -67,13 +67,13 @@ FILE *InMemoryFile::open(const char *mode)
         return nullptr; // maybe there's some legit reason for it, whoever comes up with one can remove this line
     }
     static const cookie_io_functions_t methods = {
-        /* .read = */ .read = [](void *self, char *buf, size_t sz) { return ((InMemoryFile *)self)->_read(buf, sz); },
-        /* .write = */ .write = [](void *self, const char *buf, size_t sz) { return ((InMemoryFile *)self)->_write(buf, sz); },
-        /* .seek = */ .seek = [](void *self, off64_t *offset, int whence) { return ((InMemoryFile *)self)->_seek(offset, whence); },
+        /* .read = */ .read = [](void *self, char *buf, size_t sz) { return (static_cast<InMemoryFile *>(self))->_read(buf, sz); },
+        /* .write = */ .write = [](void *self, const char *buf, size_t sz) { return (static_cast<InMemoryFile *>(self))->_write(buf, sz); },
+        /* .seek = */ .seek = [](void *self, off64_t *offset, int whence) { return (static_cast<InMemoryFile *>(self))->_seek(offset, whence); },
         /* .close = */
         .close =
                 [](void *self) {
-                    ((InMemoryFile *)self)->fptr = nullptr;
+                    (static_cast<InMemoryFile *>(self))->fptr = nullptr;
                     return 0;
                 },
     };

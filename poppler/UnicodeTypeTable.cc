@@ -806,10 +806,10 @@ Unicode *unicodeNormalizeNFKC(const Unicode *in, int len, int *out_len, int **in
         }
     }
 
-    out = (Unicode *)gmallocn(o, sizeof(Unicode));
-    classes = (int *)gmallocn(o, sizeof(int));
+    out = static_cast<Unicode *>(gmallocn(o, sizeof(Unicode)));
+    classes = static_cast<int *>(gmallocn(o, sizeof(int)));
     if (indices) {
-        idx = (int *)gmallocn(o + 1, sizeof(int));
+        idx = static_cast<int *>(gmallocn(o + 1, sizeof(int)));
     }
 
     for (i = 0, o = 0; i < len;) {

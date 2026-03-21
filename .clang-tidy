@@ -37,7 +37,6 @@ Checks:  >
     -modernize-use-std-print,
     -modernize-return-braced-init-list,
     -modernize-use-integer-sign-comparison,
-    -modernize-avoid-c-style-cast,
     -modernize-avoid-variadic-functions,
     -modernize-avoid-setjmp-longjmp,
     google-explicit-constructor,

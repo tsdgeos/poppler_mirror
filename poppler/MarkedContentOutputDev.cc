@@ -167,7 +167,7 @@ void MarkedContentOutputDev::drawChar(GfxState *state, double xx, double yy, dou
 
     // Subtract char and word spacing from the (dx,dy) values
     sp = state->getCharSpace();
-    if (c == (CharCode)0x20) {
+    if (c == static_cast<CharCode>(0x20)) {
         sp += state->getWordSpace();
     }
     state->textTransformDelta(sp * state->getHorizScaling(), 0, &dx2, &dy2);

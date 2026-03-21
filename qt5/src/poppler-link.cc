@@ -222,8 +222,8 @@ static void cvtUserToDev(::Page *page, double xu, double yu, int *xd, int *yd)
     double ctm[6];
 
     page->getDefaultCTM(ctm, 72.0, 72.0, 0, false, true);
-    *xd = (int)(ctm[0] * xu + ctm[2] * yu + ctm[4] + 0.5);
-    *yd = (int)(ctm[1] * xu + ctm[3] * yu + ctm[5] + 0.5);
+    *xd = static_cast<int>(ctm[0] * xu + ctm[2] * yu + ctm[4] + 0.5);
+    *yd = static_cast<int>(ctm[1] * xu + ctm[3] * yu + ctm[5] + 0.5);
 }
 
 LinkDestination::LinkDestination(const LinkDestinationData &data) : d(new LinkDestinationPrivate)
@@ -373,16 +373,16 @@ bool LinkDestination::isChangeZoom() const
 QString LinkDestination::toString() const
 {
     const QChar semicolon = QChar::fromLatin1(';');
-    QString s = QString::number((qint8)d->kind);
+    QString s = QString::number(static_cast<qint8>(d->kind));
     s += semicolon + QString::number(d->pageNum);
     s += semicolon + QString::number(d->left);
     s += semicolon + QString::number(d->bottom);
     s += semicolon + QString::number(d->right);
     s += semicolon + QString::number(d->top);
     s += semicolon + QString::number(d->zoom);
-    s += semicolon + QString::number((qint8)d->changeLeft);
-    s += semicolon + QString::number((qint8)d->changeTop);
-    s += semicolon + QString::number((qint8)d->changeZoom);
+    s += semicolon + QString::number(static_cast<qint8>(d->changeLeft));
+    s += semicolon + QString::number(static_cast<qint8>(d->changeTop));
+    s += semicolon + QString::number(static_cast<qint8>(d->changeZoom));
     return s;
 }
 

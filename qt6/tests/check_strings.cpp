@@ -78,7 +78,7 @@ void TestStrings::check_unicodeToQString_data()
     {
         const int l = 1;
         auto *u = new Unicode[l];
-        u[0] = int('a');
+        u[0] = static_cast<int>('a');
         QTest::newRow("a") << u << l << QStringLiteral("a");
     }
     {
@@ -90,14 +90,14 @@ void TestStrings::check_unicodeToQString_data()
     {
         const int l = 2;
         auto *u = new Unicode[l];
-        u[0] = int('a');
-        u[1] = int('b');
+        u[0] = static_cast<int>('a');
+        u[1] = static_cast<int>('b');
         QTest::newRow("ab") << u << l << QStringLiteral("ab");
     }
     {
         const int l = 2;
         auto *u = new Unicode[l];
-        u[0] = int('a');
+        u[0] = static_cast<int>('a');
         u[1] = 0x0161;
         QTest::newRow("a\u0161") << u << l << QStringLiteral("a\u0161");
     }

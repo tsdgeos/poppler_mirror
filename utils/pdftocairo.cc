@@ -427,7 +427,7 @@ static void writePageImage(GooString *filename)
         fprintf(stderr, "Error writing %s\n", filename->c_str());
         exit(2);
     }
-    auto *row = (unsigned char *)gmallocn(width, 4);
+    auto *row = static_cast<unsigned char *>(gmallocn(width, 4));
 
     for (int y = 0; y < height; y++) {
         auto *pixel = reinterpret_cast<uint32_t *>((data + y * stride));
@@ -505,15 +505,15 @@ static void getCropSize(double page_w, double page_h, double *width, double *hei
     int h = crop_h;
 
     if (w == 0) {
-        w = (int)ceil(page_w);
+        w = static_cast<int>(ceil(page_w));
     }
 
     if (h == 0) {
-        h = (int)ceil(page_h);
+        h = static_cast<int>(ceil(page_h));
     }
 
-    *width = (crop_x + w > page_w ? (int)ceil(page_w - crop_x) : w);
-    *height = (crop_y + h > page_h ? (int)ceil(page_h - crop_y) : h);
+    *width = (crop_x + w > page_w ? static_cast<int>(ceil(page_w - crop_x)) : w);
+    *height = (crop_y + h > page_h ? static_cast<int>(ceil(page_h - crop_y)) : h);
 }
 
 static void getOutputSize(double page_w, double page_h, double *width, double *height)
@@ -569,7 +569,7 @@ static void getFitToPageTransform(double page_w, double page_h, double paper_w, 
 
 static cairo_status_t writeStream(void *closure, const unsigned char *data, unsigned int length)
 {
-    FILE *file = (FILE *)closure;
+    FILE *file = static_cast<FILE *>(closure);
 
     if (fwrite(data, length, 1, file) == 1) {
         return CAIRO_STATUS_SUCCESS;
@@ -1106,7 +1106,7 @@ int main(int argc, char *argv[])
         fseek(file, 0, SEEK_END);
         icc_data_size = ftell(file);
         fseek(file, 0, SEEK_SET);
-        icc_data = (unsigned char *)gmalloc(icc_data_size);
+        icc_data = static_cast<unsigned char *>(gmalloc(icc_data_size));
         if (fread(icc_data, icc_data_size, 1, file) != 1) {
             fprintf(stderr, "Error: unable to read icc profile %s\n", icc.c_str());
             exit(4);
@@ -1221,8 +1221,8 @@ int main(int argc, char *argv[])
 
         if (printing && pg == firstPage) {
             if (paperWidth < 0 || paperHeight < 0) {
-                paperWidth = (int)ceil(pg_w);
-                paperHeight = (int)ceil(pg_h);
+                paperWidth = static_cast<int>(ceil(pg_w));
+                paperHeight = static_cast<int>(ceil(pg_h));
             }
         }
 

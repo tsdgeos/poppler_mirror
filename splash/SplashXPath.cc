@@ -72,14 +72,14 @@ SplashXPath::SplashXPath(const SplashPath &path, const std::array<SplashCoord, 6
     int curSubpath, i, j;
 
     // transform the points
-    pts = (SplashXPathPoint *)gmallocn(path.length, sizeof(SplashXPathPoint));
+    pts = static_cast<SplashXPathPoint *>(gmallocn(path.length, sizeof(SplashXPathPoint)));
     for (i = 0; i < path.length; ++i) {
         transform(matrix, path.pts[i].x, path.pts[i].y, &pts[i].x, &pts[i].y);
     }
 
     // set up the stroke adjustment hints
     if (path.hints) {
-        adjusts = (SplashXPathAdjust *)gmallocn_checkoverflow(path.hintsLength, sizeof(SplashXPathAdjust));
+        adjusts = static_cast<SplashXPathAdjust *>(gmallocn_checkoverflow(path.hintsLength, sizeof(SplashXPathAdjust)));
         if (adjusts) {
             for (i = 0; i < path.hintsLength; ++i) {
                 hint = &path.hints[i];
@@ -116,8 +116,8 @@ SplashXPath::SplashXPath(const SplashPath &path, const std::array<SplashCoord, 6
                 }
                 adjusts[i].x0a = adj0 - 0.01;
                 adjusts[i].x0b = adj0 + 0.01;
-                adjusts[i].xma = (SplashCoord)0.5 * (adj0 + adj1) - 0.01;
-                adjusts[i].xmb = (SplashCoord)0.5 * (adj0 + adj1) + 0.01;
+                adjusts[i].xma = static_cast<SplashCoord>(0.5) * (adj0 + adj1) - 0.01;
+                adjusts[i].xmb = static_cast<SplashCoord>(0.5) * (adj0 + adj1) + 0.01;
                 adjusts[i].x1a = adj1 - 0.01;
                 adjusts[i].x1b = adj1 + 0.01;
                 // rounding both edge coordinates can result in lines of
@@ -140,7 +140,7 @@ SplashXPath::SplashXPath(const SplashPath &path, const std::array<SplashCoord, 6
                 }
                 adjusts[i].x0 = x0;
                 adjusts[i].x1 = x1 - 0.01;
-                adjusts[i].xm = (SplashCoord)0.5 * (adjusts[i].x0 + adjusts[i].x1);
+                adjusts[i].xm = static_cast<SplashCoord>(0.5) * (adjusts[i].x0 + adjusts[i].x1);
                 adjusts[i].firstPt = hint->firstPt;
                 adjusts[i].lastPt = hint->lastPt;
             }
@@ -257,7 +257,7 @@ void SplashXPath::grow(int nSegs)
         while (size < length + nSegs) {
             size *= 2;
         }
-        segs = (SplashXPathSeg *)greallocn_checkoverflow(segs, size, sizeof(SplashXPathSeg));
+        segs = static_cast<SplashXPathSeg *>(greallocn_checkoverflow(segs, size, sizeof(SplashXPathSeg)));
         if (unlikely(!segs)) {
             length = 0;
             size = 0;

@@ -200,7 +200,7 @@ void MediaParameters::parseMediaPlayParameters(const Dict &playDict)
                 if (ddict.isDict()) {
                     Object tmp2 = ddict.dictLookup("V");
                     if (tmp2.isNum()) {
-                        duration = (unsigned long)(tmp2.getNum());
+                        duration = static_cast<unsigned long>(tmp2.getNum());
                     }
                 }
             }

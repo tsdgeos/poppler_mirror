@@ -24,7 +24,7 @@ private Q_SLOTS:
 static bool compare(const Unicode *a, const char *b, int len)
 {
     for (int i = 0; i < len; i++) {
-        if (a[i] != (Unicode)b[i]) {
+        if (a[i] != static_cast<Unicode>(b[i])) {
             return false;
         }
     }
@@ -119,7 +119,7 @@ void TestUTFConversion::testUnicodeToAscii7()
     free(in_norm_idx);
 
     // ascii7 conversion: ® -> (R)   © -> (c)
-    const char *expected_ascii = (char *)"(R)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)";
+    const char *expected_ascii = "(R)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)";
 
     QCOMPARE(out_len, (int)strlen(expected_ascii));
     QVERIFY(compare(out, expected_ascii, out_len));

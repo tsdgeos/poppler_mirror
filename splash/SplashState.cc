@@ -75,16 +75,16 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
     strokeOverprint = false;
     overprintMode = 0;
     for (i = 0; i < 256; ++i) {
-        rgbTransferR[i] = (unsigned char)i;
-        rgbTransferG[i] = (unsigned char)i;
-        rgbTransferB[i] = (unsigned char)i;
-        grayTransfer[i] = (unsigned char)i;
-        cmykTransferC[i] = (unsigned char)i;
-        cmykTransferM[i] = (unsigned char)i;
-        cmykTransferY[i] = (unsigned char)i;
-        cmykTransferK[i] = (unsigned char)i;
+        rgbTransferR[i] = static_cast<unsigned char>(i);
+        rgbTransferG[i] = static_cast<unsigned char>(i);
+        rgbTransferB[i] = static_cast<unsigned char>(i);
+        grayTransfer[i] = static_cast<unsigned char>(i);
+        cmykTransferC[i] = static_cast<unsigned char>(i);
+        cmykTransferM[i] = static_cast<unsigned char>(i);
+        cmykTransferY[i] = static_cast<unsigned char>(i);
+        cmykTransferK[i] = static_cast<unsigned char>(i);
         for (auto &cp : deviceNTransfer) {
-            cp[i] = (unsigned char)i;
+            cp[i] = static_cast<unsigned char>(i);
         }
     }
     overprintMask = 0xffffffff;
@@ -129,16 +129,16 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, const Spla
     strokeOverprint = false;
     overprintMode = 0;
     for (i = 0; i < 256; ++i) {
-        rgbTransferR[i] = (unsigned char)i;
-        rgbTransferG[i] = (unsigned char)i;
-        rgbTransferB[i] = (unsigned char)i;
-        grayTransfer[i] = (unsigned char)i;
-        cmykTransferC[i] = (unsigned char)i;
-        cmykTransferM[i] = (unsigned char)i;
-        cmykTransferY[i] = (unsigned char)i;
-        cmykTransferK[i] = (unsigned char)i;
+        rgbTransferR[i] = static_cast<unsigned char>(i);
+        rgbTransferG[i] = static_cast<unsigned char>(i);
+        rgbTransferB[i] = static_cast<unsigned char>(i);
+        grayTransfer[i] = static_cast<unsigned char>(i);
+        cmykTransferC[i] = static_cast<unsigned char>(i);
+        cmykTransferM[i] = static_cast<unsigned char>(i);
+        cmykTransferY[i] = static_cast<unsigned char>(i);
+        cmykTransferK[i] = static_cast<unsigned char>(i);
         for (auto &cp : deviceNTransfer) {
-            cp[i] = (unsigned char)i;
+            cp[i] = static_cast<unsigned char>(i);
         }
     }
     overprintMask = 0xffffffff;

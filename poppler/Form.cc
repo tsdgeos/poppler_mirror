@@ -104,7 +104,7 @@ std::string pdfDocEncodingToUTF16(const std::string &orig)
     result.push_back('\xff');
     // convert to utf16
     for (int i = 2, j = 0; i < length; i += 2, j++) {
-        Unicode u = pdfDocEncoding[(unsigned int)((unsigned char)orig[j])] & 0xffff;
+        Unicode u = pdfDocEncoding[static_cast<unsigned int>(static_cast<unsigned char>(orig[j]))] & 0xffff;
         result.push_back((u >> 8) & 0xff);
         result.push_back(u & 0xff);
     }
@@ -289,7 +289,7 @@ void FormWidgetButton::setState(bool astate)
         return;
     }
 
-    parent()->setState(astate ? getOnStr() : (char *)"Off");
+    parent()->setState(astate ? getOnStr() : "Off");
     // Parent will call setAppearanceState()
 
     // Now handle standAlone fields which are related to this one by having the same
@@ -338,7 +338,7 @@ void FormWidgetButton::setState(bool astate)
                 error(errInternal, -1, "FormWidgetButton::setState : FormFieldButton expected");
                 continue;
             }
-            ffb->setState((char *)"Off", true);
+            ffb->setState("Off", true);
         }
     }
 }
@@ -911,7 +911,7 @@ bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEn
 // Overwrite signature string in the file with new signature
 bool FormWidgetSignature::updateSignature(FILE *f, Goffset sigStart, Goffset sigEnd, const std::vector<unsigned char> &signature)
 {
-    if (signature.size() * 2 + 2 != size_t(sigEnd - sigStart)) {
+    if (signature.size() * 2 + 2 != static_cast<size_t>(sigEnd - sigStart)) {
         return false;
     }
 
@@ -1463,7 +1463,7 @@ void FormFieldButton::setNumSiblings(int num)
 void FormFieldButton::fillChildrenSiblingsID()
 {
     if (!terminal) {
-        int numChildren = int(children.size());
+        int numChildren = static_cast<int>(children.size());
         for (int i = 0; i < numChildren; i++) {
             auto *child = dynamic_cast<FormFieldButton *>(children[i].get());
             if (child != nullptr) {
@@ -2919,8 +2919,8 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
 
             for (int code = 0; code <= basicMultilingualMaxCode; ++code) {
                 const int glyph = fft->mapCodeToGID(unicodeBMPCMap, code);
-                data.push_back((char)(glyph >> 8));
-                data.push_back((char)(glyph & 0xff));
+                data.push_back(static_cast<char>(glyph >> 8));
+                data.push_back(static_cast<char>(glyph & 0xff));
             }
             const Ref cidToGidMapStream = xref->addStreamObject(std::make_unique<Dict>(xref), std::move(data), StreamCompression::Compress);
             descendantFont->set("CIDToGIDMap", Object(cidToGidMapStream));
@@ -3003,8 +3003,8 @@ std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooStri
     // If the text has some characters that are not available in the font, try adding a font for those
     std::unordered_set<Unicode> seen;
     for (size_t i = 2; i < unicodeText->size(); i += 2) {
-        Unicode uChar = (unsigned char)(unicodeText->getChar(i)) << 8;
-        uChar += (unsigned char)(unicodeText->getChar(i + 1));
+        Unicode uChar = static_cast<unsigned char>(unicodeText->getChar(i)) << 8;
+        uChar += static_cast<unsigned char>(unicodeText->getChar(i + 1));
 
         if (uChar < 128 && !std::isprint(static_cast<unsigned char>(uChar))) {
             continue;

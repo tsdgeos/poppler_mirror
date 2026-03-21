@@ -36,7 +36,7 @@
 JArithmeticDecoderStats::JArithmeticDecoderStats(int contextSizeA)
 {
     contextSize = contextSizeA;
-    cxTab = (unsigned char *)gmallocn_checkoverflow(contextSize, sizeof(unsigned char));
+    cxTab = static_cast<unsigned char *>(gmallocn_checkoverflow(contextSize, sizeof(unsigned char)));
     if (cxTab) {
         resetContext();
     }
@@ -104,7 +104,7 @@ inline unsigned int JArithmeticDecoder::readByte()
     ++nBytesRead;
     const int strChar = str->getChar();
     readPastEndOfStream = strChar == EOF;
-    return (unsigned int)strChar & 0xff;
+    return static_cast<unsigned int>(strChar) & 0xff;
 }
 
 JArithmeticDecoder::~JArithmeticDecoder()
@@ -309,9 +309,9 @@ bool JArithmeticDecoder::decodeInt(int *x, JArithmeticDecoderStats *stats)
         if (v == 0) {
             return false;
         }
-        *x = -(int)v;
+        *x = -static_cast<int>(v);
     } else {
-        *x = (int)v;
+        *x = static_cast<int>(v);
     }
     return true;
 }

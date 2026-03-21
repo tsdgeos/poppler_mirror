@@ -58,7 +58,7 @@ MovieObject::MovieObject(AnnotMovie *ann)
     m_movieData->m_size = QSize(width, height);
     m_movieData->m_rotation = m_movieData->m_movieObj->getRotationAngle();
     m_movieData->m_showControls = mp->showControls;
-    m_movieData->m_playMode = (MovieObject::PlayMode)mp->repeatMode;
+    m_movieData->m_playMode = static_cast<MovieObject::PlayMode>(mp->repeatMode);
 }
 
 MovieObject::~MovieObject()

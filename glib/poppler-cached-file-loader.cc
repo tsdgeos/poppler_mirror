@@ -23,8 +23,8 @@
 
 PopplerCachedFileLoader::PopplerCachedFileLoader(GInputStream *inputStreamA, GCancellable *cancellableA, goffset lengthA)
 {
-    inputStream = (GInputStream *)g_object_ref(inputStreamA);
-    cancellable = cancellableA ? (GCancellable *)g_object_ref(cancellableA) : nullptr;
+    inputStream = static_cast<GInputStream *> g_object_ref(inputStreamA);
+    cancellable = cancellableA ? static_cast<GCancellable *> g_object_ref(cancellableA) : nullptr;
     length = lengthA;
     cachedFile = nullptr;
 }
@@ -45,7 +45,7 @@ size_t PopplerCachedFileLoader::init(CachedFile *cachedFileA)
 
     cachedFile = cachedFileA;
 
-    if (length != (goffset)-1) {
+    if (length != static_cast<goffset>(-1)) {
         return length;
     }
 
@@ -55,7 +55,7 @@ size_t PopplerCachedFileLoader::init(CachedFile *cachedFileA)
         info = g_file_input_stream_query_info(G_FILE_INPUT_STREAM(inputStream), G_FILE_ATTRIBUTE_STANDARD_SIZE, cancellable, nullptr);
         if (!info) {
             error(errInternal, -1, "Failed to get size.");
-            return (size_t)-1;
+            return static_cast<size_t>(-1);
         }
 
         length = g_file_info_get_size(info);
@@ -86,7 +86,7 @@ int PopplerCachedFileLoader::load(const std::vector<ByteRange> &ranges, CachedFi
     gssize bytesRead;
     size_t rangeBytesRead, bytesToRead;
 
-    if (length == (goffset)-1) {
+    if (length == static_cast<goffset>(-1)) {
         return 0;
     }
 

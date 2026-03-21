@@ -256,14 +256,14 @@ char *getLine(char *buf, int size, FILE *f)
         if ((c = fgetc(f)) == EOF) {
             break;
         }
-        buf[i++] = (char)c;
+        buf[i++] = static_cast<char>(c);
         if (c == '\x0a') {
             break;
         }
         if (c == '\x0d') {
             c = fgetc(f);
             if (c == '\x0a' && i < size - 1) {
-                buf[i++] = (char)c;
+                buf[i++] = static_cast<char>(c);
             } else if (c != EOF) {
                 ungetc(c, f);
             }

@@ -26,7 +26,7 @@ CachedFile::CachedFile(std::unique_ptr<CachedFileLoader> &&cacheLoader) : loader
 
     length = loader->init(this);
 
-    if (length != ((size_t)-1)) {
+    if (length != (static_cast<size_t>(-1))) {
         chunks.resize(length / CachedFileChunkSize + 1);
     } else {
         error(errInternal, -1, "Failed to initialize file cache.");
@@ -164,7 +164,7 @@ size_t CachedFile::read(void *ptr, size_t unitsize, size_t count)
         memcpy(ptr, chunks[chunk].data + offset, len);
         streamPos += len;
         toCopy -= len;
-        ptr = (char *)ptr + len;
+        ptr = static_cast<char *>(ptr) + len;
     }
 
     return bytes;

@@ -65,7 +65,7 @@ bool TiffWriter::init(FILE *openedFile, int width, int height, double hDPI, doub
 {
     unsigned int compression;
     uint16_t photometric = 0;
-    auto rowsperstrip = (uint32_t)-1;
+    auto rowsperstrip = static_cast<uint32_t>(-1);
     int bitspersample;
     uint16_t samplesperpixel = 0;
     const struct compression_name_tag
@@ -184,7 +184,7 @@ bool TiffWriter::init(FILE *openedFile, int width, int height, double hDPI, doub
     TIFFSetField(priv->f, TIFFTAG_BITSPERSAMPLE, bitspersample);
     TIFFSetField(priv->f, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
     TIFFSetField(priv->f, TIFFTAG_PHOTOMETRIC, photometric);
-    TIFFSetField(priv->f, TIFFTAG_COMPRESSION, (uint16_t)compression);
+    TIFFSetField(priv->f, TIFFTAG_COMPRESSION, static_cast<uint16_t>(compression));
     TIFFSetField(priv->f, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(priv->f, rowsperstrip));
     TIFFSetField(priv->f, TIFFTAG_XRESOLUTION, hDPI);
     TIFFSetField(priv->f, TIFFTAG_YRESOLUTION, vDPI);

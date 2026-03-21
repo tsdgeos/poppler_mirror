@@ -68,7 +68,7 @@ static void poppler_attachment_finalize(GObject *obj)
     PopplerAttachment *attachment;
     PopplerAttachmentPrivate *priv;
 
-    attachment = (PopplerAttachment *)obj;
+    attachment = reinterpret_cast<PopplerAttachment *>(obj);
     priv = GET_PRIVATE(attachment);
 
     if (attachment->name) {
@@ -104,7 +104,7 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
 
     g_assert(emb_file != nullptr);
 
-    attachment = (PopplerAttachment *)g_object_new(POPPLER_TYPE_ATTACHMENT, nullptr);
+    attachment = static_cast<PopplerAttachment *>(g_object_new(POPPLER_TYPE_ATTACHMENT, nullptr));
     priv = GET_PRIVATE(attachment);
 
     if (emb_file->getFileName()) {
@@ -123,7 +123,7 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
             G_GNUC_BEGIN_IGNORE_DEPRECATIONS
             /* This will overflow on dates from after 2038. This field is
              * deprecated, only kept for backward compatibility. */
-            attachment->ctime = (GTime)g_date_time_to_unix(priv->ctime);
+            attachment->ctime = static_cast<GTime>(g_date_time_to_unix(priv->ctime));
             G_GNUC_END_IGNORE_DEPRECATIONS
         }
         if (embFile->modDate()) {
@@ -131,7 +131,7 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
             G_GNUC_BEGIN_IGNORE_DEPRECATIONS
             /* This will overflow on dates from after 2038. This field is
              * deprecated, only kept for backward compatibility. */
-            attachment->mtime = (GTime)g_date_time_to_unix(priv->mtime);
+            attachment->mtime = static_cast<GTime>(g_date_time_to_unix(priv->mtime));
             G_GNUC_END_IGNORE_DEPRECATIONS
         }
 
@@ -230,7 +230,7 @@ gsize poppler_attachment_get_size(PopplerAttachment *attachment)
 
 static gboolean save_helper(const gchar *buf, gsize count, gpointer data, GError **error)
 {
-    FILE *f = (FILE *)data;
+    FILE *f = static_cast<FILE *>(data);
     gsize n;
 
     n = fwrite(buf, 1, count, f);

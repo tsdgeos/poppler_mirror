@@ -113,16 +113,16 @@ void getRawDataFromQImage(const QImage &qimg, int bitsPerPixel, QByteArray *data
         break;
     case 8:
     case 24:
-        data->append((const char *)qimg.bits(), static_cast<int>(qimg.sizeInBytes()));
+        data->append(reinterpret_cast<const char *>(qimg.bits()), static_cast<int>(qimg.sizeInBytes()));
         break;
     case 32:
         for (int line = 0; line < height; line++) {
             const QRgb *lineData = reinterpret_cast<const QRgb *>(qimg.scanLine(line));
             for (int offset = 0; offset < width; offset++) {
-                char a = (char)qAlpha(lineData[offset]);
-                char r = (char)qRed(lineData[offset]);
-                char g = (char)qGreen(lineData[offset]);
-                char b = (char)qBlue(lineData[offset]);
+                char a = static_cast<char>(qAlpha(lineData[offset]));
+                char r = static_cast<char>(qRed(lineData[offset]));
+                char g = static_cast<char>(qGreen(lineData[offset]));
+                char b = static_cast<char>(qBlue(lineData[offset]));
 
                 data->append(r);
                 data->append(g);
@@ -454,7 +454,7 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
             auto *l = new LinkAnnotation();
 
             // -> hlMode
-            l->setLinkHighlightMode((LinkAnnotation::HighlightMode)linkann->getLinkEffect());
+            l->setLinkHighlightMode(static_cast<LinkAnnotation::HighlightMode>(linkann->getLinkEffect()));
 
             // -> link region
             // TODO
@@ -1318,7 +1318,7 @@ Annotation::Style Annotation::style() const
         }
 
         s.setWidth(border->getWidth());
-        s.setLineStyle((Annotation::LineStyle)(1 << border->getStyle()));
+        s.setLineStyle(static_cast<Annotation::LineStyle>(1 << border->getStyle()));
 
         const std::vector<double> &dashArray = border->getDash();
         s.setDashArray(QVector<double>(dashArray.begin(), dashArray.end()));
@@ -1337,7 +1337,7 @@ Annotation::Style Annotation::style() const
         border_effect = nullptr;
     }
     if (border_effect) {
-        s.setLineEffect((Annotation::LineEffect)border_effect->getEffectType());
+        s.setLineEffect(static_cast<Annotation::LineEffect>(border_effect->getEffectType()));
         s.setEffectIntensity(border_effect->getIntensity());
     }
 
@@ -1899,7 +1899,7 @@ TextAnnotation::InplaceIntent TextAnnotation::inplaceIntent() const
 
     if (d->pdfAnnot->getType() == Annot::typeFreeText) {
         const auto *ftextann = static_cast<const AnnotFreeText *>(d->pdfAnnot.get());
-        return (TextAnnotation::InplaceIntent)ftextann->getIntent();
+        return static_cast<TextAnnotation::InplaceIntent>(ftextann->getIntent());
     }
 
     return TextAnnotation::Unknown;
@@ -1916,7 +1916,7 @@ void TextAnnotation::setInplaceIntent(TextAnnotation::InplaceIntent intent)
 
     if (d->pdfAnnot->getType() == Annot::typeFreeText) {
         auto *ftextann = static_cast<AnnotFreeText *>(d->pdfAnnot.get());
-        ftextann->setIntent((AnnotFreeText::AnnotFreeTextIntent)intent);
+        ftextann->setIntent(static_cast<AnnotFreeText::AnnotFreeTextIntent>(intent));
     }
 }
 
@@ -2090,10 +2090,10 @@ LineAnnotation::TermStyle LineAnnotation::lineStartStyle() const
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const auto *lineann = static_cast<const AnnotLine *>(d->pdfAnnot.get());
-        return (LineAnnotation::TermStyle)lineann->getStartStyle();
+        return static_cast<LineAnnotation::TermStyle>(lineann->getStartStyle());
     }
     const auto *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
-    return (LineAnnotation::TermStyle)polyann->getStartStyle();
+    return static_cast<LineAnnotation::TermStyle>(polyann->getStartStyle());
 }
 
 void LineAnnotation::setLineStartStyle(LineAnnotation::TermStyle style)
@@ -2107,10 +2107,10 @@ void LineAnnotation::setLineStartStyle(LineAnnotation::TermStyle style)
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         auto *lineann = static_cast<AnnotLine *>(d->pdfAnnot.get());
-        lineann->setStartEndStyle((AnnotLineEndingStyle)style, lineann->getEndStyle());
+        lineann->setStartEndStyle(static_cast<AnnotLineEndingStyle>(style), lineann->getEndStyle());
     } else {
         auto *polyann = static_cast<AnnotPolygon *>(d->pdfAnnot.get());
-        polyann->setStartEndStyle((AnnotLineEndingStyle)style, polyann->getEndStyle());
+        polyann->setStartEndStyle(static_cast<AnnotLineEndingStyle>(style), polyann->getEndStyle());
     }
 }
 
@@ -2124,10 +2124,10 @@ LineAnnotation::TermStyle LineAnnotation::lineEndStyle() const
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const auto *lineann = static_cast<const AnnotLine *>(d->pdfAnnot.get());
-        return (LineAnnotation::TermStyle)lineann->getEndStyle();
+        return static_cast<LineAnnotation::TermStyle>(lineann->getEndStyle());
     }
     const auto *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
-    return (LineAnnotation::TermStyle)polyann->getEndStyle();
+    return static_cast<LineAnnotation::TermStyle>(polyann->getEndStyle());
 }
 
 void LineAnnotation::setLineEndStyle(LineAnnotation::TermStyle style)
@@ -2141,10 +2141,10 @@ void LineAnnotation::setLineEndStyle(LineAnnotation::TermStyle style)
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         auto *lineann = static_cast<AnnotLine *>(d->pdfAnnot.get());
-        lineann->setStartEndStyle(lineann->getStartStyle(), (AnnotLineEndingStyle)style);
+        lineann->setStartEndStyle(lineann->getStartStyle(), static_cast<AnnotLineEndingStyle>(style));
     } else {
         auto *polyann = static_cast<AnnotPolygon *>(d->pdfAnnot.get());
-        polyann->setStartEndStyle(polyann->getStartStyle(), (AnnotLineEndingStyle)style);
+        polyann->setStartEndStyle(polyann->getStartStyle(), static_cast<AnnotLineEndingStyle>(style));
     }
 }
 
@@ -2330,7 +2330,7 @@ LineAnnotation::LineIntent LineAnnotation::lineIntent() const
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const auto *lineann = static_cast<const AnnotLine *>(d->pdfAnnot.get());
-        return (LineAnnotation::LineIntent)(lineann->getIntent() + 1);
+        return static_cast<LineAnnotation::LineIntent>(lineann->getIntent() + 1);
     }
     const auto *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
     if (polyann->getIntent() == AnnotPolygon::polygonCloud) {
@@ -2355,7 +2355,7 @@ void LineAnnotation::setLineIntent(LineAnnotation::LineIntent intent)
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         auto *lineann = static_cast<AnnotLine *>(d->pdfAnnot.get());
-        lineann->setIntent((AnnotLine::AnnotLineIntent)(intent - 1));
+        lineann->setIntent(static_cast<AnnotLine::AnnotLineIntent>(intent - 1));
     } else {
         auto *polyann = static_cast<AnnotPolygon *>(d->pdfAnnot.get());
         if (intent == LineAnnotation::PolygonCloud) {
@@ -3345,7 +3345,7 @@ CaretAnnotation::CaretSymbol CaretAnnotation::caretSymbol() const
     }
 
     const auto *caretann = static_cast<const AnnotCaret *>(d->pdfAnnot.get());
-    return (CaretAnnotation::CaretSymbol)caretann->getSymbol();
+    return static_cast<CaretAnnotation::CaretSymbol>(caretann->getSymbol());
 }
 
 void CaretAnnotation::setCaretSymbol(CaretAnnotation::CaretSymbol symbol)
@@ -3358,7 +3358,7 @@ void CaretAnnotation::setCaretSymbol(CaretAnnotation::CaretSymbol symbol)
     }
 
     auto *caretann = static_cast<AnnotCaret *>(d->pdfAnnot.get());
-    caretann->setSymbol((AnnotCaret::AnnotCaretSymbol)symbol);
+    caretann->setSymbol(static_cast<AnnotCaret::AnnotCaretSymbol>(symbol));
 }
 
 /** FileAttachmentAnnotation [Annotation] */

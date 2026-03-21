@@ -193,7 +193,7 @@ static bool annotDisplayDecideCbk(Annot *annot, void *user_data)
     if (annot->getType() == Annot::typeWidget) {
         return true; // Never hide forms
     }
-    return *(bool *)user_data;
+    return *static_cast<bool *>(user_data);
 }
 
 bool PSConverter::convert()
@@ -237,8 +237,8 @@ bool PSConverter::convert()
     }
 
     if (d->opts & StrictMargins) {
-        double xScale = ((double)d->paperWidth - (double)d->marginLeft - (double)d->marginRight) / (double)d->paperWidth;
-        double yScale = ((double)d->paperHeight - (double)d->marginBottom - (double)d->marginTop) / (double)d->paperHeight;
+        double xScale = (static_cast<double>(d->paperWidth) - static_cast<double>(d->marginLeft) - static_cast<double>(d->marginRight)) / static_cast<double>(d->paperWidth);
+        double yScale = (static_cast<double>(d->paperHeight) - static_cast<double>(d->marginBottom) - static_cast<double>(d->marginTop)) / static_cast<double>(d->paperHeight);
         psOut->setScale(xScale, yScale);
     }
 

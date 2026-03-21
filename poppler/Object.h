@@ -406,7 +406,7 @@ public:
     double getNum() const
     {
         OBJECT_3TYPES_CHECK(objInt, objInt64, objReal);
-        return type == objInt ? (double)std::get<int>(data) : type == objInt64 ? (double)std::get<long long>(data) : std::get<double>(data);
+        return type == objInt ? static_cast<double>(std::get<int>(data)) : type == objInt64 ? static_cast<double>(std::get<long long>(data)) : std::get<double>(data);
     }
     double getNum(bool *ok) const
     {
@@ -414,7 +414,7 @@ public:
             *ok = false;
             return 0.;
         }
-        return type == objInt ? (double)std::get<int>(data) : type == objInt64 ? (double)std::get<long long>(data) : std::get<double>(data);
+        return type == objInt ? static_cast<double>(std::get<int>(data)) : type == objInt64 ? static_cast<double>(std::get<long long>(data)) : std::get<double>(data);
     }
     const std::string &getString() const
     {
@@ -527,7 +527,7 @@ public:
         if (unlikely(type != objInt && type != objInt64 && type != objReal)) {
             return defaultValue;
         }
-        return type == objInt ? (double)std::get<int>(data) : type == objInt64 ? (double)std::get<long long>(data) : std::get<double>(data);
+        return type == objInt ? static_cast<double>(std::get<int>(data)) : type == objInt64 ? static_cast<double>(std::get<long long>(data)) : std::get<double>(data);
     }
 
     bool getBoolWithDefaultValue(bool defaultValue) const { return (type == objBool) ? std::get<bool>(data) : defaultValue; }

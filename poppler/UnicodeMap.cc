@@ -84,7 +84,7 @@ std::unique_ptr<UnicodeMap> UnicodeMap::parse(const std::string &encodingNameA)
                 for (int i = 0; i < nBytes; ++i) {
                     unsigned int x;
                     sscanf(tok3 + i * 2, "%2x", &x);
-                    ext.code.push_back((char)x);
+                    ext.code.push_back(static_cast<char>(x));
                 }
                 eMap.push_back(std::move(ext));
             } else {
@@ -177,7 +177,7 @@ int UnicodeMap::mapUnicode(Unicode u, char *buf, int bufSize) const
                             }
                             unsigned int code = item[a].code + (u - item[a].start);
                             for (int i = n - 1; i >= 0; --i) {
-                                buf[i] = (char)(code & 0xff);
+                                buf[i] = static_cast<char>(code & 0xff);
                                 code >>= 8;
                             }
                             return n;

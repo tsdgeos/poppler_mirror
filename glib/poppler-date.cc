@@ -44,7 +44,7 @@ gboolean poppler_date_parse(const gchar *date, time_t *timet)
     }
     std::string dateString(date);
     t = dateStringToTime(dateString);
-    if (t == (time_t)-1) {
+    if (t == static_cast<time_t>(-1)) {
         return FALSE;
     }
 

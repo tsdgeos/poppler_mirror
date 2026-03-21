@@ -526,13 +526,13 @@ static bool update_font_desc_with_word(PopplerFontDescription &font_desc, std::s
         std::pair<FontPropType, int> elt = a->second;
         switch (elt.first) {
         case TYPE_STYLE:
-            font_desc.style = (PopplerStyle)elt.second;
+            font_desc.style = static_cast<PopplerStyle>(elt.second);
             return true;
         case TYPE_WEIGHT:
-            font_desc.weight = (PopplerWeight)elt.second;
+            font_desc.weight = static_cast<PopplerWeight>(elt.second);
             return true;
         case TYPE_STRETCH:
-            font_desc.stretch = (PopplerStretch)elt.second;
+            font_desc.stretch = static_cast<PopplerStretch>(elt.second);
             return true;
         case TYPE_NORMAL:
             return true;
@@ -567,7 +567,7 @@ PopplerAnnot *_poppler_annot_free_text_new(const std::shared_ptr<Annot> &annot)
 {
     PopplerAnnot *poppler_annot = _poppler_create_annot(POPPLER_TYPE_ANNOT_FREE_TEXT, annot);
     PopplerAnnotFreeText *ft_annot = POPPLER_ANNOT_FREE_TEXT(poppler_annot);
-    std::unique_ptr<DefaultAppearance> da = ((AnnotFreeText *)annot.get())->getDefaultAppearance();
+    std::unique_ptr<DefaultAppearance> da = (static_cast<AnnotFreeText *>(annot.get()))->getDefaultAppearance();
     PopplerFontDescription *desc = nullptr;
     if (!da->getFontName().empty()) {
         desc = poppler_font_description_new(da->getFontName().c_str());
@@ -886,9 +886,9 @@ static gboolean get_raw_data_from_cairo_image(cairo_surface_t *image, cairo_form
                 pixel[2] = iter_c[CAIRO_B];
                 iter_c += 4;
 
-                g_byte_array_append(data, (guint8 *)pixel, 3);
+                g_byte_array_append(data, reinterpret_cast<guint8 *>(pixel), 3);
                 if (has_alpha) {
-                    g_byte_array_append(soft_mask_data, (guint8 *)&iter_c[CAIRO_A], 1);
+                    g_byte_array_append(soft_mask_data, static_cast<guint8 *>(&iter_c[CAIRO_A]), 1);
                 }
             }
         }
@@ -916,12 +916,12 @@ std::unique_ptr<AnnotStampImageHelper> _poppler_convert_cairo_image_to_stamp_ima
         colorSpace = ColorSpace::DeviceRGB;
         bitsPerComponent = 8;
     } else {
-        g_set_error(error, POPPLER_ERROR, POPPLER_ERROR_INVALID, "Invalid or unsupported cairo image type %u", (unsigned int)format);
+        g_set_error(error, POPPLER_ERROR, POPPLER_ERROR_INVALID, "Invalid or unsupported cairo image type %u", static_cast<unsigned int>(format));
         return nullptr;
     }
 
-    data = g_byte_array_sized_new((guint)((width * 4) + rowstride_c) * height);
-    sMaskData = g_byte_array_sized_new((guint)((width * 4) + rowstride_c) * height);
+    data = g_byte_array_sized_new(static_cast<guint>((width * 4) + rowstride_c) * height);
+    sMaskData = g_byte_array_sized_new(static_cast<guint>((width * 4) + rowstride_c) * height);
 
     if (!get_raw_data_from_cairo_image(image, format, width, height, rowstride_c, data, sMaskData)) {
         g_set_error(error, POPPLER_ERROR, POPPLER_ERROR_INVALID, "Failed to get raw data from cairo image");
@@ -931,10 +931,10 @@ std::unique_ptr<AnnotStampImageHelper> _poppler_convert_cairo_image_to_stamp_ima
     }
 
     if (sMaskData->len > 0) {
-        AnnotStampImageHelper sMask(doc, width, height, ColorSpace::DeviceGray, 8, (char *)sMaskData->data, (int)sMaskData->len);
-        annotImg = std::make_unique<AnnotStampImageHelper>(doc, width, height, colorSpace, bitsPerComponent, (char *)data->data, (int)data->len, sMask.getRef());
+        AnnotStampImageHelper sMask(doc, width, height, ColorSpace::DeviceGray, 8, reinterpret_cast<char *>(sMaskData->data), static_cast<int>(sMaskData->len));
+        annotImg = std::make_unique<AnnotStampImageHelper>(doc, width, height, colorSpace, bitsPerComponent, reinterpret_cast<char *>(data->data), static_cast<int>(data->len), sMask.getRef());
     } else {
-        annotImg = std::make_unique<AnnotStampImageHelper>(doc, width, height, colorSpace, bitsPerComponent, (char *)data->data, (int)data->len);
+        annotImg = std::make_unique<AnnotStampImageHelper>(doc, width, height, colorSpace, bitsPerComponent, reinterpret_cast<char *>(data->data), static_cast<int>(data->len));
     }
 
     g_byte_array_unref(data);
@@ -1111,7 +1111,7 @@ PopplerAnnotFlag poppler_annot_get_flags(PopplerAnnot *poppler_annot)
 {
     g_return_val_if_fail(POPPLER_IS_ANNOT(poppler_annot), (PopplerAnnotFlag)0);
 
-    return (PopplerAnnotFlag)poppler_annot->annot->getFlags();
+    return static_cast<PopplerAnnotFlag>(poppler_annot->annot->getFlags());
 }
 
 /**
@@ -1132,7 +1132,7 @@ void poppler_annot_set_flags(PopplerAnnot *poppler_annot, PopplerAnnotFlag flags
         return;
     }
 
-    poppler_annot->annot->setFlags((guint)flags);
+    poppler_annot->annot->setFlags(static_cast<guint>(flags));
 }
 
 /**
@@ -2041,7 +2041,7 @@ static void poppler_annot_free_text_set_da_to_native(PopplerAnnotFreeText *poppl
     }
 
     DefaultAppearance da { font_name, size, _poppler_convert_poppler_color_to_annot_color(&(poppler_annot->font_color)) };
-    ((AnnotFreeText *)annot)->setDefaultAppearance(da);
+    (static_cast<AnnotFreeText *>(annot))->setDefaultAppearance(da);
 }
 
 /**
@@ -2591,7 +2591,7 @@ G_DEFINE_BOXED_TYPE(PopplerFontDescription, poppler_font_description, poppler_fo
  */
 PopplerFontDescription *poppler_font_description_new(const char *font_name)
 {
-    auto *font_desc = (PopplerFontDescription *)g_new0(PopplerFontDescription, 1);
+    auto *font_desc = g_new0(PopplerFontDescription, 1);
     font_desc->font_name = g_strdup(font_name);
     font_desc->size_pt = 11.;
     font_desc->stretch = POPPLER_STRETCH_NORMAL;
@@ -2651,7 +2651,7 @@ G_DEFINE_BOXED_TYPE(PopplerPath, poppler_path, poppler_path_copy, poppler_path_f
  */
 PopplerPath *poppler_path_new_from_array(PopplerPoint *points, gsize n_points)
 {
-    auto *path = (PopplerPath *)g_new(PopplerPath, 1);
+    auto *path = g_new(PopplerPath, 1);
     path->points = points;
     path->n_points = n_points;
     return path;

@@ -61,10 +61,10 @@ void LinkExtractorOutputDev::processLink(::AnnotLink *link)
 
     cvtUserToDev(left, top, &leftAux, &topAux);
     cvtUserToDev(right, bottom, &rightAux, &bottomAux);
-    linkArea.setLeft((double)leftAux / m_pageCropWidth);
-    linkArea.setTop((double)topAux / m_pageCropHeight);
-    linkArea.setRight((double)rightAux / m_pageCropWidth);
-    linkArea.setBottom((double)bottomAux / m_pageCropHeight);
+    linkArea.setLeft(static_cast<double>(leftAux) / m_pageCropWidth);
+    linkArea.setTop(static_cast<double>(topAux) / m_pageCropHeight);
+    linkArea.setRight(static_cast<double>(rightAux) / m_pageCropWidth);
+    linkArea.setBottom(static_cast<double>(bottomAux) / m_pageCropHeight);
 
     Link *popplerLink = m_data->convertLinkActionToLink(link->getAction(), linkArea);
     if (popplerLink) {

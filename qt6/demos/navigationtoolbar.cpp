@@ -132,7 +132,7 @@ void NavigationToolBar::slotZoomComboActivated(int /*index*/)
     bool ok = false;
     int value = text.toInt(&ok);
     if (ok && value >= 10) {
-        Q_EMIT zoomChanged(qreal(value) / 100);
+        Q_EMIT zoomChanged(static_cast<qreal>(value) / 100);
     }
 }
 

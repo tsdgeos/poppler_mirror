@@ -118,12 +118,12 @@ static constexpr GfxColorComp gfxColorComp1 = 0x10000;
 
 static constexpr GfxColorComp dblToCol(double x)
 {
-    return (GfxColorComp)(x * gfxColorComp1);
+    return static_cast<GfxColorComp>(x * gfxColorComp1);
 }
 
 static inline double colToDbl(GfxColorComp x)
 {
-    return (double)x / (double)gfxColorComp1;
+    return static_cast<double>(x) / static_cast<double>(gfxColorComp1);
 }
 
 static inline unsigned char dblToByte(double x)
@@ -133,7 +133,7 @@ static inline unsigned char dblToByte(double x)
 
 static inline double byteToDbl(unsigned char x)
 {
-    return (double)x / 255.0;
+    return static_cast<double>(x) / 255.0;
 }
 
 static inline GfxColorComp byteToCol(unsigned char x)
@@ -142,13 +142,13 @@ static inline GfxColorComp byteToCol(unsigned char x)
     //                  =  ((x << 8) + (x) + (x >> 8) + ...) << 16
     //                  =  (x << 8) + (x) + (x >> 7)
     //                                      [for rounding]
-    return (GfxColorComp)((x << 8) + x + (x >> 7));
+    return static_cast<GfxColorComp>((x << 8) + x + (x >> 7));
 }
 
 static inline unsigned char colToByte(GfxColorComp x)
 {
     // 255 * x + 0.5  =  256 * x - x + 0x8000
-    return (unsigned char)(((x << 8) - x + 0x8000) >> 16);
+    return static_cast<unsigned char>(((x << 8) - x + 0x8000) >> 16);
 }
 
 static inline unsigned short colToShort(GfxColorComp x)
@@ -851,7 +851,7 @@ public:
     const std::array<double, 4> &getBBox() const { return bbox; }
     double getXStep() const { return xStep; }
     double getYStep() const { return yStep; }
-    Dict *getResDict() { return resDict.isDict() ? resDict.getDict() : (Dict *)nullptr; }
+    Dict *getResDict() { return resDict.isDict() ? resDict.getDict() : nullptr; }
     const std::array<double, 6> &getMatrix() const { return matrix; }
     Object *getContentStream() { return &contentStream; }
 

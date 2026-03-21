@@ -400,7 +400,7 @@ Object Lexer::getObj(int objNum)
                         }
                     }
                 }
-                *p++ = (char)c2;
+                *p++ = static_cast<char>(c2);
                 ++n;
             }
         } while (!done);
@@ -465,7 +465,7 @@ Object Lexer::getObj(int objNum)
                     error(errSyntaxError, getPos(), "Error: name token is larger than 1 MB. Suspicion of hostile file. Stopping parsing");
                     return Object::eof();
                 }
-                s.push_back((char)c);
+                s.push_back(static_cast<char>(c));
             }
         }
         if (n < tokBufSize) {
@@ -523,7 +523,7 @@ Object Lexer::getObj(int objNum)
                         p = tokBuf;
                         n = 0;
                     }
-                    *p++ = (char)c2;
+                    *p++ = static_cast<char>(c2);
                     ++n;
                     c2 = 0;
                     m = 0;
@@ -532,7 +532,7 @@ Object Lexer::getObj(int objNum)
         }
         s.append(tokBuf, n);
         if (m == 1) {
-            s.push_back((char)(c2 << 4));
+            s.push_back(static_cast<char>(c2 << 4));
         }
         if (isUtf8WithBom(s)) {
             s = utf8ToUtf16WithBom(s);

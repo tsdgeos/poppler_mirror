@@ -68,8 +68,8 @@ PopplerPage *_poppler_page_new(PopplerDocument *document, Page *page, int index)
 
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
 
-    poppler_page = (PopplerPage *)g_object_new(POPPLER_TYPE_PAGE, nullptr, NULL);
-    poppler_page->document = (PopplerDocument *)g_object_ref(document);
+    poppler_page = static_cast<PopplerPage *>(g_object_new(POPPLER_TYPE_PAGE, nullptr, NULL));
+    poppler_page->document = static_cast<PopplerDocument *> g_object_ref(document);
     poppler_page->page = page;
     poppler_page->index = index;
 
@@ -273,7 +273,7 @@ static TextPage *poppler_page_get_text_page(PopplerPage *page)
 
 static bool annots_display_decide_cb(Annot *annot, void *user_data)
 {
-    auto flags = (PopplerRenderAnnotsFlags)GPOINTER_TO_UINT(user_data);
+    auto flags = static_cast<PopplerRenderAnnotsFlags> GPOINTER_TO_UINT(user_data);
     Annot::AnnotSubtype type = annot->getType();
     int typeMask = 1 << MAX(0, (((int)type) - 1));
 
@@ -361,7 +361,7 @@ void poppler_page_render(PopplerPage *page, cairo_t *cairo)
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 void poppler_page_render_for_printing_with_options(PopplerPage *page, cairo_t *cairo, PopplerPrintFlags options)
 {
-    int flags = (int)POPPLER_RENDER_ANNOTS_PRINT_DOCUMENT;
+    int flags = static_cast<int>(POPPLER_RENDER_ANNOTS_PRINT_DOCUMENT);
 
     if (options & POPPLER_PRINT_STAMP_ANNOTS_ONLY) {
         flags |= POPPLER_RENDER_ANNOTS_PRINT_STAMP;
@@ -370,7 +370,7 @@ void poppler_page_render_for_printing_with_options(PopplerPage *page, cairo_t *c
         flags |= POPPLER_RENDER_ANNOTS_PRINT_MARKUP;
     }
 
-    poppler_page_render_full(page, cairo, true, (PopplerRenderAnnotsFlags)flags);
+    poppler_page_render_full(page, cairo, true, static_cast<PopplerRenderAnnotsFlags>(flags));
 }
 G_GNUC_END_IGNORE_DEPRECATIONS
 
@@ -683,7 +683,7 @@ void poppler_page_selection_region_free(GList *region)
         return;
     }
 
-    g_list_free_full(region, (GDestroyNotify)poppler_rectangle_free);
+    g_list_free_full(region, reinterpret_cast<GDestroyNotify>(poppler_rectangle_free));
 }
 
 /**
@@ -733,10 +733,10 @@ cairo_region_t *poppler_page_get_selected_region(PopplerPage *page, gdouble scal
     for (const PDFRectangle *selection_rect : *list) {
         cairo_rectangle_int_t rect;
 
-        rect.x = (gint)((selection_rect->x1 * scale) + 0.5);
-        rect.y = (gint)((selection_rect->y1 * scale) + 0.5);
-        rect.width = (gint)(((selection_rect->x2 - selection_rect->x1) * scale) + 0.5);
-        rect.height = (gint)(((selection_rect->y2 - selection_rect->y1) * scale) + 0.5);
+        rect.x = static_cast<gint>((selection_rect->x1 * scale) + 0.5);
+        rect.y = static_cast<gint>((selection_rect->y1 * scale) + 0.5);
+        rect.width = static_cast<gint>(((selection_rect->x2 - selection_rect->x1) * scale) + 0.5);
+        rect.height = static_cast<gint>(((selection_rect->y2 - selection_rect->y1) * scale) + 0.5);
         cairo_region_union_rectangle(region, &rect);
 
         delete selection_rect;
@@ -1068,7 +1068,7 @@ void poppler_page_free_image_mapping(GList *list)
         return;
     }
 
-    g_list_free_full(list, (GDestroyNotify)poppler_image_mapping_free);
+    g_list_free_full(list, reinterpret_cast<GDestroyNotify>(poppler_image_mapping_free));
 }
 
 /**
@@ -1090,11 +1090,11 @@ void poppler_page_render_to_ps(PopplerPage *page, PopplerPSFile *ps_file)
             pages.push_back(i);
         }
         if (ps_file->fd != -1) {
-            ps_file->out = new PSOutputDev(ps_file->fd, ps_file->document->doc.get(), nullptr, pages, psModePS, (int)ps_file->paper_width, (int)ps_file->paper_height, false, ps_file->duplex, 0, 0, 0, 0, psRasterizeWhenNeeded, false,
-                                           nullptr, nullptr);
+            ps_file->out = new PSOutputDev(ps_file->fd, ps_file->document->doc.get(), nullptr, pages, psModePS, static_cast<int>(ps_file->paper_width), static_cast<int>(ps_file->paper_height), false, ps_file->duplex, 0, 0, 0, 0,
+                                           psRasterizeWhenNeeded, false, nullptr, nullptr);
         } else {
-            ps_file->out = new PSOutputDev(ps_file->filename, ps_file->document->doc.get(), nullptr, pages, psModePS, (int)ps_file->paper_width, (int)ps_file->paper_height, false, ps_file->duplex, 0, 0, 0, 0, psRasterizeWhenNeeded, false,
-                                           nullptr, nullptr);
+            ps_file->out = new PSOutputDev(ps_file->filename, ps_file->document->doc.get(), nullptr, pages, psModePS, static_cast<int>(ps_file->paper_width), static_cast<int>(ps_file->paper_height), false, ps_file->duplex, 0, 0, 0, 0,
+                                           psRasterizeWhenNeeded, false, nullptr, nullptr);
         }
     }
 
@@ -1228,7 +1228,7 @@ void poppler_page_free_link_mapping(GList *list)
         return;
     }
 
-    g_list_free_full(list, (GDestroyNotify)poppler_link_mapping_free);
+    g_list_free_full(list, reinterpret_cast<GDestroyNotify>(poppler_link_mapping_free));
 }
 
 /**
@@ -1290,7 +1290,7 @@ void poppler_page_free_form_field_mapping(GList *list)
         return;
     }
 
-    g_list_free_full(list, (GDestroyNotify)poppler_form_field_mapping_free);
+    g_list_free_full(list, reinterpret_cast<GDestroyNotify>(poppler_form_field_mapping_free));
 }
 
 /**
@@ -1449,7 +1449,7 @@ void poppler_page_free_annot_mapping(GList *list)
         return;
     }
 
-    g_list_free_full(list, (GDestroyNotify)poppler_annot_mapping_free);
+    g_list_free_full(list, reinterpret_cast<GDestroyNotify>(poppler_annot_mapping_free));
 }
 
 /* Adds or removes (according to @add parameter) the passed in @crop_box from the
@@ -1906,7 +1906,7 @@ G_DEFINE_BOXED_TYPE(PopplerTextAttributes, poppler_text_attributes, poppler_text
  */
 PopplerTextAttributes *poppler_text_attributes_new(void)
 {
-    return (PopplerTextAttributes *)g_slice_new0(PopplerTextAttributes);
+    return g_slice_new0(PopplerTextAttributes);
 }
 
 static gchar *get_font_name_from_word(const TextWord *word, gint word_i)
@@ -1947,9 +1947,9 @@ static PopplerTextAttributes *poppler_text_attributes_new_from_word(const TextWo
     attrs->font_size = word->getFontSize();
     attrs->is_underlined = word->isUnderlined();
     word->getColor(&r, &g, &b);
-    attrs->color.red = (int)(r * 65535. + 0.5);
-    attrs->color.green = (int)(g * 65535. + 0.5);
-    attrs->color.blue = (int)(b * 65535. + 0.5);
+    attrs->color.red = static_cast<int>(r * 65535. + 0.5);
+    attrs->color.green = static_cast<int>(g * 65535. + 0.5);
+    attrs->color.blue = static_cast<int>(b * 65535. + 0.5);
 
     return attrs;
 }
@@ -2005,7 +2005,7 @@ G_DEFINE_BOXED_TYPE(PopplerColor, poppler_color, poppler_color_copy, poppler_col
  */
 PopplerColor *poppler_color_new(void)
 {
-    return (PopplerColor *)g_new0(PopplerColor, 1);
+    return g_new0(PopplerColor, 1);
 }
 
 /**
@@ -2143,7 +2143,7 @@ G_DEFINE_BOXED_TYPE(PopplerPageTransition, poppler_page_transition, poppler_page
  */
 PopplerPageTransition *poppler_page_transition_new(void)
 {
-    return (PopplerPageTransition *)g_new0(PopplerPageTransition, 1);
+    return g_new0(PopplerPageTransition, 1);
 }
 
 /**
@@ -2205,7 +2205,7 @@ PopplerFormFieldMapping *poppler_form_field_mapping_copy(PopplerFormFieldMapping
     new_mapping = g_slice_dup(PopplerFormFieldMapping, mapping);
 
     if (mapping->field) {
-        new_mapping->field = (PopplerFormField *)g_object_ref(mapping->field);
+        new_mapping->field = static_cast<PopplerFormField *> g_object_ref(mapping->field);
     }
 
     return new_mapping;
@@ -2260,7 +2260,7 @@ PopplerAnnotMapping *poppler_annot_mapping_copy(PopplerAnnotMapping *mapping)
     new_mapping = g_slice_dup(PopplerAnnotMapping, mapping);
 
     if (mapping->annot) {
-        new_mapping->annot = (PopplerAnnot *)g_object_ref(mapping->annot);
+        new_mapping->annot = static_cast<PopplerAnnot *> g_object_ref(mapping->annot);
     }
 
     return new_mapping;
@@ -2487,7 +2487,7 @@ void poppler_page_free_text_attributes(GList *list)
         return;
     }
 
-    g_list_free_full(list, (GDestroyNotify)poppler_text_attributes_free);
+    g_list_free_full(list, reinterpret_cast<GDestroyNotify>(poppler_text_attributes_free));
 }
 
 static gboolean word_text_attributes_equal(const TextWord *a, gint ai, const TextWord *b, gint bi)

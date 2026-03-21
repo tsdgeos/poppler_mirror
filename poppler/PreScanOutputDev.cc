@@ -202,7 +202,7 @@ void PreScanOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str,
 
     colorSpace = colorMap->getColorSpace();
     if (colorSpace->getMode() == csIndexed) {
-        colorSpace = ((GfxIndexedColorSpace *)colorSpace)->getBase();
+        colorSpace = (static_cast<GfxIndexedColorSpace *>(colorSpace))->getBase();
     }
     if (colorSpace->getMode() == csDeviceGray || colorSpace->getMode() == csCalGray) {
         if (colorMap->getBits() > 1) {
@@ -239,7 +239,7 @@ void PreScanOutputDev::drawMaskedImage(GfxState *state, Object * /*ref*/, Stream
 
     colorSpace = colorMap->getColorSpace();
     if (colorSpace->getMode() == csIndexed) {
-        colorSpace = ((GfxIndexedColorSpace *)colorSpace)->getBase();
+        colorSpace = (static_cast<GfxIndexedColorSpace *>(colorSpace))->getBase();
     }
     if (colorSpace->getMode() == csDeviceGray || colorSpace->getMode() == csCalGray) {
         if (colorMap->getBits() > 1) {
@@ -262,7 +262,7 @@ void PreScanOutputDev::drawSoftMaskedImage(GfxState * /*state*/, Object * /*ref*
 
     colorSpace = colorMap->getColorSpace();
     if (colorSpace->getMode() == csIndexed) {
-        colorSpace = ((GfxIndexedColorSpace *)colorSpace)->getBase();
+        colorSpace = (static_cast<GfxIndexedColorSpace *>(colorSpace))->getBase();
     }
     if (colorSpace->getMode() != csDeviceGray && colorSpace->getMode() != csCalGray) {
         gray = false;
