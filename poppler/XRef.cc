@@ -749,6 +749,7 @@ bool XRef::readXRefStream(Stream *xrefStr, Goffset *pos)
             return false;
         }
     }
+
     constexpr int intNBytes = sizeof(int);
     constexpr int longLongNBytes = sizeof(long long);
     if (w[0] > intNBytes || w[1] > longLongNBytes || w[2] > longLongNBytes) {
@@ -804,7 +805,6 @@ bool XRef::readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n
 {
     unsigned long long offset, gen;
     const unsigned long long offsetMax = GoffsetMax();
-    int type, c, i, j;
 
     if (first > INT_MAX - n) {
         return false;
@@ -822,31 +822,36 @@ bool XRef::readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n
             return false;
         }
     }
-    for (i = first; i < first + n; ++i) {
-        if (w[0] == 0) {
-            type = 1;
-        } else {
-            for (type = 0, j = 0; j < w[0]; ++j) {
-                if ((c = xrefStr->getChar()) == EOF) {
-                    return false;
-                }
+
+    constexpr int intNBytes = sizeof(int);
+    constexpr int longLongNBytes = sizeof(long long);
+    const auto nChars = w[0] + w[1] + w[2];
+    std::array<unsigned char, intNBytes + 2 * longLongNBytes> xrefEntryBuffer;
+
+    for (int i = first; i < first + n; ++i) {
+        if (xrefStr->doGetChars(nChars, xrefEntryBuffer.data()) < nChars) {
+            return false;
+        }
+
+        int type = 1;
+        int j = 0;
+
+        if (w[0] != 0) {
+            for (type = 0; j < w[0]; ++j) {
+                auto c = xrefEntryBuffer[j];
                 type = (type << 8) + c;
             }
         }
-        for (offset = 0, j = 0; j < w[1]; ++j) {
-            if ((c = xrefStr->getChar()) == EOF) {
-                return false;
-            }
+        for (offset = 0; j < (w[1] + w[0]); ++j) {
+            auto c = xrefEntryBuffer[j];
             offset = (offset << 8) + c;
         }
         if (offset > offsetMax) {
             error(errSyntaxError, -1, "Offset inside xref table too large for fseek");
             return false;
         }
-        for (gen = 0, j = 0; j < w[2]; ++j) {
-            if ((c = xrefStr->getChar()) == EOF) {
-                return false;
-            }
+        for (gen = 0; j < (w[2] + w[1] + w[0]); ++j) {
+            auto c = xrefEntryBuffer[j];
             gen = (gen << 8) + c;
         }
         if (gen > INT_MAX) {
