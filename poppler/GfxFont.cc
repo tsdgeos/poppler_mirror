@@ -945,7 +945,7 @@ static bool testForNumericNames(const Dict &fontDict, bool hex)
 Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, const Dict &fontDict) : GfxFont(tagA, idA, std::move(nameA), typeA, embFontIDA)
 {
     const BuiltinFont *builtinFont;
-    const char **baseEnc;
+    const char *const *baseEnc;
     bool baseEncFromFontFile;
     int len;
     char *charName;
@@ -1153,7 +1153,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
         } else if (type == fontTrueType) {
             baseEnc = winAnsiEncoding;
         } else {
-            baseEnc = standardEncoding;
+            baseEnc = fofiType1StandardEncoding;
         }
     }
 
@@ -1187,8 +1187,8 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
     // StandardEncoding
     if (type == fontType1C && embFontID != Ref::INVALID() && baseEncFromFontFile) {
         for (int i = 0; i < 256; ++i) {
-            if (!enc[i] && standardEncoding[i]) {
-                enc[i] = (char *)standardEncoding[i];
+            if (!enc[i] && fofiType1StandardEncoding[i]) {
+                enc[i] = (char *)fofiType1StandardEncoding[i];
                 encFree[i] = false;
             }
         }
