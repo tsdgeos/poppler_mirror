@@ -803,6 +803,7 @@ bool XRef::readXRefStream(Stream *xrefStr, Goffset *pos)
 bool XRef::readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n)
 {
     unsigned long long offset, gen;
+    const unsigned long long offsetMax = GoffsetMax();
     int type, c, i, j;
 
     if (first > INT_MAX - n) {
@@ -838,7 +839,7 @@ bool XRef::readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n
             }
             offset = (offset << 8) + c;
         }
-        if (offset > static_cast<unsigned long long>(GoffsetMax())) {
+        if (offset > offsetMax) {
             error(errSyntaxError, -1, "Offset inside xref table too large for fseek");
             return false;
         }
