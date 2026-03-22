@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2008, 2010, 2018, 2021-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2008, 2010, 2018, 2021-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2010 Jakub Wilk <jwilk@jwilk.net>
 // Copyright (C) 2014 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -55,11 +55,11 @@ FoFiType1::FoFiType1(std::vector<unsigned char> &&fileA, PrivateTag /*unused*/) 
 
 FoFiType1::~FoFiType1()
 {
-    if (encoding && encoding != fofiType1StandardEncoding) {
-        for (int i = 0; i < 256; ++i) {
-            gfree(encoding[i]);
+    if (encoding && encoding != &fofiType1StandardEncoding) {
+        for (const char *glyphName : *encoding) {
+            gfree(const_cast<char *>(glyphName));
         }
-        gfree(static_cast<void *>(encoding));
+        delete encoding;
     }
 }
 
@@ -71,7 +71,7 @@ std::string FoFiType1::getName()
     return name;
 }
 
-char **FoFiType1::getEncoding()
+const std::array<const char *, 256> *FoFiType1::getEncodingA()
 {
     if (!parsed) {
         parse();
@@ -246,12 +246,10 @@ void FoFiType1::parse()
             }
 
             if (token2 == "StandardEncoding" && token3 == "def") {
-                encoding = (char **)fofiType1StandardEncoding;
+                encoding = &fofiType1StandardEncoding;
             } else if (token2 == "256" && token3 == "array") {
-                encoding = (char **)gmallocn(256, sizeof(char *));
-                for (int j = 0; j < 256; ++j) {
-                    encoding[j] = nullptr;
-                }
+                auto *customEncoding = new std::array<const char *, 256>();
+                customEncoding->fill(nullptr);
 
                 while (true) {
                     const std::optional<std::string_view> encodingToken = tokenizer.getToken();
@@ -288,14 +286,16 @@ void FoFiType1::parse()
                         }
 
                         if (code >= 0 && code < 256 && nameToken->length() > 1) {
-                            gfree(encoding[code]);
-                            encoding[code] = copyString(nameToken->data() + 1, nameToken->length() - 1);
+                            gfree(const_cast<char *>((*customEncoding)[code]));
+                            (*customEncoding)[code] = copyString(nameToken->data() + 1, nameToken->length() - 1);
                         }
 
                     } else if (encodingToken == "def") {
                         break;
                     }
                 }
+
+                encoding = customEncoding;
             }
         }
     }

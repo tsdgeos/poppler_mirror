@@ -98,13 +98,11 @@ FoFiType1C::FoFiType1C(std::span<const unsigned char> data, PrivateTag /*unused*
 
 FoFiType1C::~FoFiType1C()
 {
-    int i;
-
-    if (encoding && encoding != fofiType1StandardEncoding && encoding != fofiType1ExpertEncoding) {
-        for (i = 0; i < 256; ++i) {
-            gfree(encoding[i]);
+    if (encoding && encoding != &fofiType1StandardEncoding && encoding != &fofiType1ExpertEncoding) {
+        for (const char *glyphName : *encoding) {
+            gfree(const_cast<char *>(glyphName));
         }
-        gfree(static_cast<void *>(encoding));
+        delete encoding;
     }
     if (privateDicts) {
         gfree(privateDicts);
@@ -122,7 +120,7 @@ const char *FoFiType1C::getName() const
     return name ? name->c_str() : nullptr;
 }
 
-char **FoFiType1C::getEncoding() const
+const std::array<const char *, 256> *FoFiType1C::getEncodingA() const
 {
     return encoding;
 }
@@ -251,7 +249,7 @@ void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, bo
 
     // write the encoding
     (*outputFunc)(outputStream, "/Encoding ", 10);
-    if (!newEncoding && encoding == fofiType1StandardEncoding) {
+    if (!newEncoding && encoding == &fofiType1StandardEncoding) {
         (*outputFunc)(outputStream, "StandardEncoding def\n", 21);
     } else {
         (*outputFunc)(outputStream, "256 array\n", 10);
@@ -2257,16 +2255,14 @@ void FoFiType1C::buildEncoding()
     int pos, c, sid, nLeft, nSups, i, j;
 
     if (topDict.encodingOffset == 0) {
-        encoding = (char **)fofiType1StandardEncoding;
+        encoding = &fofiType1StandardEncoding;
 
     } else if (topDict.encodingOffset == 1) {
-        encoding = (char **)fofiType1ExpertEncoding;
+        encoding = &fofiType1ExpertEncoding;
 
     } else {
-        encoding = (char **)gmallocn(256, sizeof(char *));
-        for (i = 0; i < 256; ++i) {
-            encoding[i] = nullptr;
-        }
+        auto *customEncoding = new std::array<const char *, 256>();
+        customEncoding->fill(nullptr);
         pos = topDict.encodingOffset;
         encFormat = getU8(pos++, &parsedOk);
         if (!parsedOk) {
@@ -2285,10 +2281,8 @@ void FoFiType1C::buildEncoding()
                 if (!parsedOk) {
                     return;
                 }
-                if (encoding[c]) {
-                    gfree(encoding[c]);
-                }
-                encoding[c] = copyString(getString(charset[i], buf, &parsedOk));
+                gfree(const_cast<char *>((*customEncoding)[c]));
+                (*customEncoding)[c] = copyString(getString(charset[i], buf, &parsedOk));
             }
         } else if ((encFormat & 0x7f) == 1) {
             nRanges = getU8(pos++, &parsedOk);
@@ -2304,10 +2298,8 @@ void FoFiType1C::buildEncoding()
                 }
                 for (j = 0; j <= nLeft && nCodes < nGlyphs && nCodes < charsetLength; ++j) {
                     if (c < 256) {
-                        if (encoding[c]) {
-                            gfree(encoding[c]);
-                        }
-                        encoding[c] = copyString(getString(charset[nCodes], buf, &parsedOk));
+                        gfree(const_cast<char *>((*customEncoding)[c]));
+                        (*customEncoding)[c] = copyString(getString(charset[nCodes], buf, &parsedOk));
                     }
                     ++nCodes;
                     ++c;
@@ -2331,12 +2323,11 @@ void FoFiType1C::buildEncoding()
                 if (!parsedOk) {
                     return;
                 }
-                if (encoding[c]) {
-                    gfree(encoding[c]);
-                }
-                encoding[c] = copyString(getString(sid, buf, &parsedOk));
+                gfree(const_cast<char *>((*customEncoding)[c]));
+                (*customEncoding)[c] = copyString(getString(sid, buf, &parsedOk));
             }
         }
+        encoding = customEncoding;
     }
 }
 

@@ -3,16 +3,19 @@
 // FontEncodingTables.h
 //
 // Copyright 2001-2003 Glyph & Cog, LLC
+// Copyright 2026 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
 #ifndef FONTENCODINGTABLES_H
 #define FONTENCODINGTABLES_H
 
-extern const char *macRomanEncoding[];
-extern const char *macExpertEncoding[];
-extern const char *winAnsiEncoding[];
-extern const char *symbolEncoding[];
-extern const char *zapfDingbatsEncoding[];
+#include <array>
+
+extern const std::array<const char *, 256> macRomanEncoding;
+extern const std::array<const char *, 256> macExpertEncoding;
+extern const std::array<const char *, 256> winAnsiEncoding;
+extern const std::array<const char *, 256> symbolEncoding;
+extern const std::array<const char *, 256> zapfDingbatsEncoding;
 
 #endif
