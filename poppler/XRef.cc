@@ -401,8 +401,7 @@ XRef *XRef::copy() const
         xref->entries[i].offset = entries[i].offset;
         xref->entries[i].type = entries[i].type;
         // set the object to null, it will be fetched from the stream when needed
-        new (&xref->entries[i].obj) Object();
-        xref->entries[i].obj = Object::null();
+        new (&xref->entries[i].obj) Object(Object::null());
         xref->entries[i].flags = entries[i].flags;
         xref->entries[i].gen = entries[i].gen;
 
@@ -469,8 +468,7 @@ int XRef::resize(int newSize)
         for (int i = size; i < newSize; ++i) {
             entries[i].offset = -1;
             entries[i].type = xrefEntryNone;
-            new (&entries[i].obj) Object();
-            entries[i].obj = Object::null();
+            new (&entries[i].obj) Object(Object::null());
             entries[i].flags = 0;
             entries[i].gen = 0;
         }
@@ -1553,8 +1551,7 @@ bool XRef::add(int num, int gen, Goffset offs, bool used)
         for (int i = size; i < num + 1; ++i) {
             entries[i].offset = -1;
             entries[i].type = xrefEntryFree;
-            new (&entries[i].obj) Object();
-            entries[i].obj = Object::null();
+            new (&entries[i].obj) Object(Object::null());
             entries[i].flags = 0;
             entries[i].gen = 0;
         }
