@@ -10,6 +10,7 @@ public:
 private Q_SLOTS:
     static void testAcrossLinesSearch(); // leave it first
     static void testAcrossLinesSearchDoubleColumn();
+    static void testAcrossLinesContinuationRect();
     static void bug7063();
     static void testNextAndPrevious();
     static void testWholeWordsOnly();
@@ -396,6 +397,26 @@ void TestSearch::testAcrossLinesSearchDoubleColumn()
     // there's only 3 matches for 'betw' in document, where only the last
     // one is a multiline match, so that's a total of 4 rects returned
     QCOMPARE(page->search(bug_str, mode).size(), 4);
+}
+
+void TestSearch::testAcrossLinesContinuationRect()
+{
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/searchAcrossLines.pdf"));
+    QVERIFY(document);
+
+    std::unique_ptr<Poppler::Page> page = document->page(1);
+    QVERIFY(page);
+
+    const QList<QRectF> rects = page->search(QStringLiteral("reconocimiento"), Poppler::Page::AcrossLines);
+    QCOMPARE(rects.size(), 2);
+    QCOMPARE(qRound(rects[0].x()), 526);
+    QCOMPARE(qRound(rects[0].y()), 712);
+    QCOMPARE(qRound(rects[0].width()), 8);
+    QCOMPARE(qRound(rects[0].height()), 10);
+    QCOMPARE(qRound(rects[1].x()), 136);
+    QCOMPARE(qRound(rects[1].y()), 725);
+    QCOMPARE(qRound(rects[1].width()), 59);
+    QCOMPARE(qRound(rects[1].height()), 10);
 }
 
 QTEST_GUILESS_MAIN(TestSearch)
