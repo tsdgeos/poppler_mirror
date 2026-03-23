@@ -2,7 +2,7 @@
 //
 // XRef.cc
 //
-// Copyright 1996-2003 Glyph & Cog, LLC
+// Copyright 1996-2003, 2025 Glyph & Cog, LLC
 //
 //========================================================================
 
@@ -631,6 +631,9 @@ bool XRef::readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *fol
                     entries[1].obj.setToNull();
                 }
             }
+            if (i > last) {
+                last = i;
+            }
         }
     }
 
@@ -883,30 +886,21 @@ bool XRef::readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n
 }
 
 // Attempt to construct an xref table for a damaged file.
-// Warning: Reconstruction of files where last XRef section is a stream
-//          or where some objects are defined inside an object stream is not yet supported.
-//          Existing data in XRef::entries may get corrupted if applied anyway.
 bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
 {
-    Parser *parser;
-    char buf[256];
-    Goffset pos;
-    int num, gen;
-    int streamEndsSize;
-    char *p;
-    bool gotRoot;
-    char *token = nullptr;
-    bool oneCycle = true;
-    Goffset offset = 0;
+    int *streamObjNums = nullptr;
+    int streamObjNumsLen = 0;
+    int streamObjNumsSize = 0;
+    int lastObjNum = -1;
+    rootNum = -1;
+    int streamEndsSize = 0;
+    streamEndsLen = 0;
 
     resize(0); // free entries properly
     gfree(entries);
     capacity = 0;
     size = 0;
     entries = nullptr;
-
-    gotRoot = false;
-    streamEndsLen = streamEndsSize = 0;
 
     if (wasReconstructed) {
         *wasReconstructed = true;
@@ -919,142 +913,232 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
     if (!str->rewind()) {
         return false;
     }
+    char buf[4096 + 1];
+
+    intptr_t bufPos = start;
+    char *p = buf;
+    char *end = buf;
+    bool startOfLine = true;
+    bool space = true;
+    bool eof = false;
     while (true) {
-        pos = str->getPos();
-        if (!str->getLine(buf, 256)) {
+        if (end - p < 256 && !eof) {
+            memcpy(buf, p, end - p);
+            bufPos += p - buf;
+            p = buf + (end - p);
+            int n = (int)(buf + 4096 - p);
+            int m = str->doGetChars(n, (unsigned char *)p);
+            end = p + m;
+            *end = '\0';
+            p = buf;
+            eof = m < n;
+        }
+        if (p == end && eof) {
             break;
         }
-        p = buf;
-
-        // skip whitespace
-        while (*p && Lexer::isSpace(*p & 0xff)) {
+        if (startOfLine && !strncmp(p, "trailer", 7)) {
+            constructTrailerDict((intptr_t)(bufPos + (p + 7 - buf)), needCatalogDict);
+            p += 7;
+            startOfLine = false;
+            space = false;
+        } else if (startOfLine && !strncmp(p, "endstream", 9)) {
+            if (streamEndsLen == streamEndsSize) {
+                streamEndsSize += 64;
+                streamEnds = (Goffset *)greallocn(streamEnds, streamEndsSize, sizeof(Goffset));
+            }
+            streamEnds[streamEndsLen++] = ((Goffset)bufPos + (p - buf));
+            p += 9;
+            startOfLine = false;
+            space = false;
+        } else if (space && *p >= '0' && *p <= '9') {
+            p = constructObjectEntry(p, ((Goffset)bufPos + (p - buf)), &lastObjNum);
+            startOfLine = false;
+            space = false;
+        } else if (p[0] == '>' && p[1] == '>') {
+            p += 2;
+            startOfLine = false;
+            space = false;
+            // skip any PDF whitespace except for '\0'
+            while (*p == '\t' || *p == '\n' || *p == '\x0c' || *p == '\r' || *p == ' ') {
+                if (*p == '\n' || *p == '\r') {
+                    startOfLine = true;
+                }
+                space = true;
+                ++p;
+            }
+            if (!strncmp(p, "stream", 6)) {
+                if (lastObjNum >= 0) {
+                    if (streamObjNumsLen == streamObjNumsSize) {
+                        streamObjNumsSize += 64;
+                        streamObjNums = (int *)greallocn(streamObjNums, streamObjNumsSize, sizeof(int));
+                    }
+                    streamObjNums[streamObjNumsLen++] = lastObjNum;
+                }
+                p += 6;
+                startOfLine = false;
+                space = false;
+            }
+        } else {
+            if (*p == '\n' || *p == '\r') {
+                startOfLine = true;
+                space = true;
+            } else if (Lexer::isSpace(*p & 0xff)) {
+                space = true;
+            } else {
+                startOfLine = false;
+                space = false;
+            }
             ++p;
         }
+    }
 
-        oneCycle = true;
-        offset = 0;
-
-        while ((token = strstr(p, "endobj")) || oneCycle) {
-            oneCycle = false;
-
-            if (token) {
-                oneCycle = true;
-                token[0] = '\0';
-                offset = token - p;
-            }
-
-            // got trailer dictionary
-            if (!strncmp(p, "trailer", 7)) {
-                parser = new Parser(nullptr, str->makeSubStream(pos + 7, false, 0, Object::null()), false);
-                Object newTrailerDict = parser->getObj();
-                if (newTrailerDict.isDict()) {
-                    const Object &obj = newTrailerDict.dictLookupNF("Root");
-                    if (obj.isRef() && (!gotRoot || !needCatalogDict)) {
-                        rootNum = obj.getRefNum();
-                        rootGen = obj.getRefGen();
-                        trailerDict = newTrailerDict.copy();
-                        gotRoot = true;
-                    }
-                }
-                delete parser;
-
-                // look for object
-            } else if (isdigit(*p & 0xff)) {
-                num = atoi(p);
-                if (num > 0) {
-                    do {
-                        ++p;
-                    } while (*p && isdigit(*p & 0xff));
-                    if ((*p & 0xff) == 0 || isspace(*p & 0xff)) {
-                        if ((*p & 0xff) == 0) {
-                            // new line, continue with next line!
-                            str->getLine(buf, 256);
-                            p = buf;
-                        } else {
-                            ++p;
-                        }
-                        while (*p && isspace(*p & 0xff)) {
-                            ++p;
-                        }
-                        if (isdigit(*p & 0xff)) {
-                            gen = atoi(p);
-                            do {
-                                ++p;
-                            } while (*p && isdigit(*p & 0xff));
-                            if ((*p & 0xff) == 0 || isspace(*p & 0xff)) {
-                                if ((*p & 0xff) == 0) {
-                                    // new line, continue with next line!
-                                    str->getLine(buf, 256);
-                                    p = buf;
-                                } else {
-                                    ++p;
-                                }
-                                while (*p && isspace(*p & 0xff)) {
-                                    ++p;
-                                }
-                                if (!strncmp(p, "obj", 3)) {
-                                    if (num >= size) {
-                                        if (unlikely(num >= INT_MAX - 1 - 255)) {
-                                            error(errSyntaxError, -1, "Bad object number");
-                                            return false;
-                                        }
-                                        const int newSize = (num + 1 + 255) & ~255;
-                                        if (newSize < 0) {
-                                            error(errSyntaxError, -1, "Bad object number");
-                                            return false;
-                                        }
-                                        if (resize(newSize) != newSize) {
-                                            error(errSyntaxError, -1, "Invalid 'obj' parameters");
-                                            return false;
-                                        }
-                                    }
-                                    if (entries[num].type == xrefEntryFree || gen >= entries[num].gen) {
-                                        entries[num].offset = pos - start;
-                                        entries[num].gen = gen;
-                                        entries[num].type = xrefEntryUncompressed;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-            } else {
-                char *endstream = strstr(p, "endstream");
-                if (endstream) {
-                    intptr_t endstreamPos = endstream - p;
-                    if ((endstreamPos == 0 || Lexer::isSpace(p[endstreamPos - 1] & 0xff)) // endstream is either at beginning or preceeded by space
-                        && (endstreamPos + 9 >= 256 || Lexer::isSpace(p[endstreamPos + 9] & 0xff))) // endstream is either at end or followed by space
-                    {
-                        if (streamEndsLen == streamEndsSize) {
-                            streamEndsSize += 64;
-                            if (streamEndsSize >= INT_MAX / (int)sizeof(int)) {
-                                error(errSyntaxError, -1, "Invalid 'endstream' parameter.");
-                                return false;
-                            }
-                            streamEnds = (Goffset *)greallocn(streamEnds, streamEndsSize, sizeof(Goffset));
-                        }
-                        streamEnds[streamEndsLen++] = pos + endstreamPos;
-                    }
-                }
-            }
-            if (token) {
-                p = token + 6; // strlen( "endobj" ) = 6
-                pos += offset + 6; // strlen( "endobj" ) = 6
-                while (*p && Lexer::isSpace(*p & 0xff)) {
-                    ++p;
-                    ++pos;
-                }
+    // read each stream object, check for xref or object stream
+    for (int i = 0; i < streamObjNumsLen; ++i) {
+        Object obj = fetch(streamObjNums[i], entries[streamObjNums[i]].gen);
+        if (obj.isStream()) {
+            Dict *dict = obj.streamGetDict();
+            Object type = dict->lookup("Type");
+            if (type.isName("XRef")) {
+                saveTrailerDict(dict, true, needCatalogDict);
+            } else if (type.isName("ObjStm")) {
+                constructObjectStreamEntries(&obj, streamObjNums[i]);
             }
         }
     }
 
-    if (gotRoot) {
-        return true;
+    gfree(streamObjNums);
+
+    if (rootNum < 0) {
+        error(errSyntaxError, -1, "Couldn't find trailer dictionary");
+        return false;
+    }
+    return true;
+}
+
+// Attempt to construct a trailer dict at [pos] in the stream.
+void XRef::constructTrailerDict(Goffset pos, bool needCatalogDict)
+{
+    Parser parser { nullptr,
+
+                    str->makeSubStream(pos, false, 0, Object {}), false };
+    Object newTrailerDict = parser.getObj();
+    if (newTrailerDict.isDict()) {
+        saveTrailerDict(newTrailerDict.getDict(), false, needCatalogDict);
+    }
+}
+
+// If [dict] "looks like" a trailer dict (i.e., has a Root entry),
+// save it as the trailer dict.
+void XRef::saveTrailerDict(Dict *dict, bool isXRefStream, bool needCatalogDict)
+{
+    const Object &obj = dict->lookupNF("Root");
+    if (obj.isRef() && (rootNum == -1 || !needCatalogDict)) {
+        int newRootNum = obj.getRefNum();
+        // the xref stream scanning code runs after all objects are found,
+        // so we can check for a valid root object number at that point
+        if (!isXRefStream || newRootNum <= last) {
+            rootNum = newRootNum;
+            rootGen = obj.getRefGen();
+            trailerDict = Object { dict->copy(this) };
+        }
+    }
+}
+
+// Look for an object header ("nnn ggg obj") at [p].  The first
+// character at *[p] is a digit.  [pos] is the position of *[p].
+char *XRef::constructObjectEntry(char *p, Goffset pos, int *objNum)
+{
+    // we look for non-end-of-line space characters here, to deal with
+    // situations like:
+    //    nnn          <-- garbage digits on a line
+    //    nnn nnn obj  <-- actual object
+    // and we also ignore '\0' (because it's used to terminate the
+    // buffer in this damage-scanning code)
+    int num = 0;
+    do {
+        num = (num * 10) + (*p - '0');
+        ++p;
+    } while (*p >= '0' && *p <= '9' && num < 100000000);
+    if (*p != '\t' && *p != '\x0c' && *p != ' ') {
+        return p;
+    }
+    do {
+        ++p;
+    } while (*p == '\t' || *p == '\x0c' || *p == ' ');
+    if (*p < '0' || *p > '9') {
+        return p;
+    }
+    int gen = 0;
+    do {
+        gen = (gen * 10) + (*p - '0');
+        ++p;
+    } while (*p >= '0' && *p <= '9' && gen < 100000000);
+    if (*p != '\t' && *p != '\x0c' && *p != ' ') {
+        return p;
+    }
+    do {
+        ++p;
+    } while (*p == '\t' || *p == '\x0c' || *p == ' ');
+    if (strncmp(p, "obj", 3) != 0) {
+        return p;
     }
 
-    error(errSyntaxError, -1, "Couldn't find trailer dictionary");
-    return false;
+    if (constructXRefEntry(num, gen, pos - start, xrefEntryUncompressed)) {
+        *objNum = num;
+    }
+
+    return p;
+}
+
+// Read the header from an object stream, and add xref entries for all
+// of its objects.
+void XRef::constructObjectStreamEntries(Object *objStr, int objStrObjNum)
+{
+    Object objN = objStr->streamGetDict()->lookup("N");
+
+    // get the object count
+    if (!objN.isInt()) {
+        return;
+    }
+    int nObjects = objN.getInt();
+    if (nObjects <= 0 || nObjects > 1000000) {
+        return;
+    }
+
+    // parse the header: object numbers and offsets
+    Parser parser { nullptr, objStr, false };
+    for (int i = 0; i < nObjects; ++i) {
+        auto obj1 = parser.getObj(true);
+        auto obj2 = parser.getObj(true);
+        if (obj1.isInt() && obj2.isInt()) {
+            int num = obj1.getInt();
+            if (num >= 0 && num < 1000000) {
+                constructXRefEntry(num, i, objStrObjNum, xrefEntryCompressed);
+            }
+        }
+    }
+}
+
+bool XRef::constructXRefEntry(int num, int gen, Goffset pos, XRefEntryType type)
+{
+    if (num >= size) {
+        int newSize = (num + 1 + 255) & ~255;
+        if (newSize < 0) {
+            return false;
+        }
+        resize(newSize);
+    }
+
+    if (entries[num].type == xrefEntryFree || gen >= entries[num].gen) {
+        entries[num].offset = pos;
+        entries[num].gen = gen;
+        entries[num].type = type;
+        if (num > last) {
+            last = num;
+        }
+    }
+
+    return true;
 }
 
 void XRef::setEncryption(int permFlagsA, bool ownerPasswordOkA, const unsigned char *fileKeyA, int keyLengthA, int encVersionA, int encRevisionA, CryptAlgorithm encAlgorithmA)
