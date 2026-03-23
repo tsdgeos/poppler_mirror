@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2016, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
@@ -24,12 +24,14 @@
 #ifndef FOFIENCODINGS_H
 #define FOFIENCODINGS_H
 
+#include <array>
+
 //------------------------------------------------------------------------
 // Type 1 and 1C font data
 //------------------------------------------------------------------------
 
-extern const char *const fofiType1StandardEncoding[256];
-extern const char *const fofiType1ExpertEncoding[256];
+extern const std::array<const char *, 256> fofiType1StandardEncoding;
+extern const std::array<const char *, 256> fofiType1ExpertEncoding;
 
 //------------------------------------------------------------------------
 // Type 1C font data

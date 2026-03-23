@@ -132,7 +132,7 @@ static void insertChildHelper(const std::string &itemTitle, int destPageNum, uns
         nextItemObject.dictSet("Prev", Object(outlineItemRef));
         xref->setModifiedObject(&nextItemObject, (*it)->getRef());
 
-        outlineItem.dictSet("Next", Object((*(it))->getRef()));
+        outlineItem.dictSet("Next", Object((*it)->getRef()));
 
         if (it != items.begin()) {
             prevItemObject = xref->fetch((*(it - 1))->getRef());

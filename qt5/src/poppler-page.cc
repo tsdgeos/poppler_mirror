@@ -31,6 +31,7 @@
  * Copyright (C) 2024-2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
  * Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
  * Copyright (C) 2024, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2026 Aditya Tiwari <suntiwari3495@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -438,9 +439,9 @@ inline QList<QRectF> PageData::performMultipleTextSearch(TextPage *textPage, QVe
             QRectF resultN;
 
             resultN.setLeft(continueMatch.x1);
-            resultN.setTop(continueMatch.y1);
+            resultN.setTop(continueMatch.y2);
             resultN.setRight(continueMatch.x2);
-            resultN.setBottom(continueMatch.y2);
+            resultN.setBottom(continueMatch.y1);
 
             results.append(resultN);
             continueMatch.x1 = DBL_MAX;
@@ -509,7 +510,7 @@ static bool renderToQPainter(QImageDumpingQPainterOutputDev *qpainter_output, QP
 
     OutputDevCallbackHelper *abortHelper = qpainter_output;
     page->parentDoc->doc->displayPageSlice(qpainter_output, page->index + 1, xres, yres, (int)rotate * 90, false, true, false, x, y, w, h, abortHelper->shouldAbortRenderCallback ? shouldAbortRenderInternalCallback : nullAbortCallBack,
-                                           abortHelper, (hideAnnotations) ? annotDisplayDecideCbk : nullAnnotCallBack, nullptr, true);
+                                           abortHelper, hideAnnotations ? annotDisplayDecideCbk : nullAnnotCallBack, nullptr, true);
     if (savePainter) {
         painter->restore();
     }
@@ -604,7 +605,7 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
 
         OutputDevCallbackHelper *abortHelper = &splash_output;
         m_page->parentDoc->doc->displayPageSlice(&splash_output, m_page->index + 1, xres, yres, rotation, false, true, false, xPos, yPos, w, h, shouldAbortRenderCallback ? shouldAbortRenderInternalCallback : nullAbortCallBack, abortHelper,
-                                                 (hideAnnotations) ? annotDisplayDecideCbk : nullAnnotCallBack, nullptr, true);
+                                                 hideAnnotations ? annotDisplayDecideCbk : nullAnnotCallBack, nullptr, true);
 
         img = splash_output.getXBGRImage(true /* takeImageData */);
         break;

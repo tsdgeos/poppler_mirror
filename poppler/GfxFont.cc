@@ -945,7 +945,6 @@ static bool testForNumericNames(const Dict &fontDict, bool hex)
 Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, const Dict &fontDict) : GfxFont(tagA, idA, std::move(nameA), typeA, embFontIDA)
 {
     const BuiltinFont *builtinFont;
-    const char **baseEnc;
     bool baseEncFromFontFile;
     int len;
     char *charName;
@@ -1077,36 +1076,36 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
     // check FontDict for base encoding
     hasEncoding = false;
     usesMacRomanEnc = false;
-    baseEnc = nullptr;
+    const std::array<const char *, 256> *baseEnc = nullptr;
     baseEncFromFontFile = false;
     obj1 = fontDict.lookup("Encoding");
     bool isZapfDingbats = name && name->ends_with("ZapfDingbats");
     if (isZapfDingbats) {
-        baseEnc = zapfDingbatsEncoding;
+        baseEnc = &zapfDingbatsEncoding;
         hasEncoding = true;
     } else if (obj1.isDict()) {
         Object obj2 = obj1.dictLookup("BaseEncoding");
         if (obj2.isName("MacRomanEncoding")) {
             hasEncoding = true;
             usesMacRomanEnc = true;
-            baseEnc = macRomanEncoding;
+            baseEnc = &macRomanEncoding;
         } else if (obj2.isName("MacExpertEncoding")) {
             hasEncoding = true;
-            baseEnc = macExpertEncoding;
+            baseEnc = &macExpertEncoding;
         } else if (obj2.isName("WinAnsiEncoding")) {
             hasEncoding = true;
-            baseEnc = winAnsiEncoding;
+            baseEnc = &winAnsiEncoding;
         }
     } else if (obj1.isName("MacRomanEncoding")) {
         hasEncoding = true;
         usesMacRomanEnc = true;
-        baseEnc = macRomanEncoding;
+        baseEnc = &macRomanEncoding;
     } else if (obj1.isName("MacExpertEncoding")) {
         hasEncoding = true;
-        baseEnc = macExpertEncoding;
+        baseEnc = &macExpertEncoding;
     } else if (obj1.isName("WinAnsiEncoding")) {
         hasEncoding = true;
-        baseEnc = winAnsiEncoding;
+        baseEnc = &winAnsiEncoding;
     }
     // We need to keep ffT1 around until we have read everything out of 'baseEnc'
     // in case we end up using that
@@ -1125,7 +1124,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
                     embFontName = std::make_unique<GooString>(fontName);
                 }
                 if (!baseEnc) {
-                    baseEnc = (const char **)ffT1->getEncoding();
+                    baseEnc = ffT1->getEncodingA();
                     baseEncFromFontFile = true;
                 }
             }
@@ -1138,7 +1137,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
                     embFontName = std::make_unique<GooString>(ffT1C->getName());
                 }
                 if (!baseEnc) {
-                    baseEnc = (const char **)ffT1C->getEncoding();
+                    baseEnc = ffT1C->getEncodingA();
                     baseEncFromFontFile = true;
                 }
             }
@@ -1151,23 +1150,23 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
             baseEnc = builtinFont->defaultBaseEnc;
             hasEncoding = true;
         } else if (type == fontTrueType) {
-            baseEnc = winAnsiEncoding;
+            baseEnc = &winAnsiEncoding;
         } else {
-            baseEnc = standardEncoding;
+            baseEnc = &fofiType1StandardEncoding;
         }
     }
 
     if (baseEncFromFontFile) {
         encodingName = "Builtin";
-    } else if (baseEnc == winAnsiEncoding) {
+    } else if (baseEnc == &winAnsiEncoding) {
         encodingName = "WinAnsi";
-    } else if (baseEnc == macRomanEncoding) {
+    } else if (baseEnc == &macRomanEncoding) {
         encodingName = "MacRoman";
-    } else if (baseEnc == macExpertEncoding) {
+    } else if (baseEnc == &macExpertEncoding) {
         encodingName = "MacExpert";
-    } else if (baseEnc == symbolEncoding) {
+    } else if (baseEnc == &symbolEncoding) {
         encodingName = "Symbol";
-    } else if (baseEnc == zapfDingbatsEncoding) {
+    } else if (baseEnc == &zapfDingbatsEncoding) {
         encodingName = "ZapfDingbats";
     } else {
         encodingName = "Standard";
@@ -1175,9 +1174,9 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
 
     // copy the base encoding
     for (int i = 0; i < 256; ++i) {
-        enc[i] = (char *)baseEnc[i];
+        enc[i] = (char *)(*baseEnc)[i];
         if ((encFree[i] = baseEncFromFontFile) && enc[i]) {
-            enc[i] = copyString(baseEnc[i]);
+            enc[i] = copyString((*baseEnc)[i]);
         }
     }
 
@@ -1187,8 +1186,8 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
     // StandardEncoding
     if (type == fontType1C && embFontID != Ref::INVALID() && baseEncFromFontFile) {
         for (int i = 0; i < 256; ++i) {
-            if (!enc[i] && standardEncoding[i]) {
-                enc[i] = (char *)standardEncoding[i];
+            if (!enc[i] && fofiType1StandardEncoding[i]) {
+                enc[i] = (char *)fofiType1StandardEncoding[i];
                 encFree[i] = false;
             }
         }

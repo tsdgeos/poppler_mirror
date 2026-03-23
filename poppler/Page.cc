@@ -598,7 +598,7 @@ void Page::displaySlice(OutputDev *out, double hDPI, double vDPI, int rotate, bo
         return;
     }
     pageLocker();
-    XRef *localXRef = (copyXRef) ? xref->copy() : xref;
+    XRef *localXRef = copyXRef ? xref->copy() : xref;
     if (copyXRef) {
         replaceXRef(localXRef);
     }

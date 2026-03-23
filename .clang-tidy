@@ -10,6 +10,9 @@ Checks:  >
     -bugprone-implicit-widening-of-multiplication-result,
     -bugprone-assignment-in-if-condition,
     -bugprone-switch-missing-default-case,
+    -bugprone-command-processor,
+    -bugprone-unchecked-string-to-number-conversion,
+    -bugprone-float-loop-counter,
     performance-*,
     -performance-avoid-endl,
     -performance-enum-size,
@@ -34,6 +37,9 @@ Checks:  >
     -modernize-use-std-print,
     -modernize-return-braced-init-list,
     -modernize-use-integer-sign-comparison,
+    -modernize-avoid-c-style-cast,
+    -modernize-avoid-variadic-functions,
+    -modernize-avoid-setjmp-longjmp,
     google-explicit-constructor,
     misc-non-copyable-objects,
     misc-redundant-expression,
@@ -54,4 +60,6 @@ CheckOptions:
     value:           '1'
   - key:             readability-named-parameter.InsertPlainNamesInForwardDecls
     value:           '1'
+  - key:             readability-redundant-parentheses.AllowedDecls
+    value:           'std::max;std::min;std::numeric_limits<.*>::max;std::numeric_limits<.*>::min'
 ...

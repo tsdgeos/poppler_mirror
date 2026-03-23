@@ -3093,7 +3093,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
         delete splashOut;
         return false;
     }
-    nStripes = (int)ceil((double)(sliceArea) / rasterizationSliceSize);
+    nStripes = (int)ceil((double)sliceArea / rasterizationSliceSize);
     if (unlikely(nStripes == 0)) {
         delete splashOut;
         return false;
@@ -7324,7 +7324,7 @@ GooString *PSOutputDev::filterPSLabel(GooString *label, bool *needParens)
         }
     }
     if (needParens) {
-        *needParens = !(isNumeric);
+        *needParens = !isNumeric;
     }
     return label2;
 }

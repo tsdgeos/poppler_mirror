@@ -236,7 +236,7 @@ static int compute_coverage(int coverage[], int src_length, int dest_length)
         }
 
         /* compute how much the right-most pixel contributes */
-        overage = ratio * (right_fract);
+        overage = ratio * right_fract;
 
         /* the remainder is the amount that the left-most pixel
          * contributes */

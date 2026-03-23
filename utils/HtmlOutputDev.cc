@@ -101,7 +101,7 @@ public:
 // returns true if x is closer to y than x is to z
 static inline bool IS_CLOSER(double x, double y, double z)
 {
-    return std::fabs((x) - (y)) < std::fabs((x) - (z));
+    return std::fabs(x - y) < std::fabs(x - z);
 }
 
 extern bool complexMode;

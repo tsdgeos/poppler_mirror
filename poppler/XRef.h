@@ -241,6 +241,7 @@ private:
     XRefEntry *entries; // xref entries
     int capacity; // size of <entries> array
     int size; // number of entries
+    int last = -1; // last inserted entry
     int rootNum, rootGen; // catalog dict
     bool ok; // true if xref table is valid
     int errCode; // error code (if <ok> is false)
@@ -272,6 +273,13 @@ private:
 
     int reserve(int newSize);
     int resize(int newSize);
+    void constructTrailerDict(Goffset pos, bool needCatalogDict);
+    void saveTrailerDict(Dict *dict, bool isXRefStream, bool needCatalogDict);
+    void constructObjectStreamEntries(Object *objStr, int objStrObjNum);
+
+    char *constructObjectEntry(char *p, Goffset pos, int *objNum);
+    bool constructXRefEntry(int num, int gen, Goffset pos, XRefEntryType type);
+
     bool readXRef(Goffset *pos, std::vector<Goffset> *followedXRefStm, std::vector<int> *xrefStreamObjsNum);
     bool readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *followedXRefStm, std::vector<int> *xrefStreamObjsNum);
     bool readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n);

@@ -375,7 +375,7 @@ gboolean poppler_media_save_to_callback(PopplerMedia *poppler_media, PopplerMedi
         }
 
         if (i > 0) {
-            if (!(save_func)(buf, i, user_data, error)) {
+            if (!save_func(buf, i, user_data, error)) {
                 stream->close();
                 return FALSE;
             }

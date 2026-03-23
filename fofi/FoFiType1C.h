@@ -172,7 +172,7 @@ public:
 
     // Return the encoding, as an array of 256 names (any of which may
     // be NULL).  This is only useful with 8-bit fonts.
-    char **getEncoding() const;
+    const std::array<const char *, 256> *getEncodingA() const;
 
     // Return the mapping from CIDs to GIDs, and return the number of
     // CIDs in *<nCIDs>.  This is only useful for CID fonts.
@@ -233,7 +233,7 @@ private:
     char *getString(int sid, char *buf, bool *ok) const;
 
     std::unique_ptr<GooString> name;
-    char **encoding;
+    const std::array<const char *, 256> *encoding;
 
     Type1CIndex nameIdx;
     Type1CIndex topDictIdx;

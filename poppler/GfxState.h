@@ -153,7 +153,7 @@ static inline unsigned char colToByte(GfxColorComp x)
 
 static inline unsigned short colToShort(GfxColorComp x)
 {
-    return (unsigned short)(x);
+    return static_cast<unsigned short>(x);
 }
 
 //------------------------------------------------------------------------
@@ -306,7 +306,7 @@ public:
     virtual bool isNonMarking() const { return false; }
 
     // Return the color space's overprint mask.
-    unsigned int getOverprintMask() const { return overprintMask; }
+    virtual unsigned int getOverprintMask() const { return overprintMask; }
 
     // Return the number of color space modes
     static int getNumColorSpaceModes();
@@ -673,7 +673,7 @@ public:
     int getIndexHigh() const { return indexHigh; }
     unsigned char *getLookup() { return lookup; }
     GfxColor *mapColorToBase(const GfxColor *color, GfxColor *baseColor) const;
-    unsigned int getOverprintMask() const { return base->getOverprintMask(); }
+    unsigned int getOverprintMask() const override { return base->getOverprintMask(); }
     void createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, size_t maxSepComps) override { base->createMapping(separationList, maxSepComps); }
 
 private:
