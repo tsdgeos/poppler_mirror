@@ -162,7 +162,7 @@ const SEC_ASN1Template SigningCertificateV2Template[] = { { .kind = SEC_ASN1_SEQ
 const SEC_ASN1Template ESSCertIDv2DecodingTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(ESSCertIDv2) },
                                                          { .kind = SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL, .offset = offsetof(ESSCertIDv2, hashAlgorithm), .sub = SEC_ASN1_GET(SECOID_AlgorithmIDTemplate), .size = 0 },
                                                          { .kind = SEC_ASN1_OCTET_STRING, .offset = offsetof(ESSCertIDv2, certHash), .sub = nullptr, .size = 0 },
-                                                         { .kind = SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL | SEC_ASN1_SKIP, .offset = offsetof(ESSCertIDv2, issuerSerial), .sub = IssuerSerialTemplate, .size = 0 },
+                                                         { .kind = SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL, .offset = offsetof(ESSCertIDv2, issuerSerial), .sub = IssuerSerialTemplate, .size = 0 },
                                                          { .kind = 0, .offset = 0, .sub = nullptr, .size = 0 } };
 
 const SEC_ASN1Template SigningCertificateV2DecodingTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(SigningCertificateV2) },
@@ -172,7 +172,7 @@ const SEC_ASN1Template SigningCertificateV2DecodingTemplate[] = { { .kind = SEC_
 
 const SEC_ASN1Template ESSCertIDDecodingTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(ESSCertIDv2) },
                                                        { .kind = SEC_ASN1_OCTET_STRING, .offset = offsetof(ESSCertIDv2, certHash), .sub = nullptr, .size = 0 },
-                                                       { .kind = SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL | SEC_ASN1_SKIP, .offset = offsetof(ESSCertIDv2, issuerSerial), .sub = IssuerSerialTemplate, .size = 0 },
+                                                       { .kind = SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL, .offset = offsetof(ESSCertIDv2, issuerSerial), .sub = IssuerSerialTemplate, .size = 0 },
                                                        { .kind = 0, .offset = 0, .sub = nullptr, .size = 0 } };
 
 const SEC_ASN1Template SigningCertificateDecodingTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(SigningCertificateV2) },
