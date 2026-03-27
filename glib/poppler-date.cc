@@ -37,8 +37,8 @@
 gboolean poppler_date_parse(const gchar *date, time_t *timet)
 {
     time_t t;
-    GooString dateString(date);
-    t = dateStringToTime(&dateString);
+    std::string dateString(date);
+    t = dateStringToTime(dateString);
     if (t == (time_t)-1) {
         return FALSE;
     }

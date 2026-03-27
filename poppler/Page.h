@@ -82,7 +82,6 @@ public:
     const PDFRectangle *getTrimBox() const { return &trimBox; }
     const PDFRectangle *getArtBox() const { return &artBox; }
     int getRotate() const { return rotate; }
-    const GooString *getLastModified() const { return lastModified.isString() ? lastModified.getString() : nullptr; }
     Dict *getBoxColorInfo() { return boxColorInfo.isDict() ? boxColorInfo.getDict() : nullptr; }
     Dict *getGroup() { return group.isDict() ? group.getDict() : nullptr; }
     Stream *getMetadata() { return metadata.isStream() ? metadata.getStream() : nullptr; }
@@ -146,7 +145,6 @@ public:
     const PDFRectangle *getTrimBox() const { return attrs->getTrimBox(); }
     const PDFRectangle *getArtBox() const { return attrs->getArtBox(); }
     int getRotate() const { return attrs->getRotate(); }
-    const GooString *getLastModified() const { return attrs->getLastModified(); }
     Dict *getBoxColorInfo() { return attrs->getBoxColorInfo(); }
     Dict *getGroup() { return attrs->getGroup(); }
     Stream *getMetadata() { return attrs->getMetadata(); }

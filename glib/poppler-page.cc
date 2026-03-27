@@ -155,7 +155,7 @@ gchar *poppler_page_get_label(PopplerPage *page)
     g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
 
     page->document->doc->getCatalog()->indexToLabel(page->index, &label);
-    return _poppler_goo_string_to_utf8(&label);
+    return _poppler_goo_string_to_utf8(label.toStr());
 }
 
 /**

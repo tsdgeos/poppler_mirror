@@ -752,13 +752,13 @@ std::unique_ptr<GooString> PDFDoc::getDocInfoStringEntry(const char *key)
     return entryObj.takeString();
 }
 
-static bool get_id(const GooString *encodedidstring, GooString *id)
+static bool get_id(const std::string &encodedidstring, GooString *id)
 {
-    const char *encodedid = encodedidstring->c_str();
+    const char *encodedid = encodedidstring.c_str();
     char pdfid[pdfIdLength + 1];
     int n;
 
-    if (encodedidstring->size() != pdfIdLength / 2) {
+    if (encodedidstring.size() != pdfIdLength / 2) {
         return false;
     }
 
@@ -1297,41 +1297,43 @@ void PDFDoc::writeRawStream(Stream *str, OutStream *outStr)
     outStr->printf("\r\nendstream\r\n");
 }
 
-void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref)
+void PDFDoc::writeString(const std::string &s, OutStream *outStr, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref)
 {
     // Encrypt string if encryption is enabled
-    std::unique_ptr<GooString> sEnc = nullptr;
+    std::string sCopy;
     if (fileKey) {
-        auto *enc = new EncryptStream(std::make_unique<MemStream>(s->c_str(), 0, s->size(), Object::null()), fileKey, encAlgorithm, keyLength, ref);
-        sEnc = std::make_unique<GooString>();
+        auto *enc = new EncryptStream(std::make_unique<MemStream>(s.c_str(), 0, s.size(), Object::null()), fileKey, encAlgorithm, keyLength, ref);
+        std::string sEnc;
         int c;
         if (!enc->rewind()) {
             return;
         }
         while ((c = enc->getChar()) != EOF) {
-            sEnc->push_back((char)c);
+            sEnc.push_back((char)c);
         }
 
         delete enc;
-        s = sEnc.get();
+        sCopy = sEnc;
+    } else {
+        sCopy = s;
     }
 
     // Write data
-    if (hasUnicodeByteOrderMark(s->toStr())) {
+    if (hasUnicodeByteOrderMark(sCopy)) {
         // unicode string don't necessary end with \0
-        const char *c = s->c_str();
+        const char *c = sCopy.c_str();
         std::stringstream stream;
         stream << std::setfill('0') << std::hex;
-        for (size_t i = 0; i < s->size(); i++) {
+        for (size_t i = 0; i < sCopy.size(); i++) {
             stream << std::setw(2) << (0xff & (unsigned int)*(c + i));
         }
         outStr->printf("<");
         outStr->printf("%s", stream.str().c_str());
         outStr->printf("> ");
     } else {
-        const char *c = s->c_str();
+        const char *c = sCopy.c_str();
         outStr->printf("(");
-        for (size_t i = 0; i < s->size(); i++) {
+        for (size_t i = 0; i < sCopy.size(); i++) {
             char unescaped = *(c + i) & 0x000000ff;
             // escape if needed
             if (unescaped == '\r') {
@@ -1385,16 +1387,16 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
         writeString(obj->getString(), outStr, fileKey, encAlgorithm, keyLength, ref);
         break;
     case objHexString: {
-        const GooString *s = obj->getHexString();
+        const std::string &s = obj->getHexString();
         outStr->printf("<");
-        for (size_t i = 0; i < s->size(); i++) {
-            outStr->printf("%02x", s->getChar(i) & 0xff);
+        for (auto c : s) {
+            outStr->printf("%02x", c & 0xff);
         }
         outStr->printf("> ");
         break;
     }
     case objName: {
-        std::string name(obj->getNameString());
+        const std::string &name(obj->getNameString());
         outStr->printf("/%s ", sanitizedName(name).c_str());
         break;
     }
@@ -1559,7 +1561,7 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
             for (int i = 0; i < docInfo.getDict()->getLength(); i++) {
                 Object obj2 = docInfo.getDict()->getVal(i);
                 if (obj2.isString()) {
-                    message.append(obj2.getString()->toStr());
+                    message.append(obj2.getString());
                 }
             }
         }

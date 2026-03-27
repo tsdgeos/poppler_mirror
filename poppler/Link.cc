@@ -142,7 +142,7 @@ std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const std
 
         // unknown action
     } else if (obj2.isName()) {
-        action = std::make_unique<LinkUnknown>(obj2.getNameString());
+        action = std::make_unique<LinkUnknown>(std::string { obj2.getNameString() });
 
         // action is missing or wrong type
     } else {
@@ -424,7 +424,7 @@ LinkGoTo::LinkGoTo(const Object *destObj)
     if (destObj->isName()) {
         namedDest = std::make_unique<GooString>(destObj->getNameString());
     } else if (destObj->isString()) {
-        namedDest = destObj->getString()->copy();
+        namedDest = std::make_unique<GooString>(destObj->getString());
 
         // destination dictionary
     } else if (destObj->isArray()) {
@@ -457,7 +457,7 @@ LinkGoToR::LinkGoToR(Object *fileSpecObj, Object *destObj)
     if (destObj->isName()) {
         namedDest = std::make_unique<GooString>(destObj->getNameString());
     } else if (destObj->isString()) {
-        namedDest = destObj->getString()->copy();
+        namedDest = std::make_unique<GooString>(destObj->getString());
 
         // destination dictionary
     } else if (destObj->isArray()) {
@@ -524,7 +524,7 @@ LinkURI::LinkURI(const Object *uriObj, const std::optional<std::string> &baseURI
     hasURIFlag = false;
     if (uriObj->isString()) {
         hasURIFlag = true;
-        const std::string &uri2 = uriObj->getString()->toStr();
+        const std::string &uri2 = uriObj->getString();
         size_t n = strcspn(uri2.c_str(), "/:");
         if (n < uri2.size() && uri2[n] == ':') {
             // "http:..." etc.
@@ -589,7 +589,7 @@ LinkMovie::LinkMovie(const Object *obj)
 
     Object tmp = obj->dictLookup("T");
     if (tmp.isString()) {
-        annotTitle = tmp.getString()->toStr();
+        annotTitle = tmp.getString();
         hasAnnotTitleFlag = true;
     }
 
@@ -671,7 +671,7 @@ LinkRendition::LinkRendition(const Object *obj)
         Object tmp = obj->dictLookup("JS");
         if (!tmp.isNull()) {
             if (tmp.isString()) {
-                js = tmp.getString()->toStr();
+                js = tmp.getString();
             } else if (tmp.isStream()) {
                 Stream *stream = tmp.getStream();
                 stream->fillString(js);
@@ -740,7 +740,7 @@ LinkJavaScript::LinkJavaScript(Object *jsObj)
     isValid = false;
 
     if (jsObj->isString()) {
-        js = jsObj->getString()->toStr();
+        js = jsObj->getString();
         isValid = true;
     } else if (jsObj->isStream()) {
         Stream *stream = jsObj->getStream();
@@ -820,7 +820,7 @@ LinkHide::LinkHide(const Object *hideObj)
     if (hideObj->isDict()) {
         const Object targetObj = hideObj->dictLookup("T");
         if (targetObj.isString()) {
-            targetName = targetObj.getString()->toStr();
+            targetName = targetObj.getString();
             hasTargetNameFlag = true;
         }
         const Object shouldHide = hideObj->dictLookup("H");
@@ -850,7 +850,7 @@ LinkResetForm::LinkResetForm(const Object *obj)
             if (obj2.isName()) {
                 fields[i] = obj2.getNameString();
             } else if (obj2.isString()) {
-                fields[i] = obj2.getString()->toStr();
+                fields[i] = obj2.getString();
             } else if (obj2.isRef()) {
                 fields[i] = std::to_string(obj2.getRef().num);
                 fields[i].append(" ");
@@ -892,7 +892,7 @@ LinkSubmitForm::LinkSubmitForm(const Object *obj)
             if (objNF.isName()) {
                 fields[i] = objNF.getNameString();
             } else if (objNF.isString()) {
-                fields[i] = objNF.getString()->toStr();
+                fields[i] = objNF.getString();
             } else if (objNF.isRef()) {
                 fields[i] = std::to_string(objNF.getRef().num);
                 fields[i].append(" ");
@@ -908,10 +908,10 @@ LinkSubmitForm::LinkSubmitForm(const Object *obj)
     if (objFileSpecification.isDict()) {
         objFileSpecification = objFileSpecification.dictLookup("F");
         if (objFileSpecification.isString()) {
-            url = objFileSpecification.getString()->toStr();
+            url = objFileSpecification.getString();
         }
     } else if (objFileSpecification.isString()) {
-        url = objFileSpecification.getString()->toStr();
+        url = objFileSpecification.getString();
     }
 
     const Object objFlags = obj->dictLookup("Flags");

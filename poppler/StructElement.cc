@@ -587,13 +587,9 @@ Object *Attribute::getDefaultValue(Attribute::Type type)
     return entry ? const_cast<Object *>(entry->defval) : nullptr;
 }
 
-void Attribute::setFormattedValue(const GooString *formattedA)
+void Attribute::setFormattedValue(const std::optional<std::string> &formattedA)
 {
-    if (formattedA) {
-        formatted = formattedA->copy();
-    } else {
-        formatted = {};
-    }
+    formatted = formattedA;
 }
 
 bool Attribute::checkType(StructElement *element)
@@ -640,7 +636,7 @@ Attribute *Attribute::parseUserProperty(Dict *property)
 
     obj = property->lookup("N");
     if (obj.isString()) {
-        name.assign(obj.getString()->toStr());
+        name.assign(obj.getString());
     } else if (obj.isName()) {
         name.assign(obj.getNameString());
     } else {

@@ -196,10 +196,10 @@ public:
     void eoClip(GfxState *state) override;
 
     //----- text drawing
-    void beginString(GfxState *state, const GooString *s) override;
+    void beginString(GfxState *state, const std::string &s) override;
     void endString(GfxState *state) override;
     void drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode code, int nBytes, const Unicode *u, int uLen) override;
-    void beginActualText(GfxState *state, const GooString *text) override;
+    void beginActualText(GfxState *state, const std::string &text) override;
     void endActualText(GfxState *state) override;
 
     bool beginType3Char(GfxState *state, double x, double y, double dx, double dy, CharCode code, const Unicode *u, int uLen) override;

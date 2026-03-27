@@ -126,10 +126,10 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
     if (versionObj.isInt() && revisionObj.isInt() && permObj.isInt() && ownerKeyObj.isString() && userKeyObj.isString()) {
         encVersion = versionObj.getInt();
         encRevision = revisionObj.getInt();
-        if ((encRevision <= 4 && !ownerKeyObj.getString()->empty() && !userKeyObj.getString()->empty())
+        if ((encRevision <= 4 && !ownerKeyObj.getString().empty() && !userKeyObj.getString().empty())
             || ((encRevision == 5 || encRevision == 6) &&
                 // the spec says 48 bytes, but Acrobat pads them out longer
-                ownerKeyObj.getString()->size() >= 48 && userKeyObj.getString()->size() >= 48 && ownerEncObj.isString() && ownerEncObj.getString()->size() == 32 && userEncObj.isString() && userEncObj.getString()->size() == 32)) {
+                ownerKeyObj.getString().size() >= 48 && userKeyObj.getString().size() >= 48 && ownerEncObj.isString() && ownerEncObj.getString().size() == 32 && userEncObj.isString() && userEncObj.getString().size() == 32)) {
             encAlgorithm = cryptRC4;
             // revision 2 forces a 40-bit key - some buggy PDF generators
             // set the Length value incorrectly
@@ -191,13 +191,13 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
                 }
             }
             permFlags = permObj.getInt();
-            ownerKey = ownerKeyObj.getString()->copy();
-            userKey = userKeyObj.getString()->copy();
+            ownerKey = std::make_unique<GooString>(ownerKeyObj.getString());
+            userKey = std::make_unique<GooString>(userKeyObj.getString());
             if (encVersion >= 1 && encVersion <= 2 && encRevision >= 2 && encRevision <= 3) {
                 if (fileIDObj.isArray()) {
                     Object fileIDObj1 = fileIDObj.arrayGet(0);
                     if (fileIDObj1.isString()) {
-                        fileID = fileIDObj1.getString()->copy();
+                        fileID = std::make_unique<GooString>(fileIDObj1.getString());
                     } else {
                         fileID = std::make_unique<GooString>();
                     }
@@ -211,8 +211,8 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
             } else if (encVersion == 5 && (encRevision == 5 || encRevision == 6)) {
                 fileID = std::make_unique<GooString>(); // unused for V=R=5
                 if (ownerEncObj.isString() && userEncObj.isString()) {
-                    ownerEnc = ownerEncObj.getString()->copy();
-                    userEnc = userEncObj.getString()->copy();
+                    ownerEnc = std::make_unique<GooString>(ownerEncObj.getString());
+                    userEnc = std::make_unique<GooString>(userEncObj.getString());
                     if (fileKeyLength > 32 || fileKeyLength < 0) {
                         fileKeyLength = 32;
                     }
@@ -237,8 +237,8 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
         } else {
             error(errSyntaxError, -1,
                   "Invalid encryption key length. version: {0:d} - revision: {1:d} - ownerKeyLength: {2:uld} - userKeyLength: {3:uld} - ownerEncIsString: {4:d} - ownerEncLength: {5:uld} - userEncIsString: {6:d} - userEncLength: {7:uld}",
-                  encVersion, encRevision, ownerKeyObj.getString()->size(), userKeyObj.getString()->size(), ownerEncObj.isString(), ownerEncObj.isString() ? ownerEncObj.getString()->size() : -1, userEncObj.isString(),
-                  userEncObj.isString() ? userEncObj.getString()->size() : -1);
+                  encVersion, encRevision, ownerKeyObj.getString().size(), userKeyObj.getString().size(), ownerEncObj.isString(), ownerEncObj.isString() ? ownerEncObj.getString().size() : -1, userEncObj.isString(),
+                  userEncObj.isString() ? userEncObj.getString().size() : -1);
         }
     } else {
         error(errSyntaxError, -1, "Weird encryption info");

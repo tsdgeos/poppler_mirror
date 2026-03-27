@@ -42,7 +42,6 @@
 Array::Array(XRef *xrefA)
 {
     xref = xrefA;
-    ref = 1;
 }
 
 Array::~Array() = default;
@@ -121,7 +120,7 @@ bool Array::getString(int i, GooString *string) const
     const Object &obj = getNF(i);
     if (obj.isString()) {
         string->clear();
-        string->append(obj.getString()->toStr());
+        string->append(obj.getString());
         return true;
     }
     return false;

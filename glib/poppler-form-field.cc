@@ -327,7 +327,7 @@ gchar *poppler_form_field_get_partial_name(PopplerFormField *field)
 
     tmp = field->widget->getPartialName();
 
-    return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
+    return tmp ? _poppler_goo_string_to_utf8(tmp->toStr()) : nullptr;
 }
 
 /**
@@ -349,7 +349,7 @@ gchar *poppler_form_field_get_mapping_name(PopplerFormField *field)
 
     tmp = field->widget->getMappingName();
 
-    return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
+    return tmp ? _poppler_goo_string_to_utf8(tmp->toStr()) : nullptr;
 }
 
 /**
@@ -369,7 +369,7 @@ gchar *poppler_form_field_get_name(PopplerFormField *field)
 
     const GooString *tmp = field->widget->getFullyQualifiedName();
 
-    return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
+    return tmp ? _poppler_goo_string_to_utf8(tmp->toStr()) : nullptr;
 }
 
 /**
@@ -392,7 +392,7 @@ gchar *poppler_form_field_get_alternate_ui_name(PopplerFormField *field)
 
     tmp = field->widget->getAlternateUiName();
 
-    return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
+    return tmp ? _poppler_goo_string_to_utf8(tmp->toStr()) : nullptr;
 }
 
 /**
@@ -808,7 +808,7 @@ gchar *poppler_form_field_text_get_text(PopplerFormField *field)
     text_field = static_cast<FormWidgetText *>(field->widget);
     tmp = text_field->getContent();
 
-    return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
+    return tmp ? _poppler_goo_string_to_utf8(tmp->toStr()) : nullptr;
 }
 
 /**
@@ -1001,7 +1001,7 @@ gchar *poppler_form_field_choice_get_item(PopplerFormField *field, gint index)
     g_return_val_if_fail(index >= 0 && index < poppler_form_field_choice_get_n_items(field), NULL);
 
     tmp = static_cast<FormWidgetChoice *>(field->widget)->getChoice(index);
-    return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
+    return tmp ? _poppler_goo_string_to_utf8(tmp->toStr()) : nullptr;
 }
 
 /**
@@ -1099,7 +1099,7 @@ gchar *poppler_form_field_choice_get_text(PopplerFormField *field)
     g_return_val_if_fail(field->widget->getType() == formChoice, NULL);
 
     tmp = static_cast<FormWidgetChoice *>(field->widget)->getEditChoice();
-    return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
+    return tmp ? _poppler_goo_string_to_utf8(tmp->toStr()) : nullptr;
 }
 
 /**

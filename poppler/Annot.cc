@@ -2319,25 +2319,25 @@ void AnnotText::initialize(Dict *dict)
 
     obj1 = dict->lookup("StateModel");
     if (obj1.isString()) {
-        const GooString *modelName = obj1.getString();
+        const std::string &modelName = obj1.getString();
 
         Object obj2 = dict->lookup("State");
         if (obj2.isString()) {
-            const GooString *stateName = obj2.getString();
+            const std::string &stateName = obj2.getString();
 
-            if (!stateName->compare("Marked")) {
+            if (stateName == "Marked") {
                 state = stateMarked;
-            } else if (!stateName->compare("Unmarked")) {
+            } else if (stateName == "Unmarked") {
                 state = stateUnmarked;
-            } else if (!stateName->compare("Accepted")) {
+            } else if (stateName == "Accepted") {
                 state = stateAccepted;
-            } else if (!stateName->compare("Rejected")) {
+            } else if (stateName == "Rejected") {
                 state = stateRejected;
-            } else if (!stateName->compare("Cancelled")) {
+            } else if (stateName == "Cancelled") {
                 state = stateCancelled;
-            } else if (!stateName->compare("Completed")) {
+            } else if (stateName == "Completed") {
                 state = stateCompleted;
-            } else if (!stateName->compare("None")) {
+            } else if (stateName == "None") {
                 state = stateNone;
             } else {
                 state = stateUnknown;
@@ -2346,7 +2346,7 @@ void AnnotText::initialize(Dict *dict)
             state = stateUnknown;
         }
 
-        if (!modelName->compare("Marked")) {
+        if (modelName == "Marked") {
             switch (state) {
             case stateUnknown:
                 state = stateMarked;
@@ -2361,7 +2361,7 @@ void AnnotText::initialize(Dict *dict)
             default:
                 break;
             }
-        } else if (!modelName->compare("Review")) {
+        } else if (modelName == "Review") {
             switch (state) {
             case stateUnknown:
                 state = stateNone;
@@ -5769,7 +5769,7 @@ void AnnotScreen::initialize(Dict *dict)
 
     obj1 = dict->lookup("T");
     if (obj1.isString()) {
-        title = obj1.getString()->copy();
+        title = std::make_unique<GooString>(obj1.getString());
     }
 
     obj1 = dict->lookup("A");

@@ -266,38 +266,38 @@ Object getFileSpecNameForPlatform(const Object *fileSpec)
     // system-dependent path manipulation
 #ifdef _WIN32
     size_t i, j;
-    std::unique_ptr<GooString> name = fileName.getString()->copy();
+    std::string name = fileName.getString();
     // "//...."             --> "\...."
     // "/x/...."            --> "x:\...."
     // "/server/share/...." --> "\\server\share\...."
     // convert escaped slashes to slashes and unescaped slashes to backslashes
     i = 0;
-    if (name->getChar(0) == '/') {
-        if (name->size() >= 2 && name->getChar(1) == '/') {
-            name->erase(0, 1);
+    if (name.at(0) == '/') {
+        if (name.size() >= 2 && name.at(1) == '/') {
+            name.erase(0, 1);
             i = 0;
-        } else if (name->size() >= 2 && ((name->getChar(1) >= 'a' && name->getChar(1) <= 'z') || (name->getChar(1) >= 'A' && name->getChar(1) <= 'Z')) && (name->size() == 2 || name->getChar(2) == '/')) {
-            name->setChar(0, name->getChar(1));
-            name->setChar(1, ':');
+        } else if (name.size() >= 2 && ((name.at(1) >= 'a' && name.at(1) <= 'z') || (name.at(1) >= 'A' && name.at(1) <= 'Z')) && (name.size() == 2 || name.at(2) == '/')) {
+            name[0] = name.at(1);
+            name[1] = ':';
             i = 2;
         } else {
-            for (j = 2; j < name->size(); ++j) {
-                if (name->getChar(j - 1) != '\\' && name->getChar(j) == '/') {
+            for (j = 2; j < name.size(); ++j) {
+                if (name.at(j - 1) != '\\' && name.at(j) == '/') {
                     break;
                 }
             }
-            if (j < name->size()) {
-                name->setChar(0, '\\');
-                name->insert(0, "\\");
+            if (j < name.size()) {
+                name[0] = '\\';
+                name.insert(0, "\\");
                 i = 2;
             }
         }
     }
-    for (; i < name->size(); ++i) {
-        if (name->getChar(i) == '/') {
-            name->setChar(i, '\\');
-        } else if (name->getChar(i) == '\\' && i + 1 < name->size() && name->getChar(i + 1) == '/') {
-            name->erase(i, 1);
+    for (; i < name.size(); ++i) {
+        if (name.at(i) == '/') {
+            name[i] = '\\';
+        } else if (name.at(i) == '\\' && i + 1 < name.size() && name.at(i + 1) == '/') {
+            name.erase(i, 1);
         }
     }
     fileName = Object(std::move(name));

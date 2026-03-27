@@ -1868,9 +1868,9 @@ void CairoOutputDev::fillToStrokePathClip()
     cairo_restore(cairo);
 }
 
-void CairoOutputDev::beginString(GfxState *state, const GooString *s)
+void CairoOutputDev::beginString(GfxState *state, const std::string &s)
 {
-    int len = s->size();
+    int len = s.size();
 
     if (needFontUpdate) {
         updateFont(state);
@@ -2093,7 +2093,7 @@ void CairoOutputDev::endTextObject(GfxState * /*state*/)
     }
 }
 
-void CairoOutputDev::beginActualText(GfxState *state, const GooString *text)
+void CairoOutputDev::beginActualText(GfxState *state, const std::string &text)
 {
     if (textPage) {
         actualText->begin(state, text);

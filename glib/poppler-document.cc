@@ -1079,27 +1079,23 @@ GTree *poppler_document_create_dests_tree(PopplerDocument *document)
     return tree;
 }
 
-char *_poppler_goo_string_to_utf8(const GooString *s)
+char *_poppler_goo_string_to_utf8(const std::string &s)
 {
-    if (s == nullptr) {
-        return nullptr;
-    }
-
     char *result;
 
-    if (hasUnicodeByteOrderMark(s->toStr())) {
-        result = g_convert(s->c_str() + 2, s->size() - 2, "UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
-    } else if (hasUnicodeByteOrderMarkLE(s->toStr())) {
-        result = g_convert(s->c_str() + 2, s->size() - 2, "UTF-8", "UTF-16LE", nullptr, nullptr, nullptr);
+    if (hasUnicodeByteOrderMark(s)) {
+        result = g_convert(s.c_str() + 2, s.size() - 2, "UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
+    } else if (hasUnicodeByteOrderMarkLE(s)) {
+        result = g_convert(s.c_str() + 2, s.size() - 2, "UTF-8", "UTF-16LE", nullptr, nullptr, nullptr);
     } else {
         int len;
         gunichar *ucs4_temp;
         int i;
 
-        len = s->size();
+        len = s.size();
         ucs4_temp = g_new(gunichar, len + 1);
         for (i = 0; i < len; ++i) {
-            ucs4_temp[i] = pdfDocEncoding[(unsigned char)s->getChar(i)];
+            ucs4_temp[i] = pdfDocEncoding[(unsigned char)s.at(i)];
         }
         ucs4_temp[i] = 0;
 
@@ -1308,7 +1304,7 @@ gchar *poppler_document_get_title(PopplerDocument *document)
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
 
     const std::unique_ptr<GooString> goo_title = document->doc->getDocInfoTitle();
-    return _poppler_goo_string_to_utf8(goo_title.get());
+    return goo_title ? _poppler_goo_string_to_utf8(goo_title->toStr()) : nullptr;
 }
 
 /**
@@ -1351,7 +1347,7 @@ gchar *poppler_document_get_author(PopplerDocument *document)
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
 
     const std::unique_ptr<GooString> goo_author = document->doc->getDocInfoAuthor();
-    return _poppler_goo_string_to_utf8(goo_author.get());
+    return goo_author ? _poppler_goo_string_to_utf8(goo_author->toStr()) : nullptr;
 }
 
 /**
@@ -1394,7 +1390,7 @@ gchar *poppler_document_get_subject(PopplerDocument *document)
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
 
     const std::unique_ptr<GooString> goo_subject = document->doc->getDocInfoSubject();
-    return _poppler_goo_string_to_utf8(goo_subject.get());
+    return goo_subject ? _poppler_goo_string_to_utf8(goo_subject->toStr()) : nullptr;
 }
 
 /**
@@ -1437,7 +1433,7 @@ gchar *poppler_document_get_keywords(PopplerDocument *document)
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
 
     const std::unique_ptr<GooString> goo_keywords = document->doc->getDocInfoKeywords();
-    return _poppler_goo_string_to_utf8(goo_keywords.get());
+    return goo_keywords ? _poppler_goo_string_to_utf8(goo_keywords->toStr()) : nullptr;
 }
 
 /**
@@ -1482,7 +1478,7 @@ gchar *poppler_document_get_creator(PopplerDocument *document)
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
 
     const std::unique_ptr<GooString> goo_creator = document->doc->getDocInfoCreator();
-    return _poppler_goo_string_to_utf8(goo_creator.get());
+    return goo_creator ? _poppler_goo_string_to_utf8(goo_creator->toStr()) : nullptr;
 }
 
 /**
@@ -1527,7 +1523,7 @@ gchar *poppler_document_get_producer(PopplerDocument *document)
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
 
     const std::unique_ptr<GooString> goo_producer = document->doc->getDocInfoProducer();
-    return _poppler_goo_string_to_utf8(goo_producer.get());
+    return goo_producer ? _poppler_goo_string_to_utf8(goo_producer->toStr()) : nullptr;
 }
 
 /**
@@ -1574,7 +1570,7 @@ time_t poppler_document_get_creation_date(PopplerDocument *document)
     }
 
     time_t date;
-    gboolean success = _poppler_convert_pdf_date_to_gtime(str.get(), &date);
+    gboolean success = _poppler_convert_pdf_date_to_gtime(str->toStr(), &date);
 
     return success ? date : (time_t)-1;
 }
@@ -1617,7 +1613,7 @@ GDateTime *poppler_document_get_creation_date_time(PopplerDocument *document)
         return nullptr;
     }
 
-    return _poppler_convert_pdf_date_to_date_time(str.get());
+    return _poppler_convert_pdf_date_to_date_time(str->toStr());
 }
 
 /**
@@ -1663,7 +1659,7 @@ time_t poppler_document_get_modification_date(PopplerDocument *document)
     }
 
     time_t date;
-    gboolean success = _poppler_convert_pdf_date_to_gtime(str.get(), &date);
+    gboolean success = _poppler_convert_pdf_date_to_gtime(str->toStr(), &date);
 
     return success ? date : (time_t)-1;
 }
@@ -1706,7 +1702,7 @@ GDateTime *poppler_document_get_modification_date_time(PopplerDocument *document
         return nullptr;
     }
 
-    return _poppler_convert_pdf_date_to_date_time(str.get());
+    return _poppler_convert_pdf_date_to_date_time(str->toStr());
 }
 
 /**
@@ -2091,7 +2087,7 @@ gchar *poppler_document_get_pdf_subtype_string(PopplerDocument *document)
     }
     }
 
-    return _poppler_goo_string_to_utf8(infostring.get());
+    return infostring ? _poppler_goo_string_to_utf8(infostring->toStr()) : nullptr;
 }
 
 /**
@@ -3731,15 +3727,15 @@ PopplerFormField *poppler_document_get_form_field(PopplerDocument *document, gin
     return nullptr;
 }
 
-gboolean _poppler_convert_pdf_date_to_gtime(const GooString *date, time_t *gdate)
+gboolean _poppler_convert_pdf_date_to_gtime(const std::string &date, time_t *gdate)
 {
     gchar *date_string;
     gboolean retval;
 
-    if (hasUnicodeByteOrderMark(date->toStr())) {
-        date_string = g_convert(date->c_str() + 2, date->size() - 2, "UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
+    if (hasUnicodeByteOrderMark(date)) {
+        date_string = g_convert(date.c_str() + 2, date.size() - 2, "UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
     } else {
-        date_string = g_strndup(date->c_str(), date->size());
+        date_string = g_strndup(date.c_str(), date.size());
     }
 
     retval = poppler_date_parse(date_string, gdate);
@@ -3756,7 +3752,7 @@ gboolean _poppler_convert_pdf_date_to_gtime(const GooString *date, time_t *gdate
  *
  * Returns: The converted date, or %NULL on error.
  **/
-GDateTime *_poppler_convert_pdf_date_to_date_time(const GooString *date)
+GDateTime *_poppler_convert_pdf_date_to_date_time(const std::string &date)
 {
     GDateTime *date_time = nullptr;
     GTimeZone *time_zone = nullptr;

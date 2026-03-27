@@ -108,10 +108,10 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
     priv = GET_PRIVATE(attachment);
 
     if (emb_file->getFileName()) {
-        attachment->name = _poppler_goo_string_to_utf8(emb_file->getFileName());
+        attachment->name = _poppler_goo_string_to_utf8(emb_file->getFileName()->toStr());
     }
     if (emb_file->getDescription()) {
-        attachment->description = _poppler_goo_string_to_utf8(emb_file->getDescription());
+        attachment->description = _poppler_goo_string_to_utf8(emb_file->getDescription()->toStr());
     }
 
     embFile = emb_file->getEmbeddedFile();
@@ -119,7 +119,7 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
         attachment->size = embFile->size();
 
         if (embFile->createDate()) {
-            priv->ctime = _poppler_convert_pdf_date_to_date_time(embFile->createDate());
+            priv->ctime = _poppler_convert_pdf_date_to_date_time(embFile->createDate()->toStr());
             G_GNUC_BEGIN_IGNORE_DEPRECATIONS
             /* This will overflow on dates from after 2038. This field is
              * deprecated, only kept for backward compatibility. */
@@ -127,7 +127,7 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
             G_GNUC_END_IGNORE_DEPRECATIONS
         }
         if (embFile->modDate()) {
-            priv->mtime = _poppler_convert_pdf_date_to_date_time(embFile->modDate());
+            priv->mtime = _poppler_convert_pdf_date_to_date_time(embFile->modDate()->toStr());
             G_GNUC_BEGIN_IGNORE_DEPRECATIONS
             /* This will overflow on dates from after 2038. This field is
              * deprecated, only kept for backward compatibility. */

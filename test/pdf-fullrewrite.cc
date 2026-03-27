@@ -142,9 +142,9 @@ static bool compareObjects(const Object *objA, const Object *objB)
         if (objB->getType() != objString) {
             return false;
         }
-        const GooString *strA = objA->getString();
-        const GooString *strB = objB->getString();
-        return (strA->compare(strB->toStr()) == 0);
+        const std::string &strA = objA->getString();
+        const std::string &strB = objB->getString();
+        return (strA == strB);
     }
     case objName: {
         if (objB->getType() != objName) {

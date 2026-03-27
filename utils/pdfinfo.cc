@@ -124,11 +124,6 @@ static void printStdTextString(const std::string &s, const UnicodeMap *uMap)
     }
 }
 
-static void printTextString(const GooString *s, const UnicodeMap *uMap)
-{
-    printStdTextString(s->toStr(), uMap);
-}
-
 static void printUCS4String(const std::vector<Unicode> &u, const UnicodeMap *uMap)
 {
     char buf[8];
@@ -140,13 +135,11 @@ static void printUCS4String(const std::vector<Unicode> &u, const UnicodeMap *uMa
 
 static void printInfoString(Dict *infoDict, const char *key, const char *text, const UnicodeMap *uMap)
 {
-    const GooString *s1;
-
     Object obj = infoDict->lookup(key);
     if (obj.isString()) {
         fputs(text, stdout);
-        s1 = obj.getString();
-        printTextString(s1, uMap);
+        const std::string &s1 = obj.getString();
+        printStdTextString(s1, uMap);
         fputc('\n', stdout);
     }
 }
@@ -162,7 +155,7 @@ static void printInfoDate(Dict *infoDict, const char *key, const char *text, con
     Object obj = infoDict->lookup(key);
     if (obj.isString()) {
         fputs(text, stdout);
-        const GooString *s = obj.getString();
+        const std::string &s = obj.getString();
         // TODO do something with the timezone info
         if (parseDateString(s, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute)) {
             tmStruct.tm_year = year - 1900;
@@ -186,10 +179,10 @@ static void printInfoDate(Dict *infoDict, const char *key, const char *text, con
                 strftime(buf, sizeof(buf), "%c %Z", &tmStruct);
                 fputs(buf, stdout);
             } else {
-                printTextString(s, uMap);
+                printStdTextString(s, uMap);
             }
         } else {
-            printTextString(s, uMap);
+            printStdTextString(s, uMap);
         }
         fputc('\n', stdout);
     }
@@ -203,7 +196,7 @@ static void printISODate(Dict *infoDict, const char *key, const char *text, cons
     Object obj = infoDict->lookup(key);
     if (obj.isString()) {
         fputs(text, stdout);
-        const GooString *s = obj.getString();
+        const std::string &s = obj.getString();
         if (parseDateString(s, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute)) {
             fprintf(stdout, "%04d-%02d-%02dT%02d:%02d:%02d", year, mon, day, hour, min, sec);
             if (tz_hour == 0 && tz_minute == 0) {
@@ -215,7 +208,7 @@ static void printISODate(Dict *infoDict, const char *key, const char *text, cons
                 }
             }
         } else {
-            printTextString(obj.getString(), uMap);
+            printStdTextString(obj.getString(), uMap);
         }
         fputc('\n', stdout);
     }
@@ -712,8 +705,8 @@ static void printCustomInfo(PDFDoc *doc, const UnicodeMap *uMap)
                     }
 
                     // print value
-                    const auto *val_str = obj.getString();
-                    printTextString(val_str, uMap);
+                    const auto &val_str = obj.getString();
+                    printStdTextString(val_str, uMap);
                     fputc('\n', stdout);
                 }
             }

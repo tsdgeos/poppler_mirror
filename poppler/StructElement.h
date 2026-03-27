@@ -141,7 +141,7 @@ public:
     // The formatted value may be in the PDF, or be left undefined (nullptr).
     // In the later case the user agent should provide a default representation.
     const char *getFormattedValue() const { return formatted ? formatted->c_str() : nullptr; }
-    void setFormattedValue(const GooString *formattedA);
+    void setFormattedValue(const std::optional<std::string> &formattedA);
 
     ~Attribute();
 
@@ -152,7 +152,7 @@ private:
     GooString name;
     Object value;
     bool hidden;
-    std::unique_ptr<GooString> formatted;
+    std::optional<std::string> formatted;
 
     bool checkType(StructElement *element = nullptr);
     static Type getTypeForName(const char *name, StructElement *element = nullptr);

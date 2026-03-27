@@ -64,7 +64,7 @@ Sound::Sound(const Object &obj, bool readAttrs)
             kind = soundExternal;
             Object obj1 = getFileSpecNameForPlatform(&tmp);
             if (obj1.isString()) {
-                fileName = obj1.getString()->toStr();
+                fileName = obj1.getString();
             }
         } else {
             // no file specification, then the sound data have to be

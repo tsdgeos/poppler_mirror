@@ -917,8 +917,8 @@ QDateTime convertDate(const char *dateString)
     int year, mon, day, hour, min, sec, tzHours, tzMins;
     char tz;
 
-    GooString date(dateString);
-    if (parseDateString(&date, &year, &mon, &day, &hour, &min, &sec, &tz, &tzHours, &tzMins)) {
+    std::string date(dateString);
+    if (parseDateString(date, &year, &mon, &day, &hour, &min, &sec, &tz, &tzHours, &tzMins)) {
         QDate d(year, mon, day);
         QTime t(hour, min, sec);
         if (d.isValid() && t.isValid()) {

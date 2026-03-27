@@ -119,7 +119,7 @@ public:
     HtmlPage &operator=(const HtmlPage &) = delete;
 
     // Begin a new string.
-    void beginString(GfxState *state, const GooString *s);
+    void beginString(GfxState *state, const std::string &s);
 
     // Add a character to the current string.
     void addChar(GfxState *state, double x, double y, double dx, double dy, double ox, double oy, const Unicode *u, int uLen); // unsigned char c);
@@ -265,7 +265,7 @@ public:
     void updateFont(GfxState *state) override;
 
     //----- text drawing
-    void beginString(GfxState *state, const GooString *s) override;
+    void beginString(GfxState *state, const std::string &s) override;
     void endString(GfxState *state) override;
     void drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode code, int nBytes, const Unicode *u, int uLen) override;
 

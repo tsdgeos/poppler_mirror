@@ -57,7 +57,6 @@ struct Dict::CmpDictEntry
 Dict::Dict(XRef *xrefA)
 {
     xref = xrefA;
-    ref = 1;
 
     sorted = false;
 }
@@ -65,7 +64,6 @@ Dict::Dict(XRef *xrefA)
 Dict::Dict(const Dict *dictA, PrivateTag /*unused*/)
 {
     xref = dictA->xref;
-    ref = 1;
 
     entries.reserve(dictA->entries.size());
     for (const auto &entry : dictA->entries) {

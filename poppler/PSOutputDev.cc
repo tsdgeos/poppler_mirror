@@ -1531,13 +1531,13 @@ void PSOutputDev::writeHeader(int nPages, const PDFRectangle *mediaBox, const PD
     if (info.isDict()) {
         Object obj1 = info.dictLookup("Creator");
         if (obj1.isString()) {
-            const GooString *pdfCreator = obj1.getString();
-            if (pdfCreator && !pdfCreator->toStr().empty()) {
+            const std::string &pdfCreator = obj1.getString();
+            if (!pdfCreator.empty()) {
                 creator.append(". PDF Creator: ");
-                if (hasUnicodeByteOrderMark(pdfCreator->toStr())) {
-                    creator.append(TextStringToUtf8(pdfCreator->toStr()));
+                if (hasUnicodeByteOrderMark(pdfCreator)) {
+                    creator.append(TextStringToUtf8(pdfCreator));
                 } else {
-                    creator.append(pdfCreator->toStr());
+                    creator.append(pdfCreator);
                 }
             }
         }
@@ -4845,7 +4845,7 @@ void PSOutputDev::doPath(const GfxPath *path)
     }
 }
 
-void PSOutputDev::drawString(GfxState *state, const GooString *s)
+void PSOutputDev::drawString(GfxState *state, const std::string &s)
 {
     std::shared_ptr<GfxFont> font;
     std::vector<int> codeToGID;
@@ -4872,7 +4872,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
     }
 
     // ignore empty strings
-    if (s->empty()) {
+    if (s.empty()) {
         return;
     }
 
@@ -4914,10 +4914,10 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
 
     // compute the positioning (dx, dy) for each char in the string
     nChars = 0;
-    p = s->c_str();
-    len = s->size();
+    p = s.c_str();
+    len = s.size();
     s2 = new GooString();
-    dxdySize = font->isCIDFont() ? 8 : s->size();
+    dxdySize = font->isCIDFont() ? 8 : s.size();
     dxdy = (double *)gmallocn(2 * dxdySize, sizeof(double));
     while (len > 0) {
         n = font->getNextChar(p, len, &code, &u, &uLen, &dx, &dy, &originX, &originY);
@@ -6655,12 +6655,12 @@ void PSOutputDev::opiBegin20(GfxState * /*state*/, const Dict &dict)
     Object obj1 = dict.lookup("F");
     Object obj2 = getFileSpecName(&obj1);
     if (obj2.isString()) {
-        writePSFmt("%%ImageFileName: {0:t}\n", obj2.getString());
+        writePSFmt("%%ImageFileName: {0:r}\n", &obj2.getString());
     }
 
     obj1 = dict.lookup("MainImage");
     if (obj1.isString()) {
-        writePSFmt("%%MainImage: {0:t}\n", obj1.getString());
+        writePSFmt("%%MainImage: {0:r}\n", &obj1.getString());
     }
 
     //~ ignoring 'Tags' entry
@@ -6705,7 +6705,7 @@ void PSOutputDev::opiBegin20(GfxState * /*state*/, const Dict &dict)
                 Object obj4 = obj1.arrayGet(i + 1);
                 if (obj3.isString() && obj4.isNum()) {
                     writePS(" ");
-                    writePSString(obj3.getString()->toStr());
+                    writePSString(obj3.getString());
                     writePSFmt(" {0:.6g}", obj4.getNum());
                 }
             }
@@ -6750,7 +6750,7 @@ void PSOutputDev::opiBegin13(GfxState *state, const Dict &dict)
     Object obj1 = dict.lookup("F");
     Object obj2 = getFileSpecName(&obj1);
     if (obj2.isString()) {
-        writePSFmt("%ALDImageFileName: {0:t}\n", obj2.getString());
+        writePSFmt("%ALDImageFileName: {0:r}\n", &obj2.getString());
     }
 
     obj1 = dict.lookup("CropRect");
@@ -6779,7 +6779,7 @@ void PSOutputDev::opiBegin13(GfxState *state, const Dict &dict)
         obj2 = obj1.arrayGet(4);
         if (obj2.isString()) {
             writePSFmt("%ALDImageColor: {0:.4g} {1:.4g} {2:.4g} {3:.4g} ", c, m, y, k);
-            writePSString(obj2.getString()->toStr());
+            writePSString(obj2.getString());
             writePS("\n");
         }
     }
@@ -6822,7 +6822,7 @@ void PSOutputDev::opiBegin13(GfxState *state, const Dict &dict)
 
     obj1 = dict.lookup("ID");
     if (obj1.isString()) {
-        writePSFmt("%ALDImageID: {0:t}\n", obj1.getString());
+        writePSFmt("%ALDImageID: {0:r}\n", &obj1.getString());
     }
 
     obj1 = dict.lookup("ImageType");

@@ -110,18 +110,11 @@ public:
     std::string findAvailableKey(std::string_view suggestedKey);
 
 private:
-    friend class Object; // for incRef/decRef
-
-    // Reference counting.
-    int incRef() { return ++ref; }
-    int decRef() { return --ref; }
-
     using DictEntry = std::pair<std::string, Object>;
     struct CmpDictEntry;
 
     XRef *xref; // the xref table for this PDF file
     std::vector<DictEntry> entries;
-    std::atomic_int ref; // reference count
     std::atomic_bool sorted;
     mutable std::recursive_mutex mutex;
 
@@ -136,31 +129,31 @@ private:
 inline int Object::dictGetLength() const
 {
     OBJECT_TYPE_CHECK(objDict);
-    return dict->getLength();
+    return std::get<std::shared_ptr<Dict>>(data)->getLength();
 }
 
 inline void Object::dictAdd(std::string_view key, Object &&val)
 {
     OBJECT_TYPE_CHECK(objDict);
-    dict->add(key, std::move(val));
+    std::get<std::shared_ptr<Dict>>(data)->add(key, std::move(val));
 }
 
 inline void Object::dictSet(std::string_view key, Object &&val)
 {
     OBJECT_TYPE_CHECK(objDict);
-    dict->set(key, std::move(val));
+    std::get<std::shared_ptr<Dict>>(data)->set(key, std::move(val));
 }
 
 inline void Object::dictRemove(std::string_view key)
 {
     OBJECT_TYPE_CHECK(objDict);
-    dict->remove(key);
+    std::get<std::shared_ptr<Dict>>(data)->remove(key);
 }
 
 inline bool Object::dictIs(std::string_view dictType) const
 {
     OBJECT_TYPE_CHECK(objDict);
-    return dict->is(dictType);
+    return std::get<std::shared_ptr<Dict>>(data)->is(dictType);
 }
 
 inline bool Object::isDict(std::string_view dictType) const
@@ -171,31 +164,31 @@ inline bool Object::isDict(std::string_view dictType) const
 inline Object Object::dictLookup(std::string_view key, int recursion) const
 {
     OBJECT_TYPE_CHECK(objDict);
-    return dict->lookup(key, recursion);
+    return std::get<std::shared_ptr<Dict>>(data)->lookup(key, recursion);
 }
 
 inline const Object &Object::dictLookupNF(std::string_view key) const
 {
     OBJECT_TYPE_CHECK(objDict);
-    return dict->lookupNF(key);
+    return std::get<std::shared_ptr<Dict>>(data)->lookupNF(key);
 }
 
 inline const char *Object::dictGetKey(int i) const
 {
     OBJECT_TYPE_CHECK(objDict);
-    return dict->getKey(i);
+    return std::get<std::shared_ptr<Dict>>(data)->getKey(i);
 }
 
 inline Object Object::dictGetVal(int i) const
 {
     OBJECT_TYPE_CHECK(objDict);
-    return dict->getVal(i);
+    return std::get<std::shared_ptr<Dict>>(data)->getVal(i);
 }
 
 inline const Object &Object::dictGetValNF(int i) const
 {
     OBJECT_TYPE_CHECK(objDict);
-    return dict->getValNF(i);
+    return std::get<std::shared_ptr<Dict>>(data)->getValNF(i);
 }
 
 #endif

@@ -34,10 +34,10 @@
 #include <cstring>
 
 /* See PDF Reference 1.3, Section 3.8.2 for PDF Date representation */
-bool parseDateString(const GooString *date, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute)
+bool parseDateString(const std::string &date, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute)
 {
-    std::vector<Unicode> u = TextStringToUCS4(date->toStr());
-    GooString s;
+    std::vector<Unicode> u = TextStringToUCS4(date);
+    std::string s;
     for (auto &c : u) {
         // Ignore any non ASCII characters
         if (c < 128) {
@@ -131,7 +131,7 @@ std::unique_ptr<GooString> timeToDateString(const time_t *timeA)
 }
 
 // Convert PDF date string to time. Returns -1 if conversion fails.
-time_t dateStringToTime(const GooString *dateString)
+time_t dateStringToTime(const std::string &dateString)
 {
     int year, mon, day, hour, min, sec, tz_hour, tz_minute;
     char tz;

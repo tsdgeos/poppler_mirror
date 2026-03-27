@@ -44,104 +44,28 @@ Object Object::copy() const
 {
     CHECK_NOT_DEAD;
 
-    Object obj;
-    std::memcpy(reinterpret_cast<void *>(&obj), this, sizeof(Object)); // NOLINT(bugprone-undefined-memory-manipulation)
-
-    switch (type) {
-    case objString:
-    case objHexString:
-        obj.string = string->copy().release();
-        break;
-    case objName:
-    case objCmd:
-        obj.cString = copyString(cString);
-        break;
-    case objArray:
-        array->incRef();
-        break;
-    case objDict:
-        dict->incRef();
-        break;
-    case objStream:
-        stream->incRef();
-        break;
-    default:
-        break;
-    }
-
-    return obj;
+    return Object { type, data, PrivateTag {} };
 }
 
 Object Object::deepCopy() const
 {
     CHECK_NOT_DEAD;
 
-    Object obj;
-    std::memcpy(reinterpret_cast<void *>(&obj), this, sizeof(Object)); // NOLINT(bugprone-undefined-memory-manipulation)
-
     switch (type) {
-    case objString:
-    case objHexString:
-        obj.string = string->copy().release();
-        break;
-    case objName:
-    case objCmd:
-        obj.cString = copyString(cString);
-        break;
     case objArray:
-        obj.array = array->deepCopy().release();
-        break;
+        return Object { objArray, std::shared_ptr<Array>(std::get<std::shared_ptr<Array>>(data)->deepCopy()), PrivateTag {} };
     case objDict:
-        obj.dict = dict->deepCopy().release();
-        break;
-    case objStream:
-        stream->incRef();
-        break;
+        return Object { objDict, std::shared_ptr<Dict>(std::get<std::shared_ptr<Dict>>(data)->deepCopy()), PrivateTag {} };
     default:
-        break;
+        return copy();
     }
-
-    return obj;
 }
 
 Object Object::fetch(XRef *xref, int recursion) const
 {
     CHECK_NOT_DEAD;
 
-    return (type == objRef && xref) ? xref->fetch(ref, recursion) : copy();
-}
-
-void Object::free()
-{
-    switch (type) {
-    case objString:
-    case objHexString:
-
-        delete string;
-        break;
-    case objName:
-    case objCmd:
-        gfree(cString);
-        break;
-    case objArray:
-        if (!array->decRef()) {
-            delete array;
-        }
-        break;
-    case objDict:
-        if (!dict->decRef()) {
-            delete dict;
-        }
-        break;
-    case objStream:
-        if (!stream->decRef()) {
-            delete stream;
-        }
-        break;
-    default:
-        break;
-    }
-    type = objNone;
+    return (type == objRef && xref) ? xref->fetch(std::get<Ref>(data), recursion) : copy();
 }
 
 const char *Object::getTypeName() const
@@ -153,28 +77,31 @@ void Object::print(FILE *f) const
 {
     switch (type) {
     case objBool:
-        fprintf(f, "%s", booln ? "true" : "false");
+        fprintf(f, "%s", std::get<bool>(data) ? "true" : "false");
         break;
     case objInt:
-        fprintf(f, "%d", intg);
+        fprintf(f, "%d", std::get<int>(data));
         break;
     case objReal:
-        fprintf(f, "%g", real);
+        fprintf(f, "%g", std::get<double>(data));
         break;
-    case objString:
+    case objString: {
         fprintf(f, "(");
-        fwrite(string->c_str(), 1, string->size(), f);
+
+        const auto &string = std::get<std::string>(data);
+        fwrite(string.c_str(), 1, string.size(), f);
         fprintf(f, ")");
-        break;
-    case objHexString:
+    } break;
+    case objHexString: {
         fprintf(f, "<");
-        for (size_t i = 0; i < string->size(); i++) {
-            fprintf(f, "%02x", string->getChar(i) & 0xff);
+        const auto &string = std::get<std::string>(data);
+        for (auto c : string) {
+            fprintf(f, "%02x", c & 0xff);
         }
         fprintf(f, ">");
-        break;
+    } break;
     case objName:
-        fprintf(f, "/%s", cString);
+        fprintf(f, "/%s", std::get<std::string>(data).c_str());
         break;
     case objNull:
         fprintf(f, "null");
@@ -202,11 +129,12 @@ void Object::print(FILE *f) const
     case objStream:
         fprintf(f, "<stream>");
         break;
-    case objRef:
+    case objRef: {
+        Ref ref = std::get<Ref>(data);
         fprintf(f, "%d %d R", ref.num, ref.gen);
-        break;
+    } break;
     case objCmd:
-        fprintf(f, "%s", cString);
+        fprintf(f, "%s", std::get<std::string>(data).c_str());
         break;
     case objError:
         fprintf(f, "<error>");
@@ -221,7 +149,7 @@ void Object::print(FILE *f) const
         fprintf(f, "<dead>");
         break;
     case objInt64:
-        fprintf(f, "%lld", int64g);
+        fprintf(f, "%lld", std::get<long long>(data));
         break;
     }
 }

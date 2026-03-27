@@ -4597,7 +4597,7 @@ void TextSelectionPainter::endPage()
 
     out->updateFillColor(state);
 
-    GooString string;
+    std::string string;
     for (const TextWordSelection *sel : *selectionList) {
         int begin = sel->begin;
 
@@ -4620,7 +4620,7 @@ void TextSelectionPainter::endPage()
              * it's length.  Might want to change this interface later. */
             string.clear();
             std::for_each(sel->word->chars.begin() + begin, sel->word->chars.begin() + fEnd, [&string](const auto c) { string.push_back(c.charcode); });
-            out->beginString(state, &string);
+            out->beginString(state, string);
 
             for (int j = begin; j < fEnd; j++) {
                 const auto &charJ = sel->word->chars[j];
@@ -5476,7 +5476,6 @@ std::unique_ptr<TextWordList> TextPage::makeWordList(bool physLayout)
 ActualText::ActualText(TextPage *out)
 {
     text = out;
-    actualText = nullptr;
     actualTextNBytes = 0;
 }
 
@@ -5499,9 +5498,9 @@ void ActualText::addChar(const GfxState *state, double x, double y, double dx, d
     actualTextNBytes += nBytes;
 }
 
-void ActualText::begin(const GfxState * /*state*/, const GooString *t)
+void ActualText::begin(const GfxState * /*state*/, const std::string &t)
 {
-    actualText = t->copy();
+    actualText = t;
     actualTextNBytes = 0;
 }
 
@@ -5514,7 +5513,8 @@ void ActualText::end(const GfxState *state)
         // now that we have the position info for all of the text inside
         // the marked content span, we feed the "ActualText" back through
         // text->addChar()
-        std::vector<Unicode> uni = TextStringToUCS4(actualText->toStr());
+        assert(actualText.has_value());
+        std::vector<Unicode> uni = TextStringToUCS4(actualText.value());
         text->addChar(state, actualTextX0, actualTextY0, actualTextX1 - actualTextX0, actualTextY1 - actualTextY0, 0, actualTextNBytes, uni.data(), uni.size());
     }
 
@@ -5620,7 +5620,7 @@ void TextOutputDev::updateFont(GfxState *state)
     text->updateFont(state);
 }
 
-void TextOutputDev::beginString(GfxState * /*state*/, const GooString * /*s*/) { }
+void TextOutputDev::beginString(GfxState * /*state*/, const std::string & /*s*/) { }
 
 void TextOutputDev::endString(GfxState * /*state*/) { }
 
@@ -5634,7 +5634,7 @@ void TextOutputDev::incCharCount(int nChars)
     text->incCharCount(nChars);
 }
 
-void TextOutputDev::beginActualText(GfxState *state, const GooString *t)
+void TextOutputDev::beginActualText(GfxState *state, const std::string &t)
 {
     actualText->begin(state, t);
 }

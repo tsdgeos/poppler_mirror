@@ -77,7 +77,7 @@ PopplerLayer *_poppler_layer_new(PopplerDocument *document, Layer *layer, GList 
     poppler_layer->layer = layer;
     poppler_layer->rbgroup = rbgroup;
     layer_name = layer->oc->getName();
-    poppler_layer->title = layer_name ? _poppler_goo_string_to_utf8(layer_name) : nullptr;
+    poppler_layer->title = layer_name ? _poppler_goo_string_to_utf8(layer_name->toStr()) : nullptr;
 
     return poppler_layer;
 }

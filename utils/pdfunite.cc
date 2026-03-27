@@ -53,11 +53,11 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
                     const Object &mkey = mergeNameArray.arrayGetNF(j);
                     const Object &mvalue = mergeNameArray.arrayGetNF(j + 1);
                     if (mkey.isString() && mvalue.isRef()) {
-                        if (mkey.getString()->compare(key.getString()->toStr()) < 0) {
-                            newNameArray->add(Object(mkey.getString()->copy()));
+                        if (mkey.getString().compare(key.getString()) < 0) {
+                            newNameArray->add(Object(std::string { mkey.getString() }));
                             newNameArray->add(Object(Ref { .num = mvalue.getRef().num + numOffset, .gen = mvalue.getRef().gen }));
                             j += 2;
-                        } else if (mkey.getString()->compare(key.getString()->toStr()) == 0) {
+                        } else if (mkey.getString().compare(key.getString()) == 0) {
                             j += 2;
                         } else {
                             break;
@@ -66,7 +66,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
                         j += 2;
                     }
                 }
-                newNameArray->add(Object(key.getString()->copy()));
+                newNameArray->add(Object(std::string { key.getString() }));
                 newNameArray->add(Object(value.getRef()));
             }
         }
@@ -74,7 +74,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
             const Object &mkey = mergeNameArray.arrayGetNF(j);
             const Object &mvalue = mergeNameArray.arrayGetNF(j + 1);
             if (mkey.isString() && mvalue.isRef()) {
-                newNameArray->add(Object(mkey.getString()->copy()));
+                newNameArray->add(Object(std::string { mkey.getString() }));
                 newNameArray->add(Object(Ref { .num = mvalue.getRef().num + numOffset, .gen = mvalue.getRef().gen }));
             }
             j += 2;
@@ -87,7 +87,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
             const Object &key = mergeNameArray.arrayGetNF(i);
             const Object &value = mergeNameArray.arrayGetNF(i + 1);
             if (key.isString() && value.isRef()) {
-                newNameArray->add(Object(key.getString()->copy()));
+                newNameArray->add(Object(std::string { key.getString() }));
                 newNameArray->add(Object(Ref { .num = value.getRef().num + numOffset, .gen = value.getRef().gen }));
             }
         }
@@ -243,15 +243,15 @@ int main(int argc, char *argv[])
                         if (intent.isDict()) {
                             Object idf = intent.dictLookup("OutputConditionIdentifier");
                             if (idf.isString()) {
-                                const GooString *gidf = idf.getString();
+                                const std::string &gidf = idf.getString();
                                 bool removeIntent = true;
                                 for (int k = 0; k < pageintents.arrayGetLength(); k++) {
                                     Object pgintent = pageintents.arrayGet(k, 0);
                                     if (pgintent.isDict()) {
                                         Object pgidf = pgintent.dictLookup("OutputConditionIdentifier");
                                         if (pgidf.isString()) {
-                                            const GooString *gpgidf = pgidf.getString();
-                                            if (gpgidf->compare(gidf->toStr()) == 0) {
+                                            const std::string &gpgidf = pgidf.getString();
+                                            if (gpgidf == gidf) {
                                                 removeIntent = false;
                                                 break;
                                             }
@@ -260,7 +260,7 @@ int main(int argc, char *argv[])
                                 }
                                 if (removeIntent) {
                                     intents.arrayRemove(j);
-                                    error(errSyntaxWarning, -1, "Output intent {0:s} missing in pdf {1:s}, removed", gidf->c_str(), docs[i]->getFileName()->c_str());
+                                    error(errSyntaxWarning, -1, "Output intent {0:s} missing in pdf {1:s}, removed", gidf.c_str(), docs[i]->getFileName()->c_str());
                                 }
                             } else {
                                 intents.arrayRemove(j);

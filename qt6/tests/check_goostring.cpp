@@ -82,6 +82,9 @@ void TestGooString::testFormat()
         GooString gooGoo(goo);
         const std::string goo2(GooString::format("{0:s} {1:t}", "TEST", &gooGoo));
         QCOMPARE(goo2.c_str(), "TEST TEST");
+
+        const std::string goo3(GooString::format("{0:s} {1:r}", "TEST", &goo));
+        QCOMPARE(goo3.c_str(), "TEST TEST");
     }
     {
         const std::string goo(GooString::format("{0:ud} {1:d} {2:d}", UINT_MAX, INT_MAX, INT_MIN));

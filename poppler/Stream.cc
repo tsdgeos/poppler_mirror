@@ -92,10 +92,7 @@
 // Stream (base class)
 //------------------------------------------------------------------------
 
-Stream::Stream()
-{
-    ref = 1;
-}
+Stream::Stream() = default;
 
 Stream::~Stream() = default;
 

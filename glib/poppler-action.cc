@@ -392,7 +392,7 @@ static void build_goto_remote(PopplerAction *action, const LinkGoToR *link)
         return;
     }
 
-    action->goto_remote.file_name = _poppler_goo_string_to_utf8(link->getFileName());
+    action->goto_remote.file_name = _poppler_goo_string_to_utf8(link->getFileName()->toStr());
 
     link_dest = link->getDest();
     named_dest = link->getNamedDest();
@@ -409,7 +409,7 @@ static void build_goto_remote(PopplerAction *action, const LinkGoToR *link)
 static void build_launch(PopplerAction *action, const LinkLaunch *link)
 {
     if (link->getFileName()) {
-        action->launch.file_name = _poppler_goo_string_to_utf8(link->getFileName());
+        action->launch.file_name = _poppler_goo_string_to_utf8(link->getFileName()->toStr());
     }
     if (link->getParams()) {
         action->launch.params = g_strdup(link->getParams()->c_str());
@@ -466,7 +466,7 @@ static AnnotMovie *find_annot_movie_for_action(PopplerDocument *document, const 
                         }
 
                         obj1 = annotObj.dictLookup("T");
-                        if (obj1.isString() && obj1.getString()->toStr() == title) {
+                        if (obj1.isString() && obj1.getString() == title) {
                             found = true;
                         }
                     }
@@ -525,8 +525,8 @@ static void build_movie(PopplerDocument *document, PopplerAction *action, const 
 static void build_javascript(PopplerAction *action, const LinkJavaScript *link)
 {
     if (link->isOk()) {
-        const GooString script(link->getScript());
-        action->javascript.script = _poppler_goo_string_to_utf8(&script);
+        const std::string &script = link->getScript();
+        action->javascript.script = _poppler_goo_string_to_utf8(script);
     }
 }
 

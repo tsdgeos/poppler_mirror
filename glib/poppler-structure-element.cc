@@ -448,7 +448,7 @@ gchar *poppler_structure_element_get_id(PopplerStructureElement *poppler_structu
     g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
     const GooString *string = poppler_structure_element->elem->getID();
-    return string ? _poppler_goo_string_to_utf8(string) : nullptr;
+    return string ? _poppler_goo_string_to_utf8(string->toStr()) : nullptr;
 }
 
 /**
@@ -467,7 +467,7 @@ gchar *poppler_structure_element_get_title(PopplerStructureElement *poppler_stru
     g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
     const GooString *string = poppler_structure_element->elem->getTitle();
-    return string ? _poppler_goo_string_to_utf8(string) : nullptr;
+    return string ? _poppler_goo_string_to_utf8(string->toStr()) : nullptr;
 }
 
 /**
@@ -493,7 +493,7 @@ gchar *poppler_structure_element_get_abbreviation(PopplerStructureElement *poppl
     }
 
     const GooString *string = poppler_structure_element->elem->getExpandedAbbr();
-    return string ? _poppler_goo_string_to_utf8(string) : nullptr;
+    return string ? _poppler_goo_string_to_utf8(string->toStr()) : nullptr;
 }
 
 /**
@@ -514,7 +514,7 @@ gchar *poppler_structure_element_get_language(PopplerStructureElement *poppler_s
     g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
     const GooString *string = poppler_structure_element->elem->getLanguage();
-    return string ? _poppler_goo_string_to_utf8(string) : nullptr;
+    return string ? _poppler_goo_string_to_utf8(string->toStr()) : nullptr;
 }
 
 /**
@@ -539,7 +539,7 @@ gchar *poppler_structure_element_get_alt_text(PopplerStructureElement *poppler_s
     g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
     const GooString *string = poppler_structure_element->elem->getAltText();
-    return string ? _poppler_goo_string_to_utf8(string) : nullptr;
+    return string ? _poppler_goo_string_to_utf8(string->toStr()) : nullptr;
 }
 
 /**
@@ -566,7 +566,7 @@ gchar *poppler_structure_element_get_actual_text(PopplerStructureElement *popple
     g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
     const GooString *string = poppler_structure_element->elem->getActualText();
-    return string ? _poppler_goo_string_to_utf8(string) : nullptr;
+    return string ? _poppler_goo_string_to_utf8(string->toStr()) : nullptr;
 }
 
 /**
@@ -588,7 +588,7 @@ gchar *poppler_structure_element_get_text(PopplerStructureElement *poppler_struc
     g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
     GooString *string = poppler_structure_element->elem->getText(flags & POPPLER_STRUCTURE_GET_TEXT_RECURSIVE);
-    gchar *result = string ? _poppler_goo_string_to_utf8(string) : nullptr;
+    gchar *result = string ? _poppler_goo_string_to_utf8(string->toStr()) : nullptr;
     delete string;
     return result;
 }
@@ -813,7 +813,7 @@ static PopplerTextSpan *text_span_poppler_text_span(const TextSpan &span)
 {
     auto *new_span = g_slice_new0(PopplerTextSpan);
     if (const GooString *text = span.getText()) {
-        new_span->text = _poppler_goo_string_to_utf8(text);
+        new_span->text = _poppler_goo_string_to_utf8(text->toStr());
     }
 
     new_span->color.red = colToDbl(span.getColor().r) * 65535;
@@ -825,12 +825,11 @@ static PopplerTextSpan *text_span_poppler_text_span(const TextSpan &span)
         // is always a font name that can be used as fallback.
         const GooString *font_name = span.getFont()->getFamily();
         if (font_name) {
-            new_span->font_name = _poppler_goo_string_to_utf8(font_name);
+            new_span->font_name = _poppler_goo_string_to_utf8(font_name->toStr());
         } else {
             const std::optional<std::string> &fontName = span.getFont()->getName();
             if (fontName) {
-                const GooString aux(*fontName);
-                new_span->font_name = _poppler_goo_string_to_utf8(&aux);
+                new_span->font_name = _poppler_goo_string_to_utf8(fontName.value());
             } else {
                 new_span->font_name = nullptr;
             }

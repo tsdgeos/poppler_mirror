@@ -320,6 +320,11 @@ int GooStringFormatCheckerVisitor::verifyPlaceholder(const CallExpr *callExpr, c
         if (pointeeType == 0 || pointeeType->getQualifiedNameAsString() != "GooString") {
             diag->Report(argExpr->getExprLoc(), diag_wrongArgExprType) << "GooString *" << placeholderText << qualType.getAsString();
         }
+    } else if (format == "r") {
+        const CXXRecordDecl *pointeeType = valueType->isPointerType() ? valueType->getPointeeType()->getAsCXXRecordDecl() : 0;
+        if (pointeeType == 0 || (pointeeType->getQualifiedNameAsString() != "std::string" && qualType.getAsString() != "const std::string *")) {
+            diag->Report(argExpr->getExprLoc(), diag_wrongArgExprType) << "std::string *" << placeholderText << qualType.getAsString();
+        }
     } else {
         diag->Report(placeholderLocation, diag_badType) << placeholderText;
         return argNum;

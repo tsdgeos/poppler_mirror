@@ -380,8 +380,6 @@ error:
 static std::unique_ptr<GooString> getInfoString(Dict *infoDict, const char *key)
 {
     Object obj;
-    // Raw value as read from PDF (may be in pdfDocEncoding or UCS2)
-    const GooString *rawString;
     // Value converted to unicode
     Unicode *unicodeString;
     int unicodeLength;
@@ -392,23 +390,23 @@ static std::unique_ptr<GooString> getInfoString(Dict *infoDict, const char *key)
 
     obj = infoDict->lookup(key);
     if (obj.isString()) {
-        rawString = obj.getString();
+        const std::string &rawString = obj.getString();
 
         // Convert rawString to unicode
-        if (hasUnicodeByteOrderMark(rawString->toStr())) {
+        if (hasUnicodeByteOrderMark(rawString)) {
             isUnicode = true;
-            unicodeLength = (obj.getString()->size() - 2) / 2;
+            unicodeLength = (obj.getString().size() - 2) / 2;
         } else {
             isUnicode = false;
-            unicodeLength = obj.getString()->size();
+            unicodeLength = obj.getString().size();
         }
         unicodeString = new Unicode[unicodeLength];
 
         for (int i = 0; i < unicodeLength; i++) {
             if (isUnicode) {
-                unicodeString[i] = ((rawString->getChar((i + 1) * 2) & 0xff) << 8) | (rawString->getChar(((i + 1) * 2) + 1) & 0xff);
+                unicodeString[i] = ((rawString.at((i + 1) * 2) & 0xff) << 8) | (rawString.at(((i + 1) * 2) + 1) & 0xff);
             } else {
-                unicodeString[i] = pdfDocEncoding[rawString->getChar(i) & 0xff];
+                unicodeString[i] = pdfDocEncoding[rawString.at(i) & 0xff];
             }
         }
 
@@ -430,7 +428,7 @@ static std::optional<std::string> getInfoDate(Dict *infoDict, const char *key)
 
     obj = infoDict->lookup(key);
     if (obj.isString()) {
-        const GooString *s = obj.getString();
+        const std::string &s = obj.getString();
         // TODO do something with the timezone info
         if (parseDateString(s, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute)) {
             tmStruct.tm_year = year - 1900;
@@ -446,9 +444,9 @@ static std::optional<std::string> getInfoDate(Dict *infoDict, const char *key)
             if (strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S+00:00", &tmStruct)) {
                 return std::string(buf);
             }
-            return s->toStr();
+            return s;
         }
-        return s->toStr();
+        return s;
     }
     return {};
 }
