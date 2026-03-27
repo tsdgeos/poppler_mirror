@@ -239,7 +239,6 @@ GfxFont::GfxFont(const char *tagA, Ref idA, std::optional<std::string> &&nameA, 
     ok = false;
     embFontID = embFontIDA;
     embFontName = nullptr;
-    family = nullptr;
     stretch = StretchNotDefined;
     weight = WeightNotDefined;
     hasToUnicode = false;
@@ -489,7 +488,7 @@ void GfxFont::readFontDescriptor(const Dict &fontDict)
         // get family
         obj2 = obj1.dictLookup("FontFamily");
         if (obj2.isString()) {
-            family = obj2.takeString();
+            family = obj2.getString();
         }
 
         // get stretch

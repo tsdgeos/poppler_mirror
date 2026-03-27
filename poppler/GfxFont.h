@@ -200,7 +200,7 @@ public:
     bool matches(const char *tagA) const { return tag == tagA; }
 
     // Get font family name.
-    const GooString *getFamily() const { return family.get(); }
+    const std::optional<std::string> &getFamily() const { return family; }
 
     // Get font stretch.
     Stretch getStretch() const { return stretch; }
@@ -314,7 +314,7 @@ protected:
     const std::string tag; // PDF font tag
     const Ref id; // reference (used as unique ID)
     std::optional<std::string> name; // font name
-    std::unique_ptr<GooString> family; // font family
+    std::optional<std::string> family; // font family
     Stretch stretch; // font stretch
     Weight weight; // font weight
     const GfxFontType type; // type of font
