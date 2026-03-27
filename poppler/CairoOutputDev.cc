@@ -374,13 +374,12 @@ void CairoOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
                 textStringToQuotedUtf8(&name, &quoted_name);
                 emittedDestinations.insert(quoted_name.toStr());
 
-                GooString attrib;
-                attrib.appendf("name={0:t} ", &quoted_name);
+                std::string attrib = GooString::format("name={0:t} ", &quoted_name);
                 if (it.second->getChangeLeft()) {
-                    attrib.appendf("x={0:g} ", it.second->getLeft());
+                    GooString::appendf(attrib, "x={0:g} ", it.second->getLeft());
                 }
                 if (it.second->getChangeTop()) {
-                    attrib.appendf("y={0:g} ", state->getPageHeight() - it.second->getTop());
+                    GooString::appendf(attrib, "y={0:g} ", state->getPageHeight() - it.second->getTop());
                 }
 
                 cairo_tag_begin(cairo, CAIRO_TAG_DEST, attrib.c_str());
@@ -450,14 +449,14 @@ void CairoOutputDev::quadToCairoRect(AnnotQuadrilaterals *quads, int idx, double
     rect->height = y2 - y1;
 }
 
-bool CairoOutputDev::appendLinkDestRef(GooString *s, const LinkDest *dest)
+bool CairoOutputDev::appendLinkDestRef(std::string &s, const LinkDest *dest)
 {
     Ref ref = dest->getPageRef();
     auto pageNum = pdfPageRefToCairoPageNumMap.find(ref);
     if (pageNum != pdfPageRefToCairoPageNumMap.end()) {
         auto cairoPage = pdfPageToCairoPageMap.find(pageNum->second);
         if (cairoPage != pdfPageToCairoPageMap.end()) {
-            s->appendf("page={0:d} ", cairoPage->second);
+            GooString::appendf(s, "page={0:d} ", cairoPage->second);
             double destPageHeight = doc->getPageMediaHeight(dest->getPageNum());
             appendLinkDestXY(s, dest, destPageHeight);
             return true;
@@ -466,7 +465,7 @@ bool CairoOutputDev::appendLinkDestRef(GooString *s, const LinkDest *dest)
     return false;
 }
 
-void CairoOutputDev::appendLinkDestXY(GooString *s, const LinkDest *dest, double destPageHeight)
+void CairoOutputDev::appendLinkDestXY(std::string &s, const LinkDest *dest, double destPageHeight)
 {
     double x = 0;
     double y = 0;
@@ -481,7 +480,7 @@ void CairoOutputDev::appendLinkDestXY(GooString *s, const LinkDest *dest, double
 
     // if pageHeight is 0, dest is remote document, cairo uses PDF coords in this
     // case. So don't flip coords when pageHeight is 0.
-    s->appendf("pos=[{0:g} {1:g}] ", x, destPageHeight ? destPageHeight - y : y);
+    GooString::appendf(s, "pos=[{0:g} {1:g}] ", x, destPageHeight ? destPageHeight - y : y);
 }
 
 bool CairoOutputDev::beginLinkTag(AnnotLink *annotLink)
@@ -489,20 +488,19 @@ bool CairoOutputDev::beginLinkTag(AnnotLink *annotLink)
     int page_num = annotLink->getPageNum();
     double height = doc->getPageMediaHeight(page_num);
 
-    GooString attrib;
-    attrib.appendf("link_page={0:d} ", page_num);
+    auto attrib = GooString::format("link_page={0:d} ", page_num);
     attrib.append("rect=[");
     AnnotQuadrilaterals *quads = annotLink->getQuadrilaterals();
     if (quads && quads->getQuadrilateralsLength() > 0) {
         for (int i = 0; i < quads->getQuadrilateralsLength(); i++) {
             cairo_rectangle_t rect;
             quadToCairoRect(quads, i, height, &rect);
-            attrib.appendf("{0:g} {1:g} {2:g} {3:g} ", rect.x, rect.y, rect.width, rect.height);
+            GooString::appendf(attrib, "{0:g} {1:g} {2:g} {3:g} ", rect.x, rect.y, rect.width, rect.height);
         }
     } else {
         double x1, x2, y1, y2;
         annotLink->getRect(&x1, &y1, &x2, &y2);
-        attrib.appendf("{0:g} {1:g} {2:g} {3:g} ", x1, height - y2, x2 - x1, y2 - y1);
+        GooString::appendf(attrib, "{0:g} {1:g} {2:g} {3:g} ", x1, height - y2, x2 - x1, y2 - y1);
     }
     attrib.append("] ");
 
@@ -518,9 +516,9 @@ bool CairoOutputDev::beginLinkTag(AnnotLink *annotLink)
                 if (!emittedDestinations.contains(name.toStr())) {
                     return false;
                 }
-                attrib.appendf("dest={0:t} ", &name);
+                GooString::appendf(attrib, "dest={0:t} ", &name);
             } else if (linkDest && linkDest->isOk() && linkDest->isPageRef()) {
-                bool ok = appendLinkDestRef(&attrib, linkDest);
+                bool ok = appendLinkDestRef(attrib, linkDest);
                 if (!ok) {
                     return false;
                 }
@@ -528,7 +526,7 @@ bool CairoOutputDev::beginLinkTag(AnnotLink *annotLink)
         }
     } else if (action->getKind() == actionGoToR) {
         auto *act = static_cast<LinkGoToR *>(action);
-        attrib.appendf("file='{0:t}' ", act->getFileName());
+        GooString::appendf(attrib, "file='{0:t}' ", act->getFileName());
         const GooString *namedDest = act->getNamedDest();
         const LinkDest *linkDest = act->getDest();
         if (namedDest) {
@@ -537,12 +535,12 @@ bool CairoOutputDev::beginLinkTag(AnnotLink *annotLink)
             if (!emittedDestinations.contains(name.toStr())) {
                 return false;
             }
-            attrib.appendf("dest={0:t} ", &name);
+            GooString::appendf(attrib, "dest={0:t} ", &name);
         } else if (linkDest && linkDest->isOk() && !linkDest->isPageRef()) {
             auto cairoPage = pdfPageToCairoPageMap.find(linkDest->getPageNum());
             if (cairoPage != pdfPageToCairoPageMap.end()) {
-                attrib.appendf("page={0:d} ", cairoPage->second);
-                appendLinkDestXY(&attrib, linkDest, 0.0);
+                GooString::appendf(attrib, "page={0:d} ", cairoPage->second);
+                appendLinkDestXY(attrib, linkDest, 0.0);
             } else {
                 return false;
             }
@@ -550,7 +548,7 @@ bool CairoOutputDev::beginLinkTag(AnnotLink *annotLink)
     } else if (action->getKind() == actionURI) {
         auto *act = static_cast<LinkURI *>(action);
         if (act->isOk()) {
-            attrib.appendf("uri='{0:s}'", act->getURI().c_str());
+            GooString::appendf(attrib, "uri='{0:s}'", act->getURI().c_str());
         }
     }
     cairo_tag_begin(cairo, CAIRO_TAG_LINK, attrib.c_str());
@@ -592,11 +590,14 @@ bool CairoOutputDev::beginLink(const StructElement *linkElem)
 
 void CairoOutputDev::getStructElemAttributeString(const StructElement *elem)
 {
+    (void)elem;
+#if 0
     int mcid = 0;
     GooString attribs;
     Ref ref = elem->getObjectRef();
     attribs.appendf("id='{0:d}_{1:d}_{2:d}'", ref.num, ref.gen, mcid);
     attribs.appendf(" parent='{0:d}_{1:d}'", ref.num, ref.gen);
+#endif
 }
 
 int CairoOutputDev::getContentElementStructParents(const StructElement *element)
@@ -659,8 +660,7 @@ void CairoOutputDev::emitStructElement(const StructElement *element)
     if (element->isContent() && !element->isObjectRef()) {
         int structParents = getContentElementStructParents(element);
         int mcid = element->getMCID();
-        GooString attribs;
-        attribs.appendf("ref='{0:d}_{1:d}'", structParents, mcid);
+        std::string attribs = GooString::format("ref='{0:d}_{1:d}'", structParents, mcid);
         cairo_tag_begin(cairo, CAIRO_TAG_CONTENT_REF, attribs.c_str());
         cairo_tag_end(cairo, CAIRO_TAG_CONTENT_REF);
     } else if (!element->isContent()) {
@@ -3126,7 +3126,7 @@ static bool colorMapHasIdentityDecodeMap(GfxImageColorMap *colorMap)
 
 static cairo_status_t setMimeIdFromRef(cairo_surface_t *surface, const char *mime_type, const char *mime_id_prefix, Ref ref)
 {
-    GooString mime_id;
+    std::string mime_id;
     char *idBuffer;
     cairo_status_t status;
 
@@ -3134,7 +3134,7 @@ static cairo_status_t setMimeIdFromRef(cairo_surface_t *surface, const char *mim
         mime_id.append(mime_id_prefix);
     }
 
-    mime_id.appendf("{0:d}-{1:d}", ref.gen, ref.num);
+    GooString::appendf(mime_id, "{0:d}-{1:d}", ref.gen, ref.num);
 
     idBuffer = copyString(mime_id.c_str());
     status = cairo_surface_set_mime_data(surface, mime_type, reinterpret_cast<const unsigned char *>(idBuffer), mime_id.size(), gfree, idBuffer);
@@ -3176,15 +3176,15 @@ bool CairoOutputDev::setMimeDataForCCITTParams(Stream *str, cairo_surface_t *ima
 {
     auto *ccittStr = static_cast<CCITTFaxStream *>(str);
 
-    GooString params;
-    params.appendf("Columns={0:d}", ccittStr->getColumns());
-    params.appendf(" Rows={0:d}", height);
-    params.appendf(" K={0:d}", ccittStr->getEncoding());
-    params.appendf(" EndOfLine={0:d}", ccittStr->getEndOfLine() ? 1 : 0);
-    params.appendf(" EncodedByteAlign={0:d}", ccittStr->getEncodedByteAlign() ? 1 : 0);
-    params.appendf(" EndOfBlock={0:d}", ccittStr->getEndOfBlock() ? 1 : 0);
-    params.appendf(" BlackIs1={0:d}", ccittStr->getBlackIs1() ? 1 : 0);
-    params.appendf(" DamagedRowsBeforeError={0:d}", ccittStr->getDamagedRowsBeforeError());
+    std::string params;
+    GooString::appendf(params, "Columns={0:d}", ccittStr->getColumns());
+    GooString::appendf(params, " Rows={0:d}", height);
+    GooString::appendf(params, " K={0:d}", ccittStr->getEncoding());
+    GooString::appendf(params, " EndOfLine={0:d}", ccittStr->getEndOfLine() ? 1 : 0);
+    GooString::appendf(params, " EncodedByteAlign={0:d}", ccittStr->getEncodedByteAlign() ? 1 : 0);
+    GooString::appendf(params, " EndOfBlock={0:d}", ccittStr->getEndOfBlock() ? 1 : 0);
+    GooString::appendf(params, " BlackIs1={0:d}", ccittStr->getBlackIs1() ? 1 : 0);
+    GooString::appendf(params, " DamagedRowsBeforeError={0:d}", ccittStr->getDamagedRowsBeforeError());
 
     char *p = strdup(params.c_str());
     if (cairo_surface_set_mime_data(image, CAIRO_MIME_TYPE_CCITT_FAX_PARAMS, reinterpret_cast<const unsigned char *>(p), params.size(), gfree, reinterpret_cast<void *>(p))) {
@@ -3594,8 +3594,7 @@ void CairoOutputDev::beginMarkedContent(const char *name, Dict *properties)
         return;
     }
 
-    GooString attribs;
-    attribs.appendf("tag_name='{0:s}' id='{1:d}_{2:d}'", name, currentStructParents, mcid);
+    std::string attribs = GooString::format("tag_name='{0:s}' id='{1:d}_{2:d}'", name, currentStructParents, mcid);
     mcidEmitted.insert(std::pair<int, int>(currentStructParents, mcid));
 
     std::string tag;

@@ -1376,8 +1376,7 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
         outStr->printf("%lli ", obj->getInt64());
         break;
     case objReal: {
-        GooString s;
-        s.appendf("{0:.10g}", obj->getReal());
+        auto s = GooString::format("{0:.10g}", obj->getReal());
         outStr->printf("%s ", s.c_str());
         break;
     }

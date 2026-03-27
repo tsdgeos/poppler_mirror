@@ -298,23 +298,23 @@ static void printStruct(const StructElement *element, unsigned indent)
 
 static void printLinkDest(const std::unique_ptr<LinkDest> &dest)
 {
-    GooString s;
+    std::string s;
 
     switch (dest->getKind()) {
     case destXYZ:
         s.append("[ XYZ ");
         if (dest->getChangeLeft()) {
-            s.appendf("{0:4.0g} ", dest->getLeft());
+            GooString::appendf(s, "{0:4.0g} ", dest->getLeft());
         } else {
             s.append("null ");
         }
         if (dest->getChangeTop()) {
-            s.appendf("{0:4.0g} ", dest->getTop());
+            GooString::appendf(s, "{0:4.0g} ", dest->getTop());
         } else {
             s.append("null ");
         }
         if (dest->getChangeZoom()) {
-            s.appendf("{0:4.2f} ", dest->getZoom());
+            GooString::appendf(s, "{0:4.2f} ", dest->getZoom());
         } else {
             s.append("null ");
         }
@@ -324,34 +324,34 @@ static void printLinkDest(const std::unique_ptr<LinkDest> &dest)
         break;
     case destFitH:
         if (dest->getChangeTop()) {
-            s.appendf("[ FitH {0:4.0g} ", dest->getTop());
+            GooString::appendf(s, "[ FitH {0:4.0g} ", dest->getTop());
         } else {
             s.append("[ FitH null ");
         }
         break;
     case destFitV:
         if (dest->getChangeLeft()) {
-            s.appendf("[ FitV {0:4.0g} ", dest->getLeft());
+            GooString::appendf(s, "[ FitV {0:4.0g} ", dest->getLeft());
         } else {
             s.append("[ FitV null ");
         }
         break;
     case destFitR:
-        s.appendf("[ FitR {0:4.0g} {1:4.0g} {2:4.0g} {3:4.0g} ", dest->getLeft(), dest->getBottom(), dest->getRight(), dest->getTop());
+        GooString::appendf(s, "[ FitR {0:4.0g} {1:4.0g} {2:4.0g} {3:4.0g} ", dest->getLeft(), dest->getBottom(), dest->getRight(), dest->getTop());
         break;
     case destFitB:
         s.append("[ FitB ");
         break;
     case destFitBH:
         if (dest->getChangeTop()) {
-            s.appendf("[ FitBH {0:4.0g} ", dest->getTop());
+            GooString::appendf(s, "[ FitBH {0:4.0g} ", dest->getTop());
         } else {
             s.append("[ FitBH null ");
         }
         break;
     case destFitBV:
         if (dest->getChangeLeft()) {
-            s.appendf("[ FitBV {0:4.0g} ", dest->getLeft());
+            GooString::appendf(s, "[ FitBV {0:4.0g} ", dest->getLeft());
         } else {
             s.append("[ FitBV null ");
         }
@@ -359,8 +359,8 @@ static void printLinkDest(const std::unique_ptr<LinkDest> &dest)
     }
 
     s.append("                                ");
-    s.setChar(26, ']');
-    s.setChar(27, '\0');
+    s[26] = ']';
+    s[27] = '\0';
     printf("%s", s.c_str());
 }
 
@@ -516,7 +516,7 @@ static void printPdfSubtype(PDFDoc *doc, const UnicodeMap *uMap)
         case subtypeNull:
             break;
         default:
-            abbr->appendf("-{0:d}", subpart);
+            GooString::appendf(abbr->toNonConstStr(), "-{0:d}", subpart);
             break;
         }
 
@@ -526,7 +526,7 @@ static void printPdfSubtype(PDFDoc *doc, const UnicodeMap *uMap)
         case subtypePartNull:
             break;
         default:
-            standard->appendf("-{0:d}", subpart);
+            GooString::appendf(standard->toNonConstStr(), "-{0:d}", subpart);
             break;
         }
 

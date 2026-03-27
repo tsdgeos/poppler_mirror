@@ -151,8 +151,8 @@ public:
     using std::string::push_back;
 
     // Append a formatted string.
-    POPPLER_PRIVATE_EXPORT GooString *appendf(const char *fmt, ...) GOOSTRING_FORMAT;
-    POPPLER_PRIVATE_EXPORT GooString *appendfv(const char *fmt, va_list argList);
+    POPPLER_PRIVATE_EXPORT static std::string &appendf(std::string &that, const char *fmt, ...) GOOSTRING_FORMAT;
+    POPPLER_PRIVATE_EXPORT static std::string &appendfv(std::string &that, const char *fmt, va_list argList);
 
     using std::string::insert;
 

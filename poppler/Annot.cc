@@ -1676,13 +1676,13 @@ void AnnotAppearanceBuilder::setDrawColor(const AnnotColor &drawColor, bool fill
 
     switch (drawColor.getSpace()) {
     case AnnotColor::colorCMYK:
-        appearBuf->appendf("{0:.5f} {1:.5f} {2:.5f} {3:.5f} {4:c}\n", values[0], values[1], values[2], values[3], fill ? 'k' : 'K');
+        GooString::appendf(appearBuf->toNonConstStr(), "{0:.5f} {1:.5f} {2:.5f} {3:.5f} {4:c}\n", values[0], values[1], values[2], values[3], fill ? 'k' : 'K');
         break;
     case AnnotColor::colorRGB:
-        appearBuf->appendf("{0:.5f} {1:.5f} {2:.5f} {3:s}\n", values[0], values[1], values[2], fill ? "rg" : "RG");
+        GooString::appendf(appearBuf->toNonConstStr(), "{0:.5f} {1:.5f} {2:.5f} {3:s}\n", values[0], values[1], values[2], fill ? "rg" : "RG");
         break;
     case AnnotColor::colorGray:
-        appearBuf->appendf("{0:.5f} {1:c}\n", values[0], fill ? 'g' : 'G');
+        GooString::appendf(appearBuf->toNonConstStr(), "{0:.5f} {1:c}\n", values[0], fill ? 'g' : 'G');
         break;
     case AnnotColor::colorTransparent:
     default:
@@ -1693,7 +1693,7 @@ void AnnotAppearanceBuilder::setDrawColor(const AnnotColor &drawColor, bool fill
 void AnnotAppearanceBuilder::setTextFont(const std::string &fontName, double fontSize)
 {
     if (!fontName.empty()) {
-        appearBuf->appendf("/{0:s} {1:.2f} Tf\n", fontName.c_str(), fontSize);
+        GooString::appendf(appearBuf->toNonConstStr(), "/{0:s} {1:.2f} Tf\n", fontName.c_str(), fontSize);
     }
 }
 
@@ -1703,7 +1703,7 @@ void AnnotAppearanceBuilder::setLineStyleForBorder(const AnnotBorder &border)
     case AnnotBorder::borderDashed:
         appearBuf->append("[");
         for (double dash : border.getDash()) {
-            appearBuf->appendf(" {0:.2f}", dash);
+            GooString::appendf(appearBuf->toNonConstStr(), " {0:.2f}", dash);
         }
         appearBuf->append(" ] 0 d\n");
         break;
@@ -1711,7 +1711,7 @@ void AnnotAppearanceBuilder::setLineStyleForBorder(const AnnotBorder &border)
         appearBuf->append("[] 0 d\n");
         break;
     }
-    appearBuf->appendf("{0:.2f} w\n", border.getWidth());
+    GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} w\n", border.getWidth());
 }
 
 // Draw an (approximate) circle of radius <r> centered at (<cx>, <cy>).
@@ -1731,11 +1731,11 @@ void AnnotAppearanceBuilder::drawCircle(double cx, double cy, double r, bool fil
 // Path will be closed if either fill or stroke is true; otherwise it's left open.
 void AnnotAppearanceBuilder::drawEllipse(double cx, double cy, double rx, double ry, bool fill, bool stroke)
 {
-    appearBuf->appendf("{0:.2f} {1:.2f} m\n", cx + rx, cy);
-    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + rx, cy + bezierCircle * ry, cx + bezierCircle * rx, cy + ry, cx, cy + ry);
-    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - bezierCircle * rx, cy + ry, cx - rx, cy + bezierCircle * ry, cx - rx, cy);
-    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - rx, cy - bezierCircle * ry, cx - bezierCircle * rx, cy - ry, cx, cy - ry);
-    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + bezierCircle * rx, cy - ry, cx + rx, cy - bezierCircle * ry, cx + rx, cy);
+    GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} m\n", cx + rx, cy);
+    GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + rx, cy + bezierCircle * ry, cx + bezierCircle * rx, cy + ry, cx, cy + ry);
+    GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - bezierCircle * rx, cy + ry, cx - rx, cy + bezierCircle * ry, cx - rx, cy);
+    GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - rx, cy - bezierCircle * ry, cx - bezierCircle * rx, cy - ry, cx, cy - ry);
+    GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + bezierCircle * rx, cy - ry, cx + rx, cy - bezierCircle * ry, cx + rx, cy);
     if (!fill && stroke) {
         appearBuf->append("s\n");
     } else if (fill && !stroke) {
@@ -1752,9 +1752,11 @@ void AnnotAppearanceBuilder::drawCircleTopLeft(double cx, double cy, double r)
     double r2;
 
     r2 = r / std::numbers::sqrt2;
-    appearBuf->appendf("{0:.2f} {1:.2f} m\n", cx + r2, cy + r2);
-    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + (1 - bezierCircle) * r2, cy + (1 + bezierCircle) * r2, cx - (1 - bezierCircle) * r2, cy + (1 + bezierCircle) * r2, cx - r2, cy + r2);
-    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - (1 + bezierCircle) * r2, cy + (1 - bezierCircle) * r2, cx - (1 + bezierCircle) * r2, cy - (1 - bezierCircle) * r2, cx - r2, cy - r2);
+    GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} m\n", cx + r2, cy + r2);
+    GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + (1 - bezierCircle) * r2, cy + (1 + bezierCircle) * r2, cx - (1 - bezierCircle) * r2, cy + (1 + bezierCircle) * r2, cx - r2,
+                       cy + r2);
+    GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - (1 + bezierCircle) * r2, cy + (1 - bezierCircle) * r2, cx - (1 + bezierCircle) * r2, cy - (1 - bezierCircle) * r2, cx - r2,
+                       cy - r2);
     appearBuf->append("S\n");
 }
 
@@ -1765,9 +1767,11 @@ void AnnotAppearanceBuilder::drawCircleBottomRight(double cx, double cy, double 
     double r2;
 
     r2 = r / std::numbers::sqrt2;
-    appearBuf->appendf("{0:.2f} {1:.2f} m\n", cx - r2, cy - r2);
-    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - (1 - bezierCircle) * r2, cy - (1 + bezierCircle) * r2, cx + (1 - bezierCircle) * r2, cy - (1 + bezierCircle) * r2, cx + r2, cy - r2);
-    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + (1 + bezierCircle) * r2, cy - (1 - bezierCircle) * r2, cx + (1 + bezierCircle) * r2, cy + (1 - bezierCircle) * r2, cx + r2, cy + r2);
+    GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} m\n", cx - r2, cy - r2);
+    GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - (1 - bezierCircle) * r2, cy - (1 + bezierCircle) * r2, cx + (1 - bezierCircle) * r2, cy - (1 + bezierCircle) * r2, cx + r2,
+                       cy - r2);
+    GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + (1 + bezierCircle) * r2, cy - (1 - bezierCircle) * r2, cx + (1 + bezierCircle) * r2, cy + (1 - bezierCircle) * r2, cx + r2,
+                       cy + r2);
     appearBuf->append("S\n");
 }
 
@@ -1800,12 +1804,12 @@ void AnnotAppearanceBuilder::drawLineEndCircle(double x, double y, double size, 
     double ty[3];
 
     m.transform(x, y, &tx[0], &ty[0]);
-    appearBuf->appendf("{0:.2f} {1:.2f} m\n", tx[0], ty[0]);
+    GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} m\n", tx[0], ty[0]);
     for (int i = 0; i < 4; i++) {
         m.transform(x1[i], y1[i], &tx[0], &ty[0]);
         m.transform(x2[i], y2[i], &tx[1], &ty[1]);
         m.transform(x3[i], y3[i], &tx[2], &ty[2]);
-        appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", tx[0], ty[0], tx[1], ty[1], tx[2], ty[2]);
+        GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", tx[0], ty[0], tx[1], ty[1], tx[2], ty[2]);
     }
     appearBuf->append(fill ? "b\n" : "s\n");
 }
@@ -4554,7 +4558,7 @@ void AnnotAppearanceBuilder::writeString(const std::string &str)
             appearBuf->push_back('\\');
             appearBuf->push_back(c);
         } else if (c < 0x20) {
-            appearBuf->appendf("\\{0:03o}", static_cast<unsigned char>(c));
+            GooString::appendf(appearBuf->toNonConstStr(), "\\{0:03o}", static_cast<unsigned char>(c));
         } else {
             appearBuf->push_back(c);
         }
@@ -4675,15 +4679,15 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
         const int rot = appearCharacs ? appearCharacs->getRotation() : 0;
         switch (rot) {
         case 90:
-            appearBuf->appendf("0 1 -1 0 {0:.2f} 0 cm\n", rect->x2 - rect->x1);
+            GooString::appendf(appearBuf->toNonConstStr(), "0 1 -1 0 {0:.2f} 0 cm\n", rect->x2 - rect->x1);
             return { rect->y2 - rect->y1, rect->x2 - rect->x1 };
 
         case 180:
-            appearBuf->appendf("-1 0 0 -1 {0:.2f} {1:.2f} cm\n", rect->x2 - rect->x1, rect->y2 - rect->y1);
+            GooString::appendf(appearBuf->toNonConstStr(), "-1 0 0 -1 {0:.2f} {1:.2f} cm\n", rect->x2 - rect->x1, rect->y2 - rect->y1);
             return { rect->x2 - rect->y2, rect->y2 - rect->y1 };
 
         case 270:
-            appearBuf->appendf("0 -1 1 0 0 {0:.2f} cm\n", rect->y2 - rect->y1);
+            GooString::appendf(appearBuf->toNonConstStr(), "0 -1 1 0 0 {0:.2f} cm\n", rect->y2 - rect->y1);
             return { rect->y2 - rect->y1, rect->x2 - rect->x1 };
 
         default: // assume rot == 0
@@ -4703,7 +4707,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
         // compute font autosize
         if (fontSize == 0) {
             fontSize = Annot::calculateFontSize(form, font, text, wMax, dy, forceZapfDingbats);
-            daToks[tfPos + 1] = GooString().appendf("{0:.2f}", fontSize)->toStr();
+            daToks[tfPos + 1] = GooString::format("{0:.2f}", fontSize);
         }
 
         // starting y coordinate
@@ -4713,7 +4717,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
 
         // set the font matrix
         daToks[tmPos + 4] = "0";
-        daToks[tmPos + 5] = GooString().appendf("{0:.2f}", y)->toStr();
+        daToks[tmPos + 5] = GooString::format("{0:.2f}", y);
 
         // write the DA string
         for (const std::string &daTok : daToks) {
@@ -4740,7 +4744,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
                     fontSize = w;
                 }
                 fontSize = floor(fontSize);
-                daToks[tfPos + 1] = GooString().appendf("{0:.2f}", fontSize)->toStr();
+                daToks[tfPos + 1] = GooString::format("{0:.2f}", fontSize);
             }
 
             const HorizontalTextLayouter textLayouter(text, form, font, {}, forceZapfDingbats);
@@ -4763,8 +4767,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
             const double y = 0.5 * dy - 0.4 * fontSize;
 
             // set the font matrix
-            daToks[tmPos + 4] = GooString().appendf("{0:.2f}", x)->toStr();
-            daToks[tmPos + 5] = GooString().appendf("{0:.2f}", y)->toStr();
+            daToks[tmPos + 4] = GooString::format("{0:.2f}", x);
+            daToks[tmPos + 5] = GooString::format("{0:.2f}", y);
 
             // write the DA string
             for (const std::string &daTok : daToks) {
@@ -4787,7 +4791,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
                     const GfxFont *currentFont = font;
                     if (!d.fontName.empty()) {
                         appearBuf->append(" q\n");
-                        appearBuf->appendf("/{0:s} {1:.2f} Tf\n", d.fontName.c_str(), fontSize);
+                        GooString::appendf(appearBuf->toNonConstStr(), "/{0:s} {1:.2f} Tf\n", d.fontName.c_str(), fontSize);
                         currentFont = form->getDefaultResources()->lookupFont(d.fontName.c_str()).get();
                     }
 
@@ -4799,7 +4803,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
                     // position the appropriate amount relative to the start of the
                     // previous character
                     const double combX = 0.5 * (w - char_dx);
-                    appearBuf->appendf("{0:.2f} 0 Td\n", combX - xPrev + w);
+                    GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} 0 Td\n", combX - xPrev + w);
 
                     GooString charBuf(s, n);
                     writeString(charBuf.toStr());
@@ -4832,7 +4836,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
                     }
                 }
                 fontSize = floor(fontSize);
-                daToks[tfPos + 1] = GooString().appendf("{0:.2f}", fontSize)->toStr();
+                daToks[tfPos + 1] = GooString::format("{0:.2f}", fontSize);
             }
 
             // compute text start position
@@ -4852,8 +4856,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
             const double y = 0.5 * dy - 0.4 * fontSize;
 
             // set the font matrix
-            daToks[tmPos + 4] = GooString().appendf("{0:.2f}", x)->toStr();
-            daToks[tmPos + 5] = GooString().appendf("{0:.2f}", y)->toStr();
+            daToks[tmPos + 4] = GooString::format("{0:.2f}", x);
+            daToks[tmPos + 5] = GooString::format("{0:.2f}", y);
 
             // write the DA string
             for (const std::string &daTok : daToks) {
@@ -4868,7 +4872,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
             for (const HorizontalTextLayouter::Data &d : textLayouter.data) {
                 if (!d.fontName.empty()) {
                     appearBuf->append(" q\n");
-                    appearBuf->appendf("/{0:s} {1:.2f} Tf\n", d.fontName.c_str(), fontSize);
+                    GooString::appendf(appearBuf->toNonConstStr(), "/{0:s} {1:.2f} Tf\n", d.fontName.c_str(), fontSize);
                 }
                 writeString(d.text);
                 appearBuf->append(" Tj\n");
@@ -4988,7 +4992,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         if (tfPos >= 0) {
             tok = daToks[tfPos + 1].get();
             tok->clear();
-            tok->appendf("{0:.2f}", fontSize);
+            GooString::appendf(tok->toNonConstStr(), "{0:.2f}", fontSize);
         }
     }
     // draw the text
@@ -5000,7 +5004,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         // draw the background if selected
         if (fieldChoice->isSelected(i)) {
             appearBuf->append("0 g f\n");
-            appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} re f\n", borderWidth, y - 0.2 * fontSize, rect->x2 - rect->x1 - 2 * borderWidth, 1.1 * fontSize);
+            GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} {2:.2f} {3:.2f} re f\n", borderWidth, y - 0.2 * fontSize, rect->x2 - rect->x1 - 2 * borderWidth, 1.1 * fontSize);
         }
 
         // setup
@@ -5028,10 +5032,10 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         if (tmPos >= 0) {
             tok = daToks[tmPos + 4].get();
             tok->clear();
-            tok->appendf("{0:.2f}", x);
+            GooString::appendf(tok->toNonConstStr(), "{0:.2f}", x);
             tok = daToks[tmPos + 5].get();
             tok->clear();
-            tok->appendf("{0:.2f}", y);
+            GooString::appendf(tok->toNonConstStr(), "{0:.2f}", y);
         }
 
         // write the DA string
@@ -5042,7 +5046,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
         // write the font matrix (if not part of the DA string)
         if (tmPos < 0) {
-            appearBuf->appendf("1 0 0 1 {0:.2f} {1:.2f} Tm\n", x, y);
+            GooString::appendf(appearBuf->toNonConstStr(), "1 0 0 1 {0:.2f} {1:.2f} Tm\n", x, y);
         }
 
         // change the text color if selected
@@ -5089,19 +5093,19 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
         case AnnotBorder::borderDashed:
             appearBuf->append("[");
             for (double dash : border->getDash()) {
-                appearBuf->appendf(" {0:.2f}", dash);
+                GooString::appendf(appearBuf->toNonConstStr(), " {0:.2f}", dash);
             }
             appearBuf->append("] 0 d\n");
             // fallthrough
         case AnnotBorder::borderSolid:
         case AnnotBorder::borderUnderlined:
-            appearBuf->appendf("{0:.2f} w\n", w);
+            GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} w\n", w);
             setDrawColor(*aColor, false);
             drawCircle(0.5 * dx, 0.5 * dy, r - 0.5 * w, false);
             break;
         case AnnotBorder::borderBeveled:
         case AnnotBorder::borderInset:
-            appearBuf->appendf("{0:.2f} w\n", 0.5 * w);
+            GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} w\n", 0.5 * w);
             setDrawColor(*aColor, false);
             drawCircle(0.5 * dx, 0.5 * dy, r - 0.25 * w, false);
             adjustedColor = AnnotColor(*aColor);
@@ -5119,14 +5123,14 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
         case AnnotBorder::borderDashed:
             appearBuf->append("[");
             for (double dash : border->getDash()) {
-                appearBuf->appendf(" {0:.2f}", dash);
+                GooString::appendf(appearBuf->toNonConstStr(), " {0:.2f}", dash);
             }
             appearBuf->append("] 0 d\n");
             // fallthrough
         case AnnotBorder::borderSolid:
-            appearBuf->appendf("{0:.2f} w\n", w);
+            GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} w\n", w);
             setDrawColor(*aColor, false);
-            appearBuf->appendf("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re s\n", 0.5 * w, dx - w, dy - w);
+            GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {0:.2f} {1:.2f} {2:.2f} re s\n", 0.5 * w, dx - w, dy - w);
             break;
         case AnnotBorder::borderBeveled:
         case AnnotBorder::borderInset:
@@ -5134,32 +5138,32 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
             adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? 1 : -1);
             setDrawColor(adjustedColor, true);
             appearBuf->append("0 0 m\n");
-            appearBuf->appendf("0 {0:.2f} l\n", dy);
-            appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx, dy);
-            appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx - w, dy - w);
-            appearBuf->appendf("{0:.2f} {1:.2f} l\n", w, dy - w);
-            appearBuf->appendf("{0:.2f} {0:.2f} l\n", w);
+            GooString::appendf(appearBuf->toNonConstStr(), "0 {0:.2f} l\n", dy);
+            GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} l\n", dx, dy);
+            GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} l\n", dx - w, dy - w);
+            GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} l\n", w, dy - w);
+            GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {0:.2f} l\n", w);
             appearBuf->append("f\n");
             adjustedColor = AnnotColor(*aColor);
             adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? -1 : 1);
             setDrawColor(adjustedColor, true);
             appearBuf->append("0 0 m\n");
-            appearBuf->appendf("{0:.2f} 0 l\n", dx);
-            appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx, dy);
-            appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx - w, dy - w);
-            appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx - w, w);
-            appearBuf->appendf("{0:.2f} {0:.2f} l\n", w);
+            GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} 0 l\n", dx);
+            GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} l\n", dx, dy);
+            GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} l\n", dx - w, dy - w);
+            GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {1:.2f} l\n", dx - w, w);
+            GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {0:.2f} l\n", w);
             appearBuf->append("f\n");
             break;
         case AnnotBorder::borderUnderlined:
-            appearBuf->appendf("{0:.2f} w\n", w);
+            GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} w\n", w);
             setDrawColor(*aColor, false);
-            appearBuf->appendf("0 0 m {0:.2f} 0 l s\n", dx);
+            GooString::appendf(appearBuf->toNonConstStr(), "0 0 m {0:.2f} 0 l s\n", dx);
             break;
         }
 
         // clip to the inside of the border
-        appearBuf->appendf("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re W n\n", w, dx - 2 * w, dy - 2 * w);
+        GooString::appendf(appearBuf->toNonConstStr(), "{0:.2f} {0:.2f} {1:.2f} {2:.2f} re W n\n", w, dx - 2 * w, dy - 2 * w);
     }
 }
 
@@ -5685,7 +5689,7 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
         if (width != -1 && height != -1 && !poster.isNone()) {
             auto appearBuf = std::make_unique<GooString>();
             appearBuf->append("q\n");
-            appearBuf->appendf("{0:d} 0 0 {1:d} 0 0 cm\n", width, height);
+            GooString::appendf(appearBuf->toNonConstStr(), "{0:d} 0 0 {1:d} 0 0 cm\n", width, height);
             appearBuf->append("/MImg Do\n");
             appearBuf->append("Q\n");
 
@@ -5726,10 +5730,10 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
 
             appearBuf = std::make_unique<GooString>();
             appearBuf->append("q\n");
-            appearBuf->appendf("0 0 {0:d} {1:d} re W n\n", width, height);
+            GooString::appendf(appearBuf->toNonConstStr(), "0 0 {0:d} {1:d} re W n\n", width, height);
             appearBuf->append("q\n");
-            appearBuf->appendf("0 0 {0:d} {1:d} re W n\n", width, height);
-            appearBuf->appendf("1 0 0 1 {0:d} {1:d} cm\n", width / 2, height / 2);
+            GooString::appendf(appearBuf->toNonConstStr(), "0 0 {0:d} {1:d} re W n\n", width, height);
+            GooString::appendf(appearBuf->toNonConstStr(), "1 0 0 1 {0:d} {1:d} cm\n", width / 2, height / 2);
             appearBuf->append("/FRM Do\n");
             appearBuf->append("Q\n");
             appearBuf->append("Q\n");
@@ -7688,7 +7692,7 @@ void AnnotAppearanceBuilder::appendf(const char *fmt, ...) GOOSTRING_FORMAT
     va_list argList;
 
     va_start(argList, fmt);
-    appearBuf->appendfv(fmt, argList);
+    GooString::appendfv(appearBuf->toNonConstStr(), fmt, argList);
     va_end(argList);
 }
 

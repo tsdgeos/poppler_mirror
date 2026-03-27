@@ -132,36 +132,36 @@ void formatDoubleSmallAware(double x, char *buf, int bufSize, int prec, bool tri
 
 std::string GooString::format(const char *fmt, ...)
 {
-    GooString s;
+    std::string s;
 
     va_list argList;
     va_start(argList, fmt);
-    s.appendfv(fmt, argList);
+    appendfv(s, fmt, argList);
     va_end(argList);
 
-    return s.toStr();
+    return s;
 }
 
 std::string GooString::formatv(const char *fmt, va_list argList)
 {
-    GooString s;
+    std::string s;
 
-    s.appendfv(fmt, argList);
+    appendfv(s, fmt, argList);
 
-    return s.toStr();
+    return s;
 }
 
-GooString *GooString::appendf(const char *fmt, ...)
+std::string &GooString::appendf(std::string &that, const char *fmt, ...)
 {
     va_list argList;
     va_start(argList, fmt);
-    appendfv(fmt, argList);
+    appendfv(that, fmt, argList);
     va_end(argList);
 
-    return this;
+    return that;
 }
 
-GooString *GooString::appendfv(const char *fmt, va_list argList)
+std::string &GooString::appendfv(std::string &that, const char *fmt, va_list argList)
 {
     GooStringFormatArg *args;
     int argsLen, argsSize;
@@ -185,7 +185,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
             ++p0;
             if (*p0 == '{') {
                 ++p0;
-                push_back('{');
+                that.push_back('{');
             } else {
 
                 // parse the format string
@@ -470,13 +470,13 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
                 // append the formatted arg, handling width and alignment
                 if (!reverseAlign && len < width) {
                     for (i = len; i < width; ++i) {
-                        push_back(' ');
+                        that.push_back(' ');
                     }
                 }
-                append(str, len);
+                that.append(str, len);
                 if (reverseAlign && len < width) {
                     for (i = len; i < width; ++i) {
-                        push_back(' ');
+                        that.push_back(' ');
                     }
                 }
             }
@@ -486,13 +486,13 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
             if (*p0 == '}') {
                 ++p0;
             }
-            push_back('}');
+            that.push_back('}');
 
         } else {
             for (p1 = p0 + 1; *p1 && *p1 != '{' && *p1 != '}'; ++p1) {
                 ;
             }
-            append(p0, p1 - p0);
+            that.append(p0, p1 - p0);
             p0 = p1;
         }
     }
@@ -501,7 +501,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
         gfree(args);
     }
 
-    return this;
+    return that;
 }
 
 namespace {

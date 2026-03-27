@@ -5958,7 +5958,7 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
     int n, numComps;
     bool useFlate, useLZW, useRLE, useASCII, useCompressed;
     bool maskUseFlate, maskUseLZW, maskUseRLE, maskUseASCII, maskUseCompressed;
-    GooString *maskFilters;
+    std::string maskFilters;
     GfxSeparationColorSpace *sepCS;
     GfxColor color;
     GfxCMYK cmyk;
@@ -5967,7 +5967,6 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
 
     useFlate = useLZW = useRLE = useASCII = useCompressed = false;
     maskUseFlate = maskUseLZW = maskUseRLE = maskUseASCII = maskUseCompressed = false;
-    maskFilters = nullptr; // make gcc happy
 
     // explicit masking
     if (maskStr) {
@@ -5992,25 +5991,24 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
                 maskUseCompressed = true;
             }
         }
-        maskFilters = new GooString();
         if (maskUseASCII) {
-            maskFilters->appendf("  /ASCII{0:s}Decode filter\n", useASCIIHex ? "Hex" : "85");
+            GooString::appendf(maskFilters, "  /ASCII{0:s}Decode filter\n", useASCIIHex ? "Hex" : "85");
         }
         if (maskUseFlate) {
-            maskFilters->append("  /FlateDecode filter\n");
+            maskFilters.append("  /FlateDecode filter\n");
         } else if (maskUseLZW) {
-            maskFilters->append("  /LZWDecode filter\n");
+            maskFilters.append("  /LZWDecode filter\n");
         } else if (maskUseRLE) {
-            maskFilters->append("  /RunLengthDecode filter\n");
+            maskFilters.append("  /RunLengthDecode filter\n");
         }
         if (maskUseCompressed && s.has_value()) {
-            maskFilters->append(s.value());
+            maskFilters.append(s.value());
         }
         if (mode == psModeForm || inType3Char || preloadImagesForms) {
             writePSFmt("MaskData_{0:d}_{1:d} pdfMaskInit\n", ref->getRefNum(), ref->getRefGen());
         } else {
             writePS("currentfile\n");
-            writePS(maskFilters->c_str());
+            writePS(maskFilters.c_str());
             writePS("pdfMask\n");
 
             // add FlateEncode/LZWEncode/RunLengthEncode and ASCIIHex/85 encode filters
@@ -6243,11 +6241,10 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
         // mask data source
         if (mode == psModeForm || inType3Char || preloadImagesForms) {
             writePS("  /DataSource {pdfMaskSrc}\n");
-            writePS(maskFilters->c_str());
+            writePS(maskFilters.c_str());
         } else {
             writePS("  /DataSource maskStream\n");
         }
-        delete maskFilters;
 
         writePS(">>\n");
         writePS(">>\n");
@@ -7167,7 +7164,7 @@ void PSOutputDev::writePSFmt(const char *fmt, ...)
 
     va_start(args, fmt);
     if (t3String) {
-        t3String->appendfv(const_cast<char *>(fmt), args);
+        GooString::appendfv(t3String->toNonConstStr(), const_cast<char *>(fmt), args);
     } else {
         const std::string buf = GooString::formatv(const_cast<char *>(fmt), args);
         (*outputFunc)(outputStream, buf);

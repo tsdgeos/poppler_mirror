@@ -587,7 +587,7 @@ void printTSVBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int l
 
                     double lxMin = 1E+37, lyMin = 1E+37;
                     double lxMax = 0, lyMax = 0;
-                    auto *lineWordsBuffer = new GooString();
+                    std::string lineWordsBuffer;
 
                     for (word = line->getWords(); word; word = word->getNext()) {
                         word->getBBox(&xMin, &yMin, &xMax, &yMax);
@@ -604,15 +604,14 @@ void printTSVBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int l
                             lyMax = yMax;
                         }
 
-                        lineWordsBuffer->appendf("{0:d}\t{1:d}\t{2:d}\t{3:d}\t{4:d}\t{5:d}\t{6:.2f}\t{7:.2f}\t{8:.2f}\t{9:.2f}\t{10:d}\t{11:s}\n", wordLevel, page, flowNum, blockNum, lineNum, wordNum, xMin, yMin, xMax - xMin, yMax - yMin,
-                                                 wordConf, word->getText()->c_str());
+                        GooString::appendf(lineWordsBuffer, "{0:d}\t{1:d}\t{2:d}\t{3:d}\t{4:d}\t{5:d}\t{6:.2f}\t{7:.2f}\t{8:.2f}\t{9:.2f}\t{10:d}\t{11:s}\n", wordLevel, page, flowNum, blockNum, lineNum, wordNum, xMin, yMin, xMax - xMin,
+                                           yMax - yMin, wordConf, word->getText()->c_str());
                         wordNum++;
                     }
 
                     // Print Link Bounding Box info
                     fprintf(f, "%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%d\t###LINE###\n", lineLevel, page, flowNum, blockNum, lineNum, 0, lxMin, lyMin, lxMax - lxMin, lyMax - lyMin, metaConf);
-                    fprintf(f, "%s", lineWordsBuffer->c_str());
-                    delete lineWordsBuffer;
+                    fprintf(f, "%s", lineWordsBuffer.c_str());
                     lineNum++;
                 }
                 blockNum++;
