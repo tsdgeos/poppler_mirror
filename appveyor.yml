@@ -24,10 +24,13 @@ build_script:
 
 test_script:
 - ps: |
-   craft -v --src-dir $env:APPVEYOR_BUILD_FOLDER --test poppler
+     craft -v --src-dir $env:APPVEYOR_BUILD_FOLDER --test poppler
+     cd $env:APPVEYOR_BUILD_FOLDER && qt6/tests/check_qt6_signature_basics.exe
 
 
 environment:
+    global:
+    - GPGME_DEBUG: 8    
     matrix:
     - TARGET: windows-mingw_64-gcc
     - TARGET: windows-msvc2022_64-cl
