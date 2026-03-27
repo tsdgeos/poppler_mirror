@@ -78,15 +78,8 @@ public:
     bool getString(int i, GooString *string) const;
 
 private:
-    friend class Object; // for incRef/decRef
-
-    // Reference counting.
-    int incRef() { return ++ref; }
-    int decRef() { return --ref; }
-
     XRef *xref; // the xref table for this PDF file
     std::vector<Object> elems; // array of elements
-    std::atomic_int ref; // reference count
     mutable std::recursive_mutex mutex;
 };
 
@@ -96,42 +89,42 @@ private:
 
 inline bool Object::isArrayOfLength(int length) const
 {
-    return type == objArray && array->getLength() == length;
+    return type == objArray && std::get<std::shared_ptr<Array>>(data)->getLength() == length;
 }
 
 inline bool Object::isArrayOfLengthAtLeast(int length) const
 {
-    return type == objArray && array->getLength() >= length;
+    return type == objArray && std::get<std::shared_ptr<Array>>(data)->getLength() >= length;
 }
 
 inline int Object::arrayGetLength() const
 {
     OBJECT_TYPE_CHECK(objArray);
-    return array->getLength();
+    return std::get<std::shared_ptr<Array>>(data)->getLength();
 }
 
 inline void Object::arrayAdd(Object &&elem)
 {
     OBJECT_TYPE_CHECK(objArray);
-    array->add(std::move(elem));
+    std::get<std::shared_ptr<Array>>(data)->add(std::move(elem));
 }
 
 inline void Object::arrayRemove(int i)
 {
     OBJECT_TYPE_CHECK(objArray);
-    array->remove(i);
+    std::get<std::shared_ptr<Array>>(data)->remove(i);
 }
 
 inline Object Object::arrayGet(int i, int recursion = 0) const
 {
     OBJECT_TYPE_CHECK(objArray);
-    return array->get(i, recursion);
+    return std::get<std::shared_ptr<Array>>(data)->get(i, recursion);
 }
 
 inline const Object &Object::arrayGetNF(int i) const
 {
     OBJECT_TYPE_CHECK(objArray);
-    return array->getNF(i);
+    return std::get<std::shared_ptr<Array>>(data)->getNF(i);
 }
 
 #endif

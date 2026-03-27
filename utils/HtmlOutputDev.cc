@@ -334,7 +334,7 @@ void HtmlPage::updateFont(GfxState *state)
     }
 }
 
-void HtmlPage::beginString(GfxState *state, const GooString * /*s*/)
+void HtmlPage::beginString(GfxState *state, const std::string & /*s*/)
 {
     curStr = new HtmlString(state, fontSize, fonts.get());
 }
@@ -383,7 +383,7 @@ void HtmlPage::addChar(GfxState *state, double x, double y, double dx, double dy
         // for 180 rotation, cos q will be negative
         !rot_matrices_equal(curStr->getFont().getRotMat(), state->getTextMat())) {
         endString();
-        beginString(state, nullptr);
+        beginString(state, {});
     }
     state->textTransformDelta(state->getCharSpace() * state->getHorizScaling(), 0, &dx2, &dy2);
     dx -= dx2;
@@ -1247,7 +1247,7 @@ void HtmlOutputDev::updateFont(GfxState *state)
     pages->updateFont(state);
 }
 
-void HtmlOutputDev::beginString(GfxState *state, const GooString *s)
+void HtmlOutputDev::beginString(GfxState *state, const std::string &s)
 {
     pages->beginString(state, s);
 }

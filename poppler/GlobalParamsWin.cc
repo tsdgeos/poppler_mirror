@@ -390,7 +390,7 @@ void GlobalParams::setupBaseFonts(const char *dir)
                 if (obj2.isDict()) {
                     Object obj3 = obj2.getDict()->lookup("Path");
                     if (obj3.isString())
-                        addFontFile(GooString(obj1.getName()).toStr(), obj3.getString()->toStr());
+                        addFontFile(GooString(obj1.getName()).toStr(), obj3.getString());
                     // Aliases
                 } else if (obj2.isName()) {
                     substFiles.emplace(obj1.getName(), obj2.getName());

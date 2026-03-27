@@ -425,7 +425,6 @@ int main(int argc, char *argv[])
 
 static void printInfoString(FILE *f, Dict *infoDict, const char *key, const char *text1, const char *text2, const UnicodeMap *uMap)
 {
-    const GooString *s1;
     bool isUnicode;
     Unicode u;
     char buf[9];
@@ -434,20 +433,20 @@ static void printInfoString(FILE *f, Dict *infoDict, const char *key, const char
     Object obj = infoDict->lookup(key);
     if (obj.isString()) {
         fputs(text1, f);
-        s1 = obj.getString();
-        if ((s1->getChar(0) & 0xff) == 0xfe && (s1->getChar(1) & 0xff) == 0xff) {
+        const std::string &s1 = obj.getString();
+        if ((s1.at(0) & 0xff) == 0xfe && (s1.at(1) & 0xff) == 0xff) {
             isUnicode = true;
             i = 2;
         } else {
             isUnicode = false;
             i = 0;
         }
-        while (i < obj.getString()->size()) {
+        while (i < obj.getString().size()) {
             if (isUnicode) {
-                u = ((s1->getChar(i) & 0xff) << 8) | (s1->getChar(i + 1) & 0xff);
+                u = ((s1.at(i) & 0xff) << 8) | (s1.at(i + 1) & 0xff);
                 i += 2;
             } else {
-                u = pdfDocEncoding[s1->getChar(i) & 0xff];
+                u = pdfDocEncoding[s1.at(i) & 0xff];
                 ++i;
             }
             n = uMap->mapUnicode(u, buf, sizeof(buf));
@@ -466,7 +465,7 @@ static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *
 
     Object obj = infoDict->lookup(key);
     if (obj.isString()) {
-        const GooString *s = obj.getString();
+        const std::string &s = obj.getString();
         if (parseDateString(s, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute)) {
             fputs(text1, f);
             fprintf(f, "%04d-%02d-%02dT%02d:%02d:%02d", year, mon, day, hour, min, sec);

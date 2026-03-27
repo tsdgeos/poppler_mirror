@@ -3865,7 +3865,7 @@ void Gfx::opShowSpaceText(Object args[], int /*numArgs*/)
     }
 }
 
-void Gfx::doShowText(const GooString *s)
+void Gfx::doShowText(const std::string &s)
 {
     double riseX, riseY;
     CharCode code;
@@ -3932,8 +3932,8 @@ void Gfx::doShowText(const GooString *s)
         curX = state->getCurTextX();
         curY = state->getCurTextY();
         oldParser = parser;
-        p = s->c_str();
-        len = s->size();
+        p = s.c_str();
+        len = s.size();
         while (len > 0) {
             n = font->getNextChar(p, len, &code, &u, &uLen, &dx, &dy, &originX, &originY);
             dx = dx * state->getFontSize() + state->getCharSpace();
@@ -4010,8 +4010,8 @@ void Gfx::doShowText(const GooString *s)
         parser = oldParser;
 
     } else if (out->useDrawChar()) {
-        p = s->c_str();
-        len = s->size();
+        p = s.c_str();
+        len = s.size();
         while (len > 0) {
             n = font->getNextChar(p, len, &code, &u, &uLen, &dx, &dy, &originX, &originY);
             if (wMode == GfxFont::WritingMode::Vertical) {
@@ -4041,8 +4041,8 @@ void Gfx::doShowText(const GooString *s)
         }
     } else {
         dx = dy = 0;
-        p = s->c_str();
-        len = s->size();
+        p = s.c_str();
+        len = s.size();
         nChars = nSpaces = 0;
         while (len > 0) {
             n = font->getNextChar(p, len, &code, &u, &uLen, &dx2, &dy2, &originX, &originY);
@@ -4114,14 +4114,14 @@ void Gfx::doShowText(const GooString *s)
         out->restoreTextPos(state);
     }
 
-    updateLevel += 10 * s->size();
+    updateLevel += 10 * s.size();
 }
 
 // NB: this is only called when ocState is false.
-void Gfx::doIncCharCount(const GooString *s)
+void Gfx::doIncCharCount(const std::string &s)
 {
     if (out->needCharCount()) {
-        out->incCharCount(s->size());
+        out->incCharCount(s.size());
     }
 }
 

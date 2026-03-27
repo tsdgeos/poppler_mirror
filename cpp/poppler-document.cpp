@@ -342,7 +342,7 @@ time_t document::info_date_t(const std::string &key) const
         return time_t(-1);
     }
 
-    return dateStringToTime(goo_date.get());
+    return dateStringToTime(goo_date->toStr());
 }
 
 /**
@@ -637,7 +637,7 @@ time_t document::get_creation_date_t() const
         return time_t(-1);
     }
 
-    return dateStringToTime(goo_creation_date.get());
+    return dateStringToTime(goo_creation_date->toStr());
 }
 
 /**
@@ -679,7 +679,7 @@ time_t document::get_modification_date_t() const
         return time_t(-1);
     }
 
-    return dateStringToTime(goo_modification_date.get());
+    return dateStringToTime(goo_modification_date->toStr());
 }
 
 /**

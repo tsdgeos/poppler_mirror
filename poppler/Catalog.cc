@@ -114,7 +114,7 @@ Catalog::Catalog(PDFDoc *docA)
     if (obj.isDict()) {
         Object obj2 = obj.getDict()->lookupEnsureEncryptedIfNeeded("Base");
         if (obj2.isString()) {
-            baseURI = obj2.getString()->toStr();
+            baseURI = obj2.getString();
         }
     }
 
@@ -613,7 +613,7 @@ std::string Catalog::getJS(int i)
     obj2 = obj.dictLookup("JS");
     std::string js;
     if (obj2.isString()) {
-        js = obj2.getString()->toStr();
+        js = obj2.getString();
     } else if (obj2.isStream()) {
         Stream *stream = obj2.getStream();
         stream->fillString(js);
@@ -703,7 +703,7 @@ NameTree::Entry::Entry(const Array &array, int index)
     if (!array.getString(index, &name)) {
         Object aux = array.get(index);
         if (aux.isString()) {
-            name.append(aux.getString()->toStr());
+            name.append(aux.getString());
         } else {
             error(errSyntaxError, -1, "Invalid page tree");
         }

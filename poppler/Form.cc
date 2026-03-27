@@ -1205,7 +1205,6 @@ FormWidget *FormField::findWidgetByRef(Ref aref)
 const GooString *FormField::getFullyQualifiedName() const
 {
     Object parentObj;
-    const GooString *parent_name;
     bool unicode_encoded = false;
 
     if (fullyQualifiedName) {
@@ -1223,24 +1222,24 @@ const GooString *FormField::getFullyQualifiedName() const
     while (parentObj.isDict()) {
         Object obj2 = parentObj.dictLookup("T");
         if (obj2.isString()) {
-            parent_name = obj2.getString();
+            const std::string &parent_name = obj2.getString();
 
             if (unicode_encoded) {
                 fullyQualifiedName->insert(0, "\0.", 2); // 2-byte unicode period
-                if (hasUnicodeByteOrderMark(parent_name->toStr())) {
-                    fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->size() - 2); // Remove the unicode BOM
+                if (hasUnicodeByteOrderMark(parent_name)) {
+                    fullyQualifiedName->insert(0, parent_name.c_str() + 2, parent_name.size() - 2); // Remove the unicode BOM
                 } else {
-                    std::string tmp_str = pdfDocEncodingToUTF16(parent_name->toStr());
+                    std::string tmp_str = pdfDocEncodingToUTF16(parent_name);
                     fullyQualifiedName->insert(0, tmp_str.c_str() + 2, tmp_str.size() - 2); // Remove the unicode BOM
                 }
             } else {
                 fullyQualifiedName->insert(0, "."); // 1-byte ascii period
-                if (hasUnicodeByteOrderMark(parent_name->toStr())) {
+                if (hasUnicodeByteOrderMark(parent_name)) {
                     unicode_encoded = true;
                     fullyQualifiedName = convertToUtf16(fullyQualifiedName.get());
-                    fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->size() - 2); // Remove the unicode BOM
+                    fullyQualifiedName->insert(0, parent_name.c_str() + 2, parent_name.size() - 2); // Remove the unicode BOM
                 } else {
-                    fullyQualifiedName->insert(0, parent_name->toStr());
+                    fullyQualifiedName->insert(0, parent_name);
                 }
             }
         }
@@ -1641,17 +1640,17 @@ void FormFieldText::fillContent(FillValueType fillType)
 
     obj1 = Form::fieldLookup(dict, fillType == fillDefaultValue ? "DV" : "V");
     if (obj1.isString()) {
-        if (hasUnicodeByteOrderMark(obj1.getString()->toStr())) {
-            if (obj1.getString()->size() > 2) {
+        if (hasUnicodeByteOrderMark(obj1.getString())) {
+            if (obj1.getString().size() > 2) {
                 if (fillType == fillDefaultValue) {
                     defaultContent = obj1.takeString();
                 } else {
                     content = obj1.takeString();
                 }
             }
-        } else if (!obj1.getString()->empty()) {
+        } else if (!obj1.getString().empty()) {
             // non-unicode string -- assume pdfDocEncoding and try to convert to UTF16BE
-            std::string tmp_str = pdfDocEncodingToUTF16(obj1.getString()->toStr());
+            std::string tmp_str = pdfDocEncodingToUTF16(obj1.getString());
 
             if (fillType == fillDefaultValue) {
                 defaultContent = std::make_unique<GooString>(std::move(tmp_str));
@@ -1810,8 +1809,8 @@ std::optional<size_t> FormFieldText::parseDA(std::vector<std::string> *daToks) c
     if (obj.isDict()) {
         Object objDA(obj.dictLookup("DA"));
         if (objDA.isString()) {
-            const GooString *da = objDA.getString();
-            const std::optional<size_t> tfIndex = tokenizeDA(da->toStr(), daToks, "Tf");
+            const std::string &da = objDA.getString();
+            const std::optional<size_t> tfIndex = tokenizeDA(da, daToks, "Tf");
             if (tfIndex) {
                 return tfIndex.value() - 1;
             }
@@ -1940,11 +1939,11 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
 
             for (int i = 0; i < numChoices; i++) {
                 if (choices[i].exportVal) {
-                    if (choices[i].exportVal->compare(obj1.getString()->toStr()) == 0) {
+                    if (choices[i].exportVal->compare(obj1.getString()) == 0) {
                         optionFound = true;
                     }
                 } else if (choices[i].optionName) {
-                    if (choices[i].optionName->compare(obj1.getString()->toStr()) == 0) {
+                    if (choices[i].optionName->compare(obj1.getString()) == 0) {
                         optionFound = true;
                     }
                 }
@@ -1975,11 +1974,11 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
                     bool matches = false;
 
                     if (choices[i].exportVal) {
-                        if (choices[i].exportVal->compare(obj2.getString()->toStr()) == 0) {
+                        if (choices[i].exportVal->compare(obj2.getString()) == 0) {
                             matches = true;
                         }
                     } else if (choices[i].optionName) {
-                        if (choices[i].optionName->compare(obj2.getString()->toStr()) == 0) {
+                        if (choices[i].optionName->compare(obj2.getString()) == 0) {
                             matches = true;
                         }
                     }
@@ -2296,7 +2295,7 @@ void FormFieldSignature::parseInfo()
     // retrieve SigningTime
     Object time_of_signing = sig_dict.dictLookup("M");
     if (time_of_signing.isString()) {
-        const GooString *time_str = time_of_signing.getString();
+        const std::string &time_str = time_of_signing.getString();
         signature_info->setSigningTime(dateStringToTime(time_str)); // Put this information directly in SignatureInfo object
     }
 

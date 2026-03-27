@@ -329,8 +329,7 @@ ustring ustring::from_latin1(const std::string &str)
  */
 time_t poppler::convert_date_t(const std::string &date)
 {
-    GooString gooDateStr(date.c_str());
-    return dateStringToTime(&gooDateStr);
+    return dateStringToTime(date);
 }
 
 std::ostream &poppler::operator<<(std::ostream &stream, const byte_array &array)

@@ -272,18 +272,10 @@ public:
     bool isEncrypted() const;
 
 private:
-    friend class Object; // for incRef/decRef
-
-    // Reference counting.
-    int incRef() { return ++ref; }
-    int decRef() { return --ref; }
-
     virtual bool hasGetChars() { return false; }
     virtual int getChars(int nChars, unsigned char *buffer);
 
     static std::unique_ptr<Stream> makeFilter(const char *name, std::unique_ptr<Stream> str, Object *params, int recursion = 0, Dict *dict = nullptr);
-
-    std::atomic_int ref; // reference count
 };
 
 //------------------------------------------------------------------------
@@ -1549,31 +1541,31 @@ private:
 inline bool Object::streamRewind()
 {
     OBJECT_TYPE_CHECK(objStream);
-    return stream->rewind();
+    return std::get<std::shared_ptr<Stream>>(data)->rewind();
 }
 
 inline void Object::streamClose()
 {
     OBJECT_TYPE_CHECK(objStream);
-    stream->close();
+    std::get<std::shared_ptr<Stream>>(data)->close();
 }
 
 inline int Object::streamGetChar()
 {
     OBJECT_TYPE_CHECK(objStream);
-    return stream->getChar();
+    return std::get<std::shared_ptr<Stream>>(data)->getChar();
 }
 
 inline int Object::streamGetChars(int nChars, unsigned char *buffer)
 {
     OBJECT_TYPE_CHECK(objStream);
-    return stream->doGetChars(nChars, buffer);
+    return std::get<std::shared_ptr<Stream>>(data)->doGetChars(nChars, buffer);
 }
 
 inline Dict *Object::streamGetDict() const
 {
     OBJECT_TYPE_CHECK(objStream);
-    return stream->getDict();
+    return std::get<std::shared_ptr<Stream>>(data)->getDict();
 }
 
 #endif

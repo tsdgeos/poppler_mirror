@@ -43,6 +43,7 @@
 #include <set>
 #include <cstdio>
 #include <cstdlib>
+#include <variant>
 #include <cstring>
 #include "goo/GooString.h"
 #include "goo/GooLikely.h"
@@ -213,96 +214,45 @@ public:
     static Object eof() { return Object(objEOF); }
     static Object error() { return Object(objError); }
     Object() : type(objNone) { }
-    ~Object() { free(); }
+    ~Object() = default;
 
-    explicit Object(bool boolnA)
-    {
-        type = objBool;
-        booln = boolnA;
-    }
-    explicit Object(int intgA)
-    {
-        type = objInt;
-        intg = intgA;
-    }
-    explicit Object(double realA)
-    {
-        type = objReal;
-        real = realA;
-    }
-    explicit Object(std::unique_ptr<GooString> stringA)
-    {
-        assert(stringA);
-        type = objString;
-        string = stringA.release();
-    }
-    explicit Object(std::string &&stringA)
-    {
-        type = objString;
-        string = new GooString(std::move(stringA));
-    }
+    explicit Object(bool boolnA) : type { objBool }, data { boolnA } { }
 
-    Object(ObjType typeA, std::string &&stringA)
-    {
-        assert(typeA == objHexString);
-        type = typeA;
-        string = new GooString(std::move(stringA));
-    }
+    explicit Object(int intgA) : type { objInt }, data { intgA } { }
+
+    explicit Object(double realA) : type { objReal }, data { realA } { }
+
+    explicit Object(std::unique_ptr<GooString> stringA) : type { objString }, data { std::move(stringA->toNonConstStr()) } { assert(stringA); }
+
+    explicit Object(std::string &&stringA) : type { objString }, data { std::move(stringA) } { }
+
+    Object(ObjType typeA, std::string &&stringA) : type { typeA }, data { std::move(stringA) } { assert(typeA == objHexString); }
 
     Object(ObjType typeA, const char *v) : Object(typeA, std::string_view(v)) { }
-    Object(ObjType typeA, std::string_view v)
-    {
-        assert(typeA == objName || typeA == objCmd);
-        type = typeA;
-        cString = (char *)std::malloc(v.size() + 1);
-        memcpy(cString, v.data(), v.size());
-        cString[v.size()] = 0;
-    }
-    explicit Object(long long int64gA)
-    {
-        type = objInt64;
-        int64g = int64gA;
-    }
-    explicit Object(std::unique_ptr<Array> arrayA)
-    {
-        assert(arrayA);
-        type = objArray;
-        array = arrayA.release();
-    }
-    explicit Object(std::unique_ptr<Dict> &&dictA)
-    {
-        assert(dictA);
-        type = objDict;
-        dict = dictA.release();
-    }
+    Object(ObjType typeA, std::string_view v) : type { typeA }, data { std::string { v } } { assert(typeA == objName || typeA == objCmd); }
+
+    explicit Object(long long int64gA) : type { objInt64 }, data { int64gA } { }
+
+    explicit Object(std::unique_ptr<Array> arrayA) : type { objArray }, data { std::shared_ptr<Array>(std::move(arrayA)) } { }
+
+    explicit Object(std::unique_ptr<Dict> &&dictA) : type { objDict }, data { std::shared_ptr<Dict>(std::move(dictA)) } { }
+
     template<typename StreamType>
         requires(std::is_base_of_v<Stream, StreamType>)
-    explicit Object(std::unique_ptr<StreamType> &&streamA)
+    explicit Object(std::unique_ptr<StreamType> &&streamA) : type { objStream }, data { std::shared_ptr<Stream>(std::move(streamA)) }
     {
-        assert(streamA);
-        type = objStream;
-        stream = streamA.release();
     }
-    explicit Object(const Ref r)
-    {
-        type = objRef;
-        ref = r;
-    }
+    explicit Object(Ref r) : type { objRef }, data { r } { }
 
     template<typename T>
     Object(T) = delete;
 
-    Object(Object &&other) noexcept
-    {
-        std::memcpy(reinterpret_cast<void *>(this), &other, sizeof(Object)); // NOLINT(bugprone-undefined-memory-manipulation)
-        other.type = objDead;
-    }
+    Object(Object &&other) noexcept : type { other.type }, data { std::move(other.data) } { other.type = objDead; }
 
     Object &operator=(Object &&other) noexcept
     {
-        free();
-
-        std::memcpy(reinterpret_cast<void *>(this), &other, sizeof(Object)); // NOLINT(bugprone-undefined-memory-manipulation)
+        data = std::move(other.data);
+        type = other.type;
         other.type = objDead;
 
         return *this;
@@ -314,7 +264,7 @@ public:
     // Set object to null.
     void setToNull()
     {
-        free();
+        data = std::monostate {};
         type = objNull;
     }
 
@@ -432,23 +382,23 @@ public:
     bool isArrayOfLength(int length) const;
     bool isArrayOfLengthAtLeast(int length) const;
     bool isDict(std::string_view dictType) const;
-    bool isCmd(std::string_view cmdA) const { return type == objCmd && cString == cmdA; }
+    bool isCmd(std::string_view cmdA) const { return type == objCmd && std::get<std::string>(data) == cmdA; }
 
     // Accessors.
     bool getBool() const
     {
         OBJECT_TYPE_CHECK(objBool);
-        return booln;
+        return std::get<bool>(data);
     }
     int getInt() const
     {
         OBJECT_TYPE_CHECK(objInt);
-        return intg;
+        return std::get<int>(data);
     }
     double getReal() const
     {
         OBJECT_TYPE_CHECK(objReal);
-        return real;
+        return std::get<double>(data);
     }
 
     // Note: integers larger than 2^53 can not be exactly represented by a double.
@@ -456,7 +406,7 @@ public:
     double getNum() const
     {
         OBJECT_3TYPES_CHECK(objInt, objInt64, objReal);
-        return type == objInt ? (double)intg : type == objInt64 ? (double)int64g : real;
+        return type == objInt ? (double)std::get<int>(data) : type == objInt64 ? (double)std::get<long long>(data) : std::get<double>(data);
     }
     double getNum(bool *ok) const
     {
@@ -464,81 +414,81 @@ public:
             *ok = false;
             return 0.;
         }
-        return type == objInt ? (double)intg : type == objInt64 ? (double)int64g : real;
+        return type == objInt ? (double)std::get<int>(data) : type == objInt64 ? (double)std::get<long long>(data) : std::get<double>(data);
     }
-    const GooString *getString() const
+    const std::string &getString() const
     {
         OBJECT_TYPE_CHECK(objString);
-        return string;
+        return std::get<std::string>(data);
     }
     std::unique_ptr<GooString> takeString()
     {
         OBJECT_TYPE_CHECK(objString);
-        std::unique_ptr<GooString> str(string);
-        string = nullptr;
+        std::unique_ptr<GooString> str = std::make_unique<GooString>(std::get<std::string>(std::move(data)));
+        data = std::monostate {};
         type = objNull;
         return str;
     }
 
-    const GooString *getHexString() const
+    const std::string &getHexString() const
     {
         OBJECT_TYPE_CHECK(objHexString);
-        return string;
+        return std::get<std::string>(data);
     }
     const char *getName() const
     {
         OBJECT_TYPE_CHECK(objName);
-        return cString;
+        return std::get<std::string>(data).c_str();
     }
-    std::string getNameString() const
+    const std::string &getNameString() const
     {
         OBJECT_TYPE_CHECK(objName);
-        return std::string { cString };
+        return std::get<std::string>(data);
     }
     Array *getArray() const
     {
         OBJECT_TYPE_CHECK(objArray);
-        return array;
+        return std::get<std::shared_ptr<Array>>(data).get();
     }
     Dict *getDict() const
     {
         OBJECT_TYPE_CHECK(objDict);
-        return dict;
+        return std::get<std::shared_ptr<Dict>>(data).get();
     }
     Stream *getStream() const
     {
         OBJECT_TYPE_CHECK(objStream);
-        return stream;
+        return std::get<std::shared_ptr<Stream>>(data).get();
     }
     Ref getRef() const
     {
         OBJECT_TYPE_CHECK(objRef);
-        return ref;
+        return std::get<Ref>(data);
     }
     int getRefNum() const
     {
         OBJECT_TYPE_CHECK(objRef);
-        return ref.num;
+        return std::get<Ref>(data).num;
     }
     int getRefGen() const
     {
         OBJECT_TYPE_CHECK(objRef);
-        return ref.gen;
+        return std::get<Ref>(data).gen;
     }
     const char *getCmd() const
     {
         OBJECT_TYPE_CHECK(objCmd);
-        return cString;
+        return std::get<std::string>(data).c_str();
     }
     long long getInt64() const
     {
         OBJECT_TYPE_CHECK(objInt64);
-        return int64g;
+        return std::get<long long>(data);
     }
     long long getIntOrInt64() const
     {
         OBJECT_2TYPES_CHECK(objInt, objInt64);
-        return type == objInt ? intg : int64g;
+        return type == objInt ? std::get<int>(data) : std::get<long long>(data);
     }
 
     // Array accessors.
@@ -577,29 +527,23 @@ public:
         if (unlikely(type != objInt && type != objInt64 && type != objReal)) {
             return defaultValue;
         }
-        return type == objInt ? (double)intg : type == objInt64 ? (double)int64g : real;
+        return type == objInt ? (double)std::get<int>(data) : type == objInt64 ? (double)std::get<long long>(data) : std::get<double>(data);
     }
 
-    bool getBoolWithDefaultValue(bool defaultValue) const { return (type == objBool) ? booln : defaultValue; }
+    bool getBoolWithDefaultValue(bool defaultValue) const { return (type == objBool) ? std::get<bool>(data) : defaultValue; }
 
 private:
+    class PrivateTag
+    {
+    };
     explicit Object(ObjType typeA) { type = typeA; }
-    // Free object contents.
-    void free();
+    explicit Object(ObjType typeA, std::variant<std::monostate, bool, int, long long, double, std::string, std::shared_ptr<Array>, std::shared_ptr<Dict>, std::shared_ptr<Stream>, Ref> dataA, PrivateTag /*unnamed*/)
+        : type { typeA }, data { std::move(dataA) }
+    {
+    }
 
     ObjType type; // object type
-    union { // value for each type:
-        bool booln; //   boolean
-        int intg; //   integer
-        long long int64g; //   64-bit integer
-        double real; //   real
-        GooString *string; // [hex] string
-        char *cString; //   name or command, depending on objType
-        Array *array; //   array
-        Dict *dict; //   dictionary
-        Stream *stream; //   stream
-        Ref ref; //   indirect reference
-    };
+    std::variant<std::monostate, bool, int, long long, double, std::string, std::shared_ptr<Array>, std::shared_ptr<Dict>, std::shared_ptr<Stream>, Ref> data;
 };
 
 //------------------------------------------------------------------------

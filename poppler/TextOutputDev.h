@@ -727,13 +727,13 @@ public:
     ActualText &operator=(const ActualText &) = delete;
 
     void addChar(const GfxState *state, double x, double y, double dx, double dy, CharCode c, int nBytes, const Unicode *u, int uLen);
-    void begin(const GfxState *state, const GooString *text);
+    void begin(const GfxState *state, const std::string &text);
     void end(const GfxState *state);
 
 private:
     TextPage *text;
 
-    std::unique_ptr<GooString> actualText; // replacement text for the span
+    std::optional<std::string> actualText; // replacement text for the span
     double actualTextX0;
     double actualTextY0;
     double actualTextX1;
@@ -806,11 +806,11 @@ public:
     void updateFont(GfxState *state) override;
 
     //----- text drawing
-    void beginString(GfxState *state, const GooString *s) override;
+    void beginString(GfxState *state, const std::string &s) override;
     void endString(GfxState *state) override;
     void drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode c, int nBytes, const Unicode *u, int uLen) override;
     void incCharCount(int nChars) override;
-    void beginActualText(GfxState *state, const GooString *text) override;
+    void beginActualText(GfxState *state, const std::string &text) override;
     void endActualText(GfxState *state) override;
 
     //----- path painting

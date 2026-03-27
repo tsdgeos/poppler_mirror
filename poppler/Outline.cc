@@ -408,8 +408,8 @@ OutlineItem::OutlineItem(const Dict *dict, Ref refA, OutlineItem *parentA, XRef 
 
     obj1 = dict->lookup("Title");
     if (obj1.isString()) {
-        const GooString *s = obj1.getString();
-        title = TextStringToUCS4(s->toStr());
+        const std::string &s = obj1.getString();
+        title = TextStringToUCS4(s);
         // All downstream users treats empty titles
         // as this item (and children) doesn't exist
         // but there exists documents in the wild

@@ -1031,7 +1031,7 @@ gchar *poppler_annot_get_contents(PopplerAnnot *poppler_annot)
 
     contents = poppler_annot->annot->getContents();
 
-    return contents && !contents->empty() ? _poppler_goo_string_to_utf8(contents) : nullptr;
+    return contents && !contents->empty() ? _poppler_goo_string_to_utf8(contents->toStr()) : nullptr;
 }
 
 /**
@@ -1073,7 +1073,7 @@ gchar *poppler_annot_get_name(PopplerAnnot *poppler_annot)
 
     name = poppler_annot->annot->getUniqueName();
 
-    return name ? _poppler_goo_string_to_utf8(name) : nullptr;
+    return name ? _poppler_goo_string_to_utf8(name->toStr()) : nullptr;
 }
 
 /**
@@ -1095,7 +1095,7 @@ gchar *poppler_annot_get_modified(PopplerAnnot *poppler_annot)
 
     text = poppler_annot->annot->getModified();
 
-    return text ? _poppler_goo_string_to_utf8(text) : nullptr;
+    return text ? _poppler_goo_string_to_utf8(text->toStr()) : nullptr;
 }
 
 /**
@@ -1310,7 +1310,7 @@ gchar *poppler_annot_markup_get_label(PopplerAnnotMarkup *poppler_annot)
 
     text = annot->getLabel();
 
-    return text ? _poppler_goo_string_to_utf8(text) : nullptr;
+    return text ? _poppler_goo_string_to_utf8(text->toStr()) : nullptr;
 }
 
 /**
@@ -1559,7 +1559,7 @@ GDate *poppler_annot_markup_get_date(PopplerAnnotMarkup *poppler_annot)
         return nullptr;
     }
 
-    if (_poppler_convert_pdf_date_to_gtime(annot_date, &timet)) {
+    if (_poppler_convert_pdf_date_to_gtime(annot_date->toStr(), &timet)) {
         GDate *date;
 
         date = g_date_new();
@@ -1590,7 +1590,7 @@ gchar *poppler_annot_markup_get_subject(PopplerAnnotMarkup *poppler_annot)
 
     text = annot->getSubject();
 
-    return text ? _poppler_goo_string_to_utf8(text) : nullptr;
+    return text ? _poppler_goo_string_to_utf8(text->toStr()) : nullptr;
 }
 
 /**
@@ -2160,7 +2160,7 @@ gchar *poppler_annot_file_attachment_get_name(PopplerAnnotFileAttachment *popple
     annot = static_cast<AnnotFileAttachment *>(POPPLER_ANNOT(poppler_annot)->annot.get());
     name = annot->getIconName();
 
-    return name ? _poppler_goo_string_to_utf8(name) : nullptr;
+    return name ? _poppler_goo_string_to_utf8(name->toStr()) : nullptr;
 }
 
 /* PopplerAnnotCalloutLine */
@@ -2233,7 +2233,7 @@ gchar *poppler_annot_movie_get_title(PopplerAnnotMovie *poppler_annot)
 
     title = annot->getTitle();
 
-    return title ? _poppler_goo_string_to_utf8(title) : nullptr;
+    return title ? _poppler_goo_string_to_utf8(title->toStr()) : nullptr;
 }
 
 /**

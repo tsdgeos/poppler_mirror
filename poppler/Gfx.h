@@ -350,8 +350,8 @@ private:
     void opMoveShowText(Object args[], int numArgs);
     void opMoveSetShowText(Object args[], int numArgs);
     void opShowSpaceText(Object args[], int numArgs);
-    void doShowText(const GooString *s);
-    void doIncCharCount(const GooString *s);
+    void doShowText(const std::string &s);
+    void doIncCharCount(const std::string &s);
 
     // XObject operators
     void opXObject(Object args[], int numArgs);

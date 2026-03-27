@@ -270,7 +270,7 @@ public:
     //----- text drawing
     virtual void beginStringOp(GfxState * /*state*/) { }
     virtual void endStringOp(GfxState * /*state*/) { }
-    virtual void beginString(GfxState * /*state*/, const GooString * /*s*/) { }
+    virtual void beginString(GfxState * /*state*/, const std::string & /*s*/) { }
     virtual void endString(GfxState * /*state*/) { }
 
     // Draw one glyph at a specified position
@@ -283,13 +283,13 @@ public:
     // int uLen: The number of unicode entries in u.  Usually '1', for a single character,
     //           but it may also have larger values, for example for ligatures.
     virtual void drawChar(GfxState * /*state*/, double /*x*/, double /*y*/, double /*dx*/, double /*dy*/, double /*originX*/, double /*originY*/, CharCode /*code*/, int /*nBytes*/, const Unicode * /*u*/, int /*uLen*/) { }
-    virtual void drawString(GfxState * /*state*/, const GooString * /*s*/) { }
+    virtual void drawString(GfxState * /*state*/, const std::string & /*s*/) { }
     virtual bool beginType3Char(GfxState * /*state*/, double /*x*/, double /*y*/, double /*dx*/, double /*dy*/, CharCode /*code*/, const Unicode * /*u*/, int /*uLen*/);
     virtual void endType3Char(GfxState * /*state*/) { }
     virtual void beginTextObject(GfxState * /*state*/) { }
     virtual void endTextObject(GfxState * /*state*/) { }
     virtual void incCharCount(int /*nChars*/) { }
-    virtual void beginActualText(GfxState * /*state*/, const GooString * /*text*/) { }
+    virtual void beginActualText(GfxState * /*state*/, const std::string & /*text*/) { }
     virtual void endActualText(GfxState * /*state*/) { }
 
     //----- image drawing

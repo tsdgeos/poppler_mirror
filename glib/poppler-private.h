@@ -169,9 +169,9 @@ PopplerAnnot *_poppler_annot_ink_new(const std::shared_ptr<Annot> &annot);
 
 const PDFRectangle *_poppler_annot_get_cropbox(PopplerAnnot *poppler_annot);
 
-char *_poppler_goo_string_to_utf8(const GooString *s);
-gboolean _poppler_convert_pdf_date_to_gtime(const GooString *date, time_t *gdate);
-GDateTime *_poppler_convert_pdf_date_to_date_time(const GooString *date);
+char *_poppler_goo_string_to_utf8(const std::string &s);
+gboolean _poppler_convert_pdf_date_to_gtime(const std::string &date, time_t *gdate);
+GDateTime *_poppler_convert_pdf_date_to_date_time(const std::string &date);
 std::unique_ptr<GooString> _poppler_convert_date_time_to_pdf_date(GDateTime *datetime);
 AnnotStampImageHelper *_poppler_convert_cairo_image_to_stamp_image_helper(const cairo_surface_t *image);
 PopplerColor *_poppler_convert_annot_color_to_poppler_color(const AnnotColor *color);

@@ -1122,11 +1122,13 @@ void XRef::constructObjectStreamEntries(Object *objStr, int objStrObjNum)
 bool XRef::constructXRefEntry(int num, int gen, Goffset pos, XRefEntryType type)
 {
     if (num >= size) {
-        int newSize = (num + 1 + 255) & ~255;
+        const int newSize = (num + 1 + 255) & ~255;
         if (newSize < 0) {
             return false;
         }
-        resize(newSize);
+        if (resize(newSize) != newSize) {
+            return false;
+        }
     }
 
     if (entries[num].type == xrefEntryFree || gen >= entries[num].gen) {

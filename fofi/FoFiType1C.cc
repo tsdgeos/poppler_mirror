@@ -2261,7 +2261,7 @@ void FoFiType1C::buildEncoding()
         encoding = &fofiType1ExpertEncoding;
 
     } else {
-        auto *customEncoding = new std::array<const char *, 256>();
+        auto customEncoding = std::make_unique<std::array<const char *, 256>>();
         customEncoding->fill(nullptr);
         pos = topDict.encodingOffset;
         encFormat = getU8(pos++, &parsedOk);
@@ -2327,7 +2327,7 @@ void FoFiType1C::buildEncoding()
                 (*customEncoding)[c] = copyString(getString(sid, buf, &parsedOk));
             }
         }
-        encoding = customEncoding;
+        encoding = customEncoding.release();
     }
 }
 

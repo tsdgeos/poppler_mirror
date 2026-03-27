@@ -204,7 +204,7 @@ void OptContentModelPrivate::parseOrderArray(OptContentItem *parentNode, const A
         } else if (orderItem.isArrayOfLengthAtLeast(1)) {
             parseOrderArray(lastItem, orderItem.getArray());
         } else if (orderItem.isString()) {
-            const GooString *label = orderItem.getString();
+            const std::string &label = orderItem.getString();
             auto *header = new OptContentItem(UnicodeParsedString(label));
             m_headerOptContentItems.append(header);
             addChild(parentNode, header);

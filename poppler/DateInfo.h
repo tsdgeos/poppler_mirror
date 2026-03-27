@@ -30,7 +30,7 @@
 #include "poppler_private_export.h"
 #include <ctime>
 
-bool POPPLER_PRIVATE_EXPORT parseDateString(const GooString *date, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute);
+bool POPPLER_PRIVATE_EXPORT parseDateString(const std::string &date, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute);
 
 /* Converts the time_t into a PDF Date format string.
  * If timeA is NULL, current time is used.
@@ -47,6 +47,6 @@ std::string POPPLER_PRIVATE_EXPORT timeToStringWithFormat(const time_t *timeA, c
 /* Convert PDF date string to time.
  * Returns -1 if conversion fails.
  */
-time_t POPPLER_PRIVATE_EXPORT dateStringToTime(const GooString *dateString);
+time_t POPPLER_PRIVATE_EXPORT dateStringToTime(const std::string &dateString);
 
 #endif

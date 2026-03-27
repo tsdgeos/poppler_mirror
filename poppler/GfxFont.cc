@@ -1739,7 +1739,7 @@ GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&n
         }
         collection = obj2.takeString();
         collection->push_back('-');
-        collection->append(obj3.getString()->toStr());
+        collection->append(obj3.getString());
     } else {
         error(errSyntaxError, -1, "Missing CIDSystemInfo dictionary in Type 0 descendant font");
         error(errSyntaxError, -1, "Assuming Adobe-Identity for character collection");
@@ -2352,7 +2352,6 @@ int GfxFontDict::hashFontObject(Object *obj)
 
 void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h)
 {
-    const GooString *s;
     const char *p;
     double r;
     int n, i;
@@ -2372,11 +2371,11 @@ void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h)
         r = obj->getReal();
         h->hash((char *)&r, sizeof(double));
         break;
-    case objString:
+    case objString: {
         h->hash('s');
-        s = obj->getString();
-        h->hash(s->c_str(), s->size());
-        break;
+        const auto &s = obj->getString();
+        h->hash(s.c_str(), s.size());
+    } break;
     case objName:
         h->hash('n');
         p = obj->getName();

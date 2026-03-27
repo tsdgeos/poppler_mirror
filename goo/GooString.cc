@@ -68,6 +68,7 @@ union GooStringFormatArg {
     char c;
     char *s;
     GooString *gs;
+    std::string *r;
 };
 
 enum GooStringFormatType
@@ -108,12 +109,13 @@ enum GooStringFormatType
     fmtChar,
     fmtString,
     fmtGooString,
+    fmtStdString,
     fmtSpace,
     fmtInvalidFormat
 };
 
-const char *const formatStrings[] = { "d",   "x",   "X",   "o",   "b",   "ud",  "ux",   "uX",   "uo",   "ub",   "ld",   "lx", "lX", "lo", "lb", "uld", "ulx", "ulX", "ulo",
-                                      "ulb", "lld", "llx", "llX", "llo", "llb", "ulld", "ullx", "ullX", "ullo", "ullb", "f",  "gs", "g",  "c",  "s",   "t",   "w",   nullptr };
+const char *const formatStrings[] = { "d",   "x",   "X",   "o",   "b",   "ud",   "ux",   "uX",   "uo",   "ub",   "ld", "lx", "lX", "lo", "lb", "uld", "ulx", "ulX", "ulo",  "ulb",
+                                      "lld", "llx", "llX", "llo", "llb", "ulld", "ullx", "ullX", "ullo", "ullb", "f",  "gs", "g",  "c",  "s",  "t",   "r",   "w",   nullptr };
 static_assert((fmtInvalidFormat + 1) == (sizeof(formatStrings) / sizeof(char *)));
 
 void formatInt(long long x, char *buf, int bufSize, bool zeroFill, int width, int base, const char **p, int *len, bool upperCase = false);
@@ -307,6 +309,9 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
                     case fmtGooString:
                         args[argsLen].gs = va_arg(argList, GooString *);
                         break;
+                    case fmtStdString:
+                        args[argsLen].r = va_arg(argList, std::string *);
+                        break;
                     case fmtInvalidFormat:
                         assert(false);
                     }
@@ -437,6 +442,16 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
                     if (arg.gs) {
                         str = arg.gs->c_str();
                         len = arg.gs->size();
+                    } else {
+                        str = "(null)";
+                        len = 6;
+                    }
+                    reverseAlign = !reverseAlign;
+                    break;
+                case fmtStdString:
+                    if (arg.r) {
+                        str = arg.r->c_str();
+                        len = arg.r->size();
                     } else {
                         str = "(null)";
                         len = 6;
