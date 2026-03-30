@@ -961,7 +961,7 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
         const char *lang = getFontLang(font);
         if (strcmp(lang, "xx") != 0) {
             lb = FcLangSetCreate();
-            FcLangSetAdd(lb, (FcChar8 *)lang);
+            FcLangSetAdd(lb, reinterpret_cast<const FcChar8 *>(lang));
         }
 
         /*

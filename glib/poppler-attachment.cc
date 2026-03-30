@@ -48,7 +48,7 @@ static void poppler_attachment_finalize(GObject *obj);
 
 G_DEFINE_TYPE_WITH_PRIVATE(PopplerAttachment, poppler_attachment, G_TYPE_OBJECT)
 
-#define GET_PRIVATE(obj) ((PopplerAttachmentPrivate *)poppler_attachment_get_instance_private(obj))
+#define GET_PRIVATE(obj) (static_cast<PopplerAttachmentPrivate *>(poppler_attachment_get_instance_private(obj)))
 
 static void poppler_attachment_init(PopplerAttachment *attachment)
 {

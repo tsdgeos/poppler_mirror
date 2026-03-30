@@ -551,7 +551,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
                     return;
                 }
             } else {
-                if (FT_New_Memory_Face(m_ftLibrary, (const FT_Byte *)fontBuffer.data(), fontBuffer.size(), fontLoc->fontNum, &freeTypeFace)) {
+                if (FT_New_Memory_Face(m_ftLibrary, const_cast<const FT_Byte *>(fontBuffer.data()), fontBuffer.size(), fontLoc->fontNum, &freeTypeFace)) {
                     error(errSyntaxError, -1, "Couldn't create a FreeType face for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                     return;
                 }
@@ -562,7 +562,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
             std::vector<int> codeToGID;
             codeToGID.resize(256, 0);
             for (int i = 0; i < 256; ++i) {
-                if ((name = ((const char **)(static_cast<Gfx8BitFont *>(gfxFont.get()))->getEncoding())[i])) {
+                if ((name = ((static_cast<Gfx8BitFont *>(gfxFont.get()))->getEncoding())[i])) {
                     codeToGID[i] = static_cast<int>(FT_Get_Name_Index(freeTypeFace, const_cast<char *>(name)));
                     if (codeToGID[i] == 0) {
                         name = GfxFont::getAlternateName(name);

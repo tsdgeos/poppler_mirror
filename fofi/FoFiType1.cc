@@ -82,19 +82,22 @@ const std::array<const char *, 256> *FoFiType1::getEncodingA()
 void FoFiType1::writeEncoded(const char **newEncoding, FoFiOutputFunc outputFunc, void *outputStream) const
 {
     char buf[512];
-    char *line, *line2, *p;
+    const char *line, *line2, *p;
     int i;
 
+    const char *begin = reinterpret_cast<const char *>(file.data());
+    const char *end = begin + file.size();
+
     // copy everything up to the encoding
-    for (line = (char *)file.data(); line && (strncmp(line, "/Encoding", 9) != 0); line = getNextLine(line)) {
+    for (line = begin; line && (strncmp(line, "/Encoding", 9) != 0); line = getNextLine(line)) {
         ;
     }
     if (!line) {
         // no encoding - just copy the whole font file
-        (*outputFunc)(outputStream, (char *)file.data(), file.size());
+        (*outputFunc)(outputStream, begin, file.size());
         return;
     }
-    (*outputFunc)(outputStream, (char *)file.data(), line - (char *)file.data());
+    (*outputFunc)(outputStream, begin, line - begin);
 
     // write the new encoding
     (*outputFunc)(outputStream, "/Encoding 256 array\n", 20);
@@ -116,8 +119,8 @@ void FoFiType1::writeEncoded(const char **newEncoding, FoFiOutputFunc outputFunc
         // then look for 'def' preceded by PostScript whitespace
         p = line + 10;
         line = nullptr;
-        for (; p < (char *)file.data() + file.size(); ++p) {
-            if ((*p == ' ' || *p == '\t' || *p == '\x0a' || *p == '\x0d' || *p == '\x0c' || *p == '\0') && p + 4 <= (char *)file.data() + file.size() && !strncmp(p + 1, "def", 3)) {
+        for (; p < end; ++p) {
+            if ((*p == ' ' || *p == '\t' || *p == '\x0a' || *p == '\x0d' || *p == '\x0c' || *p == '\0') && p + 4 <= end && !strncmp(p + 1, "def", 3)) {
                 line = p + 4;
                 break;
             }
@@ -139,8 +142,8 @@ void FoFiType1::writeEncoded(const char **newEncoding, FoFiOutputFunc outputFunc
                 // then look for 'def' preceded by PostScript whitespace
                 p = line2 + 10;
                 line = nullptr;
-                for (; p < (char *)file.data() + file.size(); ++p) {
-                    if ((*p == ' ' || *p == '\t' || *p == '\x0a' || *p == '\x0d' || *p == '\x0c' || *p == '\0') && p + 4 <= (char *)file.data() + file.size() && !strncmp(p + 1, "def", 3)) {
+                for (; p < end; ++p) {
+                    if ((*p == ' ' || *p == '\t' || *p == '\x0a' || *p == '\x0d' || *p == '\x0c' || *p == '\0') && p + 4 <= end && !strncmp(p + 1, "def", 3)) {
                         line = p + 4;
                         break;
                     }
@@ -150,23 +153,26 @@ void FoFiType1::writeEncoded(const char **newEncoding, FoFiOutputFunc outputFunc
 
         // copy everything after the encoding
         if (line) {
-            (*outputFunc)(outputStream, line, ((char *)file.data() + file.size()) - line);
+            (*outputFunc)(outputStream, line, end - line);
         }
     }
 }
 
-char *FoFiType1::getNextLine(char *line) const
+const char *FoFiType1::getNextLine(const char *line) const
 {
-    while (line < (char *)file.data() + file.size() && *line != '\x0a' && *line != '\x0d') {
+    const char *begin = reinterpret_cast<const char *>(file.data());
+    const char *end = begin + file.size();
+
+    while (line < end && *line != '\x0a' && *line != '\x0d') {
         ++line;
     }
-    if (line < (char *)file.data() + file.size() && *line == '\x0d') {
+    if (line < end && *line == '\x0d') {
         ++line;
     }
-    if (line < (char *)file.data() + file.size() && *line == '\x0a') {
+    if (line < end && *line == '\x0a') {
         ++line;
     }
-    if (line >= (char *)file.data() + file.size()) {
+    if (line >= end) {
         return nullptr;
     }
     return line;

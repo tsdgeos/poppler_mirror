@@ -926,8 +926,8 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
             memcpy(buf, p, end - p);
             bufPos += p - buf;
             p = buf + (end - p);
-            int n = (int)(buf + 4096 - p);
-            int m = str->doGetChars(n, (unsigned char *)p);
+            int n = static_cast<int>(buf + 4096 - p);
+            int m = str->doGetChars(n, reinterpret_cast<unsigned char *>(p));
             end = p + m;
             *end = '\0';
             p = buf;
@@ -937,21 +937,21 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
             break;
         }
         if (startOfLine && !strncmp(p, "trailer", 7)) {
-            constructTrailerDict((intptr_t)(bufPos + (p + 7 - buf)), needCatalogDict);
+            constructTrailerDict(static_cast<intptr_t>(bufPos + (p + 7 - buf)), needCatalogDict);
             p += 7;
             startOfLine = false;
             space = false;
         } else if (startOfLine && !strncmp(p, "endstream", 9)) {
             if (streamEndsLen == streamEndsSize) {
                 streamEndsSize += 64;
-                streamEnds = (Goffset *)greallocn(streamEnds, streamEndsSize, sizeof(Goffset));
+                streamEnds = static_cast<Goffset *>(greallocn(streamEnds, streamEndsSize, sizeof(Goffset)));
             }
-            streamEnds[streamEndsLen++] = ((Goffset)bufPos + (p - buf));
+            streamEnds[streamEndsLen++] = (static_cast<Goffset>(bufPos) + (p - buf));
             p += 9;
             startOfLine = false;
             space = false;
         } else if (space && *p >= '0' && *p <= '9') {
-            p = constructObjectEntry(p, ((Goffset)bufPos + (p - buf)), &lastObjNum);
+            p = constructObjectEntry(p, (static_cast<Goffset>(bufPos) + (p - buf)), &lastObjNum);
             startOfLine = false;
             space = false;
         } else if (p[0] == '>' && p[1] == '>') {
@@ -970,7 +970,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
                 if (lastObjNum >= 0) {
                     if (streamObjNumsLen == streamObjNumsSize) {
                         streamObjNumsSize += 64;
-                        streamObjNums = (int *)greallocn(streamObjNums, streamObjNumsSize, sizeof(int));
+                        streamObjNums = static_cast<int *>(greallocn(streamObjNums, streamObjNumsSize, sizeof(int)));
                     }
                     streamObjNums[streamObjNumsLen++] = lastObjNum;
                 }

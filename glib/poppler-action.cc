@@ -244,7 +244,7 @@ PopplerAction *poppler_action_copy(PopplerAction *action)
 
             new_action->reset_form.fields = nullptr;
             for (iter = action->reset_form.fields; iter != nullptr; iter = iter->next) {
-                new_action->reset_form.fields = g_list_append(new_action->reset_form.fields, g_strdup((char *)iter->data));
+                new_action->reset_form.fields = g_list_append(new_action->reset_form.fields, g_strdup(static_cast<char *>(iter->data)));
             }
         }
         break;

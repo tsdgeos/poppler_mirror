@@ -769,7 +769,7 @@ OptContentModel *Document::optionalContentModel()
     if (m_doc->m_optContentModel.isNull()) {
         m_doc->m_optContentModel = new OptContentModel(m_doc->doc->getOptContentConfig(), nullptr);
     }
-    return (OptContentModel *)m_doc->m_optContentModel;
+    return m_doc->m_optContentModel;
 }
 
 Link *Document::additionalAction(DocumentAdditionalActionsType type) const
@@ -945,7 +945,7 @@ QDateTime convertDate(const char *dateString)
 
 QDateTime convertDate(char *dateString)
 {
-    return convertDate((const char *)dateString);
+    return convertDate(const_cast<const char *>(dateString));
 }
 
 bool isCmsAvailable()

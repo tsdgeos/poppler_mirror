@@ -527,7 +527,7 @@ void SampledFunction::transform(const double *in, double *out) const
 bool SampledFunction::hasDifferentResultSet(const Function *func) const
 {
     if (func->getType() == Type::Sampled) {
-        auto *compTo = (SampledFunction *)func;
+        const auto *compTo = static_cast<const SampledFunction *>(func);
         if (compTo->getSampleNumber() != nSamples) {
             return true;
         }

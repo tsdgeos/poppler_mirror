@@ -1881,7 +1881,7 @@ reload:
         // load the font file
         switch (fontType) {
         case fontType1:
-            if (!(fontFile = fontEngine->loadType1Font(std::move(id), std::move(fontsrc), (const char **)(static_cast<Gfx8BitFont *>(gfxFont))->getEncoding(), fontLoc->fontNum))) {
+            if (!(fontFile = fontEngine->loadType1Font(std::move(id), std::move(fontsrc), const_cast<const char **>(static_cast<Gfx8BitFont *>(gfxFont)->getEncoding()), fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
@@ -1890,7 +1890,7 @@ reload:
             }
             break;
         case fontType1C:
-            if (!(fontFile = fontEngine->loadType1CFont(std::move(id), std::move(fontsrc), (const char **)(static_cast<Gfx8BitFont *>(gfxFont))->getEncoding(), fontLoc->fontNum))) {
+            if (!(fontFile = fontEngine->loadType1CFont(std::move(id), std::move(fontsrc), const_cast<const char **>(static_cast<Gfx8BitFont *>(gfxFont)->getEncoding()), fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
@@ -1899,7 +1899,7 @@ reload:
             }
             break;
         case fontType1COT:
-            if (!(fontFile = fontEngine->loadOpenTypeT1CFont(std::move(id), std::move(fontsrc), (const char **)(static_cast<Gfx8BitFont *>(gfxFont))->getEncoding(), fontLoc->fontNum))) {
+            if (!(fontFile = fontEngine->loadOpenTypeT1CFont(std::move(id), std::move(fontsrc), const_cast<const char **>(static_cast<Gfx8BitFont *>(gfxFont)->getEncoding()), fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;

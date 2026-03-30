@@ -77,9 +77,9 @@ bool PNGWriter::init(FILE *f, int width, int height, double hDPI, double vDPI)
 {
     /* libpng changed the png_set_iCCP() prototype in 1.5.0 */
 #    if PNG_LIBPNG_VER < 10500
-    png_charp icc_data_ptr = (png_charp)priv->icc_data;
+    png_charp icc_data_ptr = reinterpret_cast<png_charp>(priv->icc_data);
 #    else
-    const auto *icc_data_ptr = (png_const_bytep)priv->icc_data;
+    const auto *icc_data_ptr = const_cast<png_const_bytep>(priv->icc_data);
 #    endif
 
     if (hDPI < 0 || vDPI < 0) {

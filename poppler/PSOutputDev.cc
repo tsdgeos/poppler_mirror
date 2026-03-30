@@ -2035,7 +2035,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
                     writePS(" ");
                 }
             }
-            writePS((i == 256 - 8) ? (char *)"]\n" : (char *)"\n");
+            writePS((i == 256 - 8) ? "]\n" : "\n");
         }
         writePS("pdfMakeFont\n");
     }
@@ -7207,7 +7207,7 @@ void PSOutputDev::writePSString(const std::string &s)
 
     writePSChar('(');
     line = 1;
-    for (p = const_cast<unsigned char*>(reinterpret_cast<const unsigned char *>(s.c_str())), n = s.size(); n; ++p, --n) {
+    for (p = const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(s.c_str())), n = s.size(); n; ++p, --n) {
         if (line >= 64) {
             writePSChar('\\');
             writePSChar('\n');

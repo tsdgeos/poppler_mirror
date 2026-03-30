@@ -742,7 +742,7 @@ OptContentModel *Document::optionalContentModel()
     if (m_doc->m_optContentModel.isNull()) {
         m_doc->m_optContentModel = new OptContentModel(m_doc->doc->getOptContentConfig(), nullptr);
     }
-    return (OptContentModel *)m_doc->m_optContentModel;
+    return m_doc->m_optContentModel.get();
 }
 
 void Document::applyResetFormsLink(const LinkResetForm &link)

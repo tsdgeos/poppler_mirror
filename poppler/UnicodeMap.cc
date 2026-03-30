@@ -159,7 +159,7 @@ int UnicodeMap::mapUnicode(Unicode u, char *buf, int bufSize) const
                     return (*item)(u, buf, bufSize);
                 } else if constexpr (std::is_same_v<T, std::span<const UnicodeMapRange>> || std::is_same_v<T, std::vector<UnicodeMapRange>>) {
                     int a = 0;
-                    int b = (int)item.size();
+                    int b = static_cast<int>(item.size());
                     if (u >= item[a].start) {
                         // invariant: item[a].start <= u < item[b].start
                         while (b - a > 1) {

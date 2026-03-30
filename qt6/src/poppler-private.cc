@@ -200,7 +200,7 @@ Annot::AdditionalActionsType toPopplerAdditionalActionType(Annotation::Additiona
 DocumentData::~DocumentData()
 {
     qDeleteAll(m_embeddedFiles);
-    delete (OptContentModel *)m_optContentModel;
+    delete m_optContentModel.data();
 }
 
 void DocumentData::init()
