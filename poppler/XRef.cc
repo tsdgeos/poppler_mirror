@@ -1369,7 +1369,12 @@ Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
             } else {
                 // XRef could be reconstructed in constructor of ObjectStream:
                 e = getEntry(num);
-                objStrs.emplace(e->offset, std::unique_ptr<ObjectStream>(objStr));
+                const auto [_, inserted] = objStrs.emplace(e->offset, std::unique_ptr<ObjectStream>(objStr));
+                if (!inserted) {
+                    // this happens when indeed the xref was reconstructed, and the reconstuction ended up adding an ObjectStream
+                    // for that offset, so fetch the good objStr because the one we had was just deleted by emplace failing
+                    objStr = objStrs.find(e->offset)->second.get();
+                }
             }
         }
         if (endPos) {
