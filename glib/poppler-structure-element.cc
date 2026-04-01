@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2013 Igalia S.L.
  * Copyright (C) 2018, 2025 Albert Astals Cid <aacid@kde.org>
- * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2026 Adam Sampson <ats@offog.org>
  *
  * This program is free software; you can redistribute it and/or modify

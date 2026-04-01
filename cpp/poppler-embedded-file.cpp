@@ -2,7 +2,7 @@
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018, 2020, 2022 Albert Astals Cid <aacid@kde.org>
- * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  * Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
  *

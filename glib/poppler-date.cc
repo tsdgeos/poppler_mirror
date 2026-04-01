@@ -1,6 +1,7 @@
 /* poppler-date.cc: glib interface to poppler
  *
  * Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
+ * Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -5,7 +5,7 @@
  * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  * Copyright (C) 2021, 2023 Marek Kasik <mkasik@redhat.com>
- * Copyright (C) 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2023-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Jan-Michael Brummer <jan-michael.brummer1@volkswagen.de>
  * Copyright (C) 2025 lbaudin <lbaudin@gnome.org>
  * Copyright (C) 2025 Albert Astals Cid <aacid@kde.org>
