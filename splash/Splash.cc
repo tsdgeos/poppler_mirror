@@ -25,6 +25,7 @@
 // Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2020 Tobias Deiminger <haxtibal@posteo.de>
 // Copyright (C) 2021, 2024 Even Rouault <even.rouault@spatialys.com>
+// Copyright (C) 2026 Taufeeque Sifat <entity069@protonmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
