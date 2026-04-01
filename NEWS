@@ -12,12 +12,6 @@ Release 26.04.0:
         qt6:
          * Fix inverted continuation rect in performMultipleTextSearch
 
-        glib:
-         *
-
-        build system:
-         *
-
 Release 26.03.0:
         core:
          * Add compression support for stamp annotation images
