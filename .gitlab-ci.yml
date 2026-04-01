@@ -47,7 +47,7 @@ build:
     - ninja -j ${FDO_CI_CONCURRENT} all_verify_interface_header_sets
     - ctest --output-on-failure
 
-build_clang17_libcpp:
+build_clang17_libcpp_cmake328:
   stage: build
   image: debian:trixie
   script:
