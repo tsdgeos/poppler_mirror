@@ -238,7 +238,7 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) : cacheOut {}
     }
 
     //----- buffer
-    sBuf = (double *)gmallocn(1 << m, sizeof(double));
+    sBuf = static_cast<double *>(gmallocn(1 << m, sizeof(double)));
 
     //----- get the stream
     if (!funcObj->isStream()) {
@@ -265,7 +265,7 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) : cacheOut {}
             return;
         }
     }
-    idxOffset = (int *)gmallocn(1 << m, sizeof(int));
+    idxOffset = static_cast<int *>(gmallocn(1 << m, sizeof(int)));
     for (i = 0; i < (1 << m); ++i) {
         idx = 0;
         for (j = m - 1, t = i; j >= 1; --j, t <<= 1) {
@@ -295,7 +295,7 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) : cacheOut {}
         error(errSyntaxError, -1, "Function invalid BitsPerSample");
         return;
     }
-    sampleMul = 1.0 / (pow(2.0, (double)sampleBits) - 1);
+    sampleMul = 1.0 / (pow(2.0, static_cast<double>(sampleBits)) - 1);
 
     //----- Encode
     obj1 = dict->lookup("Encode");
@@ -357,7 +357,7 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) : cacheOut {}
     for (i = 0; i < m; ++i) {
         nSamples *= sampleSize[i];
     }
-    samples = (double *)gmallocn_checkoverflow(nSamples, sizeof(double));
+    samples = static_cast<double *>(gmallocn_checkoverflow(nSamples, sizeof(double)));
     if (!samples) {
         error(errSyntaxError, -1, "Function has invalid number of samples");
         return;
@@ -388,7 +388,7 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) : cacheOut {}
             s = (buf >> (bits - sampleBits)) & bitMask;
             bits -= sampleBits;
         }
-        samples[i] = (double)s * sampleMul;
+        samples[i] = static_cast<double>(s) * sampleMul;
     }
     str->close();
 
@@ -426,13 +426,13 @@ SampledFunction::SampledFunction(const SampledFunction *func, PrivateTag /*unuse
 
     nSamples = func->nSamples;
 
-    idxOffset = (int *)gmallocn(1 << m, sizeof(int));
-    memcpy(idxOffset, func->idxOffset, (1 << m) * (int)sizeof(int));
+    idxOffset = static_cast<int *>(gmallocn(1 << m, sizeof(int)));
+    memcpy(idxOffset, func->idxOffset, (1 << m) * static_cast<int>(sizeof(int)));
 
-    samples = (double *)gmallocn(nSamples, sizeof(double));
+    samples = static_cast<double *>(gmallocn(nSamples, sizeof(double)));
     memcpy(samples, func->samples, nSamples * sizeof(double));
 
-    sBuf = (double *)gmallocn(1 << m, sizeof(double));
+    sBuf = static_cast<double *>(gmallocn(1 << m, sizeof(double)));
 
     memcpy(cacheIn, func->cacheIn, funcMaxInputs * sizeof(double));
     memcpy(cacheOut, func->cacheOut, funcMaxOutputs * sizeof(double));
@@ -470,7 +470,7 @@ void SampledFunction::transform(const double *in, double *out) const
         } else if (x > sampleSize[i] - 1) {
             x = sampleSize[i] - 1;
         }
-        e[i] = (int)x;
+        e[i] = static_cast<int>(x);
         if (e[i] == sampleSize[i] - 1 && sampleSize[i] > 1) {
             // this happens if in[i] = domain[i][1]
             e[i] = sampleSize[i] - 2;
@@ -527,7 +527,7 @@ void SampledFunction::transform(const double *in, double *out) const
 bool SampledFunction::hasDifferentResultSet(const Function *func) const
 {
     if (func->getType() == Type::Sampled) {
-        auto *compTo = (SampledFunction *)func;
+        const auto *compTo = static_cast<const SampledFunction *>(func);
         if (compTo->getSampleNumber() != nSamples) {
             return true;
         }
@@ -691,9 +691,9 @@ StitchingFunction::StitchingFunction(Dict *dict, RefRecursionChecker &usedParent
     }
     const int k = obj1.arrayGetLength();
     funcs.resize(k);
-    bounds = (double *)gmallocn(k + 1, sizeof(double));
-    encode = (double *)gmallocn(2 * k, sizeof(double));
-    scale = (double *)gmallocn(k, sizeof(double));
+    bounds = static_cast<double *>(gmallocn(k + 1, sizeof(double)));
+    encode = static_cast<double *>(gmallocn(2 * k, sizeof(double)));
+    scale = static_cast<double *>(gmallocn(k, sizeof(double)));
     for (i = 0; i < k; ++i) {
         Ref ref;
         Object obj2 = obj1.getArray()->get(i, &ref);
@@ -765,13 +765,13 @@ StitchingFunction::StitchingFunction(const StitchingFunction *func, PrivateTag /
     }
 
     const int k = funcs.size();
-    bounds = (double *)gmallocn(k + 1, sizeof(double));
+    bounds = static_cast<double *>(gmallocn(k + 1, sizeof(double)));
     memcpy(bounds, func->bounds, (k + 1) * sizeof(double));
 
-    encode = (double *)gmallocn(2 * k, sizeof(double));
+    encode = static_cast<double *>(gmallocn(2 * k, sizeof(double)));
     memcpy(encode, func->encode, 2 * k * sizeof(double));
 
-    scale = (double *)gmallocn(k, sizeof(double));
+    scale = static_cast<double *>(gmallocn(k, sizeof(double)));
     memcpy(scale, func->scale, k * sizeof(double));
 
     ok = func->ok;
@@ -955,7 +955,7 @@ public:
         double ret;
 
         if (checkUnderflow() && checkType(psInt, psReal)) {
-            ret = (stack[sp].type == psInt) ? (double)stack[sp].intg : stack[sp].real;
+            ret = (stack[sp].type == psInt) ? static_cast<double>(stack[sp].intg) : stack[sp].real;
             ++sp;
             return ret;
         }
@@ -1145,7 +1145,7 @@ PostScriptFunction::PostScriptFunction(const PostScriptFunction *func, PrivateTa
 {
     codeSize = func->codeSize;
 
-    code = (PSObject *)gmallocn(codeSize, sizeof(PSObject));
+    code = static_cast<PSObject *>(gmallocn(codeSize, sizeof(PSObject)));
     memcpy(code, func->code, codeSize * sizeof(PSObject));
 
     codeString = func->codeString->copy();
@@ -1310,7 +1310,7 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr, int &recursionCoun
             }
             resizeCode(*codePtr);
             code[*codePtr].type = psOperator;
-            code[*codePtr].op = (PSOp)a;
+            code[*codePtr].op = static_cast<PSOp>(a);
             ++*codePtr;
         }
     }
@@ -1340,10 +1340,10 @@ std::unique_ptr<GooString> PostScriptFunction::getToken(Stream *str)
         }
     }
     if (c == '{' || c == '}') {
-        s.push_back((char)c);
+        s.push_back(static_cast<char>(c));
     } else if (isdigit(c) || c == '.' || c == '-') {
         while (true) {
-            s.push_back((char)c);
+            s.push_back(static_cast<char>(c));
             c = str->lookChar();
             if (c == EOF || (!isdigit(c) && c != '.' && c != '-')) {
                 break;
@@ -1353,7 +1353,7 @@ std::unique_ptr<GooString> PostScriptFunction::getToken(Stream *str)
         }
     } else {
         while (true) {
-            s.push_back((char)c);
+            s.push_back(static_cast<char>(c));
             c = str->lookChar();
             if (c == EOF || !isalnum(c)) {
                 break;
@@ -1369,7 +1369,7 @@ void PostScriptFunction::resizeCode(int newSize)
 {
     if (newSize >= codeSize) {
         codeSize += 64;
-        code = (PSObject *)greallocn(code, codeSize, sizeof(PSObject));
+        code = static_cast<PSObject *>(greallocn(code, codeSize, sizeof(PSObject)));
     }
 }
 
@@ -1434,7 +1434,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
                 if (i2 > 0) {
                     stack->pushInt(i1 << i2);
                 } else if (i2 < 0) {
-                    stack->pushInt((int)((unsigned int)i1 >> -i2));
+                    stack->pushInt(static_cast<int>(static_cast<unsigned int>(i1) >> -i2));
                 } else {
                     stack->pushInt(i1);
                 }
@@ -1452,7 +1452,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
                 break;
             case psOpCvi:
                 if (!stack->topIsInt()) {
-                    stack->pushInt((int)stack->popNum());
+                    stack->pushInt(static_cast<int>(stack->popNum()));
                 }
                 break;
             case psOpCvr:

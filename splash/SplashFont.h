@@ -40,7 +40,7 @@ class SplashPath;
 // decimal points.
 static int constexpr splashFontFractionBits = 2;
 static int constexpr splashFontFraction = 1 << splashFontFractionBits;
-static SplashCoord constexpr splashFontFractionMul = (SplashCoord)1 / (SplashCoord)splashFontFraction;
+static SplashCoord constexpr splashFontFractionMul = static_cast<SplashCoord>(1) / static_cast<SplashCoord>(splashFontFraction);
 
 //------------------------------------------------------------------------
 // SplashFont

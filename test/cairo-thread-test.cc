@@ -139,7 +139,7 @@ private:
 
 static cairo_status_t writeStream(void *closure, const unsigned char *data, unsigned int length)
 {
-    FILE *file = (FILE *)closure;
+    FILE *file = static_cast<FILE *>(closure);
 
     if (fwrite(data, length, 1, file) == 1) {
         return CAIRO_STATUS_SUCCESS;
@@ -301,7 +301,7 @@ static void runThread(const std::shared_ptr<JobQueue> &jobQueue)
 
 static void printUsage()
 {
-    int default_threads = std::max(1, (int)std::thread::hardware_concurrency());
+    int default_threads = std::max(1, static_cast<int>(std::thread::hardware_concurrency()));
     printf("cairo-thread-test [-j jobs] [-p priority] [<output option> <files>...]...\n");
     printf(" -j num       number of concurrent threads (default %d)\n", default_threads);
     printf(" -p <priority>  priority is one of:\n");
@@ -315,7 +315,7 @@ static void printUsage()
 // Parse -j and -p options. These must appear before any other arguments
 static bool getThreadsAndPriority(int &argc, char **&argv, int &numThreads, bool &documentPriority)
 {
-    numThreads = std::max(1, (int)std::thread::hardware_concurrency());
+    numThreads = std::max(1, static_cast<int>(std::thread::hardware_concurrency()));
     documentPriority = false;
 
     while (argc > 0) {

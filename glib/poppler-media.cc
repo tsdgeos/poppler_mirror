@@ -223,7 +223,7 @@ const gchar *poppler_media_get_mime_type(PopplerMedia *poppler_media)
 
 static gboolean save_helper(const gchar *buf, gsize count, gpointer data, GError **error)
 {
-    FILE *f = (FILE *)data;
+    FILE *f = static_cast<FILE *>(data);
     gsize n;
 
     n = fwrite(buf, 1, count, f);

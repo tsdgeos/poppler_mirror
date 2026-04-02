@@ -159,7 +159,7 @@ public:
             return;
         }
         while ((readChars = doGetChars(4096, readBuf)) != 0) {
-            s.append((const char *)readBuf, readChars);
+            s.append(reinterpret_cast<const char *>(readBuf), readChars);
         }
     }
 
@@ -584,7 +584,7 @@ private:
                     break;
                 }
             }
-            m = (int)(bufEnd - bufPtr);
+            m = static_cast<int>(bufEnd - bufPtr);
             if (m > nChars - n) {
                 m = nChars - n;
             }
@@ -743,7 +743,7 @@ private:
             return 0;
         }
         if (bufEnd - bufPtr < nChars) {
-            n = (int)(bufEnd - bufPtr);
+            n = static_cast<int>(bufEnd - bufPtr);
         } else {
             n = nChars;
         }

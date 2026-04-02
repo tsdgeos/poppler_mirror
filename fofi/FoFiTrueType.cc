@@ -534,7 +534,7 @@ int FoFiTrueType::mapCodeToGID(int i, unsigned int c) const
     pos = cmaps[i].offset;
     switch (cmaps[i].fmt) {
     case 0:
-        if (c + 6 >= (unsigned int)cmaps[i].len) {
+        if (c + 6 >= static_cast<unsigned int>(cmaps[i].len)) {
             return 0;
         }
         gid = getU8(cmaps[i].offset + 6 + c, &ok);
@@ -656,7 +656,7 @@ std::optional<std::span<const unsigned char>> FoFiTrueType::getCFFBlock() const
     if (i < 0 || !checkRegion(tables[i].offset, tables[i].len)) {
         return std::nullopt;
     }
-    return std::span { file.data() + tables[i].offset, size_t(tables[i].len) };
+    return std::span { file.data() + tables[i].offset, static_cast<size_t>(tables[i].len) };
 }
 
 std::vector<int> FoFiTrueType::getCIDToGIDMap() const
@@ -709,7 +709,7 @@ void FoFiTrueType::convertToType42(const char *psName, char **encoding, const st
 
     // write the header
     ok = true;
-    std::string buf = GooString::format("%!PS-TrueTypeFont-{0:2g}\n", (double)getS32BE(0, &ok) / 65536.0);
+    std::string buf = GooString::format("%!PS-TrueTypeFont-{0:2g}\n", static_cast<double>(getS32BE(0, &ok)) / 65536.0);
     (*outputFunc)(outputStream, buf.c_str(), buf.size());
 
     // begin the font dictionary
@@ -755,7 +755,7 @@ void FoFiTrueType::convertToCIDType2(const char *psName, const std::vector<int> 
 
     // write the header
     ok = true;
-    std::string buf = GooString::format("%!PS-TrueTypeFont-{0:2g}\n", (double)getS32BE(0, &ok) / 65536.0);
+    std::string buf = GooString::format("%!PS-TrueTypeFont-{0:2g}\n", static_cast<double>(getS32BE(0, &ok)) / 65536.0);
     (*outputFunc)(outputStream, buf.c_str(), buf.size());
 
     // begin the font dictionary
@@ -772,7 +772,7 @@ void FoFiTrueType::convertToCIDType2(const char *psName, const std::vector<int> 
     (*outputFunc)(outputStream, "  end def\n", 10);
     (*outputFunc)(outputStream, "/GDBytes 2 def\n", 15);
     if (!cidMap.empty()) {
-        buf = GooString::format("/CIDCount {0:d} def\n", int(cidMap.size()));
+        buf = GooString::format("/CIDCount {0:d} def\n", static_cast<int>(cidMap.size()));
         (*outputFunc)(outputStream, buf.c_str(), buf.size());
         if (cidMap.size() > 32767) {
             (*outputFunc)(outputStream, "/CIDMap [", 9);
@@ -1094,7 +1094,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
         return;
     }
     memcpy(headData.data(), file.data() + pos, 54);
-    headData[8] = headData[9] = headData[10] = headData[11] = (unsigned char)0;
+    headData[8] = headData[9] = headData[10] = headData[11] = static_cast<unsigned char>(0);
 
     // check for a bogus loca format field in the 'head' table
     // (I've encountered fonts with loca format set to 0x0100 instead of 0x0001)
@@ -1110,7 +1110,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
     // table, cmpTrueTypeLocaOffset uses offset as its primary sort key,
     // and idx as its secondary key (ensuring that adjacent entries with
     // the same pos value remain in the same order)
-    std::vector<TrueTypeLoca> locaTable { size_t(nGlyphs + 1) };
+    std::vector<TrueTypeLoca> locaTable { static_cast<size_t>(nGlyphs + 1) };
     i = seekTable("loca");
     pos = tables[i].offset;
     i = seekTable("glyf");
@@ -1119,7 +1119,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
     for (i = 0; i <= nGlyphs; ++i) {
         locaTable[i].idx = i;
         if (locaFmt) {
-            locaTable[i].origOffset = (int)getU32BE(pos + i * 4, &ok);
+            locaTable[i].origOffset = static_cast<int>(getU32BE(pos + i * 4, &ok));
         } else {
             locaTable[i].origOffset = 2 * getU16BE(pos + i * 2, &ok);
         }
@@ -1156,13 +1156,13 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
     for (i = 0; i <= nGlyphs; ++i) {
         pos = locaTable[i].newOffset;
         if (locaFmt) {
-            locaData[4 * i] = (unsigned char)(pos >> 24);
-            locaData[4 * i + 1] = (unsigned char)(pos >> 16);
-            locaData[4 * i + 2] = (unsigned char)(pos >> 8);
-            locaData[4 * i + 3] = (unsigned char)pos;
+            locaData[4 * i] = static_cast<unsigned char>(pos >> 24);
+            locaData[4 * i + 1] = static_cast<unsigned char>(pos >> 16);
+            locaData[4 * i + 2] = static_cast<unsigned char>(pos >> 8);
+            locaData[4 * i + 3] = static_cast<unsigned char>(pos);
         } else {
-            locaData[2 * i] = (unsigned char)(pos >> 9);
-            locaData[2 * i + 1] = (unsigned char)(pos >> 1);
+            locaData[2 * i] = static_cast<unsigned char>(pos >> 9);
+            locaData[2 * i + 1] = static_cast<unsigned char>(pos >> 1);
         }
     }
 
@@ -1269,29 +1269,29 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
     tableDir[4] = 0; // numTables
     tableDir[5] = nNewTables;
     tableDir[6] = 0; // searchRange
-    tableDir[7] = (unsigned char)128;
+    tableDir[7] = static_cast<unsigned char>(128);
     tableDir[8] = 0; // entrySelector
     tableDir[9] = 3;
     tableDir[10] = 0; // rangeShift
-    tableDir[11] = (unsigned char)(16 * nNewTables - 128);
+    tableDir[11] = static_cast<unsigned char>(16 * nNewTables - 128);
     pos = 12;
     for (i = 0; i < nNewTables; ++i) {
-        tableDir[pos] = (unsigned char)(newTables[i].tag >> 24);
-        tableDir[pos + 1] = (unsigned char)(newTables[i].tag >> 16);
-        tableDir[pos + 2] = (unsigned char)(newTables[i].tag >> 8);
-        tableDir[pos + 3] = (unsigned char)newTables[i].tag;
-        tableDir[pos + 4] = (unsigned char)(newTables[i].checksum >> 24);
-        tableDir[pos + 5] = (unsigned char)(newTables[i].checksum >> 16);
-        tableDir[pos + 6] = (unsigned char)(newTables[i].checksum >> 8);
-        tableDir[pos + 7] = (unsigned char)newTables[i].checksum;
-        tableDir[pos + 8] = (unsigned char)(newTables[i].offset >> 24);
-        tableDir[pos + 9] = (unsigned char)(newTables[i].offset >> 16);
-        tableDir[pos + 10] = (unsigned char)(newTables[i].offset >> 8);
-        tableDir[pos + 11] = (unsigned char)newTables[i].offset;
-        tableDir[pos + 12] = (unsigned char)(newTables[i].len >> 24);
-        tableDir[pos + 13] = (unsigned char)(newTables[i].len >> 16);
-        tableDir[pos + 14] = (unsigned char)(newTables[i].len >> 8);
-        tableDir[pos + 15] = (unsigned char)newTables[i].len;
+        tableDir[pos] = static_cast<unsigned char>(newTables[i].tag >> 24);
+        tableDir[pos + 1] = static_cast<unsigned char>(newTables[i].tag >> 16);
+        tableDir[pos + 2] = static_cast<unsigned char>(newTables[i].tag >> 8);
+        tableDir[pos + 3] = static_cast<unsigned char>(newTables[i].tag);
+        tableDir[pos + 4] = static_cast<unsigned char>(newTables[i].checksum >> 24);
+        tableDir[pos + 5] = static_cast<unsigned char>(newTables[i].checksum >> 16);
+        tableDir[pos + 6] = static_cast<unsigned char>(newTables[i].checksum >> 8);
+        tableDir[pos + 7] = static_cast<unsigned char>(newTables[i].checksum);
+        tableDir[pos + 8] = static_cast<unsigned char>(newTables[i].offset >> 24);
+        tableDir[pos + 9] = static_cast<unsigned char>(newTables[i].offset >> 16);
+        tableDir[pos + 10] = static_cast<unsigned char>(newTables[i].offset >> 8);
+        tableDir[pos + 11] = static_cast<unsigned char>(newTables[i].offset);
+        tableDir[pos + 12] = static_cast<unsigned char>(newTables[i].len >> 24);
+        tableDir[pos + 13] = static_cast<unsigned char>(newTables[i].len >> 16);
+        tableDir[pos + 14] = static_cast<unsigned char>(newTables[i].len >> 8);
+        tableDir[pos + 15] = static_cast<unsigned char>(newTables[i].len);
         pos += 16;
     }
 
@@ -1301,10 +1301,10 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
         checksum += newTables[i].checksum;
     }
     checksum = 0xb1b0afba - checksum; // because the TrueType spec says so
-    headData[8] = (unsigned char)(checksum >> 24);
-    headData[9] = (unsigned char)(checksum >> 16);
-    headData[10] = (unsigned char)(checksum >> 8);
-    headData[11] = (unsigned char)checksum;
+    headData[8] = static_cast<unsigned char>(checksum >> 24);
+    headData[9] = static_cast<unsigned char>(checksum >> 16);
+    headData[10] = static_cast<unsigned char>(checksum >> 8);
+    headData[11] = static_cast<unsigned char>(checksum);
 
     // start the sfnts array
     if (name) {
@@ -1463,8 +1463,8 @@ void FoFiTrueType::parse()
     for (i = 0; i < nTables; ++i) {
         tables[j].tag = getU32BE(pos, &parsedOk);
         tables[j].checksum = getU32BE(pos + 4, &parsedOk);
-        tables[j].offset = (int)getU32BE(pos + 8, &parsedOk);
-        tables[j].len = (int)getU32BE(pos + 12, &parsedOk);
+        tables[j].offset = static_cast<int>(getU32BE(pos + 8, &parsedOk));
+        tables[j].len = static_cast<int>(getU32BE(pos + 12, &parsedOk));
         if (unlikely((tables[j].offset < 0) || (tables[j].len < 0) || (tables[j].offset < INT_MAX - tables[j].len) || (tables[j].len > INT_MAX - tables[j].offset)
                      || (tables[j].offset + tables[j].len >= tables[j].offset && tables[j].offset + tables[j].len <= int(file.size())))) {
             // ignore any bogus entries in the table directory
@@ -1591,10 +1591,10 @@ void FoFiTrueType::readPostTable()
                 if (!ok || !checkRegion(stringPos + 1, m)) {
                     continue;
                 }
-                if (((size_t(stringPos) + 1) == file.size()) || m == 0) {
+                if (((static_cast<size_t>(stringPos) + 1) == file.size()) || m == 0) {
                     name.clear();
                 } else {
-                    name.assign((char *)&file[stringPos + 1], m);
+                    name.assign(reinterpret_cast<const char *>(&file[stringPos + 1]), m);
                 }
                 nameToGID[name] = i;
                 ++stringIdx;

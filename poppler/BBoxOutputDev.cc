@@ -106,7 +106,7 @@ void BBoxOutputDev::drawChar(GfxState *state, double x, double y, double dx, dou
         return;
     }
 
-    if (code == (CharCode)0x20) {
+    if (code == static_cast<CharCode>(0x20)) {
         return;
     }
 
@@ -135,7 +135,7 @@ void BBoxOutputDev::drawChar(GfxState *state, double x, double y, double dx, dou
     } else {
         // adjust font size for type3 fonts,
         // similar to TextPage::updateFont()
-        w = ((Gfx8BitFont *)font)->getWidth(code);
+        w = static_cast<const Gfx8BitFont *>(font)->getWidth(code);
         adjust = w / 0.5;
         const std::array<double, 6> &fm = font->getFontMatrix();
         if (fm[0] != 0) {

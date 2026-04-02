@@ -1159,7 +1159,7 @@ AnnotAppearanceCharacs::AnnotAppearanceCharacs(Dict *dict)
 
     obj1 = dict->lookup("TP");
     if (obj1.isInt()) {
-        position = (AnnotAppearanceCharacsTextPos)obj1.getInt();
+        position = static_cast<AnnotAppearanceCharacsTextPos>(obj1.getInt());
     } else {
         position = captionNoIcon;
     }
@@ -1538,7 +1538,7 @@ void Annot::setFlags(unsigned int new_flags)
 {
     annotLocker();
     flags = new_flags;
-    update("F", Object(int(flags)));
+    update("F", Object(static_cast<int>(flags)));
 }
 
 void Annot::setBorder(std::unique_ptr<AnnotBorder> &&new_border)
@@ -1936,7 +1936,7 @@ Object Annot::createForm(const GooString *appearBuf, const std::array<double, 4>
 Object Annot::createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Object &&resDictObject)
 {
     auto appearDict = std::make_unique<Dict>(doc->getXRef());
-    appearDict->set("Length", Object(int(appearBuf->size())));
+    appearDict->set("Length", Object(static_cast<int>(appearBuf->size())));
     appearDict->set("Subtype", Object(objName, "Form"));
 
     auto a = std::make_unique<Array>(doc->getXRef());
@@ -2908,7 +2908,7 @@ void AnnotFreeText::initialize(Dict *dict)
 
     obj1 = dict->lookup("Q");
     if (obj1.isInt()) {
-        quadding = (VariableTextQuadding)obj1.getInt();
+        quadding = static_cast<VariableTextQuadding>(obj1.getInt());
     } else {
         quadding = VariableTextQuadding::leftJustified;
     }
@@ -2993,7 +2993,7 @@ void AnnotFreeText::setDefaultAppearance(const DefaultAppearance &da)
 void AnnotFreeText::setQuadding(VariableTextQuadding new_quadding)
 {
     quadding = new_quadding;
-    update("Q", Object((int)quadding));
+    update("Q", Object(static_cast<int>(quadding)));
     invalidateAppearance();
 }
 
@@ -3111,8 +3111,8 @@ public:
             } else {
                 Unicode uChar;
                 if (isUnicode) {
-                    uChar = (unsigned char)(text->getChar(i)) << 8;
-                    uChar += (unsigned char)(text->getChar(i + 1));
+                    uChar = static_cast<unsigned char>(text->getChar(i)) << 8;
+                    uChar += static_cast<unsigned char>(text->getChar(i + 1));
                 } else {
                     uChar = pdfDocEncoding[text->getChar(i) & 0xff];
                 }
@@ -4377,8 +4377,8 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, size_t *i, cons
         last_o2 = outBuf->size();
 
         if (unicode) {
-            uChar = (unsigned char)(text->getChar(*i)) << 8;
-            uChar += (unsigned char)(text->getChar(*i + 1));
+            uChar = static_cast<unsigned char>(text->getChar(*i)) << 8;
+            uChar += static_cast<unsigned char>(text->getChar(*i + 1));
             *i += 2;
         } else {
             if (noReencode) {
@@ -4554,7 +4554,7 @@ void AnnotAppearanceBuilder::writeString(const std::string &str)
             appearBuf->push_back('\\');
             appearBuf->push_back(c);
         } else if (c < 0x20) {
-            appearBuf->appendf("\\{0:03o}", (unsigned char)c);
+            appearBuf->appendf("\\{0:03o}", static_cast<unsigned char>(c));
         } else {
             appearBuf->push_back(c);
         }
@@ -5506,7 +5506,7 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
 
     const GooString *appearBuf = appearBuilder.buffer();
     // fill the appearance stream dictionary
-    appearDict->add("Length", Object(int(appearBuf->size())));
+    appearDict->add("Length", Object(static_cast<int>(appearBuf->size())));
     appearDict->add("Subtype", Object(objName, "Form"));
     auto bbox = std::make_unique<Array>(doc->getXRef());
     bbox->add(Object(0));
@@ -5696,7 +5696,7 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
             resDict->set("XObject", Object(std::move(imgDict)));
 
             auto formDict = std::make_unique<Dict>(gfx->getXRef());
-            formDict->set("Length", Object(int(appearBuf->size())));
+            formDict->set("Length", Object(static_cast<int>(appearBuf->size())));
             formDict->set("Subtype", Object(objName, "Form"));
             formDict->set("Name", Object(objName, "FRM"));
             auto bboxArray = std::make_unique<Array>(gfx->getXRef());
@@ -6365,7 +6365,7 @@ void AnnotPolygon::setIntent(AnnotPolygonIntent new_intent)
 
 void AnnotPolygon::generatePolyLineAppearance(AnnotAppearanceBuilder *appearBuilder)
 {
-    const bool fill = (bool)interiorColor;
+    const bool fill = interiorColor != nullptr;
     const double x1 = vertices->getX(0);
     const double y1 = vertices->getY(0);
     const double x2 = vertices->getX(1);

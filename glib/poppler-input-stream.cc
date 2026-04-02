@@ -23,8 +23,8 @@
 
 PopplerInputStream::PopplerInputStream(GInputStream *inputStreamA, GCancellable *cancellableA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA) : BaseSeekInputStream(startA, limitedA, lengthA, std::move(dictA))
 {
-    inputStream = (GInputStream *)g_object_ref(inputStreamA);
-    cancellable = cancellableA ? (GCancellable *)g_object_ref(cancellableA) : nullptr;
+    inputStream = static_cast<GInputStream *> g_object_ref(inputStreamA);
+    cancellable = cancellableA ? static_cast<GCancellable *> g_object_ref(cancellableA) : nullptr;
 }
 
 PopplerInputStream::~PopplerInputStream()

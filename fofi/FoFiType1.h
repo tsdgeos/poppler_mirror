@@ -59,7 +59,7 @@ public:
     explicit FoFiType1(std::vector<unsigned char> &&fileA, PrivateTag /*unused*/ = {});
 
 private:
-    char *getNextLine(char *line) const;
+    const char *getNextLine(const char *line) const;
     void parse();
     void undoPFB();
 

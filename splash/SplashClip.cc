@@ -231,10 +231,10 @@ SplashClipResult SplashClip::testRect(int rectXMin, int rectYMin, int rectXMax, 
     // against the clipping region:
     //     x = [xMin, xMax)                (note: clipping coords are fp)
     //     y = [yMin, yMax)
-    if ((SplashCoord)(rectXMax + 1) <= xMin || (SplashCoord)rectXMin >= xMax || (SplashCoord)(rectYMax + 1) <= yMin || (SplashCoord)rectYMin >= yMax) {
+    if (static_cast<SplashCoord>(rectXMax + 1) <= xMin || static_cast<SplashCoord>(rectXMin) >= xMax || static_cast<SplashCoord>(rectYMax + 1) <= yMin || static_cast<SplashCoord>(rectYMin) >= yMax) {
         return splashClipAllOutside;
     }
-    if ((SplashCoord)rectXMin >= xMin && (SplashCoord)(rectXMax + 1) <= xMax && (SplashCoord)rectYMin >= yMin && (SplashCoord)(rectYMax + 1) <= yMax && scanners.empty()) {
+    if (static_cast<SplashCoord>(rectXMin) >= xMin && static_cast<SplashCoord>(rectXMax + 1) <= xMax && static_cast<SplashCoord>(rectYMin) >= yMin && static_cast<SplashCoord>(rectYMax + 1) <= yMax && scanners.empty()) {
         return splashClipAllInside;
     }
     return splashClipPartial;
@@ -248,10 +248,10 @@ SplashClipResult SplashClip::testSpan(int spanXMin, int spanXMax, int spanY)
     // against the clipping region:
     //     x = [xMin, xMax)                (note: clipping coords are fp)
     //     y = [yMin, yMax)
-    if ((SplashCoord)(spanXMax + 1) <= xMin || (SplashCoord)spanXMin >= xMax || (SplashCoord)(spanY + 1) <= yMin || (SplashCoord)spanY >= yMax) {
+    if (static_cast<SplashCoord>(spanXMax + 1) <= xMin || static_cast<SplashCoord>(spanXMin) >= xMax || static_cast<SplashCoord>(spanY + 1) <= yMin || static_cast<SplashCoord>(spanY) >= yMax) {
         return splashClipAllOutside;
     }
-    if ((SplashCoord)spanXMin < xMin || (SplashCoord)(spanXMax + 1) > xMax || (SplashCoord)spanY < yMin || (SplashCoord)(spanY + 1) > yMax) {
+    if (static_cast<SplashCoord>(spanXMin) < xMin || static_cast<SplashCoord>(spanXMax + 1) > xMax || static_cast<SplashCoord>(spanY) < yMin || static_cast<SplashCoord>(spanY + 1) > yMax) {
         return splashClipPartial;
     }
     if (antialias) {

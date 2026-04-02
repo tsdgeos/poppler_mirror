@@ -91,8 +91,8 @@ void SplashPath::grow(int nPts)
         while (size < length + nPts) {
             size *= 2;
         }
-        pts = (SplashPathPoint *)greallocn_checkoverflow(pts, size, sizeof(SplashPathPoint));
-        flags = (unsigned char *)greallocn_checkoverflow(flags, size, sizeof(unsigned char));
+        pts = static_cast<SplashPathPoint *>(greallocn_checkoverflow(pts, size, sizeof(SplashPathPoint)));
+        flags = static_cast<unsigned char *>(greallocn_checkoverflow(flags, size, sizeof(unsigned char)));
         if (unlikely(!pts || !flags)) {
             length = size = curSubpath = 0;
         }
@@ -195,7 +195,7 @@ void SplashPath::addStrokeAdjustHint(int ctrl0, int ctrl1, int firstPt, int last
 {
     if (hintsLength == hintsSize) {
         hintsSize = hintsLength ? 2 * hintsLength : 8;
-        hints = (SplashPathHint *)greallocn_checkoverflow(hints, hintsSize, sizeof(SplashPathHint));
+        hints = static_cast<SplashPathHint *>(greallocn_checkoverflow(hints, hintsSize, sizeof(SplashPathHint)));
     }
     if (unlikely(!hints)) {
         return;

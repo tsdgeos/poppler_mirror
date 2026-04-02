@@ -139,7 +139,7 @@ void poppler_action_free(PopplerAction *action)
         break;
     case POPPLER_ACTION_OCG_STATE:
         if (action->ocg_state.state_list) {
-            g_list_free_full(action->ocg_state.state_list, (GDestroyNotify)poppler_action_layer_free);
+            g_list_free_full(action->ocg_state.state_list, reinterpret_cast<GDestroyNotify>(poppler_action_layer_free));
         }
         break;
     case POPPLER_ACTION_JAVASCRIPT:
@@ -211,12 +211,12 @@ PopplerAction *poppler_action_copy(PopplerAction *action)
         break;
     case POPPLER_ACTION_MOVIE:
         if (action->movie.movie) {
-            new_action->movie.movie = (PopplerMovie *)g_object_ref(action->movie.movie);
+            new_action->movie.movie = static_cast<PopplerMovie *> g_object_ref(action->movie.movie);
         }
         break;
     case POPPLER_ACTION_RENDITION:
         if (action->rendition.media) {
-            new_action->rendition.media = (PopplerMedia *)g_object_ref(action->rendition.media);
+            new_action->rendition.media = static_cast<PopplerMedia *> g_object_ref(action->rendition.media);
         }
         break;
     case POPPLER_ACTION_OCG_STATE:
@@ -225,7 +225,7 @@ PopplerAction *poppler_action_copy(PopplerAction *action)
             GList *new_list = nullptr;
 
             for (l = action->ocg_state.state_list; l; l = g_list_next(l)) {
-                auto *alayer = (PopplerActionLayer *)l->data;
+                auto *alayer = static_cast<PopplerActionLayer *>(l->data);
                 new_list = g_list_prepend(new_list, poppler_action_layer_copy(alayer));
             }
 
@@ -244,7 +244,7 @@ PopplerAction *poppler_action_copy(PopplerAction *action)
 
             new_action->reset_form.fields = nullptr;
             for (iter = action->reset_form.fields; iter != nullptr; iter = iter->next) {
-                new_action->reset_form.fields = g_list_append(new_action->reset_form.fields, g_strdup((char *)iter->data));
+                new_action->reset_form.fields = g_list_append(new_action->reset_form.fields, g_strdup(static_cast<char *>(iter->data)));
             }
         }
         break;
@@ -353,7 +353,7 @@ static PopplerDest *dest_new_named(const GooString *named_dest)
     const std::string &str = named_dest->toStr();
 
     dest->type = POPPLER_DEST_NAMED;
-    dest->named_dest = poppler_named_dest_from_bytestring((const guint8 *)str.data(), str.size());
+    dest->named_dest = poppler_named_dest_from_bytestring(reinterpret_cast<const guint8 *>(str.data()), str.size());
 
     return dest;
 }
@@ -560,7 +560,7 @@ static PopplerLayer *get_layer_for_ref(PopplerDocument *document, GList *layers,
     GList *l;
 
     for (l = layers; l; l = g_list_next(l)) {
-        auto *layer = (Layer *)l->data;
+        auto *layer = static_cast<Layer *>(l->data);
 
         if (layer->oc) {
             const Ref ocgRef = layer->oc->getRef();

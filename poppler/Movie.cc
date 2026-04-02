@@ -107,7 +107,7 @@ void MovieActivationParameters::parseMovieActivation(const Object *aDict)
     obj1 = aDict->dictLookup("Volume");
     if (obj1.isNum()) {
         // convert volume to [0 100]
-        volume = int((obj1.getNum() + 1.0) * 50);
+        volume = static_cast<int>((obj1.getNum() + 1.0) * 50);
     }
 
     obj1 = aDict->dictLookup("ShowControls");
@@ -193,11 +193,11 @@ void Movie::parseMovie(const Object *movieDict)
         if (aspect->getLength() >= 2) {
             Object tmp = aspect->get(0);
             if (tmp.isNum()) {
-                width = (int)floor(tmp.getNum() + 0.5);
+                width = static_cast<int>(floor(tmp.getNum() + 0.5));
             }
             tmp = aspect->get(1);
             if (tmp.isNum()) {
-                height = (int)floor(tmp.getNum() + 0.5);
+                height = static_cast<int>(floor(tmp.getNum() + 0.5));
             }
         }
     }
@@ -269,8 +269,8 @@ Movie::Movie(const Movie &other)
 
 void Movie::getFloatingWindowSize(int *widthA, int *heightA) const
 {
-    *widthA = int(width * double(MA.znum) / MA.zdenum);
-    *heightA = int(height * double(MA.znum) / MA.zdenum);
+    *widthA = static_cast<int>(width * static_cast<double>(MA.znum) / MA.zdenum);
+    *heightA = static_cast<int>(height * static_cast<double>(MA.znum) / MA.zdenum);
 }
 
 std::unique_ptr<Movie> Movie::copy() const

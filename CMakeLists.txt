@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.28.0 FATAL_ERROR)
 
 project(poppler)
 
@@ -30,7 +30,7 @@ include(CMakePushCheckState)
 
 set(ENABLE_FUZZER FALSE)
 
-find_package (ECM 1.6.0 QUIET NO_MODULE)
+find_package (ECM 5.115.0 QUIET NO_MODULE)
 if (ECM_FOUND)
     include("${ECM_MODULE_DIR}/ECMEnableSanitizers.cmake")
 
@@ -40,7 +40,7 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "26")
-set(POPPLER_MINOR_VERSION_STRING "03")
+set(POPPLER_MINOR_VERSION_STRING "04")
 # We want the string version to have 08 but the integer version can't have a leading 0 since otherwise it's considered octal
 # So strip a leading 0 if found in POPPLER_MINOR_VERSION_STRING and store the result in POPPLER_MINOR_VERSION
 string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VERSION_STRING}")
@@ -139,17 +139,21 @@ else()
 endif()
 
 # setting the minimum required versions for some components
-set(CAIRO_VERSION "1.16.0")
-set(GLIB_REQUIRED "2.72")
+set(CAIRO_VERSION "1.18.0")
+set(GLIB_REQUIRED "2.80")
 set(GTK_REQUIRED "3.24")
-set(GDK_PIXBUF_REQUIRED "2.40")
-set(FREETYPE_VERSION "2.11")
-set(FONTCONFIG_VERSION "2.13")
-set(LIBCURL_VERSION "7.81")
-set(NSS3_VERSION "3.68")
+set(GDK_PIXBUF_REQUIRED "2.42")
+set(FREETYPE_VERSION "2.13")
+set(FONTCONFIG_VERSION "2.15")
+set(LIBCURL_VERSION "8.5")
+set(NSS3_VERSION "3.98")
 set(GPGME_VERSION "1.19")
-set(LCMS2_REQUIRED_VERSION "2.12")
-set(TIFF_VERSION "4.3")
+set(LCMS2_REQUIRED_VERSION "2.14")
+set(TIFF_VERSION "4.5")
+set(QT5_VERSION "5.15")
+set(QT6_VERSION "6.4")
+set(BOOST_VERSION "1.83")
+set(GOBJECT_INTROSPECTION_VERSION "1.80")
 
 find_package(Freetype ${FREETYPE_VERSION} REQUIRED)
 if(WITH_FONTCONFIGURATION_FONTCONFIG)
@@ -211,14 +215,12 @@ else()
   message(FATAL_ERROR "Invalid ENABLE_DCTDECODER value.")
 endif()
 
-set(QT5_VERSION "5.15")
 find_soft_mandatory_package(ENABLE_QT5 Qt5Core ${QT5_VERSION})
 find_soft_mandatory_package(ENABLE_QT5 Qt5Gui ${QT5_VERSION})
 find_soft_mandatory_package(ENABLE_QT5 Qt5Xml ${QT5_VERSION})
 find_soft_mandatory_package(ENABLE_QT5 Qt5Widgets ${QT5_VERSION})
 find_soft_mandatory_package(ENABLE_QT5 Qt5Test ${QT5_VERSION})
 
-set(QT6_VERSION "6.2")
 SET(QT_NO_CREATE_VERSIONLESS_TARGETS ON)
 find_soft_mandatory_package(ENABLE_QT6 Qt6Core ${QT6_VERSION})
 find_soft_mandatory_package(ENABLE_QT6 Qt6Gui ${QT6_VERSION})
@@ -233,7 +235,7 @@ add_definitions(-DQT_NO_KEYWORDS)
 macro_optional_find_package(Cairo ${CAIRO_VERSION})
 
 if (ENABLE_BOOST)
-  find_package(Boost 1.74.0 CONFIG)
+  find_package(Boost ${BOOST_VERSION} CONFIG)
   if(Boost_FOUND)
     set(USE_BOOST_HEADERS ON)
   else()
@@ -256,7 +258,7 @@ if(CAIRO_FOUND)
   if(ENABLE_GLIB)
     if(ENABLE_GOBJECT_INTROSPECTION)
       # Check for introspection
-      macro_optional_find_package(GObjectIntrospection 1.72.0)
+      macro_optional_find_package(GObjectIntrospection ${GOBJECT_INTROSPECTION_VERSION})
       set(HAVE_INTROSPECTION ${INTROSPECTION_FOUND})
     endif()
     set(POPPLER_GLIB_DISABLE_DEPRECATED "${POPPLER_GLIB_DISABLE_DEPRECATED} -DG_DISABLE_DEPRECATED")
@@ -629,7 +631,7 @@ ADD_GPERF_FILE(TimesItalicWidths)
 ADD_GPERF_FILE(TimesRomanWidths)
 ADD_GPERF_FILE(ZapfDingbatsWidths)
 
-set(POPPLER_SOVERSION_NUMBER "158")
+set(POPPLER_SOVERSION_NUMBER "159")
 
 set(LINKER_SCRIPT "${CMAKE_BINARY_DIR}/libpoppler.map")
 configure_file(
@@ -803,50 +805,39 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     set(poppler_goo_installed_headers ${poppler_goo_installed_headers} goo/JpegWriter.h)
   endif()
 
-  if (${CMAKE_VERSION} VERSION_LESS "3.23.0")
-    install(FILES
-        ${poppler_poppler_installed_headers}
-        ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h
-        ${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h
-        DESTINATION include/poppler)
-    install(FILES ${poppler_goo_installed_headers} DESTINATION include/poppler/goo)
-    install(FILES ${poppler_fofi_installed_headers} DESTINATION include/poppler/fofi)
-    install(FILES ${poppler_splash_installed_headers} DESTINATION include/poppler/splash)
-  else()
-    target_sources(poppler
-      PUBLIC FILE_SET poppler_poppler
-      TYPE HEADERS
-      BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/poppler
-      FILES ${poppler_poppler_installed_headers}
-    )
-    target_sources(poppler
-      PUBLIC FILE_SET poppler_poppler_config
-      TYPE HEADERS
-      BASE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/poppler
-      FILES ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h
-    )
-    target_sources(poppler
-      PUBLIC FILE_SET poppler_export
-      TYPE HEADERS
-      BASE_DIRS ${CMAKE_CURRENT_BINARY_DIR}
-      FILES ${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h
-    )
-    target_sources(poppler
-      PUBLIC FILE_SET poppler_goo_fofi_splash
-      TYPE HEADERS
-      BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
-      FILES
-        ${poppler_goo_installed_headers}
-        ${poppler_fofi_installed_headers}
-        ${poppler_splash_installed_headers}
-    )
-    install(TARGETS poppler
-        FILE_SET poppler_poppler DESTINATION include/poppler
-        FILE_SET poppler_export DESTINATION include/poppler
-        FILE_SET poppler_poppler_config DESTINATION include/poppler
-        FILE_SET poppler_goo_fofi_splash DESTINATION include/poppler
-    )
-  endif()
+  target_sources(poppler
+    PUBLIC FILE_SET poppler_poppler
+    TYPE HEADERS
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/poppler
+    FILES ${poppler_poppler_installed_headers}
+  )
+  target_sources(poppler
+    PUBLIC FILE_SET poppler_poppler_config
+    TYPE HEADERS
+    BASE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/poppler
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h
+  )
+  target_sources(poppler
+    PUBLIC FILE_SET poppler_export
+    TYPE HEADERS
+    BASE_DIRS ${CMAKE_CURRENT_BINARY_DIR}
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h
+  )
+  target_sources(poppler
+    PUBLIC FILE_SET poppler_goo_fofi_splash
+    TYPE HEADERS
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+    FILES
+      ${poppler_goo_installed_headers}
+      ${poppler_fofi_installed_headers}
+      ${poppler_splash_installed_headers}
+  )
+  install(TARGETS poppler
+      FILE_SET poppler_poppler DESTINATION include/poppler
+      FILE_SET poppler_export DESTINATION include/poppler
+      FILE_SET poppler_poppler_config DESTINATION include/poppler
+      FILE_SET poppler_goo_fofi_splash DESTINATION include/poppler
+  )
 endif()
 function(VERIFY_PUBLIC_HEADERS target subfolder)
   set(_gen_source_files "")

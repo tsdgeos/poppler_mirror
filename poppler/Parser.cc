@@ -79,7 +79,7 @@ static std::unique_ptr<GooString> decryptedString(const std::string &s, const un
     std::unique_ptr<GooString> res = std::make_unique<GooString>();
     int c;
     while ((c = decrypt.getChar()) != EOF) {
-        res->push_back((char)c);
+        res->push_back(static_cast<char>(c));
     }
     return res;
 }

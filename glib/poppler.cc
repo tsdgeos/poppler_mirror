@@ -91,5 +91,5 @@ void _poppler_error_cb(ErrorCategory category, Goffset pos, const char *message)
         return;
     }
 
-    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "%s at position %" G_GOFFSET_FORMAT ": %s", cat_str[category], (goffset)pos, message);
+    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "%s at position %" G_GOFFSET_FORMAT ": %s", cat_str[category], static_cast<goffset>(pos), message);
 }

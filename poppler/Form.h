@@ -460,7 +460,7 @@ public:
 
     // For radio buttons, return the fields of the other radio buttons in the same group
     FormFieldButton *getSibling(int i) const { return siblings[i]; }
-    int getNumSiblings() const { return int(siblings.size()); }
+    int getNumSiblings() const { return static_cast<int>(siblings.size()); }
 
     void print(int indent) override;
     void reset(const std::vector<std::string> &excludedFields) override;

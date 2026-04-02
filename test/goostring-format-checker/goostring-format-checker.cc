@@ -7,6 +7,7 @@
  *
  * Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2021, 2025 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  */
 
 #include <cctype>

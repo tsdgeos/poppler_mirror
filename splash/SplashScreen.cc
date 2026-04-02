@@ -81,12 +81,12 @@ void SplashScreen::createMatrix()
     switch (params->type) {
 
     case splashScreenDispersed:
-        mat = (unsigned char *)gmallocn(size * size, sizeof(unsigned char));
+        mat = static_cast<unsigned char *>(gmallocn(size * size, sizeof(unsigned char)));
         buildDispersedMatrix(size / 2, size / 2, 1, size / 2, 1);
         break;
 
     case splashScreenClustered:
-        mat = (unsigned char *)gmallocn(size * size, sizeof(unsigned char));
+        mat = static_cast<unsigned char *>(gmallocn(size * size, sizeof(unsigned char)));
         buildClusteredMatrix();
         break;
 
@@ -96,7 +96,7 @@ void SplashScreen::createMatrix()
             size <<= 1;
             ++log2Size;
         }
-        mat = (unsigned char *)gmallocn(size * size, sizeof(unsigned char));
+        mat = static_cast<unsigned char *>(gmallocn(size * size, sizeof(unsigned char)));
         buildSCDMatrix(params->dotRadius);
         break;
     }
@@ -141,15 +141,15 @@ void SplashScreen::buildClusteredMatrix()
     }
 
     // build the distance matrix
-    dist = (SplashCoord *)gmallocn(size * size2, sizeof(SplashCoord));
+    dist = static_cast<SplashCoord *>(gmallocn(size * size2, sizeof(SplashCoord)));
     for (y = 0; y < size2; ++y) {
         for (x = 0; x < size2; ++x) {
             if (x + y < size2 - 1) {
-                u = (SplashCoord)x + 0.5 - 0;
-                v = (SplashCoord)y + 0.5 - 0;
+                u = static_cast<SplashCoord>(x) + 0.5 - 0;
+                v = static_cast<SplashCoord>(y) + 0.5 - 0;
             } else {
-                u = (SplashCoord)x + 0.5 - (SplashCoord)size2;
-                v = (SplashCoord)y + 0.5 - (SplashCoord)size2;
+                u = static_cast<SplashCoord>(x) + 0.5 - static_cast<SplashCoord>(size2);
+                v = static_cast<SplashCoord>(y) + 0.5 - static_cast<SplashCoord>(size2);
             }
             dist[y * size2 + x] = u * u + v * v;
         }
@@ -157,11 +157,11 @@ void SplashScreen::buildClusteredMatrix()
     for (y = 0; y < size2; ++y) {
         for (x = 0; x < size2; ++x) {
             if (x < y) {
-                u = (SplashCoord)x + 0.5 - 0;
-                v = (SplashCoord)y + 0.5 - (SplashCoord)size2;
+                u = static_cast<SplashCoord>(x) + 0.5 - 0;
+                v = static_cast<SplashCoord>(y) + 0.5 - static_cast<SplashCoord>(size2);
             } else {
-                u = (SplashCoord)x + 0.5 - (SplashCoord)size2;
-                v = (SplashCoord)y + 0.5 - 0;
+                u = static_cast<SplashCoord>(x) + 0.5 - static_cast<SplashCoord>(size2);
+                v = static_cast<SplashCoord>(y) + 0.5 - 0;
             }
             dist[(size2 + y) * size2 + x] = u * u + v * v;
         }
@@ -222,7 +222,7 @@ void SplashScreen::buildSCDMatrix(int r)
     int x, y, xx, yy, x0, x1, y0, y1, i, j, d, iMin, dMin, n;
 
     // generate the random space-filling curve
-    pts = (SplashScreenPoint *)gmallocn(size * size, sizeof(SplashScreenPoint));
+    pts = static_cast<SplashScreenPoint *>(gmallocn(size * size, sizeof(SplashScreenPoint)));
     i = 0;
     for (y = 0; y < size; ++y) {
         for (x = 0; x < size; ++x) {
@@ -232,7 +232,7 @@ void SplashScreen::buildSCDMatrix(int r)
         }
     }
     for (i = 0; i < size * size; ++i) {
-        j = i + (int)((double)(size * size - i) * grandom_double());
+        j = i + static_cast<int>(static_cast<double>(size * size - i) * grandom_double());
         x = pts[i].x;
         y = pts[i].y;
         pts[i].x = pts[j].x;
@@ -242,7 +242,7 @@ void SplashScreen::buildSCDMatrix(int r)
     }
 
     // construct the circle template
-    tmpl = (char *)gmallocn((r + 1) * (r + 1), sizeof(char));
+    tmpl = static_cast<char *>(gmallocn((r + 1) * (r + 1), sizeof(char)));
     for (y = 0; y <= r; ++y) {
         for (x = 0; x <= r; ++x) {
             tmpl[y * (r + 1) + x] = (x * y <= r * r) ? 1 : 0;
@@ -250,7 +250,7 @@ void SplashScreen::buildSCDMatrix(int r)
     }
 
     // mark all grid cells as free
-    grid = (char *)gmallocn(size * size, sizeof(char));
+    grid = static_cast<char *>(gmallocn(size * size, sizeof(char)));
     for (y = 0; y < size; ++y) {
         for (x = 0; x < size; ++x) {
             grid[(y << log2Size) + x] = 0;
@@ -260,14 +260,14 @@ void SplashScreen::buildSCDMatrix(int r)
     // walk the space-filling curve, adding dots
     dotsLen = 0;
     dotsSize = 32;
-    dots = (SplashScreenPoint *)gmallocn(dotsSize, sizeof(SplashScreenPoint));
+    dots = static_cast<SplashScreenPoint *>(gmallocn(dotsSize, sizeof(SplashScreenPoint)));
     for (i = 0; i < size * size; ++i) {
         x = pts[i].x;
         y = pts[i].y;
         if (!grid[(y << log2Size) + x]) {
             if (dotsLen == dotsSize) {
                 dotsSize *= 2;
-                dots = (SplashScreenPoint *)greallocn(dots, dotsSize, sizeof(SplashScreenPoint));
+                dots = static_cast<SplashScreenPoint *>(greallocn(dots, dotsSize, sizeof(SplashScreenPoint)));
             }
             dots[dotsLen++] = pts[i];
             for (yy = 0; yy <= r; ++yy) {
@@ -291,8 +291,8 @@ void SplashScreen::buildSCDMatrix(int r)
     gfree(grid);
 
     // assign each cell to a dot, compute distance to center of dot
-    region = (int *)gmallocn(size * size, sizeof(int));
-    dist = (int *)gmallocn(size * size, sizeof(int));
+    region = static_cast<int *>(gmallocn(size * size, sizeof(int)));
+    dist = static_cast<int *>(gmallocn(size * size, sizeof(int)));
     for (y = 0; y < size; ++y) {
         for (x = 0; x < size; ++x) {
             iMin = 0;
@@ -342,7 +342,7 @@ SplashScreen::SplashScreen(const SplashScreen *screen)
     size = screen->size;
     sizeM1 = screen->sizeM1;
     log2Size = screen->log2Size;
-    mat = (unsigned char *)gmallocn(size * size, sizeof(unsigned char));
+    mat = static_cast<unsigned char *>(gmallocn(size * size, sizeof(unsigned char)));
     if (likely(mat != nullptr)) {
         memcpy(mat, screen->mat, size * size * sizeof(unsigned char));
     }

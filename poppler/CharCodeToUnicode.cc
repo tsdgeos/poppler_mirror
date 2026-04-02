@@ -57,10 +57,10 @@ static int getCharFromString(void *data)
     unsigned char *p;
     int c;
 
-    p = *(unsigned char **)data;
+    p = *static_cast<unsigned char **>(data);
     if (*p) {
         c = *p++;
-        *(unsigned char **)data = p;
+        *static_cast<unsigned char **>(data) = p;
     } else {
         c = EOF;
     }
@@ -69,7 +69,7 @@ static int getCharFromString(void *data)
 
 static int getCharFromFile(void *data)
 {
-    return fgetc((FILE *)data);
+    return fgetc(static_cast<FILE *>(data));
 }
 
 //------------------------------------------------------------------------
@@ -146,7 +146,7 @@ std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::parseCIDToUnicode(const ch
         if (sscanf(buf, "%x", &u) == 1) {
             mapA[mapLenA] = u;
         } else {
-            error(errSyntaxWarning, -1, "Bad line ({0:d}) in cidToUnicode file '{1:s}'", (int)(mapLenA + 1), fileName);
+            error(errSyntaxWarning, -1, "Bad line ({0:d}) in cidToUnicode file '{1:s}'", static_cast<int>(mapLenA + 1), fileName);
             mapA[mapLenA] = 0;
         }
         ++mapLenA;
@@ -499,7 +499,7 @@ int CharCodeToUnicode::mapToUnicode(CharCode c, Unicode const **u) const
 {
     if (isIdentity) {
         auto *that = const_cast<CharCodeToUnicode *>(this);
-        that->map[0] = (Unicode)c;
+        that->map[0] = static_cast<Unicode>(c);
         *u = map.data();
         return 1;
     }
@@ -524,7 +524,7 @@ int CharCodeToUnicode::mapToCharCode(const Unicode *u, CharCode *c, int usize) c
     // look for charcode in map
     if (usize == 1 || (usize > 1 && !(*u & ~0xff))) {
         if (isIdentity) {
-            *c = (CharCode)*u;
+            *c = static_cast<CharCode>(*u);
             return 1;
         }
         for (CharCode i = 0; i < map.size(); i++) {
@@ -540,7 +540,7 @@ int CharCodeToUnicode::mapToCharCode(const Unicode *u, CharCode *c, int usize) c
         for (const auto &element : sMap) {
             // if the entry's unicode length isn't the same are usize, the strings
             // are obviously different
-            if (element.u.size() != size_t(usize)) {
+            if (element.u.size() != static_cast<size_t>(usize)) {
                 continue;
             }
             // compare the string char by char

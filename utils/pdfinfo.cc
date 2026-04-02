@@ -169,7 +169,7 @@ static void printInfoDate(Dict *infoDict, const char *key, const char *text, con
             tmStruct.tm_isdst = -1;
             // compute the tm_wday and tm_yday fields
             time = timegm(&tmStruct);
-            if (time != (time_t)-1) {
+            if (time != static_cast<time_t>(-1)) {
                 int offset = (tz_hour * 60 + tz_minute) * 60;
                 if (tz == '-') {
                     offset *= -1;

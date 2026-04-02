@@ -77,7 +77,7 @@ page_transition::~page_transition()
 
 page_transition::type_enum page_transition::type() const
 {
-    return (page_transition::type_enum)d->pt.getType();
+    return static_cast<page_transition::type_enum>(d->pt.getType());
 }
 
 int page_transition::duration() const
@@ -92,12 +92,12 @@ double page_transition::durationReal() const
 
 page_transition::alignment_enum page_transition::alignment() const
 {
-    return (page_transition::alignment_enum)d->pt.getAlignment();
+    return static_cast<page_transition::alignment_enum>(d->pt.getAlignment());
 }
 
 page_transition::direction_enum page_transition::direction() const
 {
-    return (page_transition::direction_enum)d->pt.getDirection();
+    return static_cast<page_transition::direction_enum>(d->pt.getDirection());
 }
 
 int page_transition::angle() const

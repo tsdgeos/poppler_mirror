@@ -90,7 +90,7 @@ QByteArray SoundObject::data() const
     QByteArray fileArray;
     int i;
     while ((i = stream->getChar()) != EOF) {
-        fileArray[dataLen] = (char)i;
+        fileArray[dataLen] = static_cast<char>(i);
         ++dataLen;
     }
     fileArray.resize(dataLen);

@@ -15,6 +15,7 @@
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2019, 2021, 2022, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2020 Peter Wang <novalazy@gmail.com>
+// Copyright (C) 2026 Taufeeque Sifat <entity069@protonmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -74,16 +75,16 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
     strokeOverprint = false;
     overprintMode = 0;
     for (i = 0; i < 256; ++i) {
-        rgbTransferR[i] = (unsigned char)i;
-        rgbTransferG[i] = (unsigned char)i;
-        rgbTransferB[i] = (unsigned char)i;
-        grayTransfer[i] = (unsigned char)i;
-        cmykTransferC[i] = (unsigned char)i;
-        cmykTransferM[i] = (unsigned char)i;
-        cmykTransferY[i] = (unsigned char)i;
-        cmykTransferK[i] = (unsigned char)i;
+        rgbTransferR[i] = static_cast<unsigned char>(i);
+        rgbTransferG[i] = static_cast<unsigned char>(i);
+        rgbTransferB[i] = static_cast<unsigned char>(i);
+        grayTransfer[i] = static_cast<unsigned char>(i);
+        cmykTransferC[i] = static_cast<unsigned char>(i);
+        cmykTransferM[i] = static_cast<unsigned char>(i);
+        cmykTransferY[i] = static_cast<unsigned char>(i);
+        cmykTransferK[i] = static_cast<unsigned char>(i);
         for (auto &cp : deviceNTransfer) {
-            cp[i] = (unsigned char)i;
+            cp[i] = static_cast<unsigned char>(i);
         }
     }
     overprintMask = 0xffffffff;
@@ -128,16 +129,16 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, const Spla
     strokeOverprint = false;
     overprintMode = 0;
     for (i = 0; i < 256; ++i) {
-        rgbTransferR[i] = (unsigned char)i;
-        rgbTransferG[i] = (unsigned char)i;
-        rgbTransferB[i] = (unsigned char)i;
-        grayTransfer[i] = (unsigned char)i;
-        cmykTransferC[i] = (unsigned char)i;
-        cmykTransferM[i] = (unsigned char)i;
-        cmykTransferY[i] = (unsigned char)i;
-        cmykTransferK[i] = (unsigned char)i;
+        rgbTransferR[i] = static_cast<unsigned char>(i);
+        rgbTransferG[i] = static_cast<unsigned char>(i);
+        rgbTransferB[i] = static_cast<unsigned char>(i);
+        grayTransfer[i] = static_cast<unsigned char>(i);
+        cmykTransferC[i] = static_cast<unsigned char>(i);
+        cmykTransferM[i] = static_cast<unsigned char>(i);
+        cmykTransferY[i] = static_cast<unsigned char>(i);
+        cmykTransferK[i] = static_cast<unsigned char>(i);
         for (auto &cp : deviceNTransfer) {
-            cp[i] = (unsigned char)i;
+            cp[i] = static_cast<unsigned char>(i);
         }
     }
     overprintMask = 0xffffffff;

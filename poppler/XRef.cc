@@ -165,8 +165,8 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
         return;
     }
     objs = new Object[nObjects];
-    objNums = (int *)gmallocn(nObjects, sizeof(int));
-    offsets = (Goffset *)gmallocn(nObjects, sizeof(Goffset));
+    objNums = static_cast<int *>(gmallocn(nObjects, sizeof(int)));
+    offsets = static_cast<Goffset *>(gmallocn(nObjects, sizeof(Goffset)));
 
     // parse the header: object numbers and offsets
     auto embedStr = std::make_unique<EmbedStream>(objStr.getStream(), Object::null(), true, first);
@@ -414,7 +414,7 @@ XRef *XRef::copy() const
     }
     xref->streamEndsLen = streamEndsLen;
     if (streamEndsLen != 0) {
-        xref->streamEnds = (Goffset *)gmalloc(streamEndsLen * sizeof(Goffset));
+        xref->streamEnds = static_cast<Goffset *>(gmalloc(streamEndsLen * sizeof(Goffset)));
         for (int i = 0; i < streamEndsLen; i++) {
             xref->streamEnds[i] = streamEnds[i];
         }
@@ -440,7 +440,7 @@ int XRef::reserve(int newSize)
             }
             newCapacity *= 2;
         }
-        if (newCapacity >= INT_MAX / (int)sizeof(XRefEntry)) {
+        if (newCapacity >= INT_MAX / static_cast<int>(sizeof(XRefEntry))) {
             std::fputs("Too large XRef size\n", stderr);
             return 0;
         }
@@ -451,7 +451,7 @@ int XRef::reserve(int newSize)
             return 0;
         }
 
-        entries = (XRefEntry *)p;
+        entries = static_cast<XRefEntry *>(p);
         capacity = newCapacity;
     }
 
@@ -661,7 +661,7 @@ bool XRef::readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *fol
     } else if (obj2.isRef()) {
         // certain buggy PDF generators generate "/Prev NNN 0 R" instead
         // of "/Prev NNN"
-        pos2 = (unsigned int)obj2.getRefNum();
+        pos2 = static_cast<unsigned int>(obj2.getRefNum());
         if (pos2 != *pos) {
             *pos = pos2;
             more = true;
@@ -840,7 +840,7 @@ bool XRef::readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n
             }
             offset = (offset << 8) + c;
         }
-        if (offset > (unsigned long long)GoffsetMax()) {
+        if (offset > static_cast<unsigned long long>(GoffsetMax())) {
             error(errSyntaxError, -1, "Offset inside xref table too large for fseek");
             return false;
         }
@@ -926,8 +926,8 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
             memcpy(buf, p, end - p);
             bufPos += p - buf;
             p = buf + (end - p);
-            int n = (int)(buf + 4096 - p);
-            int m = str->doGetChars(n, (unsigned char *)p);
+            int n = static_cast<int>(buf + 4096 - p);
+            int m = str->doGetChars(n, reinterpret_cast<unsigned char *>(p));
             end = p + m;
             *end = '\0';
             p = buf;
@@ -937,21 +937,21 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
             break;
         }
         if (startOfLine && !strncmp(p, "trailer", 7)) {
-            constructTrailerDict((intptr_t)(bufPos + (p + 7 - buf)), needCatalogDict);
+            constructTrailerDict(static_cast<intptr_t>(bufPos + (p + 7 - buf)), needCatalogDict);
             p += 7;
             startOfLine = false;
             space = false;
         } else if (startOfLine && !strncmp(p, "endstream", 9)) {
             if (streamEndsLen == streamEndsSize) {
                 streamEndsSize += 64;
-                streamEnds = (Goffset *)greallocn(streamEnds, streamEndsSize, sizeof(Goffset));
+                streamEnds = static_cast<Goffset *>(greallocn(streamEnds, streamEndsSize, sizeof(Goffset)));
             }
-            streamEnds[streamEndsLen++] = ((Goffset)bufPos + (p - buf));
+            streamEnds[streamEndsLen++] = (static_cast<Goffset>(bufPos) + (p - buf));
             p += 9;
             startOfLine = false;
             space = false;
         } else if (space && *p >= '0' && *p <= '9') {
-            p = constructObjectEntry(p, ((Goffset)bufPos + (p - buf)), &lastObjNum);
+            p = constructObjectEntry(p, (static_cast<Goffset>(bufPos) + (p - buf)), &lastObjNum);
             startOfLine = false;
             space = false;
         } else if (p[0] == '>' && p[1] == '>') {
@@ -970,7 +970,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
                 if (lastObjNum >= 0) {
                     if (streamObjNumsLen == streamObjNumsSize) {
                         streamObjNumsSize += 64;
-                        streamObjNums = (int *)greallocn(streamObjNums, streamObjNumsSize, sizeof(int));
+                        streamObjNums = static_cast<int *>(greallocn(streamObjNums, streamObjNumsSize, sizeof(int)));
                     }
                     streamObjNums[streamObjNumsLen++] = lastObjNum;
                 }
@@ -1352,7 +1352,7 @@ Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
       goto err;
     }
 #endif
-        if (e->offset >= (unsigned int)size || (entries[e->offset].type != xrefEntryUncompressed && entries[e->offset].type != xrefEntryNone)) {
+        if (e->offset >= static_cast<unsigned int>(size) || (entries[e->offset].type != xrefEntryUncompressed && entries[e->offset].type != xrefEntryNone)) {
             error(errSyntaxError, -1, "Invalid object stream");
             goto err;
         }
@@ -1521,7 +1521,7 @@ bool XRef::add(int num, int gen, Goffset offs, bool used)
     xrefLocker();
     if (num >= size) {
         if (num >= capacity) {
-            entries = (XRefEntry *)greallocn_checkoverflow(entries, num + 1, sizeof(XRefEntry));
+            entries = static_cast<XRefEntry *>(greallocn_checkoverflow(entries, num + 1, sizeof(XRefEntry)));
             if (unlikely(entries == nullptr)) {
                 size = 0;
                 capacity = 0;
@@ -1624,7 +1624,7 @@ void XRef::removeIndirectObject(Ref r)
 
 Ref XRef::addStreamObject(std::unique_ptr<Dict> dict, std::vector<char> buffer, StreamCompression compression)
 {
-    dict->add("Length", Object((int)buffer.size()));
+    dict->add("Length", Object(static_cast<int>(buffer.size())));
     auto stream = std::make_unique<AutoFreeMemStream>(std::move(buffer), Object(std::move(dict)));
     stream->setFilterRemovalForbidden(true);
     switch (compression) {
@@ -1699,7 +1699,7 @@ void XRef::XRefTableWriter::startSection(int first, int count)
 
 void XRef::XRefTableWriter::writeEntry(Goffset offset, int gen, XRefEntryType type)
 {
-    outStr->printf("%010lli %05i %c\r\n", (long long)offset, gen, (type == xrefEntryFree) ? 'f' : 'n');
+    outStr->printf("%010lli %05i %c\r\n", static_cast<long long>(offset), gen, (type == xrefEntryFree) ? 'f' : 'n');
 }
 
 void XRef::writeTableToFile(OutStream *outStr, bool writeAllEntries)

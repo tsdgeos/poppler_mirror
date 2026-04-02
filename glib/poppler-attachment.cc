@@ -1,6 +1,6 @@
 /* poppler-attachment.cc: glib wrapper for poppler
  * Copyright (C) 2006, Red Hat, Inc.
- * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -48,7 +48,7 @@ static void poppler_attachment_finalize(GObject *obj);
 
 G_DEFINE_TYPE_WITH_PRIVATE(PopplerAttachment, poppler_attachment, G_TYPE_OBJECT)
 
-#define GET_PRIVATE(obj) ((PopplerAttachmentPrivate *)poppler_attachment_get_instance_private(obj))
+#define GET_PRIVATE(obj) (static_cast<PopplerAttachmentPrivate *>(poppler_attachment_get_instance_private(obj)))
 
 static void poppler_attachment_init(PopplerAttachment *attachment)
 {
@@ -68,7 +68,7 @@ static void poppler_attachment_finalize(GObject *obj)
     PopplerAttachment *attachment;
     PopplerAttachmentPrivate *priv;
 
-    attachment = (PopplerAttachment *)obj;
+    attachment = reinterpret_cast<PopplerAttachment *>(obj);
     priv = GET_PRIVATE(attachment);
 
     if (attachment->name) {
@@ -104,7 +104,7 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
 
     g_assert(emb_file != nullptr);
 
-    attachment = (PopplerAttachment *)g_object_new(POPPLER_TYPE_ATTACHMENT, nullptr);
+    attachment = static_cast<PopplerAttachment *>(g_object_new(POPPLER_TYPE_ATTACHMENT, nullptr));
     priv = GET_PRIVATE(attachment);
 
     if (emb_file->getFileName()) {
@@ -123,7 +123,7 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
             G_GNUC_BEGIN_IGNORE_DEPRECATIONS
             /* This will overflow on dates from after 2038. This field is
              * deprecated, only kept for backward compatibility. */
-            attachment->ctime = (GTime)g_date_time_to_unix(priv->ctime);
+            attachment->ctime = static_cast<GTime>(g_date_time_to_unix(priv->ctime));
             G_GNUC_END_IGNORE_DEPRECATIONS
         }
         if (embFile->modDate()) {
@@ -131,7 +131,7 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
             G_GNUC_BEGIN_IGNORE_DEPRECATIONS
             /* This will overflow on dates from after 2038. This field is
              * deprecated, only kept for backward compatibility. */
-            attachment->mtime = (GTime)g_date_time_to_unix(priv->mtime);
+            attachment->mtime = static_cast<GTime>(g_date_time_to_unix(priv->mtime));
             G_GNUC_END_IGNORE_DEPRECATIONS
         }
 
@@ -230,7 +230,7 @@ gsize poppler_attachment_get_size(PopplerAttachment *attachment)
 
 static gboolean save_helper(const gchar *buf, gsize count, gpointer data, GError **error)
 {
-    FILE *f = (FILE *)data;
+    FILE *f = static_cast<FILE *>(data);
     gsize n;
 
     n = fwrite(buf, 1, count, f);

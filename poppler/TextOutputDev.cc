@@ -892,7 +892,7 @@ int TextPool::getBaseIdx(double base) const
     if (baseIdxDouble > maxBaseIdx) {
         return maxBaseIdx;
     }
-    return (int)baseIdxDouble;
+    return static_cast<int>(baseIdxDouble);
 }
 
 void TextPool::sort()
@@ -992,7 +992,7 @@ void TextPool::sort()
 void TextPool::addWord(TextWord *word)
 {
     // expand the array if needed
-    int wordBaseIdx = (int)(word->base / textPoolStep);
+    int wordBaseIdx = static_cast<int>(word->base / textPoolStep);
 
     if (unlikely(wordBaseIdx <= INT_MIN + 128 || wordBaseIdx >= INT_MAX - 128)) {
         error(errSyntaxWarning, -1, "wordBaseIdx out of range");
@@ -1239,8 +1239,8 @@ void TextLine::coalesce(const UnicodeMap *uMap)
             ++len;
         }
     }
-    text = (Unicode *)gmallocn(len, sizeof(Unicode));
-    edge = (double *)gmallocn(len + 1, sizeof(double));
+    text = static_cast<Unicode *>(gmallocn(len, sizeof(Unicode)));
+    edge = static_cast<double *>(gmallocn(len + 1, sizeof(double)));
     size_t i = 0;
     for (auto *word1 = words; word1; word1 = word1->next) {
         for (size_t j = 0; j < word1->len(); ++j) {
@@ -1250,13 +1250,13 @@ void TextLine::coalesce(const UnicodeMap *uMap)
         }
         edge[i] = word1->edgeEnd;
         if (word1->spaceAfter) {
-            text[i] = (Unicode)0x0020;
+            text[i] = static_cast<Unicode>(0x0020);
             ++i;
         }
     }
 
     // compute convertedLen and set up the col array
-    col = (int *)gmallocn(len + 1, sizeof(int));
+    col = static_cast<int *>(gmallocn(len + 1, sizeof(int)));
     convertedLen = 0;
     for (int ci = 0; ci < len; ++ci) {
         col[ci] = convertedLen;
@@ -1270,7 +1270,7 @@ void TextLine::coalesce(const UnicodeMap *uMap)
 
     // check for hyphen at end of line
     //~ need to check for other chars used as hyphens
-    hyphenated = text[len - 1] == (Unicode)'-';
+    hyphenated = text[len - 1] == static_cast<Unicode>('-');
 }
 
 //------------------------------------------------------------------------
@@ -1895,7 +1895,7 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
     }
 
     // sort lines into xy order for column assignment
-    lineArray = (TextLine **)gmallocn(nLines, sizeof(TextLine *));
+    lineArray = static_cast<TextLine **>(gmallocn(nLines, sizeof(TextLine *)));
     for (line = lines, i = 0; line; line = line->next, ++i) {
         lineArray[i] = line;
     }
@@ -1909,16 +1909,16 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
             col1 = 0; // make gcc happy
             switch (rot) {
             case 0:
-                col1 = (int)((line0->xMin - xMin) / fixedPitch + 0.5);
+                col1 = static_cast<int>((line0->xMin - xMin) / fixedPitch + 0.5);
                 break;
             case 1:
-                col1 = (int)((line0->yMin - yMin) / fixedPitch + 0.5);
+                col1 = static_cast<int>((line0->yMin - yMin) / fixedPitch + 0.5);
                 break;
             case 2:
-                col1 = (int)((xMax - line0->xMax) / fixedPitch + 0.5);
+                col1 = static_cast<int>((xMax - line0->xMax) / fixedPitch + 0.5);
                 break;
             case 3:
-                col1 = (int)((yMax - line0->yMax) / fixedPitch + 0.5);
+                col1 = static_cast<int>((yMax - line0->yMax) / fixedPitch + 0.5);
                 break;
             }
             for (k = 0; k <= line0->len; ++k) {
@@ -2565,7 +2565,7 @@ void TextPage::updateFont(const GfxState *state)
         // subset that doesn't contain 'm').
         mCode = letterCode = anyCode = -1;
         for (code = 0; code < 256; ++code) {
-            name = ((Gfx8BitFont *)gfxFont)->getCharName(code);
+            name = (static_cast<Gfx8BitFont *>(gfxFont))->getCharName(code);
             int nameLen = name ? strlen(name) : 0;
             bool nameOneChar = nameLen == 1 || (nameLen > 1 && name[1] == '\0');
             if (nameOneChar && name[0] == 'm') {
@@ -2574,17 +2574,17 @@ void TextPage::updateFont(const GfxState *state)
             if (letterCode < 0 && nameOneChar && ((name[0] >= 'A' && name[0] <= 'Z') || (name[0] >= 'a' && name[0] <= 'z'))) {
                 letterCode = code;
             }
-            if (anyCode < 0 && name && ((Gfx8BitFont *)gfxFont)->getWidth(code) > 0) {
+            if (anyCode < 0 && name && (static_cast<Gfx8BitFont *>(gfxFont))->getWidth(code) > 0) {
                 anyCode = code;
             }
         }
-        if (mCode >= 0 && (w = ((Gfx8BitFont *)gfxFont)->getWidth(mCode)) > 0) {
+        if (mCode >= 0 && (w = (static_cast<Gfx8BitFont *>(gfxFont))->getWidth(mCode)) > 0) {
             // 0.6 is a generic average 'm' width -- yes, this is a hack
             curFontSize *= w / 0.6;
-        } else if (letterCode >= 0 && (w = ((Gfx8BitFont *)gfxFont)->getWidth(letterCode)) > 0) {
+        } else if (letterCode >= 0 && (w = (static_cast<Gfx8BitFont *>(gfxFont))->getWidth(letterCode)) > 0) {
             // even more of a hack: 0.5 is a generic letter width
             curFontSize *= w / 0.5;
-        } else if (anyCode >= 0 && (w = ((Gfx8BitFont *)gfxFont)->getWidth(anyCode)) > 0) {
+        } else if (anyCode >= 0 && (w = (static_cast<Gfx8BitFont *>(gfxFont))->getWidth(anyCode)) > 0) {
             // better than nothing: 0.5 is a generic character width
             curFontSize *= w / 0.5;
         }
@@ -2651,7 +2651,7 @@ void TextPage::addChar(const GfxState *state, double x, double y, double dx, dou
 
     // subtract char and word spacing from the dx,dy values
     sp = state->getCharSpace();
-    if (c == (CharCode)0x20) {
+    if (c == static_cast<CharCode>(0x20)) {
         sp += state->getWordSpace();
     }
     state->textTransformDelta(sp * state->getHorizScaling(), 0, &dx2, &dy2);
@@ -2681,7 +2681,7 @@ void TextPage::addChar(const GfxState *state, double x, double y, double dx, dou
         endWord();
         return;
     }
-    if (uLen == 1 && u[0] == (Unicode)0x0) {
+    if (uLen == 1 && u[0] == static_cast<Unicode>(0x0)) {
         // ignore null characters
         charPos += nBytes;
         return;
@@ -3328,23 +3328,23 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
     }
     if (physLayout && fixedPitch) {
 
-        blocks = (TextBlock **)gmallocn(nBlocks, sizeof(TextBlock *));
+        blocks = static_cast<TextBlock **>(gmallocn(nBlocks, sizeof(TextBlock *)));
         int i;
         for (blk = blkList, i = 0; blk; blk = blk->next, ++i) {
             blocks[i] = blk;
             col1 = 0; // make gcc happy
             switch (primaryRot) {
             case 0:
-                col1 = (int)(blk->xMin / fixedPitch + 0.5);
+                col1 = static_cast<int>(blk->xMin / fixedPitch + 0.5);
                 break;
             case 1:
-                col1 = (int)(blk->yMin / fixedPitch + 0.5);
+                col1 = static_cast<int>(blk->yMin / fixedPitch + 0.5);
                 break;
             case 2:
-                col1 = (int)((pageWidth - blk->xMax) / fixedPitch + 0.5);
+                col1 = static_cast<int>((pageWidth - blk->xMax) / fixedPitch + 0.5);
                 break;
             case 3:
-                col1 = (int)((pageHeight - blk->yMax) / fixedPitch + 0.5);
+                col1 = static_cast<int>((pageHeight - blk->yMax) / fixedPitch + 0.5);
                 break;
             }
             blk->col = col1;
@@ -3358,7 +3358,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
     } else {
 
         // sort blocks into xy order for column assignment
-        blocks = (TextBlock **)gmallocn(nBlocks, sizeof(TextBlock *));
+        blocks = static_cast<TextBlock **>(gmallocn(nBlocks, sizeof(TextBlock *)));
         int i;
         for (blk = blkList, i = 0; blk; blk = blk->next, ++i) {
             blocks[i] = blk;
@@ -3379,7 +3379,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
                     } else if (blk1->xMax == blk1->xMin) {
                         col2 = blk1->col;
                     } else {
-                        col2 = blk1->col + (int)(((blk0->xMin - blk1->xMin) / (blk1->xMax - blk1->xMin)) * blk1->nColumns);
+                        col2 = blk1->col + static_cast<int>(((blk0->xMin - blk1->xMin) / (blk1->xMax - blk1->xMin)) * blk1->nColumns);
                     }
                     break;
                 case 1:
@@ -3388,7 +3388,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
                     } else if (blk1->yMax == blk1->yMin) {
                         col2 = blk1->col;
                     } else {
-                        col2 = blk1->col + (int)(((blk0->yMin - blk1->yMin) / (blk1->yMax - blk1->yMin)) * blk1->nColumns);
+                        col2 = blk1->col + static_cast<int>(((blk0->yMin - blk1->yMin) / (blk1->yMax - blk1->yMin)) * blk1->nColumns);
                     }
                     break;
                 case 2:
@@ -3397,7 +3397,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
                     } else if (blk1->xMin == blk1->xMax) {
                         col2 = blk1->col;
                     } else {
-                        col2 = blk1->col + (int)(((blk0->xMax - blk1->xMax) / (blk1->xMin - blk1->xMax)) * blk1->nColumns);
+                        col2 = blk1->col + static_cast<int>(((blk0->xMax - blk1->xMax) / (blk1->xMin - blk1->xMax)) * blk1->nColumns);
                     }
                     break;
                 case 3:
@@ -3406,7 +3406,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
                     } else if (blk1->yMin == blk1->yMax) {
                         col2 = blk1->col;
                     } else {
-                        col2 = blk1->col + (int)(((blk0->yMax - blk1->yMax) / (blk1->yMin - blk1->yMax)) * blk1->nColumns);
+                        col2 = blk1->col + static_cast<int>(((blk0->yMax - blk1->yMax) / (blk1->yMin - blk1->yMax)) * blk1->nColumns);
                     }
                     break;
                 }
@@ -3463,7 +3463,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
 #endif
 
     int sortPos = 0;
-    bool *visited = (bool *)gmallocn(nBlocks, sizeof(bool));
+    bool *visited = static_cast<bool *>(gmallocn(nBlocks, sizeof(bool)));
     for (int i = 0; i < nBlocks; i++) {
         visited[i] = false;
     }
@@ -3876,7 +3876,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
     }
 
     // handle right-to-left text
-    reordered = (Unicode *)gmallocn(len, sizeof(Unicode));
+    reordered = static_cast<Unicode *>(gmallocn(len, sizeof(Unicode)));
     reorderText(s, len, nullptr, primaryLR, nullptr, reordered);
 
     // normalize the search string
@@ -3997,7 +3997,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
             }
             if (!caseSensitive) {
                 if (m > txtSize) {
-                    txt = (Unicode *)greallocn(txt, m, sizeof(Unicode));
+                    txt = static_cast<Unicode *>(greallocn(txt, m, sizeof(Unicode)));
                     txtSize = m;
                 }
                 for (k = 0; k < m; ++k) {
@@ -4009,7 +4009,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                 }
                 if (matchAcrossLines && nextline) {
                     nextline_len = ignoreDiacritics ? nextline->ascii_len : nextline->normalized_len;
-                    nextline_txt = (Unicode *)gmallocn(nextline_len, sizeof(Unicode));
+                    nextline_txt = static_cast<Unicode *>(gmallocn(nextline_len, sizeof(Unicode)));
                     for (k = 0; k < nextline_len; ++k) {
                         nextline_txt[k] = ignoreDiacritics ? unicodeToUpper(nextline->ascii_translation[k]) : unicodeToUpper(nextline->normalized[k]);
                     }
@@ -4049,7 +4049,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                     for (k = 0; k < len; ++k) {
                         bool last_char_of_line = j + k == m - 1;
                         bool last_char_of_search_term = k == len - 1;
-                        bool match_started = (bool)k;
+                        bool match_started = static_cast<bool>(k);
 
                         if (p[k] != s2[k] || (nextline_txt && last_char_of_line && !last_char_of_search_term)) {
                             // now check if the comparison failed at the end-of-line hyphen,
@@ -4057,11 +4057,11 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                             nextlineAfterHyphen = false;
 
                             if (s2[k] == p[k]) {
-                                if (p[k] != (Unicode)'-' && !UnicodeIsWhitespace(s2[k + 1])) {
+                                if (p[k] != static_cast<Unicode>('-') && !UnicodeIsWhitespace(s2[k + 1])) {
                                     break;
                                 }
                                 k++;
-                            } else if (!match_started || p[k] != (Unicode)'-' || !last_char_of_line || UnicodeIsWhitespace(s2[k])) {
+                            } else if (!match_started || p[k] != static_cast<Unicode>('-') || !last_char_of_line || UnicodeIsWhitespace(s2[k])) {
                                 break;
                             } else {
                                 nextlineAfterHyphen = true;
@@ -4095,7 +4095,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                     }
                     // found it
                     if (found_it) {
-                        bool nextLineMatch = (bool)n;
+                        bool nextLineMatch = static_cast<bool>(n);
                         if (spaceConsumedByNewline) {
                             k--;
                         }
@@ -5322,7 +5322,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
                     (*outputFunc)(outputStream, eol, eolLen);
                 }
             } else if (frags[i + 1].col < col || fabs(frags[i + 1].base - frag.base) > maxIntraLineDelta * frag.line->words->fontSize) {
-                int d = (int)((frags[i + 1].base - frag.base) / frag.line->words->fontSize);
+                int d = static_cast<int>((frags[i + 1].base - frag.base) / frag.line->words->fontSize);
                 d = std::clamp(d, 1, 5);
                 for (; d > 0; --d) {
                     (*outputFunc)(outputStream, eol, eolLen);
@@ -5528,7 +5528,7 @@ void ActualText::end(const GfxState *state)
 
 static void TextOutputDev_outputToFile(void *stream, const char *text, int len)
 {
-    fwrite(text, 1, len, (FILE *)stream);
+    fwrite(text, 1, len, static_cast<FILE *>(stream));
 }
 
 TextOutputDev::TextOutputDev(const char *fileName, bool physLayoutA, double fixedPitchA, bool rawOrderA, bool append, bool discardDiagA)
@@ -5592,7 +5592,7 @@ TextOutputDev::TextOutputDev(TextOutputFunc func, void *stream, bool physLayoutA
 TextOutputDev::~TextOutputDev()
 {
     if (needClose) {
-        fclose((FILE *)outputStream);
+        fclose(static_cast<FILE *>(outputStream));
     }
 }
 

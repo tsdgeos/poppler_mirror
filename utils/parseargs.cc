@@ -135,12 +135,12 @@ static bool grabArg(const ArgDesc *arg, int i, int *argc, char *argv[])
     n = 0;
     switch (arg->kind) {
     case argFlag:
-        *(bool *)arg->val = true;
+        *static_cast<bool *>(arg->val) = true;
         n = 1;
         break;
     case argInt:
         if (i + 1 < *argc && isInt(argv[i + 1])) {
-            *(int *)arg->val = atoi(argv[i + 1]);
+            *static_cast<int *>(arg->val) = atoi(argv[i + 1]);
             n = 2;
         } else {
             ok = false;
@@ -149,7 +149,7 @@ static bool grabArg(const ArgDesc *arg, int i, int *argc, char *argv[])
         break;
     case argFP:
         if (i + 1 < *argc && isFP(argv[i + 1])) {
-            *(double *)arg->val = gatof(argv[i + 1]);
+            *static_cast<double *>(arg->val) = gatof(argv[i + 1]);
             n = 2;
         } else {
             ok = false;
@@ -158,8 +158,8 @@ static bool grabArg(const ArgDesc *arg, int i, int *argc, char *argv[])
         break;
     case argString:
         if (i + 1 < *argc) {
-            strncpy((char *)arg->val, argv[i + 1], arg->size - 1);
-            ((char *)arg->val)[arg->size - 1] = '\0';
+            strncpy(static_cast<char *>(arg->val), argv[i + 1], arg->size - 1);
+            (static_cast<char *>(arg->val))[arg->size - 1] = '\0';
             n = 2;
         } else {
             ok = false;
@@ -168,7 +168,7 @@ static bool grabArg(const ArgDesc *arg, int i, int *argc, char *argv[])
         break;
     case argGooString:
         if (i + 1 < *argc) {
-            ((GooString *)arg->val)->assign(argv[i + 1]);
+            (static_cast<GooString *>(arg->val))->assign(argv[i + 1]);
             n = 2;
         } else {
             ok = false;

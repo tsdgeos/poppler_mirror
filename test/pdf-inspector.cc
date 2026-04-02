@@ -82,7 +82,7 @@ PdfInspector::PdfInspector()
     // setup the TreeView
     widget = GTK_WIDGET(gtk_builder_get_object(builder, "pdf_tree_view"));
     g_signal_connect(gtk_tree_view_get_selection(GTK_TREE_VIEW(widget)), "changed", G_CALLBACK(on_selection_changed), this);
-    model = (GtkTreeModel *)gtk_list_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_INT, G_TYPE_DOUBLE, G_TYPE_DOUBLE, G_TYPE_DOUBLE);
+    model = reinterpret_cast<GtkTreeModel *>(gtk_list_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_INT, G_TYPE_DOUBLE, G_TYPE_DOUBLE, G_TYPE_DOUBLE));
     gtk_tree_view_set_model(GTK_TREE_VIEW(widget), model);
     gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(widget), 0, "Operation", gtk_cell_renderer_text_new(), "text", OP_STRING, NULL);
 
@@ -168,7 +168,7 @@ void PdfInspector::on_analyze_clicked(GtkWidget * /*widget*/, PdfInspector *insp
 
     spin = GTK_WIDGET(gtk_builder_get_object(inspector->builder, "pdf_spin"));
 
-    page = (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin));
+    page = static_cast<int>(gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin)));
 
     inspector->analyze_page(page);
 }

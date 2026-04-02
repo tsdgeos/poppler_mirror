@@ -1,6 +1,7 @@
 /* poppler-date.cc: glib interface to poppler
  *
  * Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
+ * Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +44,7 @@ gboolean poppler_date_parse(const gchar *date, time_t *timet)
     }
     std::string dateString(date);
     t = dateStringToTime(dateString);
-    if (t == (time_t)-1) {
+    if (t == static_cast<time_t>(-1)) {
         return FALSE;
     }
 

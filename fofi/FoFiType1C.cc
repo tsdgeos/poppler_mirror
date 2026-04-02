@@ -254,7 +254,7 @@ void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, bo
     } else {
         (*outputFunc)(outputStream, "256 array\n", 10);
         (*outputFunc)(outputStream, "0 1 255 {1 index exch /.notdef put} for\n", 40);
-        const char **enc = newEncoding ? newEncoding : (const char **)encoding;
+        const char **enc = newEncoding ? newEncoding : const_cast<const char **>(encoding->data());
         for (i = 0; i < 256; ++i) {
             if (enc && enc[i]) {
                 buf = GooString::format("dup {0:d} /{1:s} put\n", i, enc[i]);
@@ -446,7 +446,7 @@ void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<
     }
 
     // build the charstrings
-    charStringOffsets = (int *)gmallocn(cidMap.size() + 1, sizeof(int));
+    charStringOffsets = static_cast<int *>(gmallocn(cidMap.size() + 1, sizeof(int)));
     for (size_t i = 0; i < cidMap.size(); ++i) {
         charStringOffsets[i] = charStrings.size();
         if ((gid = cidMap[i]) >= 0) {
@@ -528,7 +528,7 @@ void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<
     (*outputFunc)(outputStream, "end def\n", 8);
 
     // CIDFont-specific entries
-    buf = GooString::format("/CIDCount {0:d} def\n", int(cidMap.size()));
+    buf = GooString::format("/CIDCount {0:d} def\n", static_cast<int>(cidMap.size()));
     (*outputFunc)(outputStream, buf.c_str(), buf.size());
     (*outputFunc)(outputStream, "/FDBytes 1 def\n", 15);
     buf = GooString::format("/GDBytes {0:d} def\n", gdBytes);
@@ -656,13 +656,13 @@ void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<
     for (size_t i = 0; i <= cidMap.size(); i += 6) {
         for (size_t j = 0; j < 6 && i + j <= cidMap.size(); ++j) {
             if (i + j < cidMap.size() && cidMap[i + j] >= 0 && fdSelect) {
-                buf2[0] = (char)fdSelect[cidMap[i + j]];
+                buf2[0] = static_cast<char>(fdSelect[cidMap[i + j]]);
             } else {
-                buf2[0] = (char)0;
+                buf2[0] = static_cast<char>(0);
             }
             n = offset + charStringOffsets[i + j];
             for (k = gdBytes; k >= 1; --k) {
-                buf2[k] = (char)(n & 0xff);
+                buf2[k] = static_cast<char>(n & 0xff);
                 n >>= 8;
             }
             for (k = 0; k <= gdBytes; ++k) {
@@ -729,7 +729,7 @@ void FoFiType1C::convertToType0(const std::string &psName, const std::vector<int
 
     if (privateDicts) {
         // write the descendant Type 1 fonts
-        for (int i = 0; i < int(cidMap.size()); i += 256) {
+        for (int i = 0; i < static_cast<int>(cidMap.size()); i += 256) {
 
             //~ this assumes that all CIDs in this block have the same FD --
             //~ to handle multiple FDs correctly, need to somehow divide the
@@ -737,7 +737,7 @@ void FoFiType1C::convertToType0(const std::string &psName, const std::vector<int
             fd = 0;
             // if fdSelect is NULL, we have an 8-bit font, so just leave fd=0
             if (fdSelect) {
-                for (j = i == 0 ? 1 : 0; j < 256 && i + j < int(cidMap.size()); ++j) {
+                for (j = i == 0 ? 1 : 0; j < 256 && i + j < static_cast<int>(cidMap.size()); ++j) {
                     if (cidMap[i + j] >= 0) {
                         fd = fdSelect[cidMap[i + j]];
                         break;
@@ -774,7 +774,7 @@ void FoFiType1C::convertToType0(const std::string &psName, const std::vector<int
                 (*outputFunc)(outputStream, buf.c_str(), buf.size());
             }
             (*outputFunc)(outputStream, "/Encoding 256 array\n", 20);
-            for (j = 0; j < 256 && i + j < int(cidMap.size()); ++j) {
+            for (j = 0; j < 256 && i + j < static_cast<int>(cidMap.size()); ++j) {
                 buf = GooString::format("dup {0:d} /c{1:02x} put\n", j, j);
                 (*outputFunc)(outputStream, buf.c_str(), buf.size());
             }
@@ -906,7 +906,7 @@ void FoFiType1C::convertToType0(const std::string &psName, const std::vector<int
             }
 
             // write the CharStrings
-            for (j = 0; j < 256 && i + j < int(cidMap.size()); ++j) {
+            for (j = 0; j < 256 && i + j < static_cast<int>(cidMap.size()); ++j) {
                 if (cidMap[i + j] >= 0) {
                     ok = true;
                     getIndexVal(charStringsIdx, cidMap[i + j], &val, &ok);
@@ -951,13 +951,13 @@ void FoFiType1C::convertToType0(const std::string &psName, const std::vector<int
     }
     (*outputFunc)(outputStream, "/FMapType 2 def\n", 16);
     (*outputFunc)(outputStream, "/Encoding [\n", 12);
-    for (int i = 0; i < int(cidMap.size()); i += 256) {
+    for (int i = 0; i < static_cast<int>(cidMap.size()); i += 256) {
         const std::string buf = GooString::format("{0:d}\n", i >> 8);
         (*outputFunc)(outputStream, buf.c_str(), buf.size());
     }
     (*outputFunc)(outputStream, "] def\n", 6);
     (*outputFunc)(outputStream, "/FDepVector [\n", 14);
-    for (int i = 0; i < int(cidMap.size()); i += 256) {
+    for (int i = 0; i < static_cast<int>(cidMap.size()); i += 256) {
         (*outputFunc)(outputStream, "/", 1);
         (*outputFunc)(outputStream, psName.c_str(), psName.length());
         const std::string buf = GooString::format("_{0:02x} findfont\n", i >> 8);
@@ -977,7 +977,7 @@ void FoFiType1C::eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName, int of
 
     const std::string buf = GooString::format("/{0:s} {1:uld} RD ", glyphName, charBuf.size());
     eexecWrite(eb, buf.c_str());
-    eexecWriteCharstring(eb, (unsigned char *)charBuf.c_str(), charBuf.size());
+    eexecWriteCharstring(eb, reinterpret_cast<const unsigned char *>(charBuf.c_str()), charBuf.size());
     eexecWrite(eb, " ND\n");
 }
 
@@ -1043,7 +1043,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                         d += ops[k + 1].num;
                         dFP |= ops[k + 1].isFP;
                     }
-                    charBuf->push_back((char)1);
+                    charBuf->push_back(static_cast<char>(1));
                 }
                 nHints += nOps / 2;
                 nOps = 0;
@@ -1073,7 +1073,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                         d += ops[k + 1].num;
                         dFP |= ops[k + 1].isFP;
                     }
-                    charBuf->push_back((char)3);
+                    charBuf->push_back(static_cast<char>(3));
                 }
                 nHints += nOps / 2;
                 nOps = 0;
@@ -1084,14 +1084,14 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     firstOp = false;
                 }
                 if (openPath) {
-                    charBuf->push_back((char)9);
+                    charBuf->push_back(static_cast<char>(9));
                     openPath = false;
                 }
                 if (nOps != 1) {
                     //~ error(-1, "Wrong number of args (%d) to Type 2 vmoveto", nOps);
                 }
                 cvtNum(ops[0].num, ops[0].isFP, charBuf);
-                charBuf->push_back((char)4);
+                charBuf->push_back(static_cast<char>(4));
                 nOps = 0;
                 break;
             case 0x0005: // rlineto
@@ -1101,7 +1101,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 for (k = 0; k < nOps; k += 2) {
                     cvtNum(ops[k].num, ops[k].isFP, charBuf);
                     cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
-                    charBuf->push_back((char)5);
+                    charBuf->push_back(static_cast<char>(5));
                 }
                 nOps = 0;
                 openPath = true;
@@ -1112,7 +1112,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 }
                 for (k = 0; k < nOps; ++k) {
                     cvtNum(ops[k].num, ops[k].isFP, charBuf);
-                    charBuf->push_back((char)((k & 1) ? 7 : 6));
+                    charBuf->push_back(static_cast<char>((k & 1) ? 7 : 6));
                 }
                 nOps = 0;
                 openPath = true;
@@ -1123,7 +1123,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 }
                 for (k = 0; k < nOps; ++k) {
                     cvtNum(ops[k].num, ops[k].isFP, charBuf);
-                    charBuf->push_back((char)((k & 1) ? 6 : 7));
+                    charBuf->push_back(static_cast<char>((k & 1) ? 6 : 7));
                 }
                 nOps = 0;
                 openPath = true;
@@ -1139,7 +1139,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
                     cvtNum(ops[k + 4].num, ops[k + 4].isFP, charBuf);
                     cvtNum(ops[k + 5].num, ops[k + 5].isFP, charBuf);
-                    charBuf->push_back((char)8);
+                    charBuf->push_back(static_cast<char>(8));
                 }
                 nOps = 0;
                 openPath = true;
@@ -1147,7 +1147,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
             case 0x000a: // callsubr
                 if (nOps >= 1) {
                     subrBias = (subrIdx->len < 1240) ? 107 : (subrIdx->len < 33900) ? 1131 : 32768;
-                    k = subrBias + (int)ops[nOps - 1].num;
+                    k = subrBias + static_cast<int>(ops[nOps - 1].num);
                     --nOps;
                     ok = true;
                     getIndexVal(*subrIdx, k, &val, &ok);
@@ -1168,7 +1168,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     firstOp = false;
                 }
                 if (openPath) {
-                    charBuf->push_back((char)9);
+                    charBuf->push_back(static_cast<char>(9));
                     openPath = false;
                 }
                 if (nOps == 4) {
@@ -1177,10 +1177,10 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[1].num, ops[1].isFP, charBuf);
                     cvtNum(ops[2].num, ops[2].isFP, charBuf);
                     cvtNum(ops[3].num, ops[3].isFP, charBuf);
-                    charBuf->push_back((char)12);
-                    charBuf->push_back((char)6);
+                    charBuf->push_back(static_cast<char>(12));
+                    charBuf->push_back(static_cast<char>(6));
                 } else if (nOps == 0) {
-                    charBuf->push_back((char)14);
+                    charBuf->push_back(static_cast<char>(14));
                 } else {
                     //~ error(-1, "Wrong number of args (%d) to Type 2 endchar", nOps);
                 }
@@ -1248,7 +1248,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     firstOp = false;
                 }
                 if (openPath) {
-                    charBuf->push_back((char)9);
+                    charBuf->push_back(static_cast<char>(9));
                     openPath = false;
                 }
                 if (nOps != 2) {
@@ -1256,7 +1256,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 }
                 cvtNum(ops[0].num, ops[0].isFP, charBuf);
                 cvtNum(ops[1].num, ops[1].isFP, charBuf);
-                charBuf->push_back((char)21);
+                charBuf->push_back(static_cast<char>(21));
                 nOps = 0;
                 break;
             case 0x0016: // hmoveto
@@ -1265,14 +1265,14 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     firstOp = false;
                 }
                 if (openPath) {
-                    charBuf->push_back((char)9);
+                    charBuf->push_back(static_cast<char>(9));
                     openPath = false;
                 }
                 if (nOps != 1) {
                     //~ error(-1, "Wrong number of args (%d) to Type 2 hmoveto", nOps);
                 }
                 cvtNum(ops[0].num, ops[0].isFP, charBuf);
-                charBuf->push_back((char)22);
+                charBuf->push_back(static_cast<char>(22));
                 nOps = 0;
                 break;
             case 0x0017: // vstemhm
@@ -1298,12 +1298,12 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
                     cvtNum(ops[k + 4].num, ops[k + 4].isFP, charBuf);
                     cvtNum(ops[k + 5].num, ops[k + 5].isFP, charBuf);
-                    charBuf->push_back((char)8);
+                    charBuf->push_back(static_cast<char>(8));
                 }
                 if (likely(k + 1 < nOps)) {
                     cvtNum(ops[k].num, ops[k].isFP, charBuf);
                     cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
-                    charBuf->push_back((char)5);
+                    charBuf->push_back(static_cast<char>(5));
                 }
                 nOps = 0;
                 openPath = true;
@@ -1315,7 +1315,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 for (k = 0; k < nOps - 6; k += 2) {
                     cvtNum(ops[k].num, ops[k].isFP, charBuf);
                     cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
-                    charBuf->push_back((char)5);
+                    charBuf->push_back(static_cast<char>(5));
                 }
                 cvtNum(ops[k].num, ops[k].isFP, charBuf);
                 cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
@@ -1323,7 +1323,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
                 cvtNum(ops[k + 4].num, ops[k + 4].isFP, charBuf);
                 cvtNum(ops[k + 5].num, ops[k + 5].isFP, charBuf);
-                charBuf->push_back((char)8);
+                charBuf->push_back(static_cast<char>(8));
                 nOps = 0;
                 openPath = true;
                 break;
@@ -1338,7 +1338,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[3].num, ops[3].isFP, charBuf);
                     cvtNum(0, false, charBuf);
                     cvtNum(ops[4].num, ops[4].isFP, charBuf);
-                    charBuf->push_back((char)8);
+                    charBuf->push_back(static_cast<char>(8));
                     k = 5;
                 } else {
                     k = 0;
@@ -1350,7 +1350,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[k + 2].num, ops[k + 2].isFP, charBuf);
                     cvtNum(0, false, charBuf);
                     cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
-                    charBuf->push_back((char)8);
+                    charBuf->push_back(static_cast<char>(8));
                 }
                 nOps = 0;
                 openPath = true;
@@ -1366,7 +1366,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[3].num, ops[3].isFP, charBuf);
                     cvtNum(ops[4].num, ops[4].isFP, charBuf);
                     cvtNum(0, false, charBuf);
-                    charBuf->push_back((char)8);
+                    charBuf->push_back(static_cast<char>(8));
                     k = 5;
                 } else {
                     k = 0;
@@ -1378,14 +1378,14 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[k + 2].num, ops[k + 2].isFP, charBuf);
                     cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
                     cvtNum(0, false, charBuf);
-                    charBuf->push_back((char)8);
+                    charBuf->push_back(static_cast<char>(8));
                 }
                 nOps = 0;
                 openPath = true;
                 break;
             case 0x001d: // callgsubr
                 if (nOps >= 1) {
-                    k = gsubrBias + (int)ops[nOps - 1].num;
+                    k = gsubrBias + static_cast<int>(ops[nOps - 1].num);
                     --nOps;
                     ok = true;
                     getIndexVal(gsubrIdx, k, &val, &ok);
@@ -1407,13 +1407,13 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                         cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
                         cvtNum(ops[k + 2].num, ops[k + 2].isFP, charBuf);
                         cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
-                        charBuf->push_back((char)30);
+                        charBuf->push_back(static_cast<char>(30));
                     } else {
                         cvtNum(ops[k].num, ops[k].isFP, charBuf);
                         cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
                         cvtNum(ops[k + 2].num, ops[k + 2].isFP, charBuf);
                         cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
-                        charBuf->push_back((char)31);
+                        charBuf->push_back(static_cast<char>(31));
                     }
                 }
                 if (k == nOps - 5) {
@@ -1432,7 +1432,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                         cvtNum(ops[k + 4].num, ops[k + 4].isFP, charBuf);
                         cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
                     }
-                    charBuf->push_back((char)8);
+                    charBuf->push_back(static_cast<char>(8));
                 }
                 nOps = 0;
                 openPath = true;
@@ -1447,13 +1447,13 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                         cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
                         cvtNum(ops[k + 2].num, ops[k + 2].isFP, charBuf);
                         cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
-                        charBuf->push_back((char)31);
+                        charBuf->push_back(static_cast<char>(31));
                     } else {
                         cvtNum(ops[k].num, ops[k].isFP, charBuf);
                         cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
                         cvtNum(ops[k + 2].num, ops[k + 2].isFP, charBuf);
                         cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
-                        charBuf->push_back((char)30);
+                        charBuf->push_back(static_cast<char>(30));
                     }
                 }
                 if (k == nOps - 5) {
@@ -1472,7 +1472,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                         cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
                         cvtNum(ops[k + 4].num, ops[k + 4].isFP, charBuf);
                     }
-                    charBuf->push_back((char)8);
+                    charBuf->push_back(static_cast<char>(8));
                 }
                 nOps = 0;
                 openPath = true;
@@ -1516,14 +1516,14 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 cvtNum(ops[2].num, ops[2].isFP, charBuf);
                 cvtNum(ops[3].num, ops[3].isFP, charBuf);
                 cvtNum(0, false, charBuf);
-                charBuf->push_back((char)8);
+                charBuf->push_back(static_cast<char>(8));
                 cvtNum(ops[4].num, ops[4].isFP, charBuf);
                 cvtNum(0, false, charBuf);
                 cvtNum(ops[5].num, ops[5].isFP, charBuf);
                 cvtNum(-ops[2].num, ops[2].isFP, charBuf);
                 cvtNum(ops[6].num, ops[6].isFP, charBuf);
                 cvtNum(0, false, charBuf);
-                charBuf->push_back((char)8);
+                charBuf->push_back(static_cast<char>(8));
                 nOps = 0;
                 openPath = true;
                 break;
@@ -1537,14 +1537,14 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 cvtNum(ops[3].num, ops[3].isFP, charBuf);
                 cvtNum(ops[4].num, ops[4].isFP, charBuf);
                 cvtNum(ops[5].num, ops[5].isFP, charBuf);
-                charBuf->push_back((char)8);
+                charBuf->push_back(static_cast<char>(8));
                 cvtNum(ops[6].num, ops[6].isFP, charBuf);
                 cvtNum(ops[7].num, ops[7].isFP, charBuf);
                 cvtNum(ops[8].num, ops[8].isFP, charBuf);
                 cvtNum(ops[9].num, ops[9].isFP, charBuf);
                 cvtNum(ops[10].num, ops[10].isFP, charBuf);
                 cvtNum(ops[11].num, ops[11].isFP, charBuf);
-                charBuf->push_back((char)8);
+                charBuf->push_back(static_cast<char>(8));
                 nOps = 0;
                 openPath = true;
                 break;
@@ -1558,14 +1558,14 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 cvtNum(ops[3].num, ops[3].isFP, charBuf);
                 cvtNum(ops[4].num, ops[4].isFP, charBuf);
                 cvtNum(0, false, charBuf);
-                charBuf->push_back((char)8);
+                charBuf->push_back(static_cast<char>(8));
                 cvtNum(ops[5].num, ops[5].isFP, charBuf);
                 cvtNum(0, false, charBuf);
                 cvtNum(ops[6].num, ops[6].isFP, charBuf);
                 cvtNum(ops[7].num, ops[7].isFP, charBuf);
                 cvtNum(ops[8].num, ops[8].isFP, charBuf);
                 cvtNum(-(ops[1].num + ops[3].num + ops[7].num), ops[1].isFP | ops[3].isFP | ops[7].isFP, charBuf);
-                charBuf->push_back((char)8);
+                charBuf->push_back(static_cast<char>(8));
                 nOps = 0;
                 openPath = true;
                 break;
@@ -1579,7 +1579,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 cvtNum(ops[3].num, ops[3].isFP, charBuf);
                 cvtNum(ops[4].num, ops[4].isFP, charBuf);
                 cvtNum(ops[5].num, ops[5].isFP, charBuf);
-                charBuf->push_back((char)8);
+                charBuf->push_back(static_cast<char>(8));
                 cvtNum(ops[6].num, ops[6].isFP, charBuf);
                 cvtNum(ops[7].num, ops[7].isFP, charBuf);
                 cvtNum(ops[8].num, ops[8].isFP, charBuf);
@@ -1593,7 +1593,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(-dx, ops[0].isFP | ops[2].isFP | ops[4].isFP | ops[6].isFP | ops[8].isFP, charBuf);
                     cvtNum(ops[10].num, ops[10].isFP, charBuf);
                 }
-                charBuf->push_back((char)8);
+                charBuf->push_back(static_cast<char>(8));
                 nOps = 0;
                 openPath = true;
                 break;
@@ -1638,7 +1638,7 @@ void FoFiType1C::cvtGlyphWidth(bool useOp, GooString *charBuf, const Type1CPriva
     }
     cvtNum(0, false, charBuf);
     cvtNum(w, wFP, charBuf);
-    charBuf->push_back((char)13);
+    charBuf->push_back(static_cast<char>(13));
 }
 
 void FoFiType1C::cvtNum(double x, bool isFP, GooString *charBuf)
@@ -1649,12 +1649,12 @@ void FoFiType1C::cvtNum(double x, bool isFP, GooString *charBuf)
     n = 0;
     if (isFP) {
         if (x >= -32768 && x < 32768) {
-            y = (int)(x * 256.0);
+            y = static_cast<int>(x * 256.0);
             buf[0] = 255;
-            buf[1] = (unsigned char)(y >> 24);
-            buf[2] = (unsigned char)(y >> 16);
-            buf[3] = (unsigned char)(y >> 8);
-            buf[4] = (unsigned char)y;
+            buf[1] = static_cast<unsigned char>(y >> 24);
+            buf[2] = static_cast<unsigned char>(y >> 16);
+            buf[3] = static_cast<unsigned char>(y >> 8);
+            buf[4] = static_cast<unsigned char>(y);
             buf[5] = 255;
             buf[6] = 0;
             buf[7] = 0;
@@ -1667,38 +1667,38 @@ void FoFiType1C::cvtNum(double x, bool isFP, GooString *charBuf)
             //~ error(-1, "Type 2 fixed point constant out of range");
         }
     } else {
-        y = (int)x;
+        y = static_cast<int>(x);
         if (y >= -107 && y <= 107) {
-            buf[0] = (unsigned char)(y + 139);
+            buf[0] = static_cast<unsigned char>(y + 139);
             n = 1;
         } else if (y > 107 && y <= 1131) {
             y -= 108;
-            buf[0] = (unsigned char)((y >> 8) + 247);
-            buf[1] = (unsigned char)(y & 0xff);
+            buf[0] = static_cast<unsigned char>((y >> 8) + 247);
+            buf[1] = static_cast<unsigned char>(y & 0xff);
             n = 2;
         } else if (y < -107 && y >= -1131) {
             y = -y - 108;
-            buf[0] = (unsigned char)((y >> 8) + 251);
-            buf[1] = (unsigned char)(y & 0xff);
+            buf[0] = static_cast<unsigned char>((y >> 8) + 251);
+            buf[1] = static_cast<unsigned char>(y & 0xff);
             n = 2;
         } else {
             buf[0] = 255;
-            buf[1] = (unsigned char)(y >> 24);
-            buf[2] = (unsigned char)(y >> 16);
-            buf[3] = (unsigned char)(y >> 8);
-            buf[4] = (unsigned char)y;
+            buf[1] = static_cast<unsigned char>(y >> 24);
+            buf[2] = static_cast<unsigned char>(y >> 16);
+            buf[3] = static_cast<unsigned char>(y >> 8);
+            buf[4] = static_cast<unsigned char>(y);
             n = 5;
         }
     }
-    charBuf->append((char *)buf, n);
+    charBuf->append(reinterpret_cast<char *>(buf), n);
 }
 
 void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, const char *s)
 {
-    unsigned char *p;
+    const unsigned char *p;
     unsigned char x;
 
-    for (p = (unsigned char *)s; *p; ++p) {
+    for (p = reinterpret_cast<const unsigned char *>(s); *p; ++p) {
         x = *p ^ (eb->r1 >> 8);
         eb->r1 = (x + eb->r1) * 52845 + 22719;
         if (eb->ascii) {
@@ -1710,7 +1710,7 @@ void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, const char *s)
                 eb->line = 0;
             }
         } else {
-            (*eb->outputFunc)(eb->outputStream, (char *)&x, 1);
+            (*eb->outputFunc)(eb->outputStream, reinterpret_cast<char *>(&x), 1);
         }
     }
 }
@@ -1733,7 +1733,7 @@ void FoFiType1C::eexecWriteCharstring(Type1CEexecBuf *eb, const unsigned char *s
                 eb->line = 0;
             }
         } else {
-            (*eb->outputFunc)(eb->outputStream, (char *)&x, 1);
+            (*eb->outputFunc)(eb->outputStream, reinterpret_cast<char *>(&x), 1);
         }
     }
 }
@@ -1799,7 +1799,7 @@ bool FoFiType1C::parse()
     if (!parsedOk) {
         return false;
     }
-    name = std::make_unique<GooString>((char *)&file[val.pos], val.len);
+    name = std::make_unique<GooString>(reinterpret_cast<const char *>(&file[val.pos]), val.len);
 
     // read the top dict for the first font
     readTopDict();
@@ -1808,7 +1808,7 @@ bool FoFiType1C::parse()
     if (topDict.firstOp == 0x0c1e) {
         if (topDict.fdArrayOffset == 0) {
             nFDs = 1;
-            privateDicts = (Type1CPrivateDict *)gmalloc(sizeof(Type1CPrivateDict));
+            privateDicts = static_cast<Type1CPrivateDict *>(gmalloc(sizeof(Type1CPrivateDict)));
             readPrivateDict(0, 0, &privateDicts[0]);
         } else {
             getIndex(topDict.fdArrayOffset, &fdIdx, &parsedOk);
@@ -1816,7 +1816,7 @@ bool FoFiType1C::parse()
                 return false;
             }
             nFDs = fdIdx.len;
-            privateDicts = (Type1CPrivateDict *)gmallocn(nFDs, sizeof(Type1CPrivateDict));
+            privateDicts = static_cast<Type1CPrivateDict *>(gmallocn(nFDs, sizeof(Type1CPrivateDict)));
             for (i = 0; i < nFDs; ++i) {
                 getIndexVal(fdIdx, i, &val, &parsedOk);
                 if (!parsedOk) {
@@ -1829,7 +1829,7 @@ bool FoFiType1C::parse()
         // for 8-bit fonts: read the private dict
     } else {
         nFDs = 1;
-        privateDicts = (Type1CPrivateDict *)gmalloc(sizeof(Type1CPrivateDict));
+        privateDicts = static_cast<Type1CPrivateDict *>(gmalloc(sizeof(Type1CPrivateDict)));
         readPrivateDict(topDict.privateOffset, topDict.privateSize, &privateDicts[0]);
     }
 
@@ -1934,25 +1934,25 @@ void FoFiType1C::readTopDict()
             }
             switch (ops[nOps].op) {
             case 0x0000:
-                topDict.versionSID = (int)ops[0].num;
+                topDict.versionSID = static_cast<int>(ops[0].num);
                 break;
             case 0x0001:
-                topDict.noticeSID = (int)ops[0].num;
+                topDict.noticeSID = static_cast<int>(ops[0].num);
                 break;
             case 0x0c00:
-                topDict.copyrightSID = (int)ops[0].num;
+                topDict.copyrightSID = static_cast<int>(ops[0].num);
                 break;
             case 0x0002:
-                topDict.fullNameSID = (int)ops[0].num;
+                topDict.fullNameSID = static_cast<int>(ops[0].num);
                 break;
             case 0x0003:
-                topDict.familyNameSID = (int)ops[0].num;
+                topDict.familyNameSID = static_cast<int>(ops[0].num);
                 break;
             case 0x0004:
-                topDict.weightSID = (int)ops[0].num;
+                topDict.weightSID = static_cast<int>(ops[0].num);
                 break;
             case 0x0c01:
-                topDict.isFixedPitch = (int)ops[0].num;
+                topDict.isFixedPitch = static_cast<int>(ops[0].num);
                 break;
             case 0x0c02:
                 topDict.italicAngle = ops[0].num;
@@ -1964,10 +1964,10 @@ void FoFiType1C::readTopDict()
                 topDict.underlineThickness = ops[0].num;
                 break;
             case 0x0c05:
-                topDict.paintType = (int)ops[0].num;
+                topDict.paintType = static_cast<int>(ops[0].num);
                 break;
             case 0x0c06:
-                topDict.charstringType = (int)ops[0].num;
+                topDict.charstringType = static_cast<int>(ops[0].num);
                 break;
             case 0x0c07:
                 topDict.fontMatrix[0] = ops[0].num;
@@ -1979,7 +1979,7 @@ void FoFiType1C::readTopDict()
                 topDict.hasFontMatrix = true;
                 break;
             case 0x000d:
-                topDict.uniqueID = (int)ops[0].num;
+                topDict.uniqueID = static_cast<int>(ops[0].num);
                 break;
             case 0x0005:
                 topDict.fontBBox[0] = ops[0].num;
@@ -1991,28 +1991,28 @@ void FoFiType1C::readTopDict()
                 topDict.strokeWidth = ops[0].num;
                 break;
             case 0x000f:
-                topDict.charsetOffset = (int)ops[0].num;
+                topDict.charsetOffset = static_cast<int>(ops[0].num);
                 break;
             case 0x0010:
-                topDict.encodingOffset = (int)ops[0].num;
+                topDict.encodingOffset = static_cast<int>(ops[0].num);
                 break;
             case 0x0011:
-                topDict.charStringsOffset = (int)ops[0].num;
+                topDict.charStringsOffset = static_cast<int>(ops[0].num);
                 break;
             case 0x0012:
-                topDict.privateSize = (int)ops[0].num;
-                topDict.privateOffset = (int)ops[1].num;
+                topDict.privateSize = static_cast<int>(ops[0].num);
+                topDict.privateOffset = static_cast<int>(ops[1].num);
                 break;
             case 0x0c1e:
-                topDict.registrySID = (int)ops[0].num;
-                topDict.orderingSID = (int)ops[1].num;
-                topDict.supplement = (int)ops[2].num;
+                topDict.registrySID = static_cast<int>(ops[0].num);
+                topDict.orderingSID = static_cast<int>(ops[1].num);
+                topDict.supplement = static_cast<int>(ops[2].num);
                 break;
             case 0x0c24:
-                topDict.fdArrayOffset = (int)ops[0].num;
+                topDict.fdArrayOffset = static_cast<int>(ops[0].num);
                 break;
             case 0x0c25:
-                topDict.fdSelectOffset = (int)ops[0].num;
+                topDict.fdSelectOffset = static_cast<int>(ops[0].num);
                 break;
             }
             nOps = 0;
@@ -2052,8 +2052,8 @@ void FoFiType1C::readFD(int offset, int length, Type1CPrivateDict *pDict)
                     parsedOk = false;
                     return;
                 }
-                pSize = (int)ops[0].num;
-                pOffset = (int)ops[1].num;
+                pSize = static_cast<int>(ops[0].num);
+                pOffset = static_cast<int>(ops[1].num);
                 break;
             }
             if (ops[nOps - 1].op == 0x0c07) {
@@ -2141,10 +2141,10 @@ void FoFiType1C::readPrivateDict(int offset, int length, Type1CPrivateDict *pDic
                 pDict->blueScale = ops[0].num;
                 break;
             case 0x0c0a:
-                pDict->blueShift = (int)ops[0].num;
+                pDict->blueShift = static_cast<int>(ops[0].num);
                 break;
             case 0x0c0b:
-                pDict->blueFuzz = (int)ops[0].num;
+                pDict->blueFuzz = static_cast<int>(ops[0].num);
                 break;
             case 0x000a:
                 pDict->stdHW = ops[0].num;
@@ -2168,16 +2168,16 @@ void FoFiType1C::readPrivateDict(int offset, int length, Type1CPrivateDict *pDic
                 pDict->forceBoldThreshold = ops[0].num;
                 break;
             case 0x0c11:
-                pDict->languageGroup = (int)ops[0].num;
+                pDict->languageGroup = static_cast<int>(ops[0].num);
                 break;
             case 0x0c12:
                 pDict->expansionFactor = ops[0].num;
                 break;
             case 0x0c13:
-                pDict->initialRandomSeed = (int)ops[0].num;
+                pDict->initialRandomSeed = static_cast<int>(ops[0].num);
                 break;
             case 0x0013:
-                pDict->subrsOffset = offset + (int)ops[0].num;
+                pDict->subrsOffset = offset + static_cast<int>(ops[0].num);
                 break;
             case 0x0014:
                 pDict->defaultWidthX = ops[0].num;
@@ -2197,7 +2197,7 @@ void FoFiType1C::readFDSelect()
 {
     int fdSelectFmt, pos, nRanges, gid0, gid1, fd;
 
-    fdSelect = (unsigned char *)gmalloc(nGlyphs);
+    fdSelect = static_cast<unsigned char *>(gmalloc(nGlyphs));
     if (topDict.fdSelectOffset == 0) {
         for (int i = 0; i < nGlyphs; ++i) {
             fdSelect[i] = 0;
@@ -2346,7 +2346,7 @@ bool FoFiType1C::readCharset()
         charset = fofiType1CExpertSubsetCharset;
         charsetLength = sizeof(fofiType1CExpertSubsetCharset) / sizeof(unsigned short);
     } else {
-        auto *customCharset = (unsigned short *)gmallocn(nGlyphs, sizeof(unsigned short));
+        auto *customCharset = static_cast<unsigned short *>(gmallocn(nGlyphs, sizeof(unsigned short)));
         charsetLength = nGlyphs;
         for (i = 0; i < nGlyphs; ++i) {
             customCharset[i] = 0;
@@ -2355,7 +2355,7 @@ bool FoFiType1C::readCharset()
         charsetFormat = getU8(pos++, &parsedOk);
         if (charsetFormat == 0) {
             for (i = 1; i < nGlyphs; ++i) {
-                customCharset[i] = (unsigned short)getU16BE(pos, &parsedOk);
+                customCharset[i] = static_cast<unsigned short>(getU16BE(pos, &parsedOk));
                 pos += 2;
                 if (!parsedOk) {
                     break;
@@ -2371,7 +2371,7 @@ bool FoFiType1C::readCharset()
                     break;
                 }
                 for (j = 0; j <= nLeft && i < nGlyphs; ++j) {
-                    customCharset[i++] = (unsigned short)c++;
+                    customCharset[i++] = static_cast<unsigned short>(c++);
                 }
             }
         } else if (charsetFormat == 2) {
@@ -2385,7 +2385,7 @@ bool FoFiType1C::readCharset()
                     break;
                 }
                 for (j = 0; j <= nLeft && i < nGlyphs; ++j) {
-                    customCharset[i++] = (unsigned short)c++;
+                    customCharset[i++] = static_cast<unsigned short>(c++);
                 }
             }
         }
@@ -2478,7 +2478,7 @@ int FoFiType1C::getOp(int pos, bool charstring, bool *ok)
         if (x & 0x80000000) {
             x |= ~0xffffffff;
         }
-        op.num = (double)x / 65536.0;
+        op.num = static_cast<double>(x) / 65536.0;
         op.isFP = true;
 
     } else if (b0 == 12) {
@@ -2513,7 +2513,7 @@ int FoFiType1C::getDeltaIntArray(std::span<int> arr) const
         if (unlikely(std::isinf(ops[i].num))) {
             return i;
         }
-        if (checkedAdd(x, (int)ops[i].num, &y)) {
+        if (checkedAdd(x, static_cast<int>(ops[i].num), &y)) {
             return i;
         }
         x = y;
@@ -2554,11 +2554,11 @@ void FoFiType1C::getIndex(int pos, Type1CIndex *idx, bool *ok) const
             *ok = false;
         }
         idx->startPos = pos + 3 + (idx->len + 1) * idx->offSize - 1;
-        if (idx->startPos < 0 || idx->startPos >= int(file.size())) {
+        if (idx->startPos < 0 || idx->startPos >= static_cast<int>(file.size())) {
             *ok = false;
         }
         idx->endPos = idx->startPos + getUVarBE(pos + 3 + idx->len * idx->offSize, idx->offSize, ok);
-        if (idx->endPos < idx->startPos || idx->endPos > int(file.size())) {
+        if (idx->endPos < idx->startPos || idx->endPos > static_cast<int>(file.size())) {
             *ok = false;
         }
     }
@@ -2598,7 +2598,7 @@ char *FoFiType1C::getString(int sid, char *buf, bool *ok) const
             if ((n = val.len) > 255) {
                 n = 255;
             }
-            strncpy(buf, (char *)&file[val.pos], n);
+            strncpy(buf, reinterpret_cast<const char *>(&file[val.pos]), n);
             buf[n] = '\0';
         } else {
             buf[0] = '\0';

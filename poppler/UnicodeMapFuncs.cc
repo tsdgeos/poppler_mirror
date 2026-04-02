@@ -30,34 +30,34 @@ int mapUTF8(Unicode u, char *buf, int bufSize)
         if (bufSize < 1) {
             return 0;
         }
-        buf[0] = (char)u;
+        buf[0] = static_cast<char>(u);
         return 1;
     }
     if (u <= 0x000007ff) {
         if (bufSize < 2) {
             return 0;
         }
-        buf[0] = (char)(0xc0 + (u >> 6));
-        buf[1] = (char)(0x80 + (u & 0x3f));
+        buf[0] = static_cast<char>(0xc0 + (u >> 6));
+        buf[1] = static_cast<char>(0x80 + (u & 0x3f));
         return 2;
     }
     if (u <= 0x0000ffff) {
         if (bufSize < 3) {
             return 0;
         }
-        buf[0] = (char)(0xe0 + (u >> 12));
-        buf[1] = (char)(0x80 + ((u >> 6) & 0x3f));
-        buf[2] = (char)(0x80 + (u & 0x3f));
+        buf[0] = static_cast<char>(0xe0 + (u >> 12));
+        buf[1] = static_cast<char>(0x80 + ((u >> 6) & 0x3f));
+        buf[2] = static_cast<char>(0x80 + (u & 0x3f));
         return 3;
     }
     if (u <= 0x0010ffff) {
         if (bufSize < 4) {
             return 0;
         }
-        buf[0] = (char)(0xf0 + (u >> 18));
-        buf[1] = (char)(0x80 + ((u >> 12) & 0x3f));
-        buf[2] = (char)(0x80 + ((u >> 6) & 0x3f));
-        buf[3] = (char)(0x80 + (u & 0x3f));
+        buf[0] = static_cast<char>(0xf0 + (u >> 18));
+        buf[1] = static_cast<char>(0x80 + ((u >> 12) & 0x3f));
+        buf[2] = static_cast<char>(0x80 + ((u >> 6) & 0x3f));
+        buf[3] = static_cast<char>(0x80 + (u & 0x3f));
         return 4;
     }
     return 0;
@@ -69,8 +69,8 @@ int mapUTF16(Unicode u, char *buf, int bufSize)
         if (bufSize < 2) {
             return 0;
         }
-        buf[0] = (char)((u >> 8) & 0xff);
-        buf[1] = (char)(u & 0xff);
+        buf[0] = static_cast<char>((u >> 8) & 0xff);
+        buf[1] = static_cast<char>(u & 0xff);
         return 2;
     }
     if (u < 0x110000) {
@@ -81,11 +81,11 @@ int mapUTF16(Unicode u, char *buf, int bufSize)
             return 0;
         }
         uu = ((u - 0x10000) >> 10) + 0xd800;
-        buf[0] = (char)((uu >> 8) & 0xff);
-        buf[1] = (char)(uu & 0xff);
+        buf[0] = static_cast<char>((uu >> 8) & 0xff);
+        buf[1] = static_cast<char>(uu & 0xff);
         uu = (u & 0x3ff) + 0xdc00;
-        buf[2] = (char)((uu >> 8) & 0xff);
-        buf[3] = (char)(uu & 0xff);
+        buf[2] = static_cast<char>((uu >> 8) & 0xff);
+        buf[3] = static_cast<char>(uu & 0xff);
         return 4;
     }
     return 0;

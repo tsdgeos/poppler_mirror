@@ -56,12 +56,12 @@ struct CMapVectorEntry
 
 static int getCharFromFile(void *data)
 {
-    return fgetc((FILE *)data);
+    return fgetc(static_cast<FILE *>(data));
 }
 
 static int getCharFromStream(void *data)
 {
-    return ((Stream *)data)->getChar();
+    return (static_cast<Stream *>(data))->getChar();
 }
 
 //------------------------------------------------------------------------
@@ -175,7 +175,7 @@ void CMap::parse2(CMapCache *cache, int (*getCharFunc)(void *), void *data)
                     continue;
                 }
                 n1 = (n1 - 2) / 2;
-                addCIDs(code, code, n1, (CID)atoi(tok2));
+                addCIDs(code, code, n1, static_cast<CID>(atoi(tok2)));
             }
             pst->getToken(tok1, sizeof(tok1), &n1);
         } else if (!strcmp(tok2, "begincidrange")) {
@@ -192,7 +192,7 @@ void CMap::parse2(CMapCache *cache, int (*getCharFunc)(void *), void *data)
                     sscanf(tok1 + 1, "%x", &start);
                     sscanf(tok2 + 1, "%x", &end);
                     n1 = (n1 - 2) / 2;
-                    addCIDs(start, end, n1, (CID)atoi(tok3));
+                    addCIDs(start, end, n1, static_cast<CID>(atoi(tok3)));
                 }
             }
             pst->getToken(tok1, sizeof(tok1), &n1);
@@ -207,7 +207,7 @@ CMap::CMap(std::unique_ptr<GooString> &&collectionA, std::unique_ptr<GooString> 
 {
     isIdent = false;
     wMode = GfxFont::WritingMode::Horizontal;
-    vector = (CMapVectorEntry *)gmallocn(256, sizeof(CMapVectorEntry));
+    vector = static_cast<CMapVectorEntry *>(gmallocn(256, sizeof(CMapVectorEntry)));
     for (int i = 0; i < 256; ++i) {
         vector[i].isVector = false;
         vector[i].cid = 0;
@@ -264,7 +264,7 @@ void CMap::copyVector(CMapVectorEntry *dest, CMapVectorEntry *src)
         if (src[i].isVector) {
             if (!dest[i].isVector) {
                 dest[i].isVector = true;
-                dest[i].vector = (CMapVectorEntry *)gmallocn(256, sizeof(CMapVectorEntry));
+                dest[i].vector = static_cast<CMapVectorEntry *>(gmallocn(256, sizeof(CMapVectorEntry)));
                 for (j = 0; j < 256; ++j) {
                     dest[i].vector[j].isVector = false;
                     dest[i].vector[j].cid = 0;
@@ -296,7 +296,7 @@ void CMap::addCIDs(unsigned int start, unsigned int end, unsigned int nBytes, CI
             const int byte = (i >> (8 * j)) & 0xff;
             if (!vec[byte].isVector) {
                 vec[byte].isVector = true;
-                vec[byte].vector = (CMapVectorEntry *)gmallocn(256, sizeof(CMapVectorEntry));
+                vec[byte].vector = static_cast<CMapVectorEntry *>(gmallocn(256, sizeof(CMapVectorEntry)));
                 for (unsigned int k = 0; k < 256; ++k) {
                     vec[byte].vector[k].isVector = false;
                     vec[byte].vector[k].cid = 0;

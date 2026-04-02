@@ -50,15 +50,11 @@ set(poppler_cpp_all_install_headers
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.h
 )
 
-if (${CMAKE_VERSION} VERSION_LESS "3.23.0")
-  install(FILES ${poppler_cpp_all_install_headers} DESTINATION include/poppler/cpp)
-else()
-  target_sources(poppler-cpp
-    PUBLIC
-    FILE_SET HEADERS
-    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}
-    FILES
-    ${poppler_cpp_all_install_headers}
-  )
-  install(TARGETS poppler-cpp FILE_SET HEADERS DESTINATION include/poppler/cpp)
-endif()
+target_sources(poppler-cpp
+  PUBLIC
+  FILE_SET HEADERS
+  BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}
+  FILES
+  ${poppler_cpp_all_install_headers}
+)
+install(TARGETS poppler-cpp FILE_SET HEADERS DESTINATION include/poppler/cpp)

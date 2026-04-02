@@ -171,7 +171,7 @@ static int parseCharName(char *charName, Unicode *uBuf, int uLen, bool names, bo
 
 static int readFromStream(void *data)
 {
-    return ((Stream *)data)->getChar();
+    return (static_cast<Stream *>(data))->getChar();
 }
 
 //------------------------------------------------------------------------
@@ -674,11 +674,11 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps, GooSt
     }
 
     //----- PS resident Base-14 font
-    if (ps && !isCIDFont() && ((Gfx8BitFont *)this)->base14) {
+    if (ps && !isCIDFont() && (static_cast<Gfx8BitFont *>(this))->base14) {
         GfxFontLoc fontLoc;
         fontLoc.locType = gfxFontLocResident;
         fontLoc.fontType = fontType1;
-        fontLoc.path = ((Gfx8BitFont *)this)->base14->base14Name;
+        fontLoc.path = (static_cast<Gfx8BitFont *>(this))->base14->base14Name;
         return fontLoc;
     }
 
@@ -690,8 +690,8 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps, GooSt
     }
 
     //----- external font file for Base-14 font
-    if (!ps && !isCIDFont() && ((Gfx8BitFont *)this)->base14) {
-        base14Name = new GooString(((Gfx8BitFont *)this)->base14->base14Name);
+    if (!ps && !isCIDFont() && (static_cast<Gfx8BitFont *>(this))->base14) {
+        base14Name = new GooString((static_cast<Gfx8BitFont *>(this))->base14->base14Name);
         if ((path = globalParams->findBase14FontFile(base14Name, *this, substituteFontName))) {
             if (std::optional<GfxFontLoc> fontLoc = getExternalFont(*path, false)) {
                 delete base14Name;
@@ -1174,7 +1174,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
 
     // copy the base encoding
     for (int i = 0; i < 256; ++i) {
-        enc[i] = (char *)(*baseEnc)[i];
+        enc[i] = const_cast<char *>((*baseEnc)[i]);
         if ((encFree[i] = baseEncFromFontFile) && enc[i]) {
             enc[i] = copyString((*baseEnc)[i]);
         }
@@ -1187,7 +1187,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
     if (type == fontType1C && embFontID != Ref::INVALID() && baseEncFromFontFile) {
         for (int i = 0; i < 256; ++i) {
             if (!enc[i] && fofiType1StandardEncoding[i]) {
-                enc[i] = (char *)fofiType1StandardEncoding[i];
+                enc[i] = const_cast<char *>(fofiType1StandardEncoding[i]);
                 encFree[i] = false;
             }
         }
@@ -1262,7 +1262,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
         if (unicodeIsAlphabeticPresentationForm(toUnicode[code])) {
             Unicode *normalized = unicodeNormalizeNFKC(&toUnicode[code], 1, &len, nullptr);
             if (len > 1) {
-                ctu->setMapping((CharCode)code, normalized, len);
+                ctu->setMapping(static_cast<CharCode>(code), normalized, len);
             }
             gfree(normalized);
         }
@@ -1279,14 +1279,14 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
                                           true, // do check ligatures
                                           numeric, hex,
                                           true))) { // do check variants
-                    ctu->setMapping((CharCode)code, uBuf, n);
+                    ctu->setMapping(static_cast<CharCode>(code), uBuf, n);
                     continue;
                 }
 
                 // do a simple pass-through
                 // mapping for unknown character names
                 uBuf[0] = code;
-                ctu->setMapping((CharCode)code, uBuf, 1);
+                ctu->setMapping(static_cast<CharCode>(code), uBuf, 1);
             }
         }
     }
@@ -1517,7 +1517,7 @@ int Gfx8BitFont::getNextChar(const char *s, int /*len*/, CharCode *code, Unicode
 {
     CharCode c;
 
-    *code = c = (CharCode)(*s & 0xff);
+    *code = c = static_cast<CharCode>(*s & 0xff);
     *uLen = ctu->mapToUnicode(c, u);
     *dx = widths[c];
     *dy = *ox = *oy = 0;
@@ -1623,7 +1623,7 @@ std::vector<int> Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff)
             if (((charName = enc[i]) && (u = globalParams->mapNameToUnicodeAll(charName)))) {
                 map[i] = ff->mapCodeToGID(cmap, u);
             } else {
-                const int n = ctu->mapToUnicode((CharCode)i, &uAux);
+                const int n = ctu->mapToUnicode(static_cast<CharCode>(i), &uAux);
                 if (n > 0) {
                     map[i] = ff->mapCodeToGID(cmap, uAux[0]);
                 } else {
@@ -1921,7 +1921,7 @@ int GfxCIDFont::getNextChar(const char *s, int len, CharCode *code, Unicode cons
         return 1;
     }
 
-    *code = (CharCode)(cid = cMap->getCID(s, len, &dummy, &n));
+    *code = static_cast<CharCode>(cid = cMap->getCID(s, len, &dummy, &n));
     if (ctu) {
         if (hasToUnicode) {
             int i = 0, c = 0;
@@ -2364,12 +2364,12 @@ void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h)
     case objInt:
         h->hash('i');
         n = obj->getInt();
-        h->hash((char *)&n, sizeof(int));
+        h->hash(reinterpret_cast<char *>(&n), sizeof(int));
         break;
     case objReal:
         h->hash('r');
         r = obj->getReal();
-        h->hash((char *)&r, sizeof(double));
+        h->hash(reinterpret_cast<char *>(&r), sizeof(double));
         break;
     case objString: {
         h->hash('s');
@@ -2379,7 +2379,7 @@ void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h)
     case objName:
         h->hash('n');
         p = obj->getName();
-        h->hash(p, (int)strlen(p));
+        h->hash(p, static_cast<int>(strlen(p)));
         break;
     case objNull:
         h->hash('z');
@@ -2387,7 +2387,7 @@ void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h)
     case objArray:
         h->hash('a');
         n = obj->arrayGetLength();
-        h->hash((char *)&n, sizeof(int));
+        h->hash(reinterpret_cast<char *>(&n), sizeof(int));
         for (i = 0; i < n; ++i) {
             const Object &obj2 = obj->arrayGetNF(i);
             hashFontObject1(&obj2, h);
@@ -2396,10 +2396,10 @@ void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h)
     case objDict:
         h->hash('d');
         n = obj->dictGetLength();
-        h->hash((char *)&n, sizeof(int));
+        h->hash(reinterpret_cast<char *>(&n), sizeof(int));
         for (i = 0; i < n; ++i) {
             p = obj->dictGetKey(i);
-            h->hash(p, (int)strlen(p));
+            h->hash(p, static_cast<int>(strlen(p)));
             const Object &obj2 = obj->dictGetValNF(i);
             hashFontObject1(&obj2, h);
         }
@@ -2410,9 +2410,9 @@ void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h)
     case objRef:
         h->hash('f');
         n = obj->getRefNum();
-        h->hash((char *)&n, sizeof(int));
+        h->hash(reinterpret_cast<char *>(&n), sizeof(int));
         n = obj->getRefGen();
-        h->hash((char *)&n, sizeof(int));
+        h->hash(reinterpret_cast<char *>(&n), sizeof(int));
         break;
     default:
         h->hash('u');

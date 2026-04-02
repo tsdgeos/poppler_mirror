@@ -110,9 +110,9 @@ bool Decrypt::makeFileKey(int encRevision, int keyLength, const GooString *owner
                 for (i = 0; i < 16; ++i) {
                     state.cbc[i] = 0;
                 }
-                aes256DecryptBlock(&state, (unsigned char *)ownerEnc->c_str(), false);
+                aes256DecryptBlock(&state, reinterpret_cast<const unsigned char *>(ownerEnc->c_str()), false);
                 memcpy(fileKey, state.buf, 16);
-                aes256DecryptBlock(&state, (unsigned char *)ownerEnc->c_str() + 16, false);
+                aes256DecryptBlock(&state, reinterpret_cast<const unsigned char *>(ownerEnc->c_str()) + 16, false);
                 memcpy(fileKey + 16, state.buf, 16);
 
                 *ownerPasswordOk = true;
@@ -150,9 +150,9 @@ bool Decrypt::makeFileKey(int encRevision, int keyLength, const GooString *owner
                 for (i = 0; i < 16; ++i) {
                     state.cbc[i] = 0;
                 }
-                aes256DecryptBlock(&state, (unsigned char *)userEnc->c_str(), false);
+                aes256DecryptBlock(&state, reinterpret_cast<const unsigned char *>(userEnc->c_str()), false);
                 memcpy(fileKey, state.buf, 16);
-                aes256DecryptBlock(&state, (unsigned char *)userEnc->c_str() + 16, false);
+                aes256DecryptBlock(&state, reinterpret_cast<const unsigned char *>(userEnc->c_str()) + 16, false);
                 memcpy(fileKey + 16, state.buf, 16);
 
                 return true;
@@ -195,7 +195,7 @@ bool Decrypt::makeFileKey(int encRevision, int keyLength, const GooString *owner
                 }
             }
         }
-        userPassword2 = new GooString((char *)test2, 32);
+        userPassword2 = new GooString(reinterpret_cast<char *>(test2), 32);
         if (makeFileKey2(encRevision, keyLength, ownerKey, userKey, permissions, fileID, userPassword2, fileKey, encryptMetadata)) {
             *ownerPasswordOk = true;
             delete userPassword2;
@@ -219,7 +219,7 @@ bool Decrypt::makeFileKey2(int encRevision, int keyLength, const GooString *owne
     bool ok;
 
     // generate file key
-    buf = (unsigned char *)gmalloc(72 + fileID->size());
+    buf = static_cast<unsigned char *>(gmalloc(72 + fileID->size()));
     if (userPassword) {
         len = userPassword->size();
         if (len < 32) {
@@ -448,7 +448,7 @@ int EncryptStream::lookChar()
     case cryptRC4:
         if ((c = str->getChar()) != EOF) {
             // RC4 is XOR-based: the decryption algorithm works for encryption too
-            c = rc4DecryptByte(state.rc4.state, &state.rc4.x, &state.rc4.y, (unsigned char)c);
+            c = rc4DecryptByte(state.rc4.state, &state.rc4.x, &state.rc4.y, static_cast<unsigned char>(c));
         }
         break;
     case cryptAES:
@@ -532,7 +532,7 @@ int DecryptStream::lookChar()
     switch (algo) {
     case cryptRC4:
         if ((c = str->getChar()) != EOF) {
-            c = rc4DecryptByte(state.rc4.state, &state.rc4.x, &state.rc4.y, (unsigned char)c);
+            c = rc4DecryptByte(state.rc4.state, &state.rc4.x, &state.rc4.y, static_cast<unsigned char>(c));
         }
         break;
     case cryptAES:
@@ -617,7 +617,7 @@ static bool aesReadBlock(Stream *str, unsigned char *in, bool addPadding)
 
     for (i = 0; i < 16; ++i) {
         if ((c = str->getChar()) != EOF) {
-            in[i] = (unsigned char)c;
+            in[i] = static_cast<unsigned char>(c);
         } else {
             break;
         }
@@ -629,7 +629,7 @@ static bool aesReadBlock(Stream *str, unsigned char *in, bool addPadding)
     if (addPadding) {
         c = 16 - i;
         while (i < 16) {
-            in[i++] = (unsigned char)c;
+            in[i++] = static_cast<unsigned char>(c);
         }
     }
     return false;
@@ -1331,34 +1331,34 @@ static void md5Finish(MD5State *state)
     while (state->bufLen < 56) {
         state->buf[state->bufLen++] = 0x00;
     }
-    state->buf[56] = (unsigned char)(state->msgLen << 3);
-    state->buf[57] = (unsigned char)(state->msgLen >> 5);
-    state->buf[58] = (unsigned char)(state->msgLen >> 13);
-    state->buf[59] = (unsigned char)(state->msgLen >> 21);
-    state->buf[60] = (unsigned char)(state->msgLen >> 29);
-    state->buf[61] = (unsigned char)0;
-    state->buf[62] = (unsigned char)0;
-    state->buf[63] = (unsigned char)0;
+    state->buf[56] = static_cast<unsigned char>(state->msgLen << 3);
+    state->buf[57] = static_cast<unsigned char>(state->msgLen >> 5);
+    state->buf[58] = static_cast<unsigned char>(state->msgLen >> 13);
+    state->buf[59] = static_cast<unsigned char>(state->msgLen >> 21);
+    state->buf[60] = static_cast<unsigned char>(state->msgLen >> 29);
+    state->buf[61] = static_cast<unsigned char>(0);
+    state->buf[62] = static_cast<unsigned char>(0);
+    state->buf[63] = static_cast<unsigned char>(0);
     state->bufLen = 64;
     md5ProcessBlock(state);
 
     // break digest into bytes
-    state->digest[0] = (unsigned char)state->a;
-    state->digest[1] = (unsigned char)(state->a >> 8);
-    state->digest[2] = (unsigned char)(state->a >> 16);
-    state->digest[3] = (unsigned char)(state->a >> 24);
-    state->digest[4] = (unsigned char)state->b;
-    state->digest[5] = (unsigned char)(state->b >> 8);
-    state->digest[6] = (unsigned char)(state->b >> 16);
-    state->digest[7] = (unsigned char)(state->b >> 24);
-    state->digest[8] = (unsigned char)state->c;
-    state->digest[9] = (unsigned char)(state->c >> 8);
-    state->digest[10] = (unsigned char)(state->c >> 16);
-    state->digest[11] = (unsigned char)(state->c >> 24);
-    state->digest[12] = (unsigned char)state->d;
-    state->digest[13] = (unsigned char)(state->d >> 8);
-    state->digest[14] = (unsigned char)(state->d >> 16);
-    state->digest[15] = (unsigned char)(state->d >> 24);
+    state->digest[0] = static_cast<unsigned char>(state->a);
+    state->digest[1] = static_cast<unsigned char>(state->a >> 8);
+    state->digest[2] = static_cast<unsigned char>(state->a >> 16);
+    state->digest[3] = static_cast<unsigned char>(state->a >> 24);
+    state->digest[4] = static_cast<unsigned char>(state->b);
+    state->digest[5] = static_cast<unsigned char>(state->b >> 8);
+    state->digest[6] = static_cast<unsigned char>(state->b >> 16);
+    state->digest[7] = static_cast<unsigned char>(state->b >> 24);
+    state->digest[8] = static_cast<unsigned char>(state->c);
+    state->digest[9] = static_cast<unsigned char>(state->c >> 8);
+    state->digest[10] = static_cast<unsigned char>(state->c >> 16);
+    state->digest[11] = static_cast<unsigned char>(state->c >> 24);
+    state->digest[12] = static_cast<unsigned char>(state->d);
+    state->digest[13] = static_cast<unsigned char>(state->d >> 8);
+    state->digest[14] = static_cast<unsigned char>(state->d >> 16);
+    state->digest[15] = static_cast<unsigned char>(state->d >> 24);
 }
 
 void md5(const unsigned char *msg, int msgLen, unsigned char *digest)
@@ -1509,18 +1509,18 @@ static void sha256(unsigned char *msg, int msgLen, unsigned char *hash)
     blk[57] = 0;
     blk[58] = 0;
     blk[59] = 0;
-    blk[60] = (unsigned char)(msgLen >> 21);
-    blk[61] = (unsigned char)(msgLen >> 13);
-    blk[62] = (unsigned char)(msgLen >> 5);
-    blk[63] = (unsigned char)(msgLen << 3);
+    blk[60] = static_cast<unsigned char>(msgLen >> 21);
+    blk[61] = static_cast<unsigned char>(msgLen >> 13);
+    blk[62] = static_cast<unsigned char>(msgLen >> 5);
+    blk[63] = static_cast<unsigned char>(msgLen << 3);
     sha256HashBlock(blk, H);
 
     // copy the output into the buffer (convert words to bytes)
     for (i = 0; i < 8; ++i) {
-        hash[i * 4] = (unsigned char)(H[i] >> 24);
-        hash[i * 4 + 1] = (unsigned char)(H[i] >> 16);
-        hash[i * 4 + 2] = (unsigned char)(H[i] >> 8);
-        hash[i * 4 + 3] = (unsigned char)H[i];
+        hash[i * 4] = static_cast<unsigned char>(H[i] >> 24);
+        hash[i * 4 + 1] = static_cast<unsigned char>(H[i] >> 16);
+        hash[i * 4 + 2] = static_cast<unsigned char>(H[i] >> 8);
+        hash[i * 4 + 3] = static_cast<unsigned char>(H[i]);
     }
 }
 //------------------------------------------------------------------------
@@ -1576,8 +1576,8 @@ static void sha512HashBlock(const unsigned char *blk, uint64_t *H)
 
     // 1. prepare the message schedule
     for (t = 0; t < 16; ++t) {
-        W[t] = (((uint64_t)blk[t * 8] << 56) | ((uint64_t)blk[t * 8 + 1] << 48) | ((uint64_t)blk[t * 8 + 2] << 40) | ((uint64_t)blk[t * 8 + 3] << 32) | ((uint64_t)blk[t * 8 + 4] << 24) | ((uint64_t)blk[t * 8 + 5] << 16)
-                | ((uint64_t)blk[t * 8 + 6] << 8) | ((uint64_t)blk[t * 8 + 7]));
+        W[t] = ((static_cast<uint64_t>(blk[t * 8]) << 56) | (static_cast<uint64_t>(blk[t * 8 + 1]) << 48) | (static_cast<uint64_t>(blk[t * 8 + 2]) << 40) | (static_cast<uint64_t>(blk[t * 8 + 3]) << 32)
+                | (static_cast<uint64_t>(blk[t * 8 + 4]) << 24) | (static_cast<uint64_t>(blk[t * 8 + 5]) << 16) | (static_cast<uint64_t>(blk[t * 8 + 6]) << 8) | (static_cast<uint64_t>(blk[t * 8 + 7])));
     }
     for (t = 16; t < 80; ++t) {
         W[t] = sha512sigma1(W[t - 2]) + W[t - 7] + sha512sigma0(W[t - 15]) + W[t - 16];
@@ -1665,23 +1665,23 @@ static void sha512(unsigned char *msg, int msgLen, unsigned char *hash)
     blk[121] = 0;
     blk[122] = 0;
     blk[123] = 0;
-    blk[124] = (unsigned char)(msgLen >> 21);
-    blk[125] = (unsigned char)(msgLen >> 13);
-    blk[126] = (unsigned char)(msgLen >> 5);
-    blk[127] = (unsigned char)(msgLen << 3);
+    blk[124] = static_cast<unsigned char>(msgLen >> 21);
+    blk[125] = static_cast<unsigned char>(msgLen >> 13);
+    blk[126] = static_cast<unsigned char>(msgLen >> 5);
+    blk[127] = static_cast<unsigned char>(msgLen << 3);
 
     sha512HashBlock(blk, H);
 
     // copy the output into the buffer (convert words to bytes)
     for (i = 0; i < 8; ++i) {
-        hash[i * 8] = (unsigned char)(H[i] >> 56);
-        hash[i * 8 + 1] = (unsigned char)(H[i] >> 48);
-        hash[i * 8 + 2] = (unsigned char)(H[i] >> 40);
-        hash[i * 8 + 3] = (unsigned char)(H[i] >> 32);
-        hash[i * 8 + 4] = (unsigned char)(H[i] >> 24);
-        hash[i * 8 + 5] = (unsigned char)(H[i] >> 16);
-        hash[i * 8 + 6] = (unsigned char)(H[i] >> 8);
-        hash[i * 8 + 7] = (unsigned char)H[i];
+        hash[i * 8] = static_cast<unsigned char>(H[i] >> 56);
+        hash[i * 8 + 1] = static_cast<unsigned char>(H[i] >> 48);
+        hash[i * 8 + 2] = static_cast<unsigned char>(H[i] >> 40);
+        hash[i * 8 + 3] = static_cast<unsigned char>(H[i] >> 32);
+        hash[i * 8 + 4] = static_cast<unsigned char>(H[i] >> 24);
+        hash[i * 8 + 5] = static_cast<unsigned char>(H[i] >> 16);
+        hash[i * 8 + 6] = static_cast<unsigned char>(H[i] >> 8);
+        hash[i * 8 + 7] = static_cast<unsigned char>(H[i]);
     }
 }
 
@@ -1739,24 +1739,24 @@ static void sha384(unsigned char *msg, int msgLen, unsigned char *hash)
     blk[121] = 0;
     blk[122] = 0;
     blk[123] = 0;
-    blk[124] = (unsigned char)(msgLen >> 21);
-    blk[125] = (unsigned char)(msgLen >> 13);
-    blk[126] = (unsigned char)(msgLen >> 5);
-    blk[127] = (unsigned char)(msgLen << 3);
+    blk[124] = static_cast<unsigned char>(msgLen >> 21);
+    blk[125] = static_cast<unsigned char>(msgLen >> 13);
+    blk[126] = static_cast<unsigned char>(msgLen >> 5);
+    blk[127] = static_cast<unsigned char>(msgLen << 3);
 
     sha512HashBlock(blk, H);
 
     // copy the output into the buffer (convert words to bytes)
     // hash is truncated to 384 bits.
     for (i = 0; i < 6; ++i) {
-        hash[i * 8] = (unsigned char)(H[i] >> 56);
-        hash[i * 8 + 1] = (unsigned char)(H[i] >> 48);
-        hash[i * 8 + 2] = (unsigned char)(H[i] >> 40);
-        hash[i * 8 + 3] = (unsigned char)(H[i] >> 32);
-        hash[i * 8 + 4] = (unsigned char)(H[i] >> 24);
-        hash[i * 8 + 5] = (unsigned char)(H[i] >> 16);
-        hash[i * 8 + 6] = (unsigned char)(H[i] >> 8);
-        hash[i * 8 + 7] = (unsigned char)H[i];
+        hash[i * 8] = static_cast<unsigned char>(H[i] >> 56);
+        hash[i * 8 + 1] = static_cast<unsigned char>(H[i] >> 48);
+        hash[i * 8 + 2] = static_cast<unsigned char>(H[i] >> 40);
+        hash[i * 8 + 3] = static_cast<unsigned char>(H[i] >> 32);
+        hash[i * 8 + 4] = static_cast<unsigned char>(H[i] >> 24);
+        hash[i * 8 + 5] = static_cast<unsigned char>(H[i] >> 16);
+        hash[i * 8 + 6] = static_cast<unsigned char>(H[i] >> 8);
+        hash[i * 8 + 7] = static_cast<unsigned char>(H[i]);
     }
 }
 
@@ -1808,14 +1808,14 @@ static void revision6Hash(const GooString *inputPassword, unsigned char *K, cons
         // compute the remainder,modulo 3.
         uint64_t N1 = 0, N2 = 0, N3 = 0;
         // N1 contains first 8 bytes of BE16byteNumber
-        N1 = ((uint64_t)BE16byteNumber[0] << 56 | (uint64_t)BE16byteNumber[1] << 48 | (uint64_t)BE16byteNumber[2] << 40 | (uint64_t)BE16byteNumber[3] << 32 | (uint64_t)BE16byteNumber[4] << 24 | (uint64_t)BE16byteNumber[5] << 16
-              | (uint64_t)BE16byteNumber[6] << 8 | (uint64_t)BE16byteNumber[7]);
+        N1 = (static_cast<uint64_t>(BE16byteNumber[0]) << 56 | static_cast<uint64_t>(BE16byteNumber[1]) << 48 | static_cast<uint64_t>(BE16byteNumber[2]) << 40 | static_cast<uint64_t>(BE16byteNumber[3]) << 32
+              | static_cast<uint64_t>(BE16byteNumber[4]) << 24 | static_cast<uint64_t>(BE16byteNumber[5]) << 16 | static_cast<uint64_t>(BE16byteNumber[6]) << 8 | static_cast<uint64_t>(BE16byteNumber[7]));
         uint64_t rem = N1 % 3;
         // N2 contains 0s in higher 4 bytes and 9th to 12 th bytes of BE16byteNumber in lower 4 bytes.
-        N2 = ((uint64_t)BE16byteNumber[8] << 24 | (uint64_t)BE16byteNumber[9] << 16 | (uint64_t)BE16byteNumber[10] << 8 | (uint64_t)BE16byteNumber[11]);
+        N2 = (static_cast<uint64_t>(BE16byteNumber[8]) << 24 | static_cast<uint64_t>(BE16byteNumber[9]) << 16 | static_cast<uint64_t>(BE16byteNumber[10]) << 8 | static_cast<uint64_t>(BE16byteNumber[11]));
         rem = ((rem << 32) | N2) % 3;
         // N3 contains 0s in higher 4 bytes and 13th to 16th bytes of BE16byteNumber in lower 4 bytes.
-        N3 = ((uint64_t)BE16byteNumber[12] << 24 | (uint64_t)BE16byteNumber[13] << 16 | (uint64_t)BE16byteNumber[14] << 8 | (uint64_t)BE16byteNumber[15]);
+        N3 = (static_cast<uint64_t>(BE16byteNumber[12]) << 24 | static_cast<uint64_t>(BE16byteNumber[13]) << 16 | static_cast<uint64_t>(BE16byteNumber[14]) << 8 | static_cast<uint64_t>(BE16byteNumber[15]));
         rem = ((rem << 32) | N3) % 3;
 
         // d.If remainder is 0 perform SHA-256

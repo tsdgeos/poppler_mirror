@@ -46,7 +46,7 @@ std::shared_ptr<SplashFontFile> SplashFTFontFile::loadType1Font(SplashFTFontEngi
             return nullptr;
         }
     } else {
-        if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf().data(), src->buf().size(), faceIndexA, &faceA)) {
+        if (FT_New_Memory_Face(engineA->lib, static_cast<const FT_Byte *>(src->buf().data()), src->buf().size(), faceIndexA, &faceA)) {
             return nullptr;
         }
     }
@@ -54,11 +54,11 @@ std::shared_ptr<SplashFontFile> SplashFTFontFile::loadType1Font(SplashFTFontEngi
     codeToGIDA.resize(256, 0);
     for (i = 0; i < 256; ++i) {
         if ((name = encA[i])) {
-            codeToGIDA[i] = (int)FT_Get_Name_Index(faceA, (char *)name);
+            codeToGIDA[i] = static_cast<int>(FT_Get_Name_Index(faceA, const_cast<char *>(name)));
             if (codeToGIDA[i] == 0) {
                 name = GfxFont::getAlternateName(name);
                 if (name) {
-                    codeToGIDA[i] = FT_Get_Name_Index(faceA, (char *)name);
+                    codeToGIDA[i] = FT_Get_Name_Index(faceA, const_cast<char *>(name));
                 }
             }
         }
@@ -76,7 +76,7 @@ std::shared_ptr<SplashFontFile> SplashFTFontFile::loadCIDFont(SplashFTFontEngine
             return nullptr;
         }
     } else {
-        if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf().data(), src->buf().size(), faceIndexA, &faceA)) {
+        if (FT_New_Memory_Face(engineA->lib, static_cast<const FT_Byte *>(src->buf().data()), src->buf().size(), faceIndexA, &faceA)) {
             return nullptr;
         }
     }
@@ -93,7 +93,7 @@ std::shared_ptr<SplashFontFile> SplashFTFontFile::loadTrueTypeFont(SplashFTFontE
             return nullptr;
         }
     } else {
-        if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf().data(), src->buf().size(), faceIndexA, &faceA)) {
+        if (FT_New_Memory_Face(engineA->lib, static_cast<const FT_Byte *>(src->buf().data()), src->buf().size(), faceIndexA, &faceA)) {
             return nullptr;
         }
     }

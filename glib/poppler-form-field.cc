@@ -5,7 +5,7 @@
  * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  * Copyright (C) 2021, 2023 Marek Kasik <mkasik@redhat.com>
- * Copyright (C) 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2023-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Jan-Michael Brummer <jan-michael.brummer1@volkswagen.de>
  * Copyright (C) 2025 lbaudin <lbaudin@gnome.org>
  * Copyright (C) 2025 Albert Astals Cid <aacid@kde.org>
@@ -85,7 +85,7 @@ PopplerFormField *_poppler_form_field_new(PopplerDocument *document, FormWidget 
 
     poppler_field = POPPLER_FORM_FIELD(g_object_new(POPPLER_TYPE_FORM_FIELD, nullptr));
 
-    poppler_field->document = (PopplerDocument *)g_object_ref(document);
+    poppler_field->document = static_cast<PopplerDocument *> g_object_ref(document);
     poppler_field->widget = field;
 
     return poppler_field;
@@ -306,7 +306,7 @@ void poppler_form_field_button_set_state(PopplerFormField *field, gboolean state
 {
     g_return_if_fail(field->widget->getType() == formButton);
 
-    static_cast<FormWidgetButton *>(field->widget)->setState((bool)state);
+    static_cast<FormWidgetButton *>(field->widget)->setState(static_cast<bool>(state));
 }
 
 /**
@@ -531,9 +531,9 @@ static PopplerSignatureInfo *_poppler_form_field_signature_validate(PopplerFormF
 
 static void signature_validate_thread(GTask *task, gpointer source_object, gpointer task_data, GCancellable * /*cancellable*/)
 {
-    auto flags = (PopplerSignatureValidationFlags)GPOINTER_TO_INT(task_data);
+    auto flags = static_cast<PopplerSignatureValidationFlags> GPOINTER_TO_INT(task_data);
     PopplerSignatureInfo *signature_info;
-    auto *field = (PopplerFormField *)source_object;
+    auto *field = static_cast<PopplerFormField *>(source_object);
     GError *error = nullptr;
 
     signature_info = _poppler_form_field_signature_validate(field, flags, FALSE, &error);
@@ -543,7 +543,7 @@ static void signature_validate_thread(GTask *task, gpointer source_object, gpoin
     }
 
     if (g_task_set_return_on_cancel(task, FALSE)) {
-        g_task_return_pointer(task, signature_info, (GDestroyNotify)poppler_signature_info_free);
+        g_task_return_pointer(task, signature_info, reinterpret_cast<GDestroyNotify>(poppler_signature_info_free));
     }
 }
 
@@ -574,7 +574,7 @@ PopplerSignatureInfo *poppler_form_field_signature_validate_sync(PopplerFormFiel
 
     g_task_run_in_thread_sync(task, signature_validate_thread);
 
-    signature_info = (PopplerSignatureInfo *)g_task_propagate_pointer(task, error);
+    signature_info = static_cast<PopplerSignatureInfo *>(g_task_propagate_pointer(task, error));
     g_object_unref(task);
 
     return signature_info;
@@ -623,7 +623,7 @@ PopplerSignatureInfo *poppler_form_field_signature_validate_finish(PopplerFormFi
 {
     g_return_val_if_fail(g_task_is_valid(result, field), NULL);
 
-    return (PopplerSignatureInfo *)g_task_propagate_pointer(G_TASK(result), error);
+    return static_cast<PopplerSignatureInfo *>(g_task_propagate_pointer(G_TASK(result), error));
 }
 
 G_DEFINE_BOXED_TYPE(PopplerSignatureInfo, poppler_signature_info, poppler_signature_info_copy, poppler_signature_info_free)
@@ -1148,7 +1148,7 @@ G_DEFINE_BOXED_TYPE(PopplerSigningData, poppler_signing_data, poppler_signing_da
  **/
 PopplerSigningData *poppler_signing_data_new(void)
 {
-    auto *data = (PopplerSigningData *)g_malloc0(sizeof(PopplerSigningData));
+    auto *data = static_cast<PopplerSigningData *>(g_malloc0(sizeof(PopplerSigningData)));
 
     data->password = g_strdup("");
     data->page = 0;
@@ -1197,7 +1197,7 @@ PopplerSigningData *poppler_signing_data_copy(const PopplerSigningData *signing_
 
     g_return_val_if_fail(signing_data != nullptr, nullptr);
 
-    data = (PopplerSigningData *)g_malloc0(sizeof(PopplerSigningData));
+    data = static_cast<PopplerSigningData *>(g_malloc0(sizeof(PopplerSigningData)));
     data->destination_filename = g_strdup(signing_data->destination_filename);
     data->certificate_info = poppler_certificate_info_copy(signing_data->certificate_info);
     data->page = signing_data->page;
@@ -1983,7 +1983,7 @@ const gchar *poppler_signing_data_get_document_user_password(const PopplerSignin
  **/
 PopplerCertificateInfo *poppler_certificate_info_new(void)
 {
-    return (PopplerCertificateInfo *)g_malloc0(sizeof(PopplerCertificateInfo));
+    return static_cast<PopplerCertificateInfo *>(g_malloc0(sizeof(PopplerCertificateInfo)));
 }
 
 /**
@@ -2170,7 +2170,7 @@ PopplerCertificateInfo *poppler_certificate_info_copy(const PopplerCertificateIn
 
     g_return_val_if_fail(certificate_info != nullptr, nullptr);
 
-    dup = (PopplerCertificateInfo *)g_malloc0(sizeof(PopplerCertificateInfo));
+    dup = static_cast<PopplerCertificateInfo *>(g_malloc0(sizeof(PopplerCertificateInfo)));
     dup->id = g_strdup(certificate_info->id);
     dup->subject_common_name = g_strdup(certificate_info->subject_common_name);
     dup->subject_organization = g_strdup(certificate_info->subject_organization);
@@ -2249,7 +2249,7 @@ PopplerCertificateInfo *poppler_get_certificate_info_by_id(const char *id)
     GList *list;
 
     for (list = certificate_info; list != nullptr; list = list->next) {
-        auto *info = (PopplerCertificateInfo *)list->data;
+        auto *info = static_cast<PopplerCertificateInfo *>(list->data);
 
         if (g_strcmp0(info->id, id) == 0) {
             ret = poppler_certificate_info_copy(info);
@@ -2257,7 +2257,7 @@ PopplerCertificateInfo *poppler_get_certificate_info_by_id(const char *id)
         }
     }
 
-    g_list_free_full(certificate_info, (GDestroyNotify)poppler_certificate_info_free);
+    g_list_free_full(certificate_info, reinterpret_cast<GDestroyNotify>(poppler_certificate_info_free));
 
     return ret;
 }

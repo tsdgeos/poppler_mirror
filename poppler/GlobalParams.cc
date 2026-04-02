@@ -410,7 +410,7 @@ GlobalParams::GlobalParams(std::string customPopplerDataDir) : popplerDataDir(st
     macRomanReverseMap = new NameToCharCode();
     for (int i = 255; i >= 0; --i) {
         if (macRomanEncoding[i]) {
-            macRomanReverseMap->add(macRomanEncoding[i], (CharCode)i);
+            macRomanReverseMap->add(macRomanEncoding[i], static_cast<CharCode>(i));
         }
     }
 
@@ -961,7 +961,7 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
         const char *lang = getFontLang(font);
         if (strcmp(lang, "xx") != 0) {
             lb = FcLangSetCreate();
-            FcLangSetAdd(lb, (FcChar8 *)lang);
+            FcLangSetAdd(lb, reinterpret_cast<const FcChar8 *>(lang));
         }
 
         /*
@@ -985,16 +985,16 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
                 FcChar8 *s2;
                 res = FcPatternGetString(set->fonts[i], FC_FULLNAME, 0, &s2);
                 if (res == FcResultMatch && s2) {
-                    substituteName.assign((char *)s2);
+                    substituteName.assign(reinterpret_cast<char *>(s2));
                 } else {
                     // fontconfig does not extract fullname for some fonts
                     // create the fullname from family and style
                     res = FcPatternGetString(set->fonts[i], FC_FAMILY, 0, &s2);
                     if (res == FcResultMatch && s2) {
-                        substituteName.assign((char *)s2);
+                        substituteName.assign(reinterpret_cast<char *>(s2));
                         res = FcPatternGetString(set->fonts[i], FC_STYLE, 0, &s2);
                         if (res == FcResultMatch && s2) {
-                            const std::string style = { (char *)s2 };
+                            const std::string style = { reinterpret_cast<char *>(s2) };
                             if (style != "Regular") {
                                 substituteName.append(" ");
                                 substituteName.append(style);
@@ -1002,7 +1002,7 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
                         }
                     }
                 }
-                ext = strrchr((char *)s, '.');
+                ext = strrchr(reinterpret_cast<char *>(s), '.');
                 if (!ext) {
                     continue;
                 }
@@ -1025,10 +1025,10 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
                     *fontNum = 0;
                     *type = (!strncasecmp(ext, ".ttc", 4)) ? sysFontTTC : sysFontTTF;
                     FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
-                    auto *sfi = new SysFontInfo(std::make_unique<GooString>(*fontName), bold, italic, oblique, font.isFixedWidth(), std::make_unique<GooString>((char *)s), *type, *fontNum, substituteName.copy());
+                    auto *sfi = new SysFontInfo(std::make_unique<GooString>(*fontName), bold, italic, oblique, font.isFixedWidth(), std::make_unique<GooString>(reinterpret_cast<char *>(s)), *type, *fontNum, substituteName.copy());
                     sysFonts->addFcFont(sfi);
                     fi = sfi;
-                    path = std::string((char *)s);
+                    path = std::string(reinterpret_cast<char *>(s));
                 } else if (!strncasecmp(ext, ".pfa", 4) || !strncasecmp(ext, ".pfb", 4)) {
                     int weight, slant;
                     bool bold = font.isBold();
@@ -1048,10 +1048,10 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
                     *fontNum = 0;
                     *type = (!strncasecmp(ext, ".pfa", 4)) ? sysFontPFA : sysFontPFB;
                     FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
-                    auto *sfi = new SysFontInfo(std::make_unique<GooString>(*fontName), bold, italic, oblique, font.isFixedWidth(), std::make_unique<GooString>((char *)s), *type, *fontNum, substituteName.copy());
+                    auto *sfi = new SysFontInfo(std::make_unique<GooString>(*fontName), bold, italic, oblique, font.isFixedWidth(), std::make_unique<GooString>(reinterpret_cast<char *>(s)), *type, *fontNum, substituteName.copy());
                     sysFonts->addFcFont(sfi);
                     fi = sfi;
-                    path = std::string((char *)s);
+                    path = std::string(reinterpret_cast<char *>(s));
                 } else {
                     continue;
                 }

@@ -55,8 +55,8 @@ void OutputDev::setDefaultCTM(const std::array<double, 6> &ctm)
 
 void OutputDev::cvtUserToDev(double ux, double uy, int *dx, int *dy)
 {
-    *dx = (int)(defCTM[0] * ux + defCTM[2] * uy + defCTM[4] + 0.5);
-    *dy = (int)(defCTM[1] * ux + defCTM[3] * uy + defCTM[5] + 0.5);
+    *dx = static_cast<int>(defCTM[0] * ux + defCTM[2] * uy + defCTM[4] + 0.5);
+    *dy = static_cast<int>(defCTM[1] * ux + defCTM[3] * uy + defCTM[5] + 0.5);
 }
 
 void OutputDev::updateAll(GfxState *state)

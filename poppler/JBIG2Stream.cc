@@ -463,7 +463,7 @@ int JBIG2MMRDecoder::get2DCode()
         p = &twoDimTab1[(buf >> 1) & 0x7f];
     } else if (bufLen < 8) {
         p = &twoDimTab1[(buf << (7 - bufLen)) & 0x7f];
-        if (p->bits < 0 || p->bits > (int)bufLen) {
+        if (p->bits < 0 || p->bits > static_cast<int>(bufLen)) {
             buf = (buf << 8) | (str->getChar() & 0xff);
             bufLen += 8;
             ++nBytesRead;
@@ -506,7 +506,7 @@ int JBIG2MMRDecoder::getWhiteCode()
             }
             p = &whiteTab2[code & 0x1ff];
         }
-        if (p->bits > 0 && p->bits <= (int)bufLen) {
+        if (p->bits > 0 && p->bits <= static_cast<int>(bufLen)) {
             bufLen -= p->bits;
             return p->n;
         }
@@ -562,7 +562,7 @@ int JBIG2MMRDecoder::getBlackCode()
             }
             p = &blackTab3[code & 0x3f];
         }
-        if (p->bits > 0 && p->bits <= (int)bufLen) {
+        if (p->bits > 0 && p->bits <= static_cast<int>(bufLen)) {
             bufLen -= p->bits;
             return p->n;
         }
@@ -689,7 +689,7 @@ JBIG2Bitmap::JBIG2Bitmap(unsigned int segNumA, int wA, int hA) : JBIG2Segment(se
         return;
     }
     // need to allocate one extra guard byte for use in combine()
-    data = (unsigned char *)gmalloc_checkoverflow(h * line + 1);
+    data = static_cast<unsigned char *>(gmalloc_checkoverflow(h * line + 1));
     if (data != nullptr) {
         data[h * line] = 0;
     }
@@ -714,7 +714,7 @@ JBIG2Bitmap::JBIG2Bitmap(JBIG2Bitmap *bitmap) : JBIG2Segment(0)
         return;
     }
     // need to allocate one extra guard byte for use in combine()
-    data = (unsigned char *)gmalloc(h * line + 1);
+    data = static_cast<unsigned char *>(gmalloc(h * line + 1));
     memcpy(data, bitmap->data, h * line);
     data[h * line] = 0;
 }
@@ -759,7 +759,7 @@ void JBIG2Bitmap::expand(int newH, unsigned int pixel)
         return;
     }
     // need to allocate one extra guard byte for use in combine()
-    data = (unsigned char *)grealloc(data, newH * line + 1);
+    data = static_cast<unsigned char *>(grealloc(data, newH * line + 1));
     if (pixel) {
         memset(data + h * line, 0xff, (newH - h) * line);
     } else {
@@ -1263,7 +1263,7 @@ int JBIG2Stream::getChars(int nChars, unsigned char *buffer)
         return 0;
     }
     if (dataEnd - dataPtr < nChars) {
-        n = (int)(dataEnd - dataPtr);
+        n = static_cast<int>(dataEnd - dataPtr);
     } else {
         n = nChars;
     }
@@ -1737,7 +1737,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
         } else {
             arithDecoder->decodeInt(&dh, iadhStats);
         }
-        if (dh < 0 && (unsigned int)-dh >= symHeight) {
+        if (dh < 0 && static_cast<unsigned int>(-dh) >= symHeight) {
             error(errSyntaxError, curStr->getPos(), "Bad delta-height value in JBIG2 symbol dictionary");
             return false;
         }
@@ -1763,7 +1763,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                     break;
                 }
             }
-            if (dw < 0 && (unsigned int)-dw >= symWidth) {
+            if (dw < 0 && static_cast<unsigned int>(-dw) >= symWidth) {
                 error(errSyntaxError, curStr->getPos(), "Bad delta-height value in JBIG2 symbol dictionary");
                 return false;
             }
@@ -1862,13 +1862,13 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                 if (unlikely(p == nullptr)) {
                     return false;
                 }
-                for (k = 0; k < (unsigned int)bmSize; ++k) {
+                for (k = 0; k < static_cast<unsigned int>(bmSize); ++k) {
                     const int c = curStr->getChar();
                     if (c == EOF) {
                         memset(p, 0, bmSize - k);
                         break;
                     }
-                    *p++ = (unsigned char)c;
+                    *p++ = static_cast<unsigned char>(c);
                 }
                 byteCounter += k;
             } else {
@@ -2191,7 +2191,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
     }
 
     if (huff) {
-        symCodeTab = (JBIG2HuffmanTable *)gmallocn_checkoverflow(numSyms + 1, sizeof(JBIG2HuffmanTable));
+        symCodeTab = static_cast<JBIG2HuffmanTable *>(gmallocn_checkoverflow(numSyms + 1, sizeof(JBIG2HuffmanTable)));
         if (!symCodeTab) {
             return false;
         }
@@ -2298,7 +2298,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
         arithDecoder->decodeInt(&t, iadtStats);
     }
 
-    if (checkedMultiply(t, -(int)strips, &t)) {
+    if (checkedMultiply(t, -static_cast<int>(strips), &t)) {
         return {};
     }
 
@@ -2346,7 +2346,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
             if (huff) {
                 if (symCodeTab) {
                     huffDecoder->decodeInt(&j, symCodeTab);
-                    symID = (unsigned int)j;
+                    symID = static_cast<unsigned int>(j);
                 } else {
                     symID = huffDecoder->readBits(symCodeLen);
                 }
@@ -2369,7 +2369,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                 symbolBitmap = nullptr;
                 if (refine) {
                     if (huff) {
-                        ri = (int)huffDecoder->readBit();
+                        ri = static_cast<int>(huffDecoder->readBit());
                     } else {
                         arithDecoder->decodeInt(&ri, iariStats);
                     }
@@ -2550,7 +2550,7 @@ bool JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
     }
 
     // read the bitmap
-    atx[0] = -(int)patternW;
+    atx[0] = -static_cast<int>(patternW);
     aty[0] = 0;
     atx[1] = -3;
     aty[1] = -1;
@@ -2690,7 +2690,7 @@ bool JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, const std
             for (n = 0; n < gridW; ++n) {
                 xx = gridX + m * stepY + n * stepX;
                 yy = gridY + m * stepX - n * stepY;
-                if (((xx + (int)patW) >> 8) <= 0 || (xx >> 8) >= (int)w || ((yy + (int)patH) >> 8) <= 0 || (yy >> 8) >= (int)h) {
+                if (((xx + static_cast<int>(patW)) >> 8) <= 0 || (xx >> 8) >= static_cast<int>(w) || ((yy + static_cast<int>(patH)) >> 8) <= 0 || (yy >> 8) >= static_cast<int>(h)) {
                     skipBitmap->setPixel(n, m);
                 }
             }
@@ -2698,7 +2698,7 @@ bool JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, const std
     }
 
     // read the gray-scale image
-    grayImg = (unsigned int *)gmallocn_checkoverflow(gridW * gridH, sizeof(unsigned int));
+    grayImg = static_cast<unsigned int *>(gmallocn_checkoverflow(gridW * gridH, sizeof(unsigned int)));
     if (!grayImg) {
         return false;
     }
@@ -2897,8 +2897,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
         // ---> max codingLine size = w + 1
         // refLine has one extra guard entry at the end
         // ---> max refLine size = w + 2
-        int *codingLine = (int *)gmallocn_checkoverflow(w + 1, sizeof(int));
-        int *refLine = (int *)gmallocn_checkoverflow(w + 2, sizeof(int));
+        int *codingLine = static_cast<int *>(gmallocn_checkoverflow(w + 1, sizeof(int)));
+        int *refLine = static_cast<int *>(gmallocn_checkoverflow(w + 2, sizeof(int)));
 
         if (unlikely(!codingLine || !refLine)) {
             gfree(codingLine);
@@ -4042,7 +4042,7 @@ bool JBIG2Stream::readCodeTableSeg(unsigned int segNum)
 
     huffDecoder->reset();
     huffTabSize = 8;
-    huffTab = (JBIG2HuffmanTable *)gmallocn_checkoverflow(huffTabSize, sizeof(JBIG2HuffmanTable));
+    huffTab = static_cast<JBIG2HuffmanTable *>(gmallocn_checkoverflow(huffTabSize, sizeof(JBIG2HuffmanTable)));
     if (unlikely(!huffTab)) {
         error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
         return false;
@@ -4053,7 +4053,7 @@ bool JBIG2Stream::readCodeTableSeg(unsigned int segNum)
     while (val < highVal) {
         if (i == huffTabSize) {
             huffTabSize *= 2;
-            huffTab = (JBIG2HuffmanTable *)greallocn_checkoverflow(huffTab, huffTabSize, sizeof(JBIG2HuffmanTable));
+            huffTab = static_cast<JBIG2HuffmanTable *>(greallocn_checkoverflow(huffTab, huffTabSize, sizeof(JBIG2HuffmanTable)));
             if (unlikely(!huffTab)) {
                 error(errInternal, curStr->getPos(), "Failed allocation when processing JBIG2 stream");
                 return false;
@@ -4073,7 +4073,7 @@ bool JBIG2Stream::readCodeTableSeg(unsigned int segNum)
     }
     if (i + oob + 3 > huffTabSize) {
         huffTabSize = i + oob + 3;
-        huffTab = (JBIG2HuffmanTable *)greallocn_checkoverflow(huffTab, huffTabSize, sizeof(JBIG2HuffmanTable));
+        huffTab = static_cast<JBIG2HuffmanTable *>(greallocn_checkoverflow(huffTab, huffTabSize, sizeof(JBIG2HuffmanTable)));
         if (unlikely(!huffTab)) {
             error(errInternal, curStr->getPos(), "Failed allocation when processing JBIG2 stream");
             return false;
@@ -4225,7 +4225,7 @@ bool JBIG2Stream::readUByte(unsigned int *x)
         return false;
     }
     ++byteCounter;
-    *x = (unsigned int)c0;
+    *x = static_cast<unsigned int>(c0);
     return true;
 }
 
@@ -4252,7 +4252,7 @@ bool JBIG2Stream::readUWord(unsigned int *x)
         return false;
     }
     byteCounter += 2;
-    *x = (unsigned int)((c0 << 8) | c1);
+    *x = static_cast<unsigned int>((c0 << 8) | c1);
     return true;
 }
 
@@ -4264,7 +4264,7 @@ bool JBIG2Stream::readULong(unsigned int *x)
         return false;
     }
     byteCounter += 4;
-    *x = (unsigned int)((c0 << 24) | (c1 << 16) | (c2 << 8) | c3);
+    *x = static_cast<unsigned int>((c0 << 24) | (c1 << 16) | (c2 << 8) | c3);
     return true;
 }
 
@@ -4278,7 +4278,7 @@ bool JBIG2Stream::readLong(int *x)
     byteCounter += 4;
     *x = ((c0 << 24) | (c1 << 16) | (c2 << 8) | c3);
     if (c0 & 0x80) {
-        *x |= -1 - (int)0xffffffff;
+        *x |= -1 - static_cast<int>(0xffffffff);
     }
     return true;
 }

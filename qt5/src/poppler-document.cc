@@ -22,7 +22,7 @@
  * Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
  * Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
  * Copyright (C) 2024 Stefan Brüns <stefan.bruens@rwth-aachen.de>
- * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -252,7 +252,7 @@ QByteArray Document::fontData(const FontInfo &fi) const
         if (strObj.isStream() && strObj.streamRewind()) {
             int c;
             while ((c = strObj.streamGetChar()) != EOF) {
-                result.append((char)c);
+                result.append(static_cast<char>(c));
             }
             strObj.streamClose();
         }
@@ -721,7 +721,7 @@ void Document::setRenderHint(Document::RenderHint hint, bool on)
 
     int hintForOperation = hint;
     if (touchesOverprinting && !isOverprintPreviewAvailable()) {
-        hintForOperation = hintForOperation & ~(int)Document::OverprintPreview;
+        hintForOperation = hintForOperation & ~static_cast<int>(Document::OverprintPreview);
     }
 
     if (on) {
@@ -769,7 +769,7 @@ OptContentModel *Document::optionalContentModel()
     if (m_doc->m_optContentModel.isNull()) {
         m_doc->m_optContentModel = new OptContentModel(m_doc->doc->getOptContentConfig(), nullptr);
     }
-    return (OptContentModel *)m_doc->m_optContentModel;
+    return m_doc->m_optContentModel;
 }
 
 Link *Document::additionalAction(DocumentAdditionalActionsType type) const
@@ -945,7 +945,7 @@ QDateTime convertDate(const char *dateString)
 
 QDateTime convertDate(char *dateString)
 {
-    return convertDate((const char *)dateString);
+    return convertDate(const_cast<const char *>(dateString));
 }
 
 bool isCmsAvailable()

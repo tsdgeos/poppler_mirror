@@ -57,7 +57,7 @@ std::optional<std::vector<unsigned char>> FoFiBase::readFile(const char *fileNam
         fclose(f);
         return std::nullopt;
     }
-    const int n = (int)ftell(f);
+    const int n = static_cast<int>(ftell(f));
     if (n < 0) {
         error(errIO, -1, "Cannot determine length of '{0:s}'", fileName);
         fclose(f);
@@ -107,7 +107,7 @@ int FoFiBase::getS16BE(int pos, bool *ok) const
 {
     int x;
 
-    if (pos < 0 || pos > INT_MAX - 1 || pos + 1 >= int(file.size())) {
+    if (pos < 0 || pos > INT_MAX - 1 || pos + 1 >= static_cast<int>(file.size())) {
         *ok = false;
         return 0;
     }
@@ -123,7 +123,7 @@ int FoFiBase::getU16BE(int pos, bool *ok) const
 {
     int x;
 
-    if (pos < 0 || pos > INT_MAX - 1 || pos + 1 >= int(file.size())) {
+    if (pos < 0 || pos > INT_MAX - 1 || pos + 1 >= static_cast<int>(file.size())) {
         *ok = false;
         return 0;
     }
@@ -136,7 +136,7 @@ int FoFiBase::getS32BE(int pos, bool *ok) const
 {
     int x;
 
-    if (pos < 0 || pos > INT_MAX - 3 || pos + 3 >= int(file.size())) {
+    if (pos < 0 || pos > INT_MAX - 3 || pos + 3 >= static_cast<int>(file.size())) {
         *ok = false;
         return 0;
     }
@@ -154,7 +154,7 @@ unsigned int FoFiBase::getU32BE(int pos, bool *ok) const
 {
     unsigned int x;
 
-    if (pos < 0 || pos > INT_MAX - 3 || pos + 3 >= int(file.size())) {
+    if (pos < 0 || pos > INT_MAX - 3 || pos + 3 >= static_cast<int>(file.size())) {
         *ok = false;
         return 0;
     }
@@ -169,7 +169,7 @@ unsigned int FoFiBase::getU32LE(int pos, bool *ok) const
 {
     unsigned int x;
 
-    if (pos < 0 || pos > INT_MAX - 3 || pos + 3 >= int(file.size())) {
+    if (pos < 0 || pos > INT_MAX - 3 || pos + 3 >= static_cast<int>(file.size())) {
         *ok = false;
         return 0;
     }
@@ -185,7 +185,7 @@ unsigned int FoFiBase::getUVarBE(int pos, int size, bool *ok) const
     unsigned int x;
     int i;
 
-    if (pos < 0 || pos > INT_MAX - size || pos + size > int(file.size())) {
+    if (pos < 0 || pos > INT_MAX - size || pos + size > static_cast<int>(file.size())) {
         *ok = false;
         return 0;
     }
@@ -198,5 +198,5 @@ unsigned int FoFiBase::getUVarBE(int pos, int size, bool *ok) const
 
 bool FoFiBase::checkRegion(int pos, int size) const
 {
-    return pos >= 0 && size >= 0 && pos < INT_MAX - size && size < INT_MAX - pos && pos + size >= pos && pos + size <= int(file.size());
+    return pos >= 0 && size >= 0 && pos < INT_MAX - size && size < INT_MAX - pos && pos + size >= pos && pos + size <= static_cast<int>(file.size());
 }

@@ -100,7 +100,7 @@ static std::ostream &operator<<(std::ostream &stream, const poppler::ustring &st
 
 static std::string out_date(std::time_t date)
 {
-    if (date != std::time_t(-1)) {
+    if (date != static_cast<std::time_t>(-1)) {
         struct tm time;
         gmtime_r(&date, &time);
         struct tm *t = &time;

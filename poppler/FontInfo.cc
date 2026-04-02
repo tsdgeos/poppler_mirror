@@ -153,7 +153,7 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref)
     }
 
     // font type
-    type = (FontInfo::Type)font->getType();
+    type = static_cast<FontInfo::Type>(font->getType());
 
     // check for an embedded font
     if (font->getType() == fontType3) {

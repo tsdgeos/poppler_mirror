@@ -242,8 +242,8 @@ void HtmlString::addChar(GfxState * /*state*/, double x, double /*y*/, double dx
 
     if (len == size) {
         size += 16;
-        text = (Unicode *)grealloc(text, size * sizeof(Unicode));
-        xRight = (double *)grealloc(xRight, size * sizeof(double));
+        text = static_cast<Unicode *>(grealloc(text, size * sizeof(Unicode)));
+        xRight = static_cast<double *>(grealloc(xRight, size * sizeof(double)));
     }
     text[len] = u;
     if (len == 0) {
@@ -316,12 +316,12 @@ void HtmlPage::updateFont(GfxState *state)
             // width of the character 'm' (which breaks if the font is a
             // subset that doesn't contain 'm').
             for (code = 0; code < 256; ++code) {
-                if ((name = ((Gfx8BitFont *)font)->getCharName(code)) && name[0] == 'm' && name[1] == '\0') {
+                if ((name = static_cast<const Gfx8BitFont *>(font)->getCharName(code)) && name[0] == 'm' && name[1] == '\0') {
                     break;
                 }
             }
             if (code < 256) {
-                dimLength = ((Gfx8BitFont *)font)->getWidth(code);
+                dimLength = static_cast<const Gfx8BitFont *>(font)->getWidth(code);
                 if (dimLength != 0) {
                     // 600 is a generic average 'm' width -- yes, this is a hack
                     fontSize *= dimLength / 0.6;
@@ -594,8 +594,8 @@ void HtmlPage::coalesce()
             }
 
             str1->size = (n + 15) & ~15;
-            str1->text = (Unicode *)grealloc(str1->text, str1->size * sizeof(Unicode));
-            str1->xRight = (double *)grealloc(str1->xRight, str1->size * sizeof(double));
+            str1->text = static_cast<Unicode *>(grealloc(str1->text, str1->size * sizeof(Unicode)));
+            str1->xRight = static_cast<double *>(grealloc(str1->xRight, str1->size * sizeof(double)));
             if (addSpace) {
                 str1->text[str1->len] = 0x20;
                 str1->htext->append(xml ? " " : "&#160;");
@@ -611,7 +611,7 @@ void HtmlPage::coalesce()
                 str1->yMax = str2->yMax;
                 str1->xMax = str2->xMax;
                 int fontLineSize = hfont1->getLineSize();
-                int curLineSize = (int)(vertSpace + space);
+                int curLineSize = static_cast<int>(vertSpace + space);
                 if (curLineSize != fontLineSize) {
                     HtmlFont newfnt(*hfont1);
                     newfnt.setLineSize(curLineSize);
@@ -876,7 +876,7 @@ void HtmlPage::dumpComplex(FILE *file, int page, const std::vector<std::string> 
 
     fprintf(pageFile, "<div id=\"page%d-div\" style=\"position:relative;width:%dpx;height:%dpx;\">\n", page, pageWidth, pageHeight);
 
-    if (!ignore && (size_t)(page - firstPage) < backgroundImages.size()) {
+    if (!ignore && static_cast<size_t>(page - firstPage) < backgroundImages.size()) {
         fprintf(pageFile, "<img width=\"%d\" height=\"%d\" src=\"%s\" alt=\"background image\"/>\n", pageWidth, pageHeight, backgroundImages[page - firstPage].c_str());
     }
 
@@ -1340,7 +1340,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
             error(errInternal, -1, "Can't rewind image stream");
             return;
         }
-        auto *row = (unsigned char *)gmalloc(3 * width); // 3 bytes/pixel: RGB
+        auto *row = static_cast<unsigned char *>(gmalloc(3 * width)); // 3 bytes/pixel: RGB
         unsigned char **row_pointer = &row;
 
         // Initialize the image stream
@@ -1394,7 +1394,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
             error(errInternal, -1, "failed to rewind stream");
             return;
         }
-        auto *png_row = (unsigned char *)gmalloc(size);
+        auto *png_row = static_cast<unsigned char *>(gmalloc(size));
 
         for (int ri = 0; ri < height; ++ri) {
             for (int i = 0; i < size; i++) {
@@ -1482,7 +1482,7 @@ void HtmlOutputDev::doProcessLink(AnnotLink *link)
     cvtUserToDev(_x2, _y2, &x2, &y2);
 
     std::unique_ptr<GooString> _dest = getLinkDest(link);
-    HtmlLink t((double)x1, (double)y2, (double)x2, (double)y1, std::move(_dest));
+    HtmlLink t(static_cast<double>(x1), static_cast<double>(y2), static_cast<double>(x2), static_cast<double>(y1), std::move(_dest));
     pages->AddLink(t);
 }
 
@@ -1494,7 +1494,7 @@ std::unique_ptr<GooString> HtmlOutputDev::getLinkDest(AnnotLink *link)
     switch (link->getAction()->getKind()) {
     case actionGoTo: {
         int destPage = 1;
-        auto *ha = (LinkGoTo *)link->getAction();
+        auto *ha = static_cast<LinkGoTo *>(link->getAction());
         std::unique_ptr<LinkDest> dest;
         if (ha->getDest() != nullptr) {
             dest = std::make_unique<LinkDest>(*ha->getDest());
@@ -1538,7 +1538,7 @@ std::unique_ptr<GooString> HtmlOutputDev::getLinkDest(AnnotLink *link)
         return std::make_unique<GooString>();
     }
     case actionGoToR: {
-        auto *ha = (LinkGoToR *)link->getAction();
+        auto *ha = static_cast<LinkGoToR *>(link->getAction());
         LinkDest *dest = nullptr;
         int destPage = 1;
         std::unique_ptr<GooString> file = std::make_unique<GooString>();
@@ -1573,13 +1573,13 @@ std::unique_ptr<GooString> HtmlOutputDev::getLinkDest(AnnotLink *link)
         return file;
     }
     case actionURI: {
-        auto *ha = (LinkURI *)link->getAction();
+        auto *ha = static_cast<LinkURI *>(link->getAction());
         // printf("uri : %s\n",ha->getURI()->c_str());
         return std::make_unique<GooString>(ha->getURI());
     }
     case actionLaunch:
         if (printHtml) {
-            auto *ha = (LinkLaunch *)link->getAction();
+            auto *ha = static_cast<LinkLaunch *>(link->getAction());
             std::unique_ptr<GooString> file = std::make_unique<GooString>(ha->getFileName()->c_str());
             const char *p = file->c_str() + file->size() - 4;
             if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {

@@ -83,13 +83,13 @@ struct XRefEntry
 
     bool getFlag(Flag flag) const
     {
-        const int mask = (1 << (int)flag);
+        const int mask = (1 << static_cast<int>(flag));
         return (flags & mask) != 0;
     }
 
     void setFlag(Flag flag, bool value)
     {
-        const int mask = (1 << (int)flag);
+        const int mask = (1 << static_cast<int>(flag));
         if (value) {
             flags |= mask;
         } else {

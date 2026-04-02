@@ -117,7 +117,7 @@ Annotation *AnnotationUtils::createAnnotation(const QDomElement &annElement)
 void AnnotationUtils::storeAnnotation(const Annotation *ann, QDomElement &annElement, QDomDocument &document)
 {
     // save annotation's type as element's attribute
-    annElement.setAttribute(QStringLiteral("type"), (uint)ann->subType());
+    annElement.setAttribute(QStringLiteral("type"), static_cast<uint>(ann->subType()));
 
     // append all annotation data as children of this node
     ann->store(annElement, document);
@@ -178,16 +178,16 @@ void getRawDataFromQImage(const QImage &qimg, int bitsPerPixel, QByteArray *data
         break;
     case 8:
     case 24:
-        data->append((const char *)qimg.bits(), static_cast<int>(qimg.sizeInBytes()));
+        data->append(reinterpret_cast<const char *>(qimg.bits()), static_cast<int>(qimg.sizeInBytes()));
         break;
     case 32:
         for (int line = 0; line < height; line++) {
             const QRgb *lineData = reinterpret_cast<const QRgb *>(qimg.scanLine(line));
             for (int offset = 0; offset < width; offset++) {
-                char a = (char)qAlpha(lineData[offset]);
-                char r = (char)qRed(lineData[offset]);
-                char g = (char)qGreen(lineData[offset]);
-                char b = (char)qBlue(lineData[offset]);
+                char a = static_cast<char>(qAlpha(lineData[offset]));
+                char r = static_cast<char>(qRed(lineData[offset]));
+                char g = static_cast<char>(qGreen(lineData[offset]));
+                char b = static_cast<char>(qBlue(lineData[offset]));
 
                 data->append(r);
                 data->append(g);
@@ -531,7 +531,7 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
             annotation = l;
 
             // -> hlMode
-            l->setLinkHighlightMode((LinkAnnotation::HighlightMode)linkann->getLinkEffect());
+            l->setLinkHighlightMode(static_cast<LinkAnnotation::HighlightMode>(linkann->getLinkEffect()));
 
             // -> link region
             // TODO
@@ -1176,7 +1176,7 @@ Annotation::Annotation(AnnotationPrivate &dd, const QDomNode &annNode) : d_ptr(&
         // parse penStyle if not default
         else if (ee.tagName() == QLatin1String("penStyle")) {
             s.setWidth(ee.attribute(QStringLiteral("width")).toDouble());
-            s.setLineStyle((LineStyle)ee.attribute(QStringLiteral("style")).toInt());
+            s.setLineStyle(static_cast<LineStyle>(ee.attribute(QStringLiteral("style")).toInt()));
             s.setXCorners(ee.attribute(QStringLiteral("xcr")).toDouble());
             s.setYCorners(ee.attribute(QStringLiteral("ycr")).toDouble());
 
@@ -1205,7 +1205,7 @@ Annotation::Annotation(AnnotationPrivate &dd, const QDomNode &annNode) : d_ptr(&
         }
         // parse effectStyle if not default
         else if (ee.tagName() == QLatin1String("penEffect")) {
-            s.setLineEffect((LineEffect)ee.attribute(QStringLiteral("effect")).toInt());
+            s.setLineEffect(static_cast<LineEffect>(ee.attribute(QStringLiteral("effect")).toInt()));
             s.setEffectIntensity(ee.attribute(QStringLiteral("intensity")).toDouble());
         }
         // parse window if present
@@ -1257,8 +1257,8 @@ Annotation::Annotation(AnnotationPrivate &dd, const QDomNode &annNode) : d_ptr(&
 
         if (reply) // if annotation is valid, add as a revision of this annotation
         {
-            RevScope scope = (RevScope)revElement.attribute(QStringLiteral("revScope")).toInt();
-            RevType type = (RevType)revElement.attribute(QStringLiteral("revType")).toInt();
+            RevScope scope = static_cast<RevScope>(revElement.attribute(QStringLiteral("revScope")).toInt());
+            RevType type = static_cast<RevType>(revElement.attribute(QStringLiteral("revType")).toInt());
             d->addRevision(reply, scope, type);
             delete reply;
         }
@@ -1306,10 +1306,10 @@ void Annotation::storeBaseAnnotationProperties(QDomNode &annNode, QDomDocument &
     const QRectF brect = boundary();
     QDomElement bE = document.createElement(QStringLiteral("boundary"));
     e.appendChild(bE);
-    bE.setAttribute(QStringLiteral("l"), QString::number((double)brect.left()));
-    bE.setAttribute(QStringLiteral("t"), QString::number((double)brect.top()));
-    bE.setAttribute(QStringLiteral("r"), QString::number((double)brect.right()));
-    bE.setAttribute(QStringLiteral("b"), QString::number((double)brect.bottom()));
+    bE.setAttribute(QStringLiteral("l"), QString::number(static_cast<double>(brect.left())));
+    bE.setAttribute(QStringLiteral("t"), QString::number(static_cast<double>(brect.top())));
+    bE.setAttribute(QStringLiteral("r"), QString::number(static_cast<double>(brect.right())));
+    bE.setAttribute(QStringLiteral("b"), QString::number(static_cast<double>(brect.bottom())));
 
     // Sub-Node-2 - penStyle
     const QVector<double> &dashArray = s.dashArray();
@@ -1317,16 +1317,16 @@ void Annotation::storeBaseAnnotationProperties(QDomNode &annNode, QDomDocument &
         QDomElement psE = document.createElement(QStringLiteral("penStyle"));
         e.appendChild(psE);
         psE.setAttribute(QStringLiteral("width"), QString::number(s.width()));
-        psE.setAttribute(QStringLiteral("style"), (int)s.lineStyle());
+        psE.setAttribute(QStringLiteral("style"), static_cast<int>(s.lineStyle()));
         psE.setAttribute(QStringLiteral("xcr"), QString::number(s.xCorners()));
         psE.setAttribute(QStringLiteral("ycr"), QString::number(s.yCorners()));
 
         int marks = 3, spaces = 0; // Do not break code relying on marks/spaces
         if (!dashArray.empty()) {
-            marks = (int)dashArray[0];
+            marks = static_cast<int>(dashArray[0]);
         }
         if (dashArray.size() > 1) {
-            spaces = (int)dashArray[1];
+            spaces = static_cast<int>(dashArray[1]);
         }
 
         psE.setAttribute(QStringLiteral("marks"), marks);
@@ -1343,7 +1343,7 @@ void Annotation::storeBaseAnnotationProperties(QDomNode &annNode, QDomDocument &
     if (s.lineEffect() != NoEffect || s.effectIntensity() != 1.0) {
         QDomElement peE = document.createElement(QStringLiteral("penEffect"));
         e.appendChild(peE);
-        peE.setAttribute(QStringLiteral("effect"), (int)s.lineEffect());
+        peE.setAttribute(QStringLiteral("effect"), static_cast<int>(s.lineEffect()));
         peE.setAttribute(QStringLiteral("intensity"), QString::number(s.effectIntensity()));
     }
 
@@ -1355,8 +1355,8 @@ void Annotation::storeBaseAnnotationProperties(QDomNode &annNode, QDomDocument &
         wE.setAttribute(QStringLiteral("flags"), w.flags());
         wE.setAttribute(QStringLiteral("top"), QString::number(geom.x()));
         wE.setAttribute(QStringLiteral("left"), QString::number(geom.y()));
-        wE.setAttribute(QStringLiteral("width"), (int)geom.width());
-        wE.setAttribute(QStringLiteral("height"), (int)geom.height());
+        wE.setAttribute(QStringLiteral("width"), static_cast<int>(geom.width()));
+        wE.setAttribute(QStringLiteral("height"), static_cast<int>(geom.height()));
         wE.setAttribute(QStringLiteral("widthDouble"), QString::number(geom.width()));
         wE.setAttribute(QStringLiteral("heightDouble"), QString::number(geom.height()));
         wE.setAttribute(QStringLiteral("title"), w.title());
@@ -1382,8 +1382,8 @@ void Annotation::storeBaseAnnotationProperties(QDomNode &annNode, QDomDocument &
         QDomElement r = document.createElement(QStringLiteral("revision"));
         annNode.appendChild(r);
         // set element attributes
-        r.setAttribute(QStringLiteral("revScope"), (int)rev->revisionScope());
-        r.setAttribute(QStringLiteral("revType"), (int)rev->revisionType());
+        r.setAttribute(QStringLiteral("revScope"), static_cast<int>(rev->revisionScope()));
+        r.setAttribute(QStringLiteral("revType"), static_cast<int>(rev->revisionType()));
         // use revision as the annotation element, so fill it up
         AnnotationUtils::storeAnnotation(rev, r, document);
         delete rev;
@@ -1676,7 +1676,7 @@ Annotation::Style Annotation::style() const
         }
 
         s.setWidth(border->getWidth());
-        s.setLineStyle((Annotation::LineStyle)(1 << border->getStyle()));
+        s.setLineStyle(static_cast<Annotation::LineStyle>(1 << border->getStyle()));
 
         const std::vector<double> &dashArray = border->getDash();
         s.setDashArray(QVector<double>(dashArray.begin(), dashArray.end()));
@@ -1695,7 +1695,7 @@ Annotation::Style Annotation::style() const
         border_effect = nullptr;
     }
     if (border_effect) {
-        s.setLineEffect((Annotation::LineEffect)border_effect->getEffectType());
+        s.setLineEffect(static_cast<Annotation::LineEffect>(border_effect->getEffectType()));
         s.setEffectIntensity(border_effect->getIntensity());
     }
 
@@ -2005,7 +2005,7 @@ TextAnnotation::TextAnnotation(const QDomNode &node) : Annotation(*new TextAnnot
 
         // parse the attributes
         if (e.hasAttribute(QStringLiteral("type"))) {
-            setTextType((TextAnnotation::TextType)e.attribute(QStringLiteral("type")).toInt());
+            setTextType(static_cast<TextAnnotation::TextType>(e.attribute(QStringLiteral("type")).toInt()));
         }
         if (e.hasAttribute(QStringLiteral("icon"))) {
             setTextIcon(e.attribute(QStringLiteral("icon")));
@@ -2023,7 +2023,7 @@ TextAnnotation::TextAnnotation(const QDomNode &node) : Annotation(*new TextAnnot
             setInplaceAlign(e.attribute(QStringLiteral("align")).toInt());
         }
         if (e.hasAttribute(QStringLiteral("intent"))) {
-            setInplaceIntent((TextAnnotation::InplaceIntent)e.attribute(QStringLiteral("intent")).toInt());
+            setInplaceIntent(static_cast<TextAnnotation::InplaceIntent>(e.attribute(QStringLiteral("intent")).toInt()));
         }
 
         // parse the subnodes
@@ -2061,7 +2061,7 @@ void TextAnnotation::store(QDomNode &node, QDomDocument &document) const
 
     // store the optional attributes
     if (textType() != Linked) {
-        textElement.setAttribute(QStringLiteral("type"), (int)textType());
+        textElement.setAttribute(QStringLiteral("type"), static_cast<int>(textType()));
     }
     if (textIcon() != QLatin1String("Note")) {
         textElement.setAttribute(QStringLiteral("icon"), textIcon());
@@ -2070,7 +2070,7 @@ void TextAnnotation::store(QDomNode &node, QDomDocument &document) const
         textElement.setAttribute(QStringLiteral("align"), inplaceAlign());
     }
     if (inplaceIntent() != Unknown) {
-        textElement.setAttribute(QStringLiteral("intent"), (int)inplaceIntent());
+        textElement.setAttribute(QStringLiteral("intent"), static_cast<int>(inplaceIntent()));
     }
 
     textElement.setAttribute(QStringLiteral("font"), textFont().toString());
@@ -2242,7 +2242,7 @@ void TextAnnotation::setInplaceAlign(int align)
 
     if (d->pdfAnnot->getType() == Annot::typeFreeText) {
         auto *ftextann = static_cast<AnnotFreeText *>(d->pdfAnnot.get());
-        ftextann->setQuadding((VariableTextQuadding)align);
+        ftextann->setQuadding(static_cast<VariableTextQuadding>(align));
     }
 }
 
@@ -2340,7 +2340,7 @@ TextAnnotation::InplaceIntent TextAnnotation::inplaceIntent() const
 
     if (d->pdfAnnot->getType() == Annot::typeFreeText) {
         const auto *ftextann = static_cast<const AnnotFreeText *>(d->pdfAnnot.get());
-        return (TextAnnotation::InplaceIntent)ftextann->getIntent();
+        return static_cast<TextAnnotation::InplaceIntent>(ftextann->getIntent());
     }
 
     return TextAnnotation::Unknown;
@@ -2357,7 +2357,7 @@ void TextAnnotation::setInplaceIntent(TextAnnotation::InplaceIntent intent)
 
     if (d->pdfAnnot->getType() == Annot::typeFreeText) {
         auto *ftextann = static_cast<AnnotFreeText *>(d->pdfAnnot.get());
-        ftextann->setIntent((AnnotFreeText::AnnotFreeTextIntent)intent);
+        ftextann->setIntent(static_cast<AnnotFreeText::AnnotFreeTextIntent>(intent));
     }
 }
 
@@ -2442,10 +2442,10 @@ LineAnnotation::LineAnnotation(const QDomNode &node) : Annotation(*new LineAnnot
 
         // parse the attributes
         if (e.hasAttribute(QStringLiteral("startStyle"))) {
-            setLineStartStyle((LineAnnotation::TermStyle)e.attribute(QStringLiteral("startStyle")).toInt());
+            setLineStartStyle(static_cast<LineAnnotation::TermStyle>(e.attribute(QStringLiteral("startStyle")).toInt()));
         }
         if (e.hasAttribute(QStringLiteral("endStyle"))) {
-            setLineEndStyle((LineAnnotation::TermStyle)e.attribute(QStringLiteral("endStyle")).toInt());
+            setLineEndStyle(static_cast<LineAnnotation::TermStyle>(e.attribute(QStringLiteral("endStyle")).toInt()));
         }
         if (e.hasAttribute(QStringLiteral("closed"))) {
             setLineClosed(e.attribute(QStringLiteral("closed")).toInt());
@@ -2463,7 +2463,7 @@ LineAnnotation::LineAnnotation(const QDomNode &node) : Annotation(*new LineAnnot
             setLineShowCaption(e.attribute(QStringLiteral("showCaption")).toInt());
         }
         if (e.hasAttribute(QStringLiteral("intent"))) {
-            setLineIntent((LineAnnotation::LineIntent)e.attribute(QStringLiteral("intent")).toInt());
+            setLineIntent(static_cast<LineAnnotation::LineIntent>(e.attribute(QStringLiteral("intent")).toInt()));
         }
 
         // parse all 'point' subnodes
@@ -2501,10 +2501,10 @@ void LineAnnotation::store(QDomNode &node, QDomDocument &document) const
 
     // store the attributes
     if (lineStartStyle() != None) {
-        lineElement.setAttribute(QStringLiteral("startStyle"), (int)lineStartStyle());
+        lineElement.setAttribute(QStringLiteral("startStyle"), static_cast<int>(lineStartStyle()));
     }
     if (lineEndStyle() != None) {
-        lineElement.setAttribute(QStringLiteral("endStyle"), (int)lineEndStyle());
+        lineElement.setAttribute(QStringLiteral("endStyle"), static_cast<int>(lineEndStyle()));
     }
     if (isLineClosed()) {
         lineElement.setAttribute(QStringLiteral("closed"), isLineClosed());
@@ -2640,10 +2640,10 @@ LineAnnotation::TermStyle LineAnnotation::lineStartStyle() const
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const auto *lineann = static_cast<const AnnotLine *>(d->pdfAnnot.get());
-        return (LineAnnotation::TermStyle)lineann->getStartStyle();
+        return static_cast<LineAnnotation::TermStyle>(lineann->getStartStyle());
     }
     const auto *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
-    return (LineAnnotation::TermStyle)polyann->getStartStyle();
+    return static_cast<LineAnnotation::TermStyle>(polyann->getStartStyle());
 }
 
 void LineAnnotation::setLineStartStyle(LineAnnotation::TermStyle style)
@@ -2657,10 +2657,10 @@ void LineAnnotation::setLineStartStyle(LineAnnotation::TermStyle style)
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         auto *lineann = static_cast<AnnotLine *>(d->pdfAnnot.get());
-        lineann->setStartEndStyle((AnnotLineEndingStyle)style, lineann->getEndStyle());
+        lineann->setStartEndStyle(static_cast<AnnotLineEndingStyle>(style), lineann->getEndStyle());
     } else {
         auto *polyann = static_cast<AnnotPolygon *>(d->pdfAnnot.get());
-        polyann->setStartEndStyle((AnnotLineEndingStyle)style, polyann->getEndStyle());
+        polyann->setStartEndStyle(static_cast<AnnotLineEndingStyle>(style), polyann->getEndStyle());
     }
 }
 
@@ -2674,10 +2674,10 @@ LineAnnotation::TermStyle LineAnnotation::lineEndStyle() const
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const auto *lineann = static_cast<const AnnotLine *>(d->pdfAnnot.get());
-        return (LineAnnotation::TermStyle)lineann->getEndStyle();
+        return static_cast<LineAnnotation::TermStyle>(lineann->getEndStyle());
     }
     const auto *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
-    return (LineAnnotation::TermStyle)polyann->getEndStyle();
+    return static_cast<LineAnnotation::TermStyle>(polyann->getEndStyle());
 }
 
 void LineAnnotation::setLineEndStyle(LineAnnotation::TermStyle style)
@@ -2691,10 +2691,10 @@ void LineAnnotation::setLineEndStyle(LineAnnotation::TermStyle style)
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         auto *lineann = static_cast<AnnotLine *>(d->pdfAnnot.get());
-        lineann->setStartEndStyle(lineann->getStartStyle(), (AnnotLineEndingStyle)style);
+        lineann->setStartEndStyle(lineann->getStartStyle(), static_cast<AnnotLineEndingStyle>(style));
     } else {
         auto *polyann = static_cast<AnnotPolygon *>(d->pdfAnnot.get());
-        polyann->setStartEndStyle(polyann->getStartStyle(), (AnnotLineEndingStyle)style);
+        polyann->setStartEndStyle(polyann->getStartStyle(), static_cast<AnnotLineEndingStyle>(style));
     }
 }
 
@@ -2880,7 +2880,7 @@ LineAnnotation::LineIntent LineAnnotation::lineIntent() const
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const auto *lineann = static_cast<const AnnotLine *>(d->pdfAnnot.get());
-        return (LineAnnotation::LineIntent)(lineann->getIntent() + 1);
+        return static_cast<LineAnnotation::LineIntent>(lineann->getIntent() + 1);
     }
     const auto *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
     if (polyann->getIntent() == AnnotPolygon::polygonCloud) {
@@ -2905,7 +2905,7 @@ void LineAnnotation::setLineIntent(LineAnnotation::LineIntent intent)
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         auto *lineann = static_cast<AnnotLine *>(d->pdfAnnot.get());
-        lineann->setIntent((AnnotLine::AnnotLineIntent)(intent - 1));
+        lineann->setIntent(static_cast<AnnotLine::AnnotLineIntent>(intent - 1));
     } else {
         auto *polyann = static_cast<AnnotPolygon *>(d->pdfAnnot.get());
         if (intent == LineAnnotation::PolygonCloud) {
@@ -2985,7 +2985,7 @@ GeomAnnotation::GeomAnnotation(const QDomNode &node) : Annotation(*new GeomAnnot
 
         // parse the attributes
         if (e.hasAttribute(QStringLiteral("type"))) {
-            setGeomType((GeomAnnotation::GeomType)e.attribute(QStringLiteral("type")).toInt());
+            setGeomType(static_cast<GeomAnnotation::GeomType>(e.attribute(QStringLiteral("type")).toInt()));
         }
         if (e.hasAttribute(QStringLiteral("color"))) {
             setGeomInnerColor(QColor(e.attribute(QStringLiteral("color"))));
@@ -3009,7 +3009,7 @@ void GeomAnnotation::store(QDomNode &node, QDomDocument &document) const
 
     // append the optional attributes
     if (geomType() != InscribedSquare) {
-        geomElement.setAttribute(QStringLiteral("type"), (int)geomType());
+        geomElement.setAttribute(QStringLiteral("type"), static_cast<int>(geomType()));
     }
     if (geomInnerColor().isValid()) {
         geomElement.setAttribute(QStringLiteral("color"), geomInnerColor().name());
@@ -3212,7 +3212,7 @@ HighlightAnnotation::HighlightAnnotation(const QDomNode &node) : Annotation(*new
 
         // parse the attributes
         if (e.hasAttribute(QStringLiteral("type"))) {
-            setHighlightType((HighlightAnnotation::HighlightType)e.attribute(QStringLiteral("type")).toInt());
+            setHighlightType(static_cast<HighlightAnnotation::HighlightType>(e.attribute(QStringLiteral("type")).toInt()));
         }
 
         // parse all 'quad' subnodes
@@ -3258,7 +3258,7 @@ void HighlightAnnotation::store(QDomNode &node, QDomDocument &document) const
 
     // append the optional attributes
     if (highlightType() != Highlight) {
-        hlElement.setAttribute(QStringLiteral("type"), (int)highlightType());
+        hlElement.setAttribute(QStringLiteral("type"), static_cast<int>(highlightType()));
     }
 
     const QList<HighlightAnnotation::Quad> quads = highlightQuads();
@@ -3825,7 +3825,7 @@ LinkAnnotation::LinkAnnotation(const QDomNode &node) : Annotation(*new LinkAnnot
 
         // parse the attributes
         if (e.hasAttribute(QStringLiteral("hlmode"))) {
-            setLinkHighlightMode((LinkAnnotation::HighlightMode)e.attribute(QStringLiteral("hlmode")).toInt());
+            setLinkHighlightMode(static_cast<LinkAnnotation::HighlightMode>(e.attribute(QStringLiteral("hlmode")).toInt()));
         }
 
         // parse all 'quad' subnodes
@@ -3909,7 +3909,7 @@ void LinkAnnotation::store(QDomNode &node, QDomDocument &document) const
 
     // append the optional attributes
     if (linkHighlightMode() != Invert) {
-        linkElement.setAttribute(QStringLiteral("hlmode"), (int)linkHighlightMode());
+        linkElement.setAttribute(QStringLiteral("hlmode"), static_cast<int>(linkHighlightMode()));
     }
 
     // saving region
@@ -4203,7 +4203,7 @@ CaretAnnotation::CaretSymbol CaretAnnotation::caretSymbol() const
     }
 
     const auto *caretann = static_cast<const AnnotCaret *>(d->pdfAnnot.get());
-    return (CaretAnnotation::CaretSymbol)caretann->getSymbol();
+    return static_cast<CaretAnnotation::CaretSymbol>(caretann->getSymbol());
 }
 
 void CaretAnnotation::setCaretSymbol(CaretAnnotation::CaretSymbol symbol)
@@ -4216,7 +4216,7 @@ void CaretAnnotation::setCaretSymbol(CaretAnnotation::CaretSymbol symbol)
     }
 
     auto *caretann = static_cast<AnnotCaret *>(d->pdfAnnot.get());
-    caretann->setSymbol((AnnotCaret::AnnotCaretSymbol)symbol);
+    caretann->setSymbol(static_cast<AnnotCaret::AnnotCaretSymbol>(symbol));
 }
 
 /** FileAttachmentAnnotation [Annotation] */

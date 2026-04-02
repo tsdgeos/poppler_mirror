@@ -73,9 +73,9 @@ static inline int splashFloor(SplashCoord x)
     return result;
 #else
     if (x > 0) {
-        return (int)x;
+        return static_cast<int>(x);
     }
-    return (int)floor(x);
+    return static_cast<int>(floor(x));
 
 #endif
 }
@@ -119,7 +119,7 @@ static inline int splashCeil(SplashCoord x)
     __asm fldcw WORD PTR oldCW;
     return result;
 #else
-    return (int)ceil(x);
+    return static_cast<int>(ceil(x));
 #endif
 }
 

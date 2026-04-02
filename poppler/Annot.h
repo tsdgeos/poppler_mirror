@@ -376,7 +376,7 @@ public:
 
     void adjustColor(int adjust);
 
-    AnnotColorSpace getSpace() const { return (AnnotColorSpace)length; }
+    AnnotColorSpace getSpace() const { return static_cast<AnnotColorSpace>(length); }
     const std::array<double, 4> &getValues() const { return values; }
 
     Object writeToObject(XRef *xref) const;

@@ -7,6 +7,7 @@
 // Copyright (C) 2021 Marco Genasci <fedeliallalinea@gmail.com>
 // Copyright (C) 2023 Jordan Abrahams-Whitehead <ajordanr@google.com>
 // Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Aditya Tiwari <suntiwari3495@gmail.com>
 //
 // This file is licensed under the GPLv2 or later
 //
@@ -113,7 +114,7 @@ class PngEmbedder : public ImageEmbedder
         // Pass this static function to png_set_read_fn().
         static void readCallback(png_structp png, png_bytep out, png_size_t size)
         {
-            auto *stream = (LibpngInputStream *)png_get_io_ptr(png);
+            auto *stream = static_cast<LibpngInputStream *>(png_get_io_ptr(png));
             if (stream) {
                 stream->read(out, size);
             }
@@ -307,7 +308,7 @@ struct JpegErrorManager
 // Note: an address of pub is equal to an address of a JpegErrorManager instance.
 static void jpegExitErrorHandler(j_common_ptr info)
 {
-    auto *errorManager = (JpegErrorManager *)info->err;
+    auto *errorManager = reinterpret_cast<JpegErrorManager *>(info->err);
     (*errorManager->pub.output_message)(info);
     // Jump to the setjmp point.
     longjmp(errorManager->setjmpBuffer, 1);

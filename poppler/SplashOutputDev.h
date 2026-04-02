@@ -61,7 +61,7 @@ class SplashFunctionPattern : public SplashPattern
 public:
     SplashFunctionPattern(SplashColorMode colorMode, GfxState *state, GfxFunctionShading *shading);
 
-    SplashPattern *copy() const override { return new SplashFunctionPattern(colorMode, state, (GfxFunctionShading *)shading); }
+    SplashPattern *copy() const override { return new SplashFunctionPattern(colorMode, state, shading); }
 
     ~SplashFunctionPattern() override;
 
@@ -117,7 +117,7 @@ class SplashAxialPattern : public SplashUnivariatePattern
 public:
     SplashAxialPattern(SplashColorMode colorMode, GfxState *state, GfxAxialShading *shading);
 
-    SplashPattern *copy() const override { return new SplashAxialPattern(colorMode, state, (GfxAxialShading *)shading); }
+    SplashPattern *copy() const override { return new SplashAxialPattern(colorMode, state, static_cast<GfxAxialShading *>(shading)); }
 
     ~SplashAxialPattern() override;
 
@@ -169,7 +169,7 @@ class SplashRadialPattern : public SplashUnivariatePattern
 public:
     SplashRadialPattern(SplashColorMode colorMode, GfxState *state, GfxRadialShading *shading);
 
-    SplashPattern *copy() const override { return new SplashRadialPattern(colorMode, state, (GfxRadialShading *)shading); }
+    SplashPattern *copy() const override { return new SplashRadialPattern(colorMode, state, static_cast<GfxRadialShading *>(shading)); }
 
     ~SplashRadialPattern() override;
 

@@ -66,7 +66,7 @@ size_t CurlCachedFileLoader::init(CachedFile *cachedFileA)
 
 static size_t load_cb(const char *ptr, size_t size, size_t nmemb, void *data)
 {
-    auto *writer = (CachedFileWriter *)data;
+    auto *writer = static_cast<CachedFileWriter *>(data);
     return (writer->write)(ptr, size * nmemb);
 }
 

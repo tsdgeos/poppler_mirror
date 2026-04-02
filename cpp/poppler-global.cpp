@@ -8,6 +8,7 @@
  * Copyright (C) 2018 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2022, Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +61,7 @@ struct MiniIconv
     MiniIconv &operator=(const MiniIconv &) = delete;
     bool is_valid() const
     {
-        return i_ != (iconv_t)-1; // NOLINT(performance-no-int-to-ptr)
+        return i_ != reinterpret_cast<iconv_t>(-1); // NOLINT(performance-no-int-to-ptr)
     }
     explicit operator iconv_t() const { return i_; }
     iconv_t i_;
@@ -239,13 +240,13 @@ byte_array ustring::to_utf8() const
     char *str_data = str.data();
     size_t me_len_char = size() * sizeof(value_type);
     size_t str_len_left = str.size();
-    size_t ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&me_data, &me_len_char, &str_data, &str_len_left); // NOLINT(readability-redundant-casting)
+    size_t ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&me_data, &me_len_char, &str_data, &str_len_left); // NOLINT(readability-redundant-casting,modernize-avoid-c-style-cast)
     if ((ir == kIconvError) && (errno == E2BIG)) {
         const size_t delta = str_data - str.data();
         str_len_left += str.size();
         str.resize(str.size() * 2);
         str_data = &str[delta];
-        ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&me_data, &me_len_char, &str_data, &str_len_left); // NOLINT(readability-redundant-casting)
+        ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&me_data, &me_len_char, &str_data, &str_len_left); // NOLINT(readability-redundant-casting,modernize-avoid-c-style-cast)
         if (ir == kIconvError) {
             return byte_array();
         }
@@ -264,7 +265,7 @@ std::string ustring::to_latin1() const
     std::string ret(mylength, '\0');
     const value_type *me = data();
     for (size_type i = 0; i < mylength; ++i) {
-        ret[i] = (char)*me++;
+        ret[i] = static_cast<char>(*me++);
     }
     return ret;
 }
@@ -293,13 +294,13 @@ ustring ustring::from_utf8(const char *str, int len)
     char *str_data = const_cast<char *>(str);
     size_t str_len_char = len;
     size_t ret_len_left = ret.size() * sizeof(ustring::value_type);
-    size_t ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&str_data, &str_len_char, &ret_data, &ret_len_left); // NOLINT(readability-redundant-casting)
+    size_t ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&str_data, &str_len_char, &ret_data, &ret_len_left); // NOLINT(readability-redundant-casting,modernize-avoid-c-style-cast)
     if ((ir == kIconvError) && (errno == E2BIG)) {
         const size_t delta = ret_data - reinterpret_cast<char *>(ret.data());
         ret_len_left += ret.size() * sizeof(ustring::value_type);
         ret.resize(ret.size() * 2);
         ret_data = reinterpret_cast<char *>(ret.data()) + delta;
-        ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&str_data, &str_len_char, &ret_data, &ret_len_left); // NOLINT(readability-redundant-casting)
+        ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&str_data, &str_len_char, &ret_data, &ret_len_left); // NOLINT(readability-redundant-casting,modernize-avoid-c-style-cast)
         if (ir == kIconvError) {
             return ustring();
         }

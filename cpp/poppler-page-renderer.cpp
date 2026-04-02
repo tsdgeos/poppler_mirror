@@ -168,7 +168,7 @@ void page_renderer::set_render_hint(page_renderer::render_hint hint, bool on)
     if (on) {
         d->hints |= hint;
     } else {
-        d->hints &= ~(int)hint;
+        d->hints &= ~static_cast<int>(hint);
     }
 }
 
@@ -278,7 +278,7 @@ image page_renderer::render_page(const page *p, double xres, double yres, int x,
     splashOutputDev.setVectorAntialias((d->hints & antialiasing) != 0);
     splashOutputDev.setFreeTypeHinting((d->hints & text_hinting) != 0, false);
     splashOutputDev.startDoc(pdfdoc);
-    pdfdoc->displayPageSlice(&splashOutputDev, pp->index + 1, xres, yres, int(rotate) * 90, false, true, false, x, y, w, h, nullptr, nullptr, nullptr, nullptr, true);
+    pdfdoc->displayPageSlice(&splashOutputDev, pp->index + 1, xres, yres, static_cast<int>(rotate) * 90, false, true, false, x, y, w, h, nullptr, nullptr, nullptr, nullptr, true);
 
     SplashBitmap *bitmap = splashOutputDev.getBitmap();
     const int bw = bitmap->getWidth();

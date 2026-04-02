@@ -2,7 +2,7 @@
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018, 2020, 2022 Albert Astals Cid <aacid@kde.org>
- * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  * Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
  *
@@ -115,7 +115,7 @@ time_t embedded_file::modification_date_t() const
 {
     const EmbFile *ef = d->file_spec->getEmbeddedFile();
     const GooString *goo = ef ? ef->modDate() : nullptr;
-    return goo ? dateStringToTime(goo->toStr()) : time_t(-1);
+    return goo ? dateStringToTime(goo->toStr()) : static_cast<time_t>(-1);
 }
 
 /**
@@ -126,7 +126,7 @@ time_t embedded_file::creation_date_t() const
 {
     const EmbFile *ef = d->file_spec->getEmbeddedFile();
     const GooString *goo = ef ? ef->createDate() : nullptr;
-    return goo ? dateStringToTime(goo->toStr()) : time_t(-1);
+    return goo ? dateStringToTime(goo->toStr()) : static_cast<time_t>(-1);
 }
 
 /**
@@ -183,7 +183,7 @@ byte_array embedded_file::data() const
         if (data_len == ret.size()) {
             ret.resize(ret.size() * 2);
         }
-        ret[data_len] = (char)i;
+        ret[data_len] = static_cast<char>(i);
         ++data_len;
     }
     ret.resize(data_len);

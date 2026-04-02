@@ -195,7 +195,7 @@ void PdfViewer::loadDocument(const QString &file)
 
     m_doc->setRenderHint(Poppler::Document::TextAntialiasing, m_settingsTextAAAct->isChecked());
     m_doc->setRenderHint(Poppler::Document::Antialiasing, m_settingsGfxAAAct->isChecked());
-    m_doc->setRenderBackend((Poppler::Document::RenderBackend)m_settingsRenderBackendGrp->checkedAction()->data().toInt());
+    m_doc->setRenderBackend(static_cast<Poppler::Document::RenderBackend>(m_settingsRenderBackendGrp->checkedAction()->data().toInt()));
     if (m_doc->xrefWasReconstructed()) {
         xrefReconstructedHandler();
     } else {
@@ -309,7 +309,7 @@ void PdfViewer::slotRenderBackend(QAction *act)
         return;
     }
 
-    m_doc->setRenderBackend((Poppler::Document::RenderBackend)act->data().toInt());
+    m_doc->setRenderBackend(static_cast<Poppler::Document::RenderBackend>(act->data().toInt()));
 
     Q_FOREACH (DocumentObserver *obs, m_observers) {
         obs->pageChanged(m_currentPage);

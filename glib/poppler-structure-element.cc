@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2013 Igalia S.L.
  * Copyright (C) 2018, 2025 Albert Astals Cid <aacid@kde.org>
- * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2026 Adam Sampson <ats@offog.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -61,8 +61,8 @@ static PopplerStructureElement *_poppler_structure_element_new(PopplerDocument *
     g_assert(POPPLER_IS_DOCUMENT(document));
     g_assert(element);
 
-    poppler_structure_element = (PopplerStructureElement *)g_object_new(POPPLER_TYPE_STRUCTURE_ELEMENT, nullptr, NULL);
-    poppler_structure_element->document = (PopplerDocument *)g_object_ref(document);
+    poppler_structure_element = static_cast<PopplerStructureElement *>(g_object_new(POPPLER_TYPE_STRUCTURE_ELEMENT, nullptr, NULL));
+    poppler_structure_element->document = static_cast<PopplerDocument *> g_object_ref(document);
     poppler_structure_element->elem = element;
 
     return poppler_structure_element;
@@ -629,7 +629,7 @@ PopplerStructureElementIter *poppler_structure_element_iter_copy(PopplerStructur
     g_return_val_if_fail(iter != nullptr, NULL);
 
     new_iter = g_slice_dup(PopplerStructureElementIter, iter);
-    new_iter->document = (PopplerDocument *)g_object_ref(new_iter->document);
+    new_iter->document = static_cast<PopplerDocument *> g_object_ref(new_iter->document);
 
     return new_iter;
 }
@@ -707,7 +707,7 @@ PopplerStructureElementIter *poppler_structure_element_iter_new(PopplerDocument 
     }
 
     iter = g_slice_new0(PopplerStructureElementIter);
-    iter->document = (PopplerDocument *)g_object_ref(poppler_document);
+    iter->document = static_cast<PopplerDocument *> g_object_ref(poppler_document);
     iter->is_root = TRUE;
     iter->root = root;
 
@@ -778,7 +778,7 @@ PopplerStructureElementIter *poppler_structure_element_iter_get_child(PopplerStr
 
     if (elem->getNumChildren() > 0) {
         auto *child = g_slice_new0(PopplerStructureElementIter);
-        child->document = (PopplerDocument *)g_object_ref(parent->document);
+        child->document = static_cast<PopplerDocument *> g_object_ref(parent->document);
         child->elem = elem;
         return child;
     }
