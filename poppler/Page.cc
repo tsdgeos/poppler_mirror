@@ -434,6 +434,7 @@ void Page::loadStandaloneFields(Form *form)
 
 Annots *Page::getAnnots(XRef *xrefA)
 {
+    pageLocker();
     if (!annots) {
         Object obj = getAnnotsObject(xrefA);
         annots = std::make_unique<Annots>(doc, num, &obj);
