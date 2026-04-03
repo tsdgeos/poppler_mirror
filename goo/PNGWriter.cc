@@ -6,7 +6,7 @@
 //
 // Copyright (C) 2009 Warren Toomey <wkt@tuhs.org>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
-// Copyright (C) 2009, 2011-2023, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2011-2023, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010, 2011, 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2011 Thomas Klausner <wiz@danbala.tuwien.ac.at>
@@ -75,12 +75,7 @@ void PNGWriter::setSRGBProfile()
 
 bool PNGWriter::init(FILE *f, int width, int height, double hDPI, double vDPI)
 {
-    /* libpng changed the png_set_iCCP() prototype in 1.5.0 */
-#    if PNG_LIBPNG_VER < 10500
-    png_charp icc_data_ptr = reinterpret_cast<png_charp>(priv->icc_data);
-#    else
     const auto *icc_data_ptr = const_cast<png_const_bytep>(priv->icc_data);
-#    endif
 
     if (hDPI < 0 || vDPI < 0) {
         error(errInternal, -1, "PNGWriter::init: hDPI or vDPI values are invalid {0:f} {1:f}", hDPI, vDPI);
