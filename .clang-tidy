@@ -10,7 +10,6 @@ Checks:  >
     -bugprone-implicit-widening-of-multiplication-result,
     -bugprone-assignment-in-if-condition,
     -bugprone-switch-missing-default-case,
-    -bugprone-command-processor,
     -bugprone-unchecked-string-to-number-conversion,
     -bugprone-float-loop-counter,
     performance-*,
