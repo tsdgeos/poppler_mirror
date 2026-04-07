@@ -139,7 +139,14 @@ bool SplashFont::getGlyph(int c, int xFrac, int yFrac, SplashGlyphBitmap *bitmap
             bitmap->data = cache + (i + j) * glyphSize;
             bitmap->freeData = false;
 
-            *clipRes = clip.testRect(x0 - bitmap->x, y0 - bitmap->y, x0 - bitmap->x + bitmap->w - 1, y0 - bitmap->y + bitmap->h - 1);
+            int rectXMin, rectYMin;
+            if (checkedSubtraction(x0, bitmap->x, &rectXMin)) {
+                return false;
+            }
+            if (checkedSubtraction(y0, bitmap->y, &rectYMin)) {
+                return false;
+            }
+            *clipRes = clip.testRect(rectXMin, rectYMin, rectXMin + bitmap->w - 1, rectYMin + bitmap->h - 1);
 
             return true;
         }
