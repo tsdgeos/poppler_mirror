@@ -47,7 +47,7 @@ class SplashFTFontFile : public SplashFontFile, public std::enable_shared_from_t
     };
 
 public:
-    static std::shared_ptr<SplashFontFile> loadType1Font(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **encA, int faceIndexA);
+    static std::shared_ptr<SplashFontFile> loadType1Font(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const std::array<const char *, 256> &encA, int faceIndexA);
     static std::shared_ptr<SplashFontFile> loadCIDFont(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, std::vector<int> &&codeToGIDA, int faceIndexA);
     static std::shared_ptr<SplashFontFile> loadTrueTypeFont(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, std::vector<int> &&codeToGIDA, int faceIndexA);
 

@@ -165,7 +165,7 @@ static const char *base14SubstFonts[14] = { "Courier", "Courier-Oblique", "Couri
 
 //------------------------------------------------------------------------
 
-static int parseCharName(char *charName, Unicode *uBuf, int uLen, bool names, bool ligatures, bool numeric, bool hex, bool variants);
+static int parseCharName(const char *charName, Unicode *uBuf, int uLen, bool names, bool ligatures, bool numeric, bool hex, bool variants);
 
 //------------------------------------------------------------------------
 
@@ -947,7 +947,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
     const BuiltinFont *builtinFont;
     bool baseEncFromFontFile;
     int len;
-    char *charName;
+    const char *charName;
     bool missing, hex;
     Unicode toUnicode[256];
     Unicode uBuf[8];
@@ -1207,7 +1207,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
                 } else if (obj3.isName()) {
                     if (code >= 0 && code < 256) {
                         if (encFree[code]) {
-                            gfree(enc[code]);
+                            gfree(const_cast<char *>(enc[code]));
                         }
                         enc[code] = copyString(obj3.getName());
                         encFree[code] = true;
@@ -1392,7 +1392,7 @@ Gfx8BitFont::~Gfx8BitFont()
 
     for (i = 0; i < 256; ++i) {
         if (encFree[i] && enc[i]) {
-            gfree(enc[i]);
+            gfree(const_cast<char *>(enc[i]));
         }
     }
 }
@@ -1401,7 +1401,7 @@ Gfx8BitFont::~Gfx8BitFont()
 // Convention: http://www.adobe.com/devnet/opentype/archives/glyph.html
 // Algorithmic comments are excerpted from that document to aid
 // maintainability.
-static int parseCharName(char *charName, Unicode *uBuf, int uLen, bool names, bool ligatures, bool numeric, bool hex, bool variants)
+static int parseCharName(const char *charName, Unicode *uBuf, int uLen, bool names, bool ligatures, bool numeric, bool hex, bool variants)
 {
     if (uLen <= 0) {
         error(errInternal, -1,
@@ -1413,7 +1413,7 @@ static int parseCharName(char *charName, Unicode *uBuf, int uLen, bool names, bo
     // Step 1: drop all the characters from the glyph name starting with the
     // first occurrence of a period (U+002E FULL STOP), if any.
     if (variants) {
-        char *var_part = strchr(charName, '.');
+        const char *var_part = strchr(charName, '.');
         if (var_part == charName) {
             return 0; // .notdef or similar
         }
@@ -1534,7 +1534,7 @@ std::vector<int> Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff)
     std::vector<int> map;
     int unicodeCmap, macRomanCmap, msSymbolCmap, cmap;
     bool useMacRoman, useUnicode;
-    char *charName;
+    const char *charName;
     Unicode u;
 
     map.resize(256, 0);

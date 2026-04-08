@@ -343,7 +343,7 @@ public:
     int getNextChar(const char *s, int len, CharCode *code, Unicode const **u, int *uLen, double *dx, double *dy, double *ox, double *oy) const override;
 
     // Return the encoding.
-    char **getEncoding() { return enc; }
+    const std::array<const char *, 256> &getEncoding() const { return enc; }
 
     // Return the Unicode map.
     const CharCodeToUnicode *getToUnicode() const override;
@@ -378,7 +378,7 @@ public:
 
 private:
     const Base14FontMapEntry *base14; // for Base-14 fonts only; NULL otherwise
-    char *enc[256]; // char code --> char name
+    std::array<const char *, 256> enc; // char code --> char name
     char encFree[256]; // boolean for each char name: if set,
                        //   the string is malloc'ed
     std::unique_ptr<CharCodeToUnicode> ctu; // char code --> Unicode

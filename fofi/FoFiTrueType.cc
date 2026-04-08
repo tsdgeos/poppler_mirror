@@ -698,7 +698,7 @@ int FoFiTrueType::getEmbeddingRights() const
     return 3;
 }
 
-void FoFiTrueType::convertToType42(const char *psName, char **encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::convertToType42(const char *psName, const std::array<const char *, 256> *encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const
 {
     int maxUsedGlyph;
     bool ok;
@@ -976,7 +976,7 @@ void FoFiTrueType::convertToType0(const std::string &psName, const std::vector<i
     ff->convertToType0(psName, cidMap, outputFunc, outputStream);
 }
 
-void FoFiTrueType::cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void *outputStream)
+void FoFiTrueType::cvtEncoding(const std::array<const char *, 256> *encoding, FoFiOutputFunc outputFunc, void *outputStream)
 {
     const char *name;
     int i;
@@ -984,7 +984,7 @@ void FoFiTrueType::cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void 
     (*outputFunc)(outputStream, "/Encoding 256 array\n", 20);
     if (encoding) {
         for (i = 0; i < 256; ++i) {
-            if (!(name = encoding[i])) {
+            if (!(name = (*encoding)[i])) {
                 name = ".notdef";
             }
             const std::string buf = GooString::format("dup {0:d} /", i);
@@ -1001,7 +1001,7 @@ void FoFiTrueType::cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void 
     (*outputFunc)(outputStream, "readonly def\n", 13);
 }
 
-void FoFiTrueType::cvtCharStrings(char **encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::cvtCharStrings(const std::array<const char *, 256> *encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const
 {
     const char *name;
     char buf2[16];
@@ -1025,7 +1025,7 @@ void FoFiTrueType::cvtCharStrings(char **encoding, const std::vector<int> &codeT
     k = 0; // make gcc happy
     for (i = 255; i >= 0; --i) {
         if (encoding) {
-            name = encoding[i];
+            name = (*encoding)[i];
         } else {
             sprintf(buf2, "c%02x", i);
             name = buf2;

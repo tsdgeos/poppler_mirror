@@ -2338,7 +2338,7 @@ void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, GooString *psName, in
     if (fontBuf) {
         if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(std::span(fontBuf.value()), faceIndex)) {
             std::vector<int> codeToGID = (static_cast<Gfx8BitFont *>(font))->getCodeToGIDMap(ffTT.get());
-            ffTT->convertToType42(psName->c_str(), (static_cast<Gfx8BitFont *>(font))->getHasEncoding() ? (static_cast<Gfx8BitFont *>(font))->getEncoding() : nullptr, codeToGID, outputFunc, outputStream);
+            ffTT->convertToType42(psName->c_str(), (static_cast<Gfx8BitFont *>(font))->getHasEncoding() ? &(static_cast<Gfx8BitFont *>(font))->getEncoding() : nullptr, codeToGID, outputFunc, outputStream);
             if (!codeToGID.empty()) {
                 font8Info.emplace_back(*font->getID(), std::move(codeToGID));
             }
@@ -2360,7 +2360,7 @@ void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, const std::string &fi
     // convert it to a Type 42 font
     if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::load(fileName.c_str(), faceIndex)) {
         std::vector<int> codeToGID = (static_cast<Gfx8BitFont *>(font))->getCodeToGIDMap(ffTT.get());
-        ffTT->convertToType42(psName->c_str(), (static_cast<Gfx8BitFont *>(font))->getHasEncoding() ? (static_cast<Gfx8BitFont *>(font))->getEncoding() : nullptr, codeToGID, outputFunc, outputStream);
+        ffTT->convertToType42(psName->c_str(), (static_cast<Gfx8BitFont *>(font))->getHasEncoding() ? &(static_cast<Gfx8BitFont *>(font))->getEncoding() : nullptr, codeToGID, outputFunc, outputStream);
         if (!codeToGID.empty()) {
             font8Info.emplace_back(*font->getID(), std::move(codeToGID));
         }

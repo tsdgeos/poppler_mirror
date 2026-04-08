@@ -35,7 +35,7 @@
 // SplashFTFontFile
 //------------------------------------------------------------------------
 
-std::shared_ptr<SplashFontFile> SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **encA, int faceIndexA)
+std::shared_ptr<SplashFontFile> SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const std::array<const char *, 256> &encA, int faceIndexA)
 {
     FT_Face faceA;
     const char *name;
