@@ -732,7 +732,7 @@ void FoFiTrueType::convertToType42(const char *psName, const std::array<const ch
     (*outputFunc)(outputStream, "FontName currentdict end definefont pop\n", 40);
 }
 
-void FoFiTrueType::convertToType1(const char *psName, const char **newEncoding, bool ascii, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::convertToType1(const char *psName, FoFiOutputFunc outputFunc, void *outputStream) const
 {
     auto cffBlock = getCFFBlock();
     if (!cffBlock) {
@@ -742,7 +742,7 @@ void FoFiTrueType::convertToType1(const char *psName, const char **newEncoding, 
     if (!ff) {
         return;
     }
-    ff->convertToType1(psName, newEncoding, ascii, outputFunc, outputStream);
+    ff->convertToType1(psName, outputFunc, outputStream);
 }
 
 void FoFiTrueType::convertToCIDType2(const char *psName, const std::vector<int> &cidMap, bool needVerticalMetrics, FoFiOutputFunc outputFunc, void *outputStream) const

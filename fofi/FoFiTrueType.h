@@ -116,13 +116,10 @@ public:
     void convertToType42(const char *psName, const std::array<const char *, 256> *encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const;
 
     // Convert to a Type 1 font, suitable for embedding in a PostScript
-    // file.  This is only useful with 8-bit fonts.  If <newEncoding> is
-    // not NULL, it will be used in place of the encoding in the Type 1C
-    // font.  If <ascii> is true the eexec section will be hex-encoded,
-    // otherwise it will be left as binary data.  If <psName> is
+    // file.  This is only useful with 8-bit fonts.  <psName> is
     // non-NULL, it will be used as the PostScript font name.  (Only
     // useful for OpenType CFF fonts.)
-    void convertToType1(const char *psName, const char **newEncoding, bool ascii, FoFiOutputFunc outputFunc, void *outputStream) const;
+    void convertToType1(const char *psName, FoFiOutputFunc outputFunc, void *outputStream) const;
 
     // Convert to a Type 2 CIDFont, suitable for embedding in a
     // PostScript file.  <psName> will be used as the PostScript font

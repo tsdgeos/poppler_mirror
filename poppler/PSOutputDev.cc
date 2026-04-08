@@ -2285,7 +2285,7 @@ void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psN
     std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
     if (fontBuf) {
         if (auto ffT1C = FoFiType1C::make(std::move(fontBuf).value())) {
-            ffT1C->convertToType1(psName->c_str(), nullptr, true, outputFunc, outputStream);
+            ffT1C->convertToType1(psName->c_str(), outputFunc, outputStream);
         }
     }
 
@@ -2316,7 +2316,7 @@ void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString
     if (fontBuf) {
         if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(std::span(fontBuf.value()), faceIndex)) {
             if (ffTT->isOpenTypeCFF()) {
-                ffTT->convertToType1(psName->c_str(), nullptr, true, outputFunc, outputStream);
+                ffTT->convertToType1(psName->c_str(), outputFunc, outputStream);
             }
         }
     }

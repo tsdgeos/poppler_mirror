@@ -142,7 +142,6 @@ struct Type1CEexecBuf
 {
     FoFiOutputFunc outputFunc;
     void *outputStream;
-    bool ascii; // ASCII encoding?
     unsigned short r1; // eexec encryption key
     int line; // number of eexec chars left on current line
 };
@@ -179,12 +178,9 @@ public:
     std::vector<int> getCIDToGIDMap() const;
 
     // Convert to a Type 1 font, suitable for embedding in a PostScript
-    // file.  This is only useful with 8-bit fonts.  If <newEncoding> is
-    // not NULL, it will be used in place of the encoding in the Type 1C
-    // font.  If <ascii> is true the eexec section will be hex-encoded,
-    // otherwise it will be left as binary data.  If <psName> is non-NULL,
+    // file.  This is only useful with 8-bit fonts.  If <psName> is non-NULL,
     // it will be used as the PostScript font name.
-    void convertToType1(const char *psName, const char **newEncoding, bool ascii, FoFiOutputFunc outputFunc, void *outputStream);
+    void convertToType1(const char *psName, FoFiOutputFunc outputFunc, void *outputStream);
 
     // Convert to a Type 0 CIDFont, suitable for embedding in a
     // PostScript file.  <psName> will be used as the PostScript font

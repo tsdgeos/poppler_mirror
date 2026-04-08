@@ -151,7 +151,7 @@ std::vector<int> FoFiType1C::getCIDToGIDMap() const
     return map;
 }
 
-void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, bool ascii, FoFiOutputFunc outputFunc, void *outputStream)
+void FoFiType1C::convertToType1(const char *psName, FoFiOutputFunc outputFunc, void *outputStream)
 {
     int psNameLen;
     Type1CEexecBuf eb;
@@ -249,12 +249,12 @@ void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, bo
 
     // write the encoding
     (*outputFunc)(outputStream, "/Encoding ", 10);
-    if (!newEncoding && encoding == &fofiType1StandardEncoding) {
+    if (encoding == &fofiType1StandardEncoding) {
         (*outputFunc)(outputStream, "StandardEncoding def\n", 21);
     } else {
         (*outputFunc)(outputStream, "256 array\n", 10);
         (*outputFunc)(outputStream, "0 1 255 {1 index exch /.notdef put} for\n", 40);
-        const char **enc = newEncoding ? newEncoding : const_cast<const char **>(encoding->data());
+        const char *const *enc = encoding->data();
         for (i = 0; i < 256; ++i) {
             if (enc && enc[i]) {
                 buf = GooString::format("dup {0:d} /{1:s} put\n", i, enc[i]);
@@ -269,7 +269,6 @@ void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, bo
     (*outputFunc)(outputStream, "currentfile eexec\n", 18);
     eb.outputFunc = outputFunc;
     eb.outputStream = outputStream;
-    eb.ascii = ascii;
     eb.r1 = 55665;
     eb.line = 0;
 
@@ -396,7 +395,7 @@ void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, bo
     eexecWrite(&eb, "mark currentfile closefile\n");
 
     // trailer
-    if (ascii && eb.line > 0) {
+    if (eb.line > 0) {
         (*outputFunc)(outputStream, "\n", 1);
     }
     for (i = 0; i < 8; ++i) {
@@ -789,7 +788,6 @@ void FoFiType1C::convertToType0(const std::string &psName, const std::vector<int
             (*outputFunc)(outputStream, "currentfile eexec\n", 18);
             eb.outputFunc = outputFunc;
             eb.outputStream = outputStream;
-            eb.ascii = true;
             eb.r1 = 55665;
             eb.line = 0;
 
@@ -1701,16 +1699,12 @@ void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, const char *s)
     for (p = reinterpret_cast<const unsigned char *>(s); *p; ++p) {
         x = *p ^ (eb->r1 >> 8);
         eb->r1 = (x + eb->r1) * 52845 + 22719;
-        if (eb->ascii) {
-            (*eb->outputFunc)(eb->outputStream, &hexChars[x >> 4], 1);
-            (*eb->outputFunc)(eb->outputStream, &hexChars[x & 0x0f], 1);
-            eb->line += 2;
-            if (eb->line == 64) {
-                (*eb->outputFunc)(eb->outputStream, "\n", 1);
-                eb->line = 0;
-            }
-        } else {
-            (*eb->outputFunc)(eb->outputStream, reinterpret_cast<char *>(&x), 1);
+        (*eb->outputFunc)(eb->outputStream, &hexChars[x >> 4], 1);
+        (*eb->outputFunc)(eb->outputStream, &hexChars[x & 0x0f], 1);
+        eb->line += 2;
+        if (eb->line == 64) {
+            (*eb->outputFunc)(eb->outputStream, "\n", 1);
+            eb->line = 0;
         }
     }
 }
@@ -1724,16 +1718,12 @@ void FoFiType1C::eexecWriteCharstring(Type1CEexecBuf *eb, const unsigned char *s
     for (i = 0; i < n; ++i) {
         x = s[i] ^ (eb->r1 >> 8);
         eb->r1 = (x + eb->r1) * 52845 + 22719;
-        if (eb->ascii) {
-            (*eb->outputFunc)(eb->outputStream, &hexChars[x >> 4], 1);
-            (*eb->outputFunc)(eb->outputStream, &hexChars[x & 0x0f], 1);
-            eb->line += 2;
-            if (eb->line == 64) {
-                (*eb->outputFunc)(eb->outputStream, "\n", 1);
-                eb->line = 0;
-            }
-        } else {
-            (*eb->outputFunc)(eb->outputStream, reinterpret_cast<char *>(&x), 1);
+        (*eb->outputFunc)(eb->outputStream, &hexChars[x >> 4], 1);
+        (*eb->outputFunc)(eb->outputStream, &hexChars[x & 0x0f], 1);
+        eb->line += 2;
+        if (eb->line == 64) {
+            (*eb->outputFunc)(eb->outputStream, "\n", 1);
+            eb->line = 0;
         }
     }
 }
