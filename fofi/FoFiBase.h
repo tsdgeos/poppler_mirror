@@ -31,10 +31,11 @@
 #include <optional>
 #include <vector>
 #include <span>
+#include <string_view>
 
 //------------------------------------------------------------------------
 
-using FoFiOutputFunc = void (*)(void *stream, const char *data, size_t len);
+using FoFiOutputFunc = void (*)(void *stream, std::string_view string);
 
 //------------------------------------------------------------------------
 // FoFiBase

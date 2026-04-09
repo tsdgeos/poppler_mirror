@@ -32,9 +32,9 @@
 
 #include "PSOutputDev.h"
 
-static void outputToQIODevice(void *stream, const char *data, size_t len)
+static void outputToQIODevice(void *stream, std::string_view string)
 {
-    static_cast<QIODevice *>(stream)->write(data, len);
+    static_cast<QIODevice *>(stream)->write(string.data(), string.length());
 }
 
 namespace Poppler {

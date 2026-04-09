@@ -1062,9 +1062,9 @@ extern "C" {
 typedef void (*SignalFunc)(int);
 }
 
-static void outputToFile(void *stream, const char *data, size_t len)
+static void outputToFile(void *stream, std::string_view string)
 {
-    fwrite(data, 1, len, static_cast<FILE *>(stream));
+    fwrite(string.data(), 1, string.length(), static_cast<FILE *>(stream));
 }
 
 PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA, char *psTitleA, const std::vector<int> &pagesA, PSOutMode modeA, int paperWidthA, int paperHeightA, bool noCropA, bool duplexA, int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
@@ -2591,13 +2591,13 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName, Dict *parentR
                 } else {
                     buf = GooString::format("{0:.6g} {1:.6g} setcharwidth\n", t3WX, t3WY);
                 }
-                (*outputFunc)(outputStream, buf.c_str(), buf.size());
-                (*outputFunc)(outputStream, t3String->c_str(), t3String->size());
+                (*outputFunc)(outputStream, buf);
+                (*outputFunc)(outputStream, *t3String);
                 delete t3String;
                 t3String = nullptr;
             }
             if (t3NeedsRestore) {
-                (*outputFunc)(outputStream, "Q\n", 2);
+                (*outputFunc)(outputStream, "Q\n");
             }
             writePS("} def\n");
         }
@@ -7137,7 +7137,7 @@ void PSOutputDev::writePSChar(char c)
     if (t3String) {
         t3String->push_back(c);
     } else {
-        (*outputFunc)(outputStream, &c, 1);
+        (*outputFunc)(outputStream, std::string_view(&c, 1));
     }
 }
 
@@ -7146,7 +7146,7 @@ void PSOutputDev::writePS(const char *s)
     if (t3String) {
         t3String->append(s);
     } else {
-        (*outputFunc)(outputStream, s, strlen(s));
+        (*outputFunc)(outputStream, s);
     }
 }
 
@@ -7157,7 +7157,7 @@ void PSOutputDev::writePSBuf(const char *s, int len)
             t3String->push_back(s[i]);
         }
     } else {
-        (*outputFunc)(outputStream, s, len);
+        (*outputFunc)(outputStream, std::string_view(s, len));
     }
 }
 
@@ -7170,7 +7170,7 @@ void PSOutputDev::writePSFmt(const char *fmt, ...)
         t3String->appendfv(const_cast<char *>(fmt), args);
     } else {
         const std::string buf = GooString::formatv(const_cast<char *>(fmt), args);
-        (*outputFunc)(outputStream, buf.c_str(), buf.size());
+        (*outputFunc)(outputStream, buf);
     }
     va_end(args);
 }
