@@ -68,8 +68,8 @@ MovieObject::~MovieObject()
 
 QString MovieObject::url() const
 {
-    const GooString *goo = m_movieData->m_movieObj->getFileName();
-    return goo ? QString::fromStdString(goo->toStr()) : QString();
+    const std::optional<std::string> &goo = m_movieData->m_movieObj->getFileName();
+    return goo ? QString::fromStdString(goo.value()) : QString();
 }
 
 QSize MovieObject::size() const

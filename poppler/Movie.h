@@ -86,7 +86,7 @@ public:
     bool isOk() const { return ok; }
     const MovieActivationParameters *getActivationParameters() const { return &MA; }
 
-    const GooString *getFileName() const { return fileName.get(); }
+    const std::optional<std::string> &getFileName() const { return fileName; }
 
     unsigned short getRotationAngle() const { return rotationAngle; }
     void getAspect(int *widthA, int *heightA) const
@@ -115,7 +115,7 @@ private:
     Object poster;
     bool showPoster;
 
-    std::unique_ptr<GooString> fileName;
+    std::optional<std::string> fileName;
 
     MovieActivationParameters MA;
 };
