@@ -20,6 +20,7 @@
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2022, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026  Zekun Shen <bruceshenzk@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -493,16 +494,16 @@ void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<
         ok = true;
         getString(topDict.registrySID, buf2, &ok);
         if (ok) {
-            (*outputFunc)(outputStream, "  /Registry (", 13);
-            (*outputFunc)(outputStream, buf2, strlen(buf2));
-            (*outputFunc)(outputStream, ") def\n", 6);
+            (*outputFunc)(outputStream, "  /Registry ", 12);
+            writePSString(buf2, outputFunc, outputStream);
+            (*outputFunc)(outputStream, " def\n", 5);
         }
         ok = true;
         getString(topDict.orderingSID, buf2, &ok);
         if (ok) {
-            (*outputFunc)(outputStream, "  /Ordering (", 13);
-            (*outputFunc)(outputStream, buf2, strlen(buf2));
-            (*outputFunc)(outputStream, ") def\n", 6);
+            (*outputFunc)(outputStream, "  /Ordering ", 12);
+            writePSString(buf2, outputFunc, outputStream);
+            (*outputFunc)(outputStream, " def\n", 5);
         }
     } else {
         (*outputFunc)(outputStream, "  /Registry (Adobe) def\n", 24);
