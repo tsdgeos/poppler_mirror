@@ -102,6 +102,7 @@ static bool printVersion = false;
 static bool printHelp = false;
 static bool printEnc = false;
 static bool tsvMode = false;
+static char hyphenModeStr[16] = "";
 
 static const ArgDesc argDesc[] = { { .arg = "-f", .kind = argInt, .val = &firstPage, .size = 0, .usage = "first page to convert" },
                                    { .arg = "-l", .kind = argInt, .val = &lastPage, .size = 0, .usage = "last page to convert" },
@@ -113,6 +114,7 @@ static const ArgDesc argDesc[] = { { .arg = "-f", .kind = argInt, .val = &firstP
                                    { .arg = "-layout", .kind = argFlag, .val = &physLayout, .size = 0, .usage = "maintain original physical layout" },
                                    { .arg = "-fixed", .kind = argFP, .val = &fixedPitch, .size = 0, .usage = "assume fixed-pitch (or tabular) text" },
                                    { .arg = "-raw", .kind = argFlag, .val = &rawOrder, .size = 0, .usage = "keep strings in content stream order" },
+                                   { .arg = "-remove-hyphens", .kind = argString, .val = hyphenModeStr, .size = sizeof(hyphenModeStr), .usage = "end-of-line hyphen handling: none, soft, or all (default: all)" },
                                    { .arg = "-nodiag", .kind = argFlag, .val = &discardDiag, .size = 0, .usage = "discard diagonal text" },
                                    { .arg = "-htmlmeta", .kind = argFlag, .val = &htmlMeta, .size = 0, .usage = "generate a simple HTML file, including the meta information" },
                                    { .arg = "-tsv", .kind = argFlag, .val = &tsvMode, .size = 0, .usage = "generate a simple TSV file, including the meta information for bounding boxes" },
@@ -242,6 +244,21 @@ int main(int argc, char *argv[])
         globalParams->setErrQuiet(quiet);
     }
 
+    EndOfLineHyphenMode hyphenMode = EndOfLineHyphenMode::RemoveAll;
+    if (hyphenModeStr[0]) {
+        using namespace std::string_view_literals;
+        if (hyphenModeStr == "none"sv) {
+            hyphenMode = EndOfLineHyphenMode::Keep;
+        } else if (hyphenModeStr == "soft"sv) {
+            hyphenMode = EndOfLineHyphenMode::RemoveSoft;
+        } else if (hyphenModeStr == "all"sv) {
+            hyphenMode = EndOfLineHyphenMode::RemoveAll;
+        } else {
+            error(errCommandLine, -1, "Invalid '-remove-hyphens' value");
+            return 99;
+        }
+    }
+
     // get mapping to output encoding
     if (!(uMap = globalParams->getTextEncoding())) {
         error(errCommandLine, -1, "Couldn't get text encoding");
@@ -348,6 +365,7 @@ int main(int argc, char *argv[])
         if (textOut.isOk()) {
             textOut.setTextEOL(textEOL);
             textOut.setMinColSpacing1(colspacing);
+            textOut.setEndOfLineHyphenMode(hyphenMode);
             if (noPageBreaks) {
                 textOut.setTextPageBreaks(false);
             }
@@ -364,6 +382,7 @@ int main(int argc, char *argv[])
 
         if (tsvMode) {
             TextOutputDev textOut(nullptr, physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
+            textOut.setEndOfLineHyphenMode(hyphenMode);
             if (!textFileName->compare("-")) {
                 f = stdout;
             } else {
@@ -381,6 +400,7 @@ int main(int argc, char *argv[])
             if (textOut.isOk()) {
                 textOut.setTextEOL(textEOL);
                 textOut.setMinColSpacing1(colspacing);
+                textOut.setEndOfLineHyphenMode(hyphenMode);
                 if (noPageBreaks) {
                     textOut.setTextPageBreaks(false);
                 }

@@ -1039,7 +1039,6 @@ TextLine::TextLine(TextBlock *blkA, int rotA, double baseA)
     col = nullptr;
     len = 0;
     convertedLen = 0;
-    hyphenated = false;
     next = nullptr;
     xMin = yMin = 0;
     xMax = yMax = -1;
@@ -1267,10 +1266,6 @@ void TextLine::coalesce(const UnicodeMap *uMap)
         }
     }
     col[len] = convertedLen;
-
-    // check for hyphen at end of line
-    //~ need to check for other chars used as hyphens
-    hyphenated = text[len - 1] == static_cast<Unicode>('-');
 }
 
 //------------------------------------------------------------------------
@@ -4054,6 +4049,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                         if (p[k] != s2[k] || (nextline_txt && last_char_of_line && !last_char_of_search_term)) {
                             // now check if the comparison failed at the end-of-line hyphen,
                             // and if so, keep on comparing at the next line
+                            // (only ASCII '-', U+002D; other hyphen code points are not matched across lines)
                             nextlineAfterHyphen = false;
 
                             if (s2[k] == p[k]) {
@@ -4198,7 +4194,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
     return false;
 }
 
-GooString TextPage::getText(const std::optional<PDFRectangle> &area, EndOfLineKind textEOL, bool physLayout) const
+GooString TextPage::getText(const std::optional<PDFRectangle> &area, EndOfLineKind textEOL, bool physLayout, EndOfLineHyphenMode hyphenMode) const
 {
     TextOutputFunc dumpToString = [](void *stream, const char *text, int len) {
         auto *s = static_cast<GooString *>(stream);
@@ -4211,7 +4207,7 @@ GooString TextPage::getText(const std::optional<PDFRectangle> &area, EndOfLineKi
         error(errInternal, -1, "physical layout false, rawOrder false and an area does not work well together");
     }
 
-    dump(&s, dumpToString, physLayout, textEOL, false, true, area);
+    dump(&s, dumpToString, physLayout, textEOL, false, true, area, hyphenMode);
     return s;
 }
 
@@ -5175,7 +5171,12 @@ std::pair<int, int> TextLine::getLineBounds(const PDFRectangle &area) const
     return { l, u - l };
 }
 
-void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol, std::optional<PDFRectangle> area) const
+static bool isHyphenChar(Unicode c)
+{
+    return c == static_cast<Unicode>('-') || c == static_cast<Unicode>(0x2010) || c == static_cast<Unicode>(0xFE63) || c == static_cast<Unicode>(0xFF0D);
+}
+
+void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol, std::optional<PDFRectangle> area, EndOfLineHyphenMode hyphenMode) const
 {
     const UnicodeMap *uMap;
     char space[8], eol[16], eop[8];
@@ -5337,15 +5338,26 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
         for (TextFlow *flow = flows; flow; flow = flow->next) {
             for (TextBlock *blk = flow->blocks; blk; blk = blk->next) {
                 for (TextLine *line = blk->lines; line; line = line->next) {
-                    int n = line->len;
-                    if (line->hyphenated && (line->next || blk->next)) {
-                        --n;
-                    }
+                    const bool suppressHyphen = [&]() -> bool {
+                        if (!line->next && !blk->next) {
+                            return false;
+                        }
+                        if (hyphenMode == EndOfLineHyphenMode::Keep) {
+                            return false;
+                        }
+                        if (line->text[line->len - 1] == static_cast<Unicode>(0x00AD)) {
+                            return true;
+                        }
+                        if (hyphenMode == EndOfLineHyphenMode::RemoveAll && isHyphenChar(line->text[line->len - 1])) {
+                            return true;
+                        }
+                        return false;
+                    }();
+                    const int n = suppressHyphen ? line->len - 1 : line->len;
                     s.clear();
                     dumpFragment(line->text, n, uMap, &s);
                     (*outputFunc)(outputStream, s.c_str(), s.size());
-                    // output a newline when a hyphen is not suppressed
-                    if (n == line->len) {
+                    if (!suppressHyphen) {
                         (*outputFunc)(outputStream, eol, eolLen);
                     }
                 }
@@ -5606,7 +5618,7 @@ void TextOutputDev::endPage()
     text->endPage();
     text->coalesce(physLayout, fixedPitch, doHTML, minColSpacing1);
     if (outputStream) {
-        text->dump(outputStream, outputFunc, physLayout, textEOL, textPageBreaks, false, std::nullopt);
+        text->dump(outputStream, outputFunc, physLayout, textEOL, textPageBreaks, false, std::nullopt, hyphenMode);
     }
 }
 
@@ -5796,7 +5808,7 @@ bool TextOutputDev::findText(const Unicode *s, int len, bool startAtTop, bool st
 
 GooString TextOutputDev::getText(const std::optional<PDFRectangle> &area) const
 {
-    return text->getText(area, textEOL, physLayout);
+    return text->getText(area, textEOL, physLayout, hyphenMode);
 }
 
 void TextOutputDev::drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor *glyph_color, const GfxColor *box_color, double box_opacity, bool draw_glyphs)

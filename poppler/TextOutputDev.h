@@ -82,6 +82,13 @@ enum EndOfLineKind
     eolMac // CR
 };
 
+enum class EndOfLineHyphenMode
+{
+    RemoveAll,
+    RemoveSoft,
+    Keep
+};
+
 //------------------------------------------------------------------------
 // TextFontInfo
 //------------------------------------------------------------------------
@@ -334,9 +341,6 @@ public:
     // Get the next TextLine on the linked list.
     const TextLine *getNext() const { return next; }
 
-    // Returns true if the last char of the line is a hyphen.
-    bool isHyphenated() const { return hyphenated; }
-
 private:
     std::pair<int, int> getLineBounds(const PDFRectangle &area) const;
 
@@ -354,7 +358,6 @@ private:
     int *col; // starting column number of each Unicode char
     int len; // number of Unicode chars
     int convertedLen; // total number of converted characters
-    bool hyphenated; // set if last char is a hyphen
     TextLine *next; // next line in block
     Unicode *normalized; // normalized form of Unicode text
     int normalized_len; // number of normalized Unicode chars
@@ -626,7 +629,7 @@ public:
 
     // Get the text which is inside the specified rectangle.
     // physical layout false and raw order false does not go well with a rectangle
-    GooString getText(const std::optional<PDFRectangle> &area, EndOfLineKind textEOL, bool physLayout) const;
+    GooString getText(const std::optional<PDFRectangle> &area, EndOfLineKind textEOL, bool physLayout, EndOfLineHyphenMode hyphenMode) const;
 
     void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style);
 
@@ -644,7 +647,7 @@ public:
     bool findCharRange(int pos, int length, double *xMin, double *yMin, double *xMax, double *yMax) const;
 
     // Dump contents of page to a file.
-    void dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol, std::optional<PDFRectangle> area) const;
+    void dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol, std::optional<PDFRectangle> area, EndOfLineHyphenMode hyphenMode) const;
 
     // Get the head of the linked list of TextFlows.
     const TextFlow *getFlows() const { return flows; }
@@ -872,6 +875,7 @@ public:
     void setTextPageBreaks(bool textPageBreaksA) { textPageBreaks = textPageBreaksA; }
     double getMinColSpacing1() const { return minColSpacing1; }
     void setMinColSpacing1(double val) { minColSpacing1 = val; }
+    void setEndOfLineHyphenMode(EndOfLineHyphenMode mode) { hyphenMode = mode; }
 
 private:
     TextOutputFunc outputFunc; // output function
@@ -893,6 +897,7 @@ private:
     bool ok; // set up ok?
     bool textPageBreaks; // insert end-of-page markers?
     EndOfLineKind textEOL; // type of EOL marker to use
+    EndOfLineHyphenMode hyphenMode = EndOfLineHyphenMode::RemoveAll;
 
     std::unique_ptr<ActualText> actualText;
 };
