@@ -174,7 +174,7 @@ static std::optional<GooString> poppler_password_to_latin1(const gchar *password
     }
 
     password_latin = g_convert(password, -1, "ISO-8859-1", "UTF-8", nullptr, nullptr, nullptr);
-    std::optional<GooString> password_g = GooString(password_latin);
+    std::optional<GooString> password_g = GooString(std::string { password_latin });
     g_free(password_latin);
 
     return password_g;
@@ -225,10 +225,10 @@ PopplerDocument *poppler_document_new_from_file(const char *uri, const char *pas
     }
     delete[] filenameW;
 #else
-    newDoc = std::make_unique<PDFDoc>(std::make_unique<GooString>(filename), password_g, password_g);
+    newDoc = std::make_unique<PDFDoc>(std::make_unique<GooString>(std::string { filename }), password_g, password_g);
     if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
         /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
-        newDoc = std::make_unique<PDFDoc>(std::make_unique<GooString>(filename), GooString(password), GooString(password));
+        newDoc = std::make_unique<PDFDoc>(std::make_unique<GooString>(std::string { filename }), GooString(password), GooString(password));
     }
 #endif
     g_free(filename);
@@ -268,7 +268,7 @@ PopplerDocument *poppler_document_new_from_data(char *data, int length, const ch
     if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
         /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
         str = std::make_unique<MemStream>(data, 0, length, Object::null());
-        newDoc = std::make_unique<PDFDoc>(std::move(str), GooString(password), GooString(password));
+        newDoc = std::make_unique<PDFDoc>(std::move(str), password ? std::optional<GooString>(password) : std::nullopt, password ? std::optional<GooString>(password) : std::nullopt);
     }
 
     return _poppler_document_new_from_pdfdoc(std::move(initer), std::move(newDoc), error);
@@ -329,7 +329,7 @@ PopplerDocument *poppler_document_new_from_bytes(GBytes *bytes, const char *pass
     if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
         /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
         str = std::make_unique<BytesStream>(bytes, Object::null());
-        newDoc = std::make_unique<PDFDoc>(std::move(str), GooString(password), GooString(password));
+        newDoc = std::make_unique<PDFDoc>(std::move(str), password ? std::optional<GooString>(password) : std::nullopt, password ? std::optional<GooString>(password) : std::nullopt);
     }
 
     return _poppler_document_new_from_pdfdoc(std::move(initer), std::move(newDoc), error);
@@ -390,7 +390,7 @@ PopplerDocument *poppler_document_new_from_stream(GInputStream *stream, goffset 
     auto newDoc = std::make_unique<PDFDoc>(std::move(str), password_g, password_g);
     if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
         /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
-        newDoc = std::make_unique<PDFDoc>(newDoc->getBaseStream()->copy(), GooString(password), GooString(password));
+        newDoc = std::make_unique<PDFDoc>(newDoc->getBaseStream()->copy(), password ? std::optional<GooString>(password) : std::nullopt, password ? std::optional<GooString>(password) : std::nullopt);
     }
 
     return _poppler_document_new_from_pdfdoc(std::move(initer), std::move(newDoc), error);
@@ -511,7 +511,7 @@ PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GErr
     auto newDoc = std::make_unique<PDFDoc>(std::move(stream), password_g, password_g);
     if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
         /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
-        newDoc = std::make_unique<PDFDoc>(newDoc->getBaseStream()->copy(), GooString(password), GooString(password));
+        newDoc = std::make_unique<PDFDoc>(newDoc->getBaseStream()->copy(), password ? std::optional<GooString>(password) : std::nullopt, password ? std::optional<GooString>(password) : std::nullopt);
     }
 
     return _poppler_document_new_from_pdfdoc(std::move(initer), std::move(newDoc), error);
@@ -774,6 +774,9 @@ PopplerPage *poppler_document_get_page(PopplerDocument *document, int index)
  **/
 PopplerPage *poppler_document_get_page_by_label(PopplerDocument *document, const char *label)
 {
+    if (!label) {
+        return nullptr;
+    }
     Catalog *catalog;
     const GooString label_g(label);
     int index;

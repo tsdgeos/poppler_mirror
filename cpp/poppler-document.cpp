@@ -54,14 +54,14 @@ using namespace poppler;
 
 document_private::document_private(std::unique_ptr<GooString> &&file_path, const std::string &owner_password, const std::string &user_password) : document_private()
 {
-    doc = std::make_unique<PDFDoc>(std::move(file_path), GooString(owner_password.c_str()), GooString(user_password.c_str()));
+    doc = std::make_unique<PDFDoc>(std::move(file_path), GooString(owner_password), GooString(user_password));
 }
 
 document_private::document_private(byte_array *file_data, const std::string &owner_password, const std::string &user_password) : document_private()
 {
     file_data->swap(doc_data);
     auto memstr = std::make_unique<MemStream>(doc_data.data(), 0, doc_data.size(), Object::null());
-    doc = std::make_unique<PDFDoc>(std::move(memstr), GooString(owner_password.c_str()), GooString(user_password.c_str()));
+    doc = std::make_unique<PDFDoc>(std::move(memstr), GooString(owner_password), GooString(user_password));
 }
 
 document_private::document_private(const char *file_data, int file_data_length, const std::string &owner_password, const std::string &user_password) : document_private()
@@ -69,7 +69,7 @@ document_private::document_private(const char *file_data, int file_data_length, 
     raw_doc_data = file_data;
     raw_doc_data_length = file_data_length;
     auto memstr = std::make_unique<MemStream>(raw_doc_data, 0, raw_doc_data_length, Object::null());
-    doc = std::make_unique<PDFDoc>(std::move(memstr), GooString(owner_password.c_str()), GooString(user_password.c_str()));
+    doc = std::make_unique<PDFDoc>(std::move(memstr), GooString(owner_password), GooString(user_password));
 }
 
 document_private::document_private() : GlobalParamsIniter(detail::error_function), doc(nullptr), raw_doc_data(nullptr), raw_doc_data_length(0), is_locked(false) { }
