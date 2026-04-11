@@ -1059,8 +1059,8 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
         certPriv->public_key_type = static_cast<int>(pkInfo.publicKeyType);
         certPriv->public_key_strength = pkInfo.publicKeyStrength;
 
-        const GooString &certDer = ci->getCertificateDER();
-        certPriv->certificate_der = QByteArray(certDer.c_str(), certDer.size());
+        const std::vector<unsigned char> &certDer = ci->getCertificateDER();
+        certPriv->certificate_der = QByteArray(reinterpret_cast<const char *>(certDer.data()), certDer.size());
 
         certPriv->is_null = false;
     }

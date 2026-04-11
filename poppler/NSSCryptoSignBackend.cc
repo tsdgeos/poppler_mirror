@@ -635,7 +635,7 @@ static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromCERT(CERTCerti
     certInfo->setPublicKeyInfo(std::move(pkInfo));
 
     certInfo->setKeyUsageExtensions(cert->keyUsage);
-    certInfo->setCertificateDER(SECItemToGooString(cert->derCert));
+    certInfo->setCertificateDER(std::vector<unsigned char>(cert->derCert.data, cert->derCert.data + cert->derCert.len));
     certInfo->setIsSelfSigned(CERT_CompareName(&cert->subject, &cert->issuer) == SECEqual);
 
     return certInfo;
