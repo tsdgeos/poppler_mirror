@@ -119,7 +119,7 @@ const SEC_ASN1Template GeneralNameTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .o
  * GeneralNames ::= SEQUENCE SIZE (1..MAX) OF GeneralName
  */
 const SEC_ASN1Template GeneralNamesTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(GeneralNames) },
-                                                  { .kind = SEC_ASN1_INLINE | SEC_ASN1_CONTEXT_SPECIFIC | 4, .offset = offsetof(GeneralNames, names), .sub = GeneralNameTemplate, .size = 0 },
+                                                  { .kind = SEC_ASN1_CONTEXT_SPECIFIC | 4, .offset = offsetof(GeneralNames, names), .sub = GeneralNameTemplate, .size = 0 },
                                                   { .kind = 0, .offset = 0, .sub = nullptr, .size = 0 } };
 
 /**
