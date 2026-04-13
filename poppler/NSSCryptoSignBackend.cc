@@ -575,7 +575,11 @@ static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromCERT(CERTCerti
 {
     auto certInfo = std::make_unique<X509CertificateInfo>();
 
-    certInfo->setVersion(DER_GetInteger(&cert->version) + 1);
+    long version = 0;
+    if (cert->version.data && cert->version.len) {
+        version = DER_GetInteger(&cert->version);
+    }
+    certInfo->setVersion(version + 1);
     certInfo->setSerialNumber(SECItemToGooString(cert->serialNumber));
 
     // issuer info
