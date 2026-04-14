@@ -699,7 +699,7 @@ Object AnnotBorderBS::writeToObject(XRef *xref) const
 {
     auto dict = std::make_unique<Dict>(xref);
     dict->set("W", Object(width));
-    dict->set("S", Object(objName, getStyleName()));
+    dict->set("S", Object::name(getStyleName()));
     if (style == borderDashed && !dash.empty()) {
         auto a = std::make_unique<Array>(xref);
 
@@ -1271,7 +1271,7 @@ Annot::Annot(PDFDoc *docA, PDFRectangle *rectA)
     a->add(Object(rectA->y2));
 
     annotObj = Object(std::make_unique<Dict>(docA->getXRef()));
-    annotObj.dictSet("Type", Object(objName, "Annot"));
+    annotObj.dictSet("Type", Object::name("Annot"));
     annotObj.dictSet("Rect", Object(std::move(a)));
 
     ref = docA->getXRef()->addIndirectObject(annotObj);
@@ -1601,7 +1601,7 @@ void Annot::setAppearanceState(const char *state)
     appearState = std::make_unique<GooString>(state);
     appearBBox = nullptr;
 
-    update("AS", Object(objName, state));
+    update("AS", Object::name(state));
 
     // The appearance state determines the current appearance stream
     if (appearStreams) {
@@ -1940,7 +1940,7 @@ Object Annot::createForm(const std::string &appearBuf, const std::array<double, 
 {
     auto appearDict = std::make_unique<Dict>(doc->getXRef());
     appearDict->set("Length", Object(static_cast<int>(appearBuf.size())));
-    appearDict->set("Subtype", Object(objName, "Form"));
+    appearDict->set("Subtype", Object::name("Form"));
 
     auto a = std::make_unique<Array>(doc->getXRef());
     a->add(Object(bbox[0]));
@@ -1950,7 +1950,7 @@ Object Annot::createForm(const std::string &appearBuf, const std::array<double, 
     appearDict->set("BBox", Object(std::move(a)));
     if (transparencyGroup) {
         auto d = std::make_unique<Dict>(doc->getXRef());
-        d->set("S", Object(objName, "Transparency"));
+        d->set("S", Object::name("Transparency"));
         appearDict->set("Group", Object(std::move(d)));
     }
     if (resDictObject.isDict()) {
@@ -1970,7 +1970,7 @@ std::unique_ptr<Dict> Annot::createResourcesDict(const char *formName, Object &&
         gsDict->set("ca", Object(opacity));
     }
     if (blendMode) {
-        gsDict->set("BM", Object(objName, blendMode));
+        gsDict->set("BM", Object::name(blendMode));
     }
     auto stateDict = std::make_unique<Dict>(doc->getXRef());
     stateDict->set(stateName, Object(std::move(gsDict)));
@@ -2072,7 +2072,7 @@ void Annot::setNewAppearance(Object &&newAppearance, bool keepAppearState)
             appearState = std::make_unique<GooString>(oldAS.getNameString());
             update("AS", std::move(oldAS));
         } else {
-            update("AS", Object(objName, "N"));
+            update("AS", Object::name("N"));
         }
     } else {
         appearStreams = std::make_unique<AnnotAppearance>(doc, &newAppearance);
@@ -2097,7 +2097,7 @@ AnnotPopup::AnnotPopup(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
 {
     type = typePopup;
 
-    annotObj.dictSet("Subtype", Object(objName, "Popup"));
+    annotObj.dictSet("Subtype", Object::name("Popup"));
     initialize(annotObj.getDict());
 }
 
@@ -2293,7 +2293,7 @@ AnnotText::AnnotText(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rect
     type = typeText;
     flags |= flagNoZoom | flagNoRotate;
 
-    annotObj.dictSet("Subtype", Object(objName, "Text"));
+    annotObj.dictSet("Subtype", Object::name("Text"));
     initialize(annotObj.getDict());
 }
 
@@ -2402,7 +2402,7 @@ void AnnotText::setIcon(const std::string &new_icon)
         icon = "Note";
     }
 
-    update("Name", Object(objName, icon.c_str()));
+    update("Name", Object::name(icon));
     invalidateAppearance();
 }
 
@@ -2793,7 +2793,7 @@ void AnnotText::draw(Gfx *gfx, bool printing)
 AnnotLink::AnnotLink(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
 {
     type = typeLink;
-    annotObj.dictSet("Subtype", Object(objName, "Link"));
+    annotObj.dictSet("Subtype", Object::name("Link"));
     initialize(annotObj.getDict());
 }
 
@@ -2883,8 +2883,8 @@ AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(do
 {
     type = typeFreeText;
 
-    annotObj.dictSet("Subtype", Object(objName, "FreeText"));
-    annotObj.dictSet("DA", Object(std::string()));
+    annotObj.dictSet("Subtype", Object::name("FreeText"));
+    annotObj.dictSet("DA", Object(std::string {}));
 
     initialize(annotObj.getDict());
 }
@@ -3055,7 +3055,7 @@ void AnnotFreeText::setIntent(AnnotFreeTextIntent new_intent)
     } else { // intentFreeTextTypeWriter
         intentName = "FreeTextTypeWriter";
     }
-    update("IT", Object(objName, intentName));
+    update("IT", Object::name(intentName));
 }
 
 std::unique_ptr<DefaultAppearance> AnnotFreeText::getDefaultAppearance() const
@@ -3068,10 +3068,10 @@ static std::unique_ptr<GfxFont> createAnnotDrawFont(XRef *xref, Dict *fontParent
     const Ref dummyRef = { .num = -1, .gen = -1 };
 
     auto fontDict = std::make_unique<Dict>(xref);
-    fontDict->add("BaseFont", Object(objName, fontname));
-    fontDict->add("Subtype", Object(objName, "Type1"));
+    fontDict->add("BaseFont", Object::name(fontname));
+    fontDict->add("Subtype", Object::name("Type1"));
     if ((strcmp(fontname, "ZapfDingbats") != 0) && (strcmp(fontname, "Symbol") != 0)) {
-        fontDict->add("Encoding", Object(objName, "WinAnsiEncoding"));
+        fontDict->add("Encoding", Object::name("WinAnsiEncoding"));
     }
 
     Object fontsDictObj = fontParentDict->lookup("Font");
@@ -3458,7 +3458,7 @@ Object AnnotFreeText::getAppearanceResDict()
 AnnotLine::AnnotLine(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rectA)
 {
     type = typeLine;
-    annotObj.dictSet("Subtype", Object(objName, "Line"));
+    annotObj.dictSet("Subtype", Object::name("Line"));
 
     initialize(annotObj.getDict());
 }
@@ -3612,8 +3612,8 @@ void AnnotLine::setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyl
     endStyle = end;
 
     auto leArray = std::make_unique<Array>(doc->getXRef());
-    leArray->add(Object(objName, convertAnnotLineEndingStyle(startStyle)));
-    leArray->add(Object(objName, convertAnnotLineEndingStyle(endStyle)));
+    leArray->add(Object::name(convertAnnotLineEndingStyle(startStyle)));
+    leArray->add(Object::name(convertAnnotLineEndingStyle(endStyle)));
 
     update("LE", Object(std::move(leArray)));
     invalidateAppearance();
@@ -3665,7 +3665,7 @@ void AnnotLine::setIntent(AnnotLineIntent new_intent)
     } else { // intentLineDimension
         intentName = "LineDimension";
     }
-    update("IT", Object(objName, intentName));
+    update("IT", Object::name(intentName));
 }
 
 void AnnotLine::generateLineAppearance()
@@ -3888,16 +3888,16 @@ AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rectA, AnnotSubtype
 {
     switch (subType) {
     case typeHighlight:
-        annotObj.dictSet("Subtype", Object(objName, "Highlight"));
+        annotObj.dictSet("Subtype", Object::name("Highlight"));
         break;
     case typeUnderline:
-        annotObj.dictSet("Subtype", Object(objName, "Underline"));
+        annotObj.dictSet("Subtype", Object::name("Underline"));
         break;
     case typeSquiggly:
-        annotObj.dictSet("Subtype", Object(objName, "Squiggly"));
+        annotObj.dictSet("Subtype", Object::name("Squiggly"));
         break;
     case typeStrikeOut:
-        annotObj.dictSet("Subtype", Object(objName, "StrikeOut"));
+        annotObj.dictSet("Subtype", Object::name("StrikeOut"));
         break;
     default:
         assert(0 && "Invalid subtype for AnnotTextMarkup\n");
@@ -3970,7 +3970,7 @@ void AnnotTextMarkup::setType(AnnotSubtype new_type)
     }
 
     type = new_type;
-    update("Subtype", Object(objName, typeName));
+    update("Subtype", Object::name(typeName));
     invalidateAppearance();
 }
 
@@ -5501,7 +5501,7 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
     const std::string &appearBuf = appearBuilder.buffer();
     // fill the appearance stream dictionary
     appearDict->add("Length", Object(static_cast<int>(appearBuf.size())));
-    appearDict->add("Subtype", Object(objName, "Form"));
+    appearDict->add("Subtype", Object::name("Form"));
     auto bbox = std::make_unique<Array>(doc->getXRef());
     bbox->add(Object(0));
     bbox->add(Object(0));
@@ -5599,8 +5599,8 @@ void AnnotWidget::draw(Gfx *gfx, bool printing)
         // so create a fake one
         // If refactoring this code remember to test issue #1642 afterwards
         auto fontDict = std::make_unique<Dict>(gfx->getXRef());
-        fontDict->add("BaseFont", Object(objName, "ZapfDingbats"));
-        fontDict->add("Subtype", Object(objName, "Type1"));
+        fontDict->add("BaseFont", Object::name("ZapfDingbats"));
+        fontDict->add("Subtype", Object::name("Type1"));
 
         auto fontsDict = std::make_unique<Dict>(gfx->getXRef());
         fontsDict->add("ZaDb", Object(std::move(fontDict)));
@@ -5621,7 +5621,7 @@ void AnnotWidget::draw(Gfx *gfx, bool printing)
 AnnotMovie::AnnotMovie(PDFDoc *docA, PDFRectangle *rectA, Movie *movieA) : Annot(docA, rectA)
 {
     type = typeMovie;
-    annotObj.dictSet("Subtype", Object(objName, "Movie"));
+    annotObj.dictSet("Subtype", Object::name("Movie"));
 
     movie = movieA->copy();
     // TODO: create movie dict from movieA
@@ -5691,8 +5691,8 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
 
             auto formDict = std::make_unique<Dict>(gfx->getXRef());
             formDict->set("Length", Object(static_cast<int>(appearBuf.size())));
-            formDict->set("Subtype", Object(objName, "Form"));
-            formDict->set("Name", Object(objName, "FRM"));
+            formDict->set("Subtype", Object::name("Form"));
+            formDict->set("Name", Object::name("FRM"));
             auto bboxArray = std::make_unique<Array>(gfx->getXRef());
             bboxArray->add(Object(0));
             bboxArray->add(Object(0));
@@ -5745,7 +5745,7 @@ AnnotScreen::AnnotScreen(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
 {
     type = typeScreen;
 
-    annotObj.dictSet("Subtype", Object(objName, "Screen"));
+    annotObj.dictSet("Subtype", Object::name("Screen"));
     initialize(annotObj.getDict());
 }
 
@@ -5799,7 +5799,7 @@ std::unique_ptr<LinkAction> AnnotScreen::getAdditionalAction(AdditionalActionsTy
 AnnotStamp::AnnotStamp(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rectA)
 {
     type = typeStamp;
-    annotObj.dictSet("Subtype", Object(objName, "Stamp"));
+    annotObj.dictSet("Subtype", Object::name("Stamp"));
     initialize(annotObj.getDict());
 }
 
@@ -5994,7 +5994,7 @@ void AnnotStamp::setIcon(const std::string &new_icon)
 {
     icon = new_icon;
 
-    update("Name", Object(objName, icon.c_str()));
+    update("Name", Object::name(icon));
     invalidateAppearance();
 }
 
@@ -6023,10 +6023,10 @@ AnnotGeometry::AnnotGeometry(PDFDoc *docA, PDFRectangle *rectA, AnnotSubtype sub
 {
     switch (subType) {
     case typeSquare:
-        annotObj.dictSet("Subtype", Object(objName, "Square"));
+        annotObj.dictSet("Subtype", Object::name("Square"));
         break;
     case typeCircle:
-        annotObj.dictSet("Subtype", Object(objName, "Circle"));
+        annotObj.dictSet("Subtype", Object::name("Circle"));
         break;
     default:
         assert(0 && "Invalid subtype for AnnotGeometry\n");
@@ -6096,7 +6096,7 @@ void AnnotGeometry::setType(AnnotSubtype new_type)
     }
 
     type = new_type;
-    update("Subtype", Object(objName, typeName));
+    update("Subtype", Object::name(typeName));
     invalidateAppearance();
 }
 
@@ -6182,10 +6182,10 @@ AnnotPolygon::AnnotPolygon(PDFDoc *docA, PDFRectangle *rectA, AnnotSubtype subTy
 {
     switch (subType) {
     case typePolygon:
-        annotObj.dictSet("Subtype", Object(objName, "Polygon"));
+        annotObj.dictSet("Subtype", Object::name("Polygon"));
         break;
     case typePolyLine:
-        annotObj.dictSet("Subtype", Object(objName, "PolyLine"));
+        annotObj.dictSet("Subtype", Object::name("PolyLine"));
         break;
     default:
         assert(0 && "Invalid subtype for AnnotGeometry\n");
@@ -6298,7 +6298,7 @@ void AnnotPolygon::setType(AnnotSubtype new_type)
     }
 
     type = new_type;
-    update("Subtype", Object(objName, typeName));
+    update("Subtype", Object::name(typeName));
     invalidateAppearance();
 }
 
@@ -6322,8 +6322,8 @@ void AnnotPolygon::setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingS
     endStyle = end;
 
     auto a = std::make_unique<Array>(doc->getXRef());
-    a->add(Object(objName, convertAnnotLineEndingStyle(startStyle)));
-    a->add(Object(objName, convertAnnotLineEndingStyle(endStyle)));
+    a->add(Object::name(convertAnnotLineEndingStyle(startStyle)));
+    a->add(Object::name(convertAnnotLineEndingStyle(endStyle)));
 
     update("LE", Object(std::move(a)));
     invalidateAppearance();
@@ -6354,7 +6354,7 @@ void AnnotPolygon::setIntent(AnnotPolygonIntent new_intent)
     } else { // polygonDimension
         intentName = "PolygonDimension";
     }
-    update("IT", Object(objName, intentName));
+    update("IT", Object::name(intentName));
 }
 
 void AnnotPolygon::generatePolyLineAppearance(AnnotAppearanceBuilder *appearBuilder)
@@ -6513,7 +6513,7 @@ AnnotCaret::AnnotCaret(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, re
 {
     type = typeCaret;
 
-    annotObj.dictSet("Subtype", Object(objName, "Caret"));
+    annotObj.dictSet("Subtype", Object::name("Caret"));
     initialize(annotObj.getDict());
 }
 
@@ -6548,7 +6548,7 @@ void AnnotCaret::initialize(Dict *dict)
 void AnnotCaret::setSymbol(AnnotCaretSymbol new_symbol)
 {
     symbol = new_symbol;
-    update("Sy", Object(objName, new_symbol == symbolP ? "P" : "None"));
+    update("Sy", Object::name(new_symbol == symbolP ? "P" : "None"));
     invalidateAppearance();
 }
 
@@ -6559,7 +6559,7 @@ AnnotInk::AnnotInk(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rectA)
 {
     type = typeInk;
 
-    annotObj.dictSet("Subtype", Object(objName, "Ink"));
+    annotObj.dictSet("Subtype", Object::name("Ink"));
 
     // Store dummy path with one null vertex only
     auto inkListArray = std::make_unique<Array>(doc->getXRef());
@@ -6768,7 +6768,7 @@ AnnotFileAttachment::AnnotFileAttachment(PDFDoc *docA, PDFRectangle *rectA, GooS
 {
     type = typeFileAttachment;
 
-    annotObj.dictSet("Subtype", Object(objName, "FileAttachment"));
+    annotObj.dictSet("Subtype", Object::name("FileAttachment"));
     annotObj.dictSet("FS", Object(std::string { filename->toStr() }));
 
     initialize(annotObj.getDict());
@@ -6967,7 +6967,7 @@ AnnotSound::AnnotSound(PDFDoc *docA, PDFRectangle *rectA, Sound *soundA) : Annot
 {
     type = typeSound;
 
-    annotObj.dictSet("Subtype", Object(objName, "Sound"));
+    annotObj.dictSet("Subtype", Object::name("Sound"));
     annotObj.dictSet("Sound", soundA->getObject().copy());
 
     initialize(annotObj.getDict());
@@ -7114,7 +7114,7 @@ Annot3D::Annot3D(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
 {
     type = type3D;
 
-    annotObj.dictSet("Subtype", Object(objName, "3D"));
+    annotObj.dictSet("Subtype", Object::name("3D"));
 
     initialize(annotObj.getDict());
 }
@@ -7217,7 +7217,7 @@ AnnotRichMedia::AnnotRichMedia(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, 
 {
     type = typeRichMedia;
 
-    annotObj.dictSet("Subtype", Object(objName, "RichMedia"));
+    annotObj.dictSet("Subtype", Object::name("RichMedia"));
 
     initialize(annotObj.getDict());
 }

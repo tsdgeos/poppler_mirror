@@ -87,7 +87,7 @@ static void insertChildHelper(const std::string &itemTitle, int destPageNum, uns
         // alternately, could put 0, or omit it
         a->add(Object(destPageNum - 1));
     }
-    a->add(Object(objName, "Fit"));
+    a->add(Object::name("Fit"));
 
     Object outlineItem = Object(std::make_unique<Dict>(xref));
 
@@ -290,7 +290,7 @@ int Outline::addOutlineTreeNodeList(const std::vector<OutlineTreeNode> &nodeList
             // alternately, could put 0, or omit it
             a->add(Object(node.destPageNum - 1));
         }
-        a->add(Object(objName, "Fit"));
+        a->add(Object::name("Fit"));
 
         Object outlineItem = Object(std::make_unique<Dict>(doc->getXRef()));
         Ref outlineItemRef = doc->getXRef()->addIndirectObject(outlineItem);
@@ -515,7 +515,7 @@ bool OutlineItem::setPageDest(int i)
             obj1.arrayRemove(0);
         }
         obj1.arrayAdd(Object(i - 1));
-        obj1.arrayAdd(Object(objName, "Fit"));
+        obj1.arrayAdd(Object::name("Fit"));
 
         // unique_ptr will destroy previous on assignment
         action = LinkAction::parseDest(&obj1);

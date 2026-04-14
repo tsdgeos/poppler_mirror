@@ -1655,7 +1655,7 @@ Ref XRef::addStreamObject(std::unique_ptr<Dict> dict, std::vector<char> buffer, 
     case StreamCompression::None:;
         break;
     case StreamCompression::Compress:
-        stream->getDict()->add("Filter", Object(objName, "FlateDecode"));
+        stream->getDict()->add("Filter", Object::name("FlateDecode"));
         break;
     }
     return addIndirectObject(Object(std::move(stream)));
@@ -1788,7 +1788,7 @@ void XRef::writeStreamToBuffer(GooString *stmBuf, Dict *xrefDict, XRef *xref)
     XRefStreamWriter writer(index.get(), stmBuf, offsetSize);
     writeXRef(&writer, false);
 
-    xrefDict->set("Type", Object(objName, "XRef"));
+    xrefDict->set("Type", Object::name("XRef"));
     xrefDict->set("Index", Object(std::move(index)));
     auto wArray = std::make_unique<Array>(xref);
     wArray->add(Object(1));

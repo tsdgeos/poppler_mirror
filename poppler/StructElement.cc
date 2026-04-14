@@ -197,16 +197,16 @@ struct AttributeDefaults
 {
     AttributeDefaults() = default; // needed to support old clang
 
-    Object Inline = Object(objName, "Inline");
-    Object LrTb = Object(objName, "LrTb");
-    Object Normal = Object(objName, "Normal");
-    Object Distribute = Object(objName, "Distribute");
-    Object off = Object(objName, "off");
+    Object Inline = Object::name("Inline");
+    Object LrTb = Object::name("LrTb");
+    Object Normal = Object::name("Normal");
+    Object Distribute = Object::name("Distribute");
+    Object off = Object::name("off");
     Object Zero = Object(0.0);
-    Object Auto = Object(objName, "Auto");
-    Object Start = Object(objName, "Start");
-    Object None = Object(objName, "None");
-    Object Before = Object(objName, "Before");
+    Object Auto = Object::name("Auto");
+    Object Start = Object::name("Start");
+    Object None = Object::name("None");
+    Object Before = Object::name("Before");
     Object Nat1 = Object(1);
 };
 

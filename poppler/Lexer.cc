@@ -469,18 +469,17 @@ Object Lexer::getObj(int objNum)
             }
         }
         if (n < tokBufSize) {
-            return Object(objName, std::string_view(tokBuf, n));
+            return Object::name(std::string_view(tokBuf, n));
         }
-        Object obj(objName, s);
-        return obj;
+        return Object::name(s);
         break;
     }
 
     // array punctuation
     case '[':
-        return Object(objCmd, std::string_view("[", 1));
+        return Object::cmd("[");
     case ']':
-        return Object(objCmd, std::string_view("]", 1));
+        return Object::cmd("]");
 
     // hex string or dict punctuation
     case '<': {
@@ -489,7 +488,7 @@ Object Lexer::getObj(int objNum)
         // dict punctuation
         if (c == '<') {
             getChar();
-            return Object(objCmd, std::string_view("<<", 2));
+            return Object::cmd("<<");
 
             // hex string
         }
@@ -545,7 +544,7 @@ Object Lexer::getObj(int objNum)
         c = lookChar();
         if (c == '>') {
             getChar();
-            return Object(objCmd, std::string_view(">>", 2));
+            return Object::cmd(">>");
         }
         error(errSyntaxError, getPos(), "Illegal character '>'");
         return Object::error();
@@ -583,7 +582,7 @@ Object Lexer::getObj(int objNum)
         if (res == "null") {
             return Object::null();
         }
-        return Object(objCmd, res);
+        return Object::cmd(res);
 
         break;
     }
@@ -630,7 +629,7 @@ Object Lexer::getObj(std::string_view cmdA, int objNum)
         }
     }
 
-    return Object(objCmd, std::string_view(tokBuf, p));
+    return Object::cmd(std::string_view(tokBuf, p));
 }
 
 void Lexer::skipToNextLine()

@@ -2204,9 +2204,9 @@ std::variant<PDFDoc::SignatureData, CryptoSign::SigningErrorMessage> PDFDoc::cre
     Form *form = catalog->getCreateForm();
 
     Object annotObj = Object(std::make_unique<Dict>(getXRef()));
-    annotObj.dictSet("Type", Object(objName, "Annot"));
-    annotObj.dictSet("Subtype", Object(objName, "Widget"));
-    annotObj.dictSet("FT", Object(objName, "Sig"));
+    annotObj.dictSet("Type", Object::name("Annot"));
+    annotObj.dictSet("Subtype", Object::name("Widget"));
+    annotObj.dictSet("FT", Object::name("Sig"));
     annotObj.dictSet("T", Object(std::move(partialFieldName->toNonConstStr())));
     auto rectArray = std::make_unique<Array>(getXRef());
     rectArray->add(Object(rect.x1));

@@ -214,6 +214,10 @@ public:
     static Object null() { return Object(objNull); }
     static Object eof() { return Object(objEOF); }
     static Object error() { return Object(objError); }
+
+    static Object name(std::string_view name) { return Object(objName, name); }
+    static Object cmd(std::string_view name) { return Object(objCmd, name); }
+    static Object hexString(std::string &&hex) { return Object(objHexString, std::move(hex)); }
     Object() : type(objNone) { }
     ~Object() = default;
 
@@ -224,11 +228,6 @@ public:
     explicit Object(double realA) : type { objReal }, data { realA } { }
 
     explicit Object(std::string &&stringA) : type { objString }, data { std::move(stringA) } { }
-
-    Object(ObjType typeA, std::string &&stringA) : type { typeA }, data { std::move(stringA) } { assert(typeA == objHexString); }
-
-    Object(ObjType typeA, const char *v) : Object(typeA, std::string_view(v)) { }
-    Object(ObjType typeA, std::string_view v) : type { typeA }, data { std::string { v } } { assert(typeA == objName || typeA == objCmd); }
 
     explicit Object(long long int64gA) : type { objInt64 }, data { int64gA } { }
 
@@ -530,6 +529,10 @@ private:
     class PrivateTag
     {
     };
+    Object(ObjType typeA, std::string &&stringA) : type { typeA }, data { std::move(stringA) } { assert(typeA == objHexString); }
+
+    Object(ObjType typeA, std::string_view v) : type { typeA }, data { std::string { v } } { assert(typeA == objName || typeA == objCmd); }
+
     explicit Object(ObjType typeA) { type = typeA; }
     explicit Object(ObjType typeA, std::variant<std::monostate, bool, int, long long, double, std::string, std::shared_ptr<Array>, std::shared_ptr<Dict>, std::shared_ptr<Stream>, Ref> dataA, PrivateTag /*unnamed*/)
         : type { typeA }, data { std::move(dataA) }

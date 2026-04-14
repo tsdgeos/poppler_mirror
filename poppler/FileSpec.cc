@@ -183,7 +183,7 @@ Object FileSpec::newFileSpecObject(XRef *xref, GooFile *file, const std::string 
     efDict->set("F", Object(streamRef));
 
     auto fsDict = std::make_unique<Dict>(xref);
-    fsDict->set("Type", Object(objName, "Filespec"));
+    fsDict->set("Type", Object::name("Filespec"));
     fsDict->set("UF", Object(std::string { fileName }));
     fsDict->set("EF", Object(std::move(efDict)));
 

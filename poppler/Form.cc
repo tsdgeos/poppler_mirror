@@ -930,9 +930,9 @@ bool FormWidgetSignature::updateSignature(FILE *f, Goffset sigStart, Goffset sig
 
 bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooString &name, int placeholderLength, const GooString *reason, const GooString *location, CryptoSign::SignatureType signatureType)
 {
-    vObj.dictAdd("Type", Object(objName, "Sig"));
-    vObj.dictAdd("Filter", Object(objName, "Adobe.PPKLite"));
-    vObj.dictAdd("SubFilter", Object(objName, std::string_view { toStdString(signatureType) }));
+    vObj.dictAdd("Type", Object::name("Sig"));
+    vObj.dictAdd("Filter", Object::name("Adobe.PPKLite"));
+    vObj.dictAdd("SubFilter", Object::name(toStdString(signatureType)));
     vObj.dictAdd("Name", Object(std::string { name.toStr() }));
     vObj.dictAdd("M", Object(std::string { timeToDateString(nullptr)->toStr() }));
     if (reason && !reason->empty()) {
@@ -942,7 +942,7 @@ bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooStrin
         vObj.dictAdd("Location", Object(std::string { location->toStr() }));
     }
 
-    vObj.dictAdd("Contents", Object(objHexString, std::string(placeholderLength, '\0')));
+    vObj.dictAdd("Contents", Object::hexString(std::string(placeholderLength, '\0')));
     Object bObj(std::make_unique<Array>(xref));
     // reserve space in byte range for maximum number of bytes
     bObj.arrayAdd(Object(0LL));
@@ -1569,7 +1569,7 @@ bool FormFieldButton::getState(const char *state) const
 
 void FormFieldButton::updateState(const char *state)
 {
-    appearanceState = Object(objName, state);
+    appearanceState = Object::name(state);
     obj.getDict()->set("V", appearanceState.copy());
     xref->setModifiedObject(&obj, ref);
 }
@@ -2767,19 +2767,19 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
 
     XRef *xref = doc->getXRef();
     Object fontDict(std::make_unique<Dict>(xref));
-    fontDict.dictSet("Type", Object(objName, "Font"));
-    fontDict.dictSet("Subtype", Object(objName, (embedActualFont ? "Type0" : "Type1")));
-    fontDict.dictSet("BaseFont", Object(objName, std::string_view { fontFamilyAndStyle }));
+    fontDict.dictSet("Type", Object::name("Font"));
+    fontDict.dictSet("Subtype", Object::name((embedActualFont ? "Type0" : "Type1")));
+    fontDict.dictSet("BaseFont", Object::name(fontFamilyAndStyle));
 
     if (embedActualFont) {
-        fontDict.dictSet("Encoding", Object(objName, "Identity-H"));
+        fontDict.dictSet("Encoding", Object::name("Identity-H"));
         std::unique_ptr<Array> descendantFonts = std::make_unique<Array>(xref);
 
         const bool isTrueType = (fontFoFiType == fofiIdTrueType || fontFoFiType == fofiIdTrueTypeCollection);
         std::unique_ptr<Dict> descendantFont = std::make_unique<Dict>(xref);
-        descendantFont->set("Type", Object(objName, "Font"));
-        descendantFont->set("Subtype", Object(objName, isTrueType ? "CIDFontType2" : "CIDFontType0"));
-        descendantFont->set("BaseFont", Object(objName, std::string_view { fontFamilyAndStyle }));
+        descendantFont->set("Type", Object::name("Font"));
+        descendantFont->set("Subtype", Object::name(isTrueType ? "CIDFontType2" : "CIDFontType0"));
+        descendantFont->set("BaseFont", Object::name(fontFamilyAndStyle));
 
         {
             // We only support fonts with identity cmaps for now
@@ -2811,8 +2811,8 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
 
         {
             std::unique_ptr<Dict> fontDescriptor = std::make_unique<Dict>(xref);
-            fontDescriptor->set("Type", Object(objName, "FontDescriptor"));
-            fontDescriptor->set("FontName", Object(objName, std::string_view { fontFamilyAndStyle }));
+            fontDescriptor->set("Type", Object::name("FontDescriptor"));
+            fontDescriptor->set("FontName", Object::name(fontFamilyAndStyle));
 
             // a bit arbirary but the Flags field is mandatory...
             const std::string lowerCaseFontFamily = GooString::toLowerCase(fontFamily);
@@ -2862,7 +2862,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                     fontDescriptor->set("FontFile2", Object(fontFile2Ref));
                 } else {
                     auto fontFileStreamDict = std::make_unique<Dict>(xref);
-                    fontFileStreamDict->set("Subtype", Object(objName, "OpenType"));
+                    fontFileStreamDict->set("Subtype", Object::name("OpenType"));
                     const Ref fontFile3Ref = xref->addStreamObject(std::move(fontFileStreamDict), std::move(data), StreamCompression::Compress);
                     fontDescriptor->set("FontFile3", Object(fontFile3Ref));
                 }

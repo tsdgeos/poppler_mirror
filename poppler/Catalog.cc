@@ -1019,7 +1019,7 @@ Object *Catalog::getCreateOutline()
 
     // setup an empty outline dict
     outline = Object(std::make_unique<Dict>(doc->getXRef()));
-    outline.dictSet("Type", Object(objName, "Outlines"));
+    outline.dictSet("Type", Object::name("Outlines"));
     outline.dictSet("Count", Object(0));
 
     const Ref outlineRef = doc->getXRef()->addIndirectObject(outline);
