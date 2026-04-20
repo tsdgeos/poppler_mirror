@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dominic Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2008, 2010, 2011, 2017-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2011, 2017-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Jan Jockusch <jan@jockusch.de>
 // Copyright (C) 2010, 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Kenneth Berland <ken@hero.com>
@@ -455,7 +455,7 @@ static void printInfoString(FILE *f, Dict *infoDict, const char *key, const char
     if (obj.isString()) {
         fputs(text1, f);
         const std::string &s1 = obj.getString();
-        if ((s1.at(0) & 0xff) == 0xfe && (s1.at(1) & 0xff) == 0xff) {
+        if (s1.length() > 1 && (s1.at(0) & 0xff) == 0xfe && (s1.at(1) & 0xff) == 0xff) {
             isUnicode = true;
             i = 2;
         } else {
