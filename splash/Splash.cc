@@ -6006,7 +6006,7 @@ SplashError Splash::blitCorrectedAlpha(SplashBitmap *dest, int xSrc, int ySrc, i
     unsigned char alpha0, aSrc;
     int x, y;
 
-    if (bitmap->mode != dest->mode || !bitmap->alpha || !dest->alpha || !groupBackBitmap) {
+    if (bitmap->mode != dest->mode || !bitmap->alpha || !dest->alpha || !groupBackBitmap || !groupBackBitmap->alpha) {
         return SplashError::ModeMismatch;
     }
 
