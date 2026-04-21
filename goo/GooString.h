@@ -140,9 +140,6 @@ public:
     // Get <i>th character.
     char getChar(size_t i) const { return (*this)[i]; }
 
-    // Change <i>th character.
-    void setChar(size_t i, char c) { (*this)[i] = c; }
-
     // Clear string to zero length.
     using std::string::clear;
 

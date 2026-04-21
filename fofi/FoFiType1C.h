@@ -208,9 +208,9 @@ public:
 
 private:
     void eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName, int offset, int nBytes, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict);
-    void cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict, bool top, std::set<int> &offsetBeingParsed);
-    void cvtGlyphWidth(bool useOp, GooString *charBuf, const Type1CPrivateDict *pDict);
-    static void cvtNum(double x, bool isFP, GooString *charBuf);
+    void cvtGlyph(int offset, int nBytes, std::string &charBuf, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict, bool top, std::set<int> &offsetBeingParsed);
+    void cvtGlyphWidth(bool useOp, std::string &charBuf, const Type1CPrivateDict *pDict);
+    static void cvtNum(double x, bool isFP, std::string &charBuf);
     static void eexecWrite(Type1CEexecBuf *eb, const char *s);
     static void eexecWriteCharstring(Type1CEexecBuf *eb, const unsigned char *s, int n);
     static void writePSString(const char *s, FoFiOutputFunc outputFunc, void *outputStream);
