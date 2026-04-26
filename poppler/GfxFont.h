@@ -25,7 +25,7 @@
 // Copyright (C) 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2021, 2022, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -200,7 +200,7 @@ public:
     bool matches(const char *tagA) const { return tag == tagA; }
 
     // Get font family name.
-    const GooString *getFamily() const { return family.get(); }
+    const std::optional<std::string> &getFamily() const { return family; }
 
     // Get font stretch.
     Stretch getStretch() const { return stretch; }
@@ -314,7 +314,7 @@ protected:
     const std::string tag; // PDF font tag
     const Ref id; // reference (used as unique ID)
     std::optional<std::string> name; // font name
-    std::unique_ptr<GooString> family; // font family
+    std::optional<std::string> family; // font family
     Stretch stretch; // font stretch
     Weight weight; // font weight
     const GfxFontType type; // type of font
@@ -343,7 +343,7 @@ public:
     int getNextChar(const char *s, int len, CharCode *code, Unicode const **u, int *uLen, double *dx, double *dy, double *ox, double *oy) const override;
 
     // Return the encoding.
-    char **getEncoding() { return enc; }
+    const std::array<const char *, 256> &getEncoding() const { return enc; }
 
     // Return the Unicode map.
     const CharCodeToUnicode *getToUnicode() const override;
@@ -378,7 +378,7 @@ public:
 
 private:
     const Base14FontMapEntry *base14; // for Base-14 fonts only; NULL otherwise
-    char *enc[256]; // char code --> char name
+    std::array<const char *, 256> enc; // char code --> char name
     char encFree[256]; // boolean for each char name: if set,
                        //   the string is malloc'ed
     std::unique_ptr<CharCodeToUnicode> ctu; // char code --> Unicode

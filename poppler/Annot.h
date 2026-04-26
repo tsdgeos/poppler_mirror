@@ -604,7 +604,7 @@ public:
     void append(const char *text);
     void appendf(const char *fmt, ...) GOOSTRING_FORMAT;
 
-    const GooString *buffer() const;
+    const std::string &buffer() const;
     bool getAddedDingbatsResource() const { return addedDingbatsResource; }
 
 private:
@@ -631,7 +631,7 @@ private:
                   XRef *xref, Dict *resourcesDict, int flags = NoDrawTextFlags, int nCombs = 0);
     void drawArrowPath(double x, double y, const Matrix &m, int orientation = 1);
 
-    std::unique_ptr<GooString> appearBuf;
+    std::string appearBuf;
     bool addedDingbatsResource;
 };
 
@@ -790,8 +790,8 @@ private:
 
 protected:
     virtual void removeReferencedObjects(); // Called by Page::removeAnnot
-    Object createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, std::unique_ptr<Dict> resDict);
-    Object createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
+    Object createForm(const std::string &appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, std::unique_ptr<Dict> resDict);
+    Object createForm(const std::string &appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
     std::unique_ptr<Dict> createResourcesDict(const char *formName, Object &&formStream, const char *stateName, double opacity, const char *blendMode);
     bool isVisible(bool printing);
     int getRotation() const;

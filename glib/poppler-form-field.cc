@@ -2274,7 +2274,7 @@ PopplerCertificateInfo *poppler_get_certificate_info_by_id(const char *id)
 void poppler_set_nss_dir(const char *path)
 {
 #if ENABLE_NSS3
-    NSSSignatureConfiguration::setNSSDir(GooString(path));
+    NSSSignatureConfiguration::setNSSDir(GooString(path ? path : ""));
 #else
     (void)path;
 #endif

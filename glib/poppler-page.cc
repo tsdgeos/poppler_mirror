@@ -256,6 +256,7 @@ PopplerPageTransition *poppler_page_get_transition(PopplerPage *page)
 
 static TextPage *poppler_page_get_text_page(PopplerPage *page)
 {
+    std::scoped_lock lock(page->mutex);
     if (page->text == nullptr) {
 
         auto text_dev = std::make_unique<TextOutputDev>(nullptr, true, 0, false, false);
@@ -304,6 +305,8 @@ void poppler_page_render_full(PopplerPage *page, cairo_t *cairo, gboolean printi
     g_return_if_fail(POPPLER_IS_PAGE(page));
     g_return_if_fail(cairo != nullptr);
 
+    std::unique_lock lock(page->mutex);
+
     output_dev = page->document->output_dev;
     output_dev->setCairo(cairo);
     output_dev->setPrinting(printing);
@@ -311,6 +314,8 @@ void poppler_page_render_full(PopplerPage *page, cairo_t *cairo, gboolean printi
     if (!printing && page->text == nullptr) {
         page->text = std::make_shared<TextPage>(false);
         output_dev->setTextPage(page->text);
+    } else {
+        lock.unlock();
     }
 
     cairo_save(cairo);

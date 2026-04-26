@@ -55,7 +55,7 @@ class SplashClip
 
 public:
     // Create a clip, for the given rectangle.
-    SplashClip(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, bool antialiasA);
+    SplashClip(double x0, double y0, double x1, double y1, bool antialiasA);
 
     // Copy a clip.
     std::unique_ptr<SplashClip> copy() const { return std::make_unique<SplashClip>(this); }
@@ -66,13 +66,13 @@ public:
     SplashClip &operator=(const SplashClip &) = delete;
 
     // Reset the clip to a rectangle.
-    void resetToRect(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1);
+    void resetToRect(double x0, double y0, double x1, double y1);
 
     // Intersect the clip with a rectangle.
-    SplashError clipToRect(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1);
+    SplashError clipToRect(double x0, double y0, double x1, double y1);
 
     // Intersect the clip with <path>.
-    SplashError clipToPath(const SplashPath &path, const std::array<SplashCoord, 6> &matrix, SplashCoord flatness, bool eo);
+    SplashError clipToPath(const SplashPath &path, const std::array<double, 6> &matrix, double flatness, bool eo);
 
     // Returns true if (<x>,<y>) is inside the clip.
     bool test(int x, int y) const
@@ -106,10 +106,10 @@ public:
     void clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y, bool adjustVertLine = false);
 
     // Get the rectangle part of the clip region.
-    SplashCoord getXMin() const { return xMin; }
-    SplashCoord getXMax() const { return xMax; }
-    SplashCoord getYMin() const { return yMin; }
-    SplashCoord getYMax() const { return yMax; }
+    double getXMin() const { return xMin; }
+    double getXMax() const { return xMax; }
+    double getYMin() const { return yMin; }
+    double getYMax() const { return yMax; }
 
     // Get the rectangle part of the clip region, in integer coordinates.
     int getXMinI() const { return xMinI; }
@@ -126,7 +126,7 @@ protected:
     bool testClipPaths(int x, int y) const;
 
     bool antialias;
-    SplashCoord xMin, yMin, xMax, yMax;
+    double xMin, yMin, xMax, yMax;
     int xMinI, yMinI, xMaxI, yMaxI;
     std::vector<std::shared_ptr<SplashXPathScanner>> scanners;
 };

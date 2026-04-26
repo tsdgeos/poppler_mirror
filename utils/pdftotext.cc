@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dominic Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2008, 2010, 2011, 2017-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2011, 2017-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Jan Jockusch <jan@jockusch.de>
 // Copyright (C) 2010, 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Kenneth Berland <ken@hero.com>
@@ -36,6 +36,7 @@
 // Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Hagen Möbius <hagen.moebius@googlemail.com>
 // Copyright (C) 2026 Ojas Maheshwari <workonlyojas@gmail.com>
+// Copyright (C) 2026 Aditya Tiwari <suntiwari3495@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -102,6 +103,7 @@ static bool printVersion = false;
 static bool printHelp = false;
 static bool printEnc = false;
 static bool tsvMode = false;
+static char hyphenModeStr[16] = "";
 
 static const ArgDesc argDesc[] = { { .arg = "-f", .kind = argInt, .val = &firstPage, .size = 0, .usage = "first page to convert" },
                                    { .arg = "-l", .kind = argInt, .val = &lastPage, .size = 0, .usage = "last page to convert" },
@@ -113,6 +115,7 @@ static const ArgDesc argDesc[] = { { .arg = "-f", .kind = argInt, .val = &firstP
                                    { .arg = "-layout", .kind = argFlag, .val = &physLayout, .size = 0, .usage = "maintain original physical layout" },
                                    { .arg = "-fixed", .kind = argFP, .val = &fixedPitch, .size = 0, .usage = "assume fixed-pitch (or tabular) text" },
                                    { .arg = "-raw", .kind = argFlag, .val = &rawOrder, .size = 0, .usage = "keep strings in content stream order" },
+                                   { .arg = "-remove-hyphens", .kind = argString, .val = hyphenModeStr, .size = sizeof(hyphenModeStr), .usage = "end-of-line hyphen handling: none, soft, or all (default: all)" },
                                    { .arg = "-nodiag", .kind = argFlag, .val = &discardDiag, .size = 0, .usage = "discard diagonal text" },
                                    { .arg = "-htmlmeta", .kind = argFlag, .val = &htmlMeta, .size = 0, .usage = "generate a simple HTML file, including the meta information" },
                                    { .arg = "-tsv", .kind = argFlag, .val = &tsvMode, .size = 0, .usage = "generate a simple TSV file, including the meta information for bounding boxes" },
@@ -242,6 +245,21 @@ int main(int argc, char *argv[])
         globalParams->setErrQuiet(quiet);
     }
 
+    EndOfLineHyphenMode hyphenMode = EndOfLineHyphenMode::RemoveAll;
+    if (hyphenModeStr[0]) {
+        using namespace std::string_view_literals;
+        if (hyphenModeStr == "none"sv) {
+            hyphenMode = EndOfLineHyphenMode::Keep;
+        } else if (hyphenModeStr == "soft"sv) {
+            hyphenMode = EndOfLineHyphenMode::RemoveSoft;
+        } else if (hyphenModeStr == "all"sv) {
+            hyphenMode = EndOfLineHyphenMode::RemoveAll;
+        } else {
+            error(errCommandLine, -1, "Invalid '-remove-hyphens' value");
+            return 99;
+        }
+    }
+
     // get mapping to output encoding
     if (!(uMap = globalParams->getTextEncoding())) {
         error(errCommandLine, -1, "Couldn't get text encoding");
@@ -348,6 +366,7 @@ int main(int argc, char *argv[])
         if (textOut.isOk()) {
             textOut.setTextEOL(textEOL);
             textOut.setMinColSpacing1(colspacing);
+            textOut.setEndOfLineHyphenMode(hyphenMode);
             if (noPageBreaks) {
                 textOut.setTextPageBreaks(false);
             }
@@ -364,6 +383,7 @@ int main(int argc, char *argv[])
 
         if (tsvMode) {
             TextOutputDev textOut(nullptr, physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
+            textOut.setEndOfLineHyphenMode(hyphenMode);
             if (!textFileName->compare("-")) {
                 f = stdout;
             } else {
@@ -381,6 +401,7 @@ int main(int argc, char *argv[])
             if (textOut.isOk()) {
                 textOut.setTextEOL(textEOL);
                 textOut.setMinColSpacing1(colspacing);
+                textOut.setEndOfLineHyphenMode(hyphenMode);
                 if (noPageBreaks) {
                     textOut.setTextPageBreaks(false);
                 }
@@ -434,7 +455,7 @@ static void printInfoString(FILE *f, Dict *infoDict, const char *key, const char
     if (obj.isString()) {
         fputs(text1, f);
         const std::string &s1 = obj.getString();
-        if ((s1.at(0) & 0xff) == 0xfe && (s1.at(1) & 0xff) == 0xff) {
+        if (s1.length() > 1 && (s1.at(0) & 0xff) == 0xfe && (s1.at(1) & 0xff) == 0xff) {
             isUnicode = true;
             i = 2;
         } else {
@@ -587,7 +608,7 @@ void printTSVBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int l
 
                     double lxMin = 1E+37, lyMin = 1E+37;
                     double lxMax = 0, lyMax = 0;
-                    auto *lineWordsBuffer = new GooString();
+                    std::string lineWordsBuffer;
 
                     for (word = line->getWords(); word; word = word->getNext()) {
                         word->getBBox(&xMin, &yMin, &xMax, &yMax);
@@ -604,15 +625,14 @@ void printTSVBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int l
                             lyMax = yMax;
                         }
 
-                        lineWordsBuffer->appendf("{0:d}\t{1:d}\t{2:d}\t{3:d}\t{4:d}\t{5:d}\t{6:.2f}\t{7:.2f}\t{8:.2f}\t{9:.2f}\t{10:d}\t{11:s}\n", wordLevel, page, flowNum, blockNum, lineNum, wordNum, xMin, yMin, xMax - xMin, yMax - yMin,
-                                                 wordConf, word->getText()->c_str());
+                        GooString::appendf(lineWordsBuffer, "{0:d}\t{1:d}\t{2:d}\t{3:d}\t{4:d}\t{5:d}\t{6:.2f}\t{7:.2f}\t{8:.2f}\t{9:.2f}\t{10:d}\t{11:s}\n", wordLevel, page, flowNum, blockNum, lineNum, wordNum, xMin, yMin, xMax - xMin,
+                                           yMax - yMin, wordConf, word->getText()->c_str());
                         wordNum++;
                     }
 
                     // Print Link Bounding Box info
                     fprintf(f, "%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%d\t###LINE###\n", lineLevel, page, flowNum, blockNum, lineNum, 0, lxMin, lyMin, lxMax - lxMin, lyMax - lyMin, metaConf);
-                    fprintf(f, "%s", lineWordsBuffer->c_str());
-                    delete lineWordsBuffer;
+                    fprintf(f, "%s", lineWordsBuffer.c_str());
                     lineNum++;
                 }
                 blockNum++;

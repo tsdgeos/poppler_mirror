@@ -57,17 +57,17 @@ SplashFTFontEngine::~SplashFTFontEngine()
     FT_Done_FreeType(lib);
 }
 
-std::shared_ptr<SplashFontFile> SplashFTFontEngine::loadType1Font(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex)
+std::shared_ptr<SplashFontFile> SplashFTFontEngine::loadType1Font(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const std::array<const char *, 256> &enc, int faceIndex)
 {
     return SplashFTFontFile::loadType1Font(this, std::move(idA), std::move(src), enc, faceIndex);
 }
 
-std::shared_ptr<SplashFontFile> SplashFTFontEngine::loadType1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex)
+std::shared_ptr<SplashFontFile> SplashFTFontEngine::loadType1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const std::array<const char *, 256> &enc, int faceIndex)
 {
     return SplashFTFontFile::loadType1Font(this, std::move(idA), std::move(src), enc, faceIndex);
 }
 
-std::shared_ptr<SplashFontFile> SplashFTFontEngine::loadOpenTypeT1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex)
+std::shared_ptr<SplashFontFile> SplashFTFontEngine::loadOpenTypeT1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const std::array<const char *, 256> &enc, int faceIndex)
 {
     return SplashFTFontFile::loadType1Font(this, std::move(idA), std::move(src), enc, faceIndex);
 }

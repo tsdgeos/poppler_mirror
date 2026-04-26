@@ -124,10 +124,24 @@ static const char *prolog[] = { "/xpdf 75 dict def xpdf begin",
                                 "~123sn",
                                 "/pdfSetup {",
                                 "  /setpagedevice where {",
-                                "    pop 2 dict begin",
-                                "      /Policies 1 dict dup begin /PageSize 6 def end def",
-                                "      { /Duplex true def } if",
-                                "    currentdict end setpagedevice",
+                                "    pop",
+                                "    currentpagedevice /Policies known {",
+                                "      currentpagedevice /Policies get /PageSize known",
+                                "    } {",
+                                "      false",
+                                "    } ifelse",
+                                "    {",
+                                "      1 dict begin",
+                                "        { /Duplex true def } if",
+                                "      currentdict end",
+                                "      setpagedevice",
+                                "    } {",
+                                "      2 dict begin",
+                                "        /Policies 1 dict dup begin /PageSize 6 def end def",
+                                "        { /Duplex true def } if",
+                                "      currentdict end",
+                                "      setpagedevice",
+                                "    } ifelse",
                                 "  } {",
                                 "    pop",
                                 "  } ifelse",
@@ -1062,9 +1076,9 @@ extern "C" {
 typedef void (*SignalFunc)(int);
 }
 
-static void outputToFile(void *stream, const char *data, size_t len)
+static void outputToFile(void *stream, std::string_view string)
 {
-    fwrite(data, 1, len, static_cast<FILE *>(stream));
+    fwrite(string.data(), 1, string.length(), static_cast<FILE *>(stream));
 }
 
 PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA, char *psTitleA, const std::vector<int> &pagesA, PSOutMode modeA, int paperWidthA, int paperHeightA, bool noCropA, bool duplexA, int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
@@ -2285,7 +2299,7 @@ void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psN
     std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
     if (fontBuf) {
         if (auto ffT1C = FoFiType1C::make(std::move(fontBuf).value())) {
-            ffT1C->convertToType1(psName->c_str(), nullptr, true, outputFunc, outputStream);
+            ffT1C->convertToType1(psName->c_str(), outputFunc, outputStream);
         }
     }
 
@@ -2316,7 +2330,7 @@ void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString
     if (fontBuf) {
         if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(std::span(fontBuf.value()), faceIndex)) {
             if (ffTT->isOpenTypeCFF()) {
-                ffTT->convertToType1(psName->c_str(), nullptr, true, outputFunc, outputStream);
+                ffTT->convertToType1(psName->c_str(), outputFunc, outputStream);
             }
         }
     }
@@ -2338,7 +2352,7 @@ void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, GooString *psName, in
     if (fontBuf) {
         if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(std::span(fontBuf.value()), faceIndex)) {
             std::vector<int> codeToGID = (static_cast<Gfx8BitFont *>(font))->getCodeToGIDMap(ffTT.get());
-            ffTT->convertToType42(psName->c_str(), (static_cast<Gfx8BitFont *>(font))->getHasEncoding() ? (static_cast<Gfx8BitFont *>(font))->getEncoding() : nullptr, codeToGID, outputFunc, outputStream);
+            ffTT->convertToType42(psName->c_str(), (static_cast<Gfx8BitFont *>(font))->getHasEncoding() ? &(static_cast<Gfx8BitFont *>(font))->getEncoding() : nullptr, codeToGID, outputFunc, outputStream);
             if (!codeToGID.empty()) {
                 font8Info.emplace_back(*font->getID(), std::move(codeToGID));
             }
@@ -2360,7 +2374,7 @@ void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, const std::string &fi
     // convert it to a Type 42 font
     if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::load(fileName.c_str(), faceIndex)) {
         std::vector<int> codeToGID = (static_cast<Gfx8BitFont *>(font))->getCodeToGIDMap(ffTT.get());
-        ffTT->convertToType42(psName->c_str(), (static_cast<Gfx8BitFont *>(font))->getHasEncoding() ? (static_cast<Gfx8BitFont *>(font))->getEncoding() : nullptr, codeToGID, outputFunc, outputStream);
+        ffTT->convertToType42(psName->c_str(), (static_cast<Gfx8BitFont *>(font))->getHasEncoding() ? &(static_cast<Gfx8BitFont *>(font))->getEncoding() : nullptr, codeToGID, outputFunc, outputStream);
         if (!codeToGID.empty()) {
             font8Info.emplace_back(*font->getID(), std::move(codeToGID));
         }
@@ -2591,13 +2605,13 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName, Dict *parentR
                 } else {
                     buf = GooString::format("{0:.6g} {1:.6g} setcharwidth\n", t3WX, t3WY);
                 }
-                (*outputFunc)(outputStream, buf.c_str(), buf.size());
-                (*outputFunc)(outputStream, t3String->c_str(), t3String->size());
+                (*outputFunc)(outputStream, buf);
+                (*outputFunc)(outputStream, *t3String);
                 delete t3String;
                 t3String = nullptr;
             }
             if (t3NeedsRestore) {
-                (*outputFunc)(outputStream, "Q\n", 2);
+                (*outputFunc)(outputStream, "Q\n");
             }
             writePS("} def\n");
         }
@@ -2966,7 +2980,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     GfxState *state;
     SplashBitmap *bitmap;
     Stream *str0, *str;
-    unsigned char *p;
+    const unsigned char *p;
     unsigned char col[4];
     double hDPI2, vDPI2;
     double m0, m1, m2, m3, m4, m5;
@@ -3298,7 +3312,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
             if (processColorFormat == splashModeCMYK8 && internalColorFormat != splashModeCMYK8) {
                 str0 = new SplashBitmapCMYKEncoder(bitmap);
             } else {
-                str0 = new MemStream(reinterpret_cast<char *>(p), 0, w * h * numComps, Object::null());
+                str0 = new MemStream(reinterpret_cast<const char *>(p), 0, w * h * numComps, Object::null());
             }
             // Check for a color image that uses only gray
             if (!getOptimizeColorSpace()) {
@@ -5958,7 +5972,7 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
     int n, numComps;
     bool useFlate, useLZW, useRLE, useASCII, useCompressed;
     bool maskUseFlate, maskUseLZW, maskUseRLE, maskUseASCII, maskUseCompressed;
-    GooString *maskFilters;
+    std::string maskFilters;
     GfxSeparationColorSpace *sepCS;
     GfxColor color;
     GfxCMYK cmyk;
@@ -5967,7 +5981,6 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
 
     useFlate = useLZW = useRLE = useASCII = useCompressed = false;
     maskUseFlate = maskUseLZW = maskUseRLE = maskUseASCII = maskUseCompressed = false;
-    maskFilters = nullptr; // make gcc happy
 
     // explicit masking
     if (maskStr) {
@@ -5992,25 +6005,24 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
                 maskUseCompressed = true;
             }
         }
-        maskFilters = new GooString();
         if (maskUseASCII) {
-            maskFilters->appendf("  /ASCII{0:s}Decode filter\n", useASCIIHex ? "Hex" : "85");
+            GooString::appendf(maskFilters, "  /ASCII{0:s}Decode filter\n", useASCIIHex ? "Hex" : "85");
         }
         if (maskUseFlate) {
-            maskFilters->append("  /FlateDecode filter\n");
+            maskFilters.append("  /FlateDecode filter\n");
         } else if (maskUseLZW) {
-            maskFilters->append("  /LZWDecode filter\n");
+            maskFilters.append("  /LZWDecode filter\n");
         } else if (maskUseRLE) {
-            maskFilters->append("  /RunLengthDecode filter\n");
+            maskFilters.append("  /RunLengthDecode filter\n");
         }
         if (maskUseCompressed && s.has_value()) {
-            maskFilters->append(s.value());
+            maskFilters.append(s.value());
         }
         if (mode == psModeForm || inType3Char || preloadImagesForms) {
             writePSFmt("MaskData_{0:d}_{1:d} pdfMaskInit\n", ref->getRefNum(), ref->getRefGen());
         } else {
             writePS("currentfile\n");
-            writePS(maskFilters->c_str());
+            writePS(maskFilters.c_str());
             writePS("pdfMask\n");
 
             // add FlateEncode/LZWEncode/RunLengthEncode and ASCIIHex/85 encode filters
@@ -6243,11 +6255,10 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
         // mask data source
         if (mode == psModeForm || inType3Char || preloadImagesForms) {
             writePS("  /DataSource {pdfMaskSrc}\n");
-            writePS(maskFilters->c_str());
+            writePS(maskFilters.c_str());
         } else {
             writePS("  /DataSource maskStream\n");
         }
-        delete maskFilters;
 
         writePS(">>\n");
         writePS(">>\n");
@@ -7137,7 +7148,7 @@ void PSOutputDev::writePSChar(char c)
     if (t3String) {
         t3String->push_back(c);
     } else {
-        (*outputFunc)(outputStream, &c, 1);
+        (*outputFunc)(outputStream, std::string_view(&c, 1));
     }
 }
 
@@ -7146,7 +7157,7 @@ void PSOutputDev::writePS(const char *s)
     if (t3String) {
         t3String->append(s);
     } else {
-        (*outputFunc)(outputStream, s, strlen(s));
+        (*outputFunc)(outputStream, s);
     }
 }
 
@@ -7157,7 +7168,7 @@ void PSOutputDev::writePSBuf(const char *s, int len)
             t3String->push_back(s[i]);
         }
     } else {
-        (*outputFunc)(outputStream, s, len);
+        (*outputFunc)(outputStream, std::string_view(s, len));
     }
 }
 
@@ -7167,10 +7178,10 @@ void PSOutputDev::writePSFmt(const char *fmt, ...)
 
     va_start(args, fmt);
     if (t3String) {
-        t3String->appendfv(const_cast<char *>(fmt), args);
+        GooString::appendfv(t3String->toNonConstStr(), const_cast<char *>(fmt), args);
     } else {
         const std::string buf = GooString::formatv(const_cast<char *>(fmt), args);
-        (*outputFunc)(outputStream, buf.c_str(), buf.size());
+        (*outputFunc)(outputStream, buf);
     }
     va_end(args);
 }

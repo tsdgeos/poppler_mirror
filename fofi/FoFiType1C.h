@@ -142,7 +142,6 @@ struct Type1CEexecBuf
 {
     FoFiOutputFunc outputFunc;
     void *outputStream;
-    bool ascii; // ASCII encoding?
     unsigned short r1; // eexec encryption key
     int line; // number of eexec chars left on current line
 };
@@ -179,12 +178,9 @@ public:
     std::vector<int> getCIDToGIDMap() const;
 
     // Convert to a Type 1 font, suitable for embedding in a PostScript
-    // file.  This is only useful with 8-bit fonts.  If <newEncoding> is
-    // not NULL, it will be used in place of the encoding in the Type 1C
-    // font.  If <ascii> is true the eexec section will be hex-encoded,
-    // otherwise it will be left as binary data.  If <psName> is non-NULL,
+    // file.  This is only useful with 8-bit fonts.  If <psName> is non-NULL,
     // it will be used as the PostScript font name.
-    void convertToType1(const char *psName, const char **newEncoding, bool ascii, FoFiOutputFunc outputFunc, void *outputStream);
+    void convertToType1(const char *psName, FoFiOutputFunc outputFunc, void *outputStream);
 
     // Convert to a Type 0 CIDFont, suitable for embedding in a
     // PostScript file.  <psName> will be used as the PostScript font
@@ -212,9 +208,9 @@ public:
 
 private:
     void eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName, int offset, int nBytes, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict);
-    void cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict, bool top, std::set<int> &offsetBeingParsed);
-    void cvtGlyphWidth(bool useOp, GooString *charBuf, const Type1CPrivateDict *pDict);
-    static void cvtNum(double x, bool isFP, GooString *charBuf);
+    void cvtGlyph(int offset, int nBytes, std::string &charBuf, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict, bool top, std::set<int> &offsetBeingParsed);
+    void cvtGlyphWidth(bool useOp, std::string &charBuf, const Type1CPrivateDict *pDict);
+    static void cvtNum(double x, bool isFP, std::string &charBuf);
     static void eexecWrite(Type1CEexecBuf *eb, const char *s);
     static void eexecWriteCharstring(Type1CEexecBuf *eb, const unsigned char *s, int n);
     static void writePSString(const char *s, FoFiOutputFunc outputFunc, void *outputStream);

@@ -3,6 +3,7 @@
  * Copyright (C) 2008, 2018, 2022, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2010, Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Tobias Koenig <tobias.koenig@kdab.com>
+ * Copyright (C) 2026, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,8 +69,8 @@ MovieObject::~MovieObject()
 
 QString MovieObject::url() const
 {
-    const GooString *goo = m_movieData->m_movieObj->getFileName();
-    return goo ? QString::fromStdString(goo->toStr()) : QString();
+    const std::optional<std::string> &goo = m_movieData->m_movieObj->getFileName();
+    return goo ? QString::fromStdString(goo.value()) : QString();
 }
 
 QSize MovieObject::size() const

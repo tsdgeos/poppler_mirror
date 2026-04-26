@@ -76,7 +76,7 @@ std::shared_ptr<SplashFontFile> SplashFontEngine::getFontFile(const SplashFontFi
     return nullptr;
 }
 
-std::shared_ptr<SplashFontFile> SplashFontEngine::loadType1Font(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex)
+std::shared_ptr<SplashFontFile> SplashFontEngine::loadType1Font(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const std::array<const char *, 256> &enc, int faceIndex)
 {
     if (ftEngine) {
         return ftEngine->loadType1Font(std::move(idA), std::move(src), enc, faceIndex);
@@ -85,7 +85,7 @@ std::shared_ptr<SplashFontFile> SplashFontEngine::loadType1Font(std::unique_ptr<
     return nullptr;
 }
 
-std::shared_ptr<SplashFontFile> SplashFontEngine::loadType1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex)
+std::shared_ptr<SplashFontFile> SplashFontEngine::loadType1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const std::array<const char *, 256> &enc, int faceIndex)
 {
     if (ftEngine) {
         return ftEngine->loadType1CFont(std::move(idA), std::move(src), enc, faceIndex);
@@ -94,7 +94,7 @@ std::shared_ptr<SplashFontFile> SplashFontEngine::loadType1CFont(std::unique_ptr
     return nullptr;
 }
 
-std::shared_ptr<SplashFontFile> SplashFontEngine::loadOpenTypeT1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex)
+std::shared_ptr<SplashFontFile> SplashFontEngine::loadOpenTypeT1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const std::array<const char *, 256> &enc, int faceIndex)
 {
     if (ftEngine) {
         return ftEngine->loadOpenTypeT1CFont(std::move(idA), std::move(src), enc, faceIndex);
@@ -142,9 +142,9 @@ void SplashFontEngine::setAA(bool aa)
     }
 }
 
-SplashFont *SplashFontEngine::getFont(std::shared_ptr<SplashFontFile> fontFile, const std::array<SplashCoord, 4> &textMat, const std::array<SplashCoord, 6> &ctm)
+SplashFont *SplashFontEngine::getFont(std::shared_ptr<SplashFontFile> fontFile, const std::array<double, 4> &textMat, const std::array<double, 6> &ctm)
 {
-    std::array<SplashCoord, 4> mat;
+    std::array<double, 4> mat;
 
     mat[0] = textMat[0] * ctm[0] + textMat[1] * ctm[2];
     mat[1] = -(textMat[0] * ctm[1] + textMat[1] * ctm[3]);

@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2011, 2012, 2018-2020, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2011, 2012, 2018-2020, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2016 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -113,16 +113,13 @@ public:
     // If <encoding> is NULL, the encoding is unknown or undefined.  The
     // <codeToGID> array specifies the mapping from char codes to GIDs.
     // (Not useful for OpenType CFF fonts.)
-    void convertToType42(const char *psName, char **encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const;
+    void convertToType42(const char *psName, const std::array<const char *, 256> *encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const;
 
     // Convert to a Type 1 font, suitable for embedding in a PostScript
-    // file.  This is only useful with 8-bit fonts.  If <newEncoding> is
-    // not NULL, it will be used in place of the encoding in the Type 1C
-    // font.  If <ascii> is true the eexec section will be hex-encoded,
-    // otherwise it will be left as binary data.  If <psName> is
+    // file.  This is only useful with 8-bit fonts.  <psName> is
     // non-NULL, it will be used as the PostScript font name.  (Only
     // useful for OpenType CFF fonts.)
-    void convertToType1(const char *psName, const char **newEncoding, bool ascii, FoFiOutputFunc outputFunc, void *outputStream) const;
+    void convertToType1(const char *psName, FoFiOutputFunc outputFunc, void *outputStream) const;
 
     // Convert to a Type 2 CIDFont, suitable for embedding in a
     // PostScript file.  <psName> will be used as the PostScript font
@@ -160,8 +157,8 @@ public:
     FoFiTrueType(std::span<const unsigned char> data, int faceIndexA, PrivateTag /*unused*/ = {});
 
 private:
-    static void cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void *outputStream);
-    void cvtCharStrings(char **encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const;
+    static void cvtEncoding(const std::array<const char *, 256> *encoding, FoFiOutputFunc outputFunc, void *outputStream);
+    void cvtCharStrings(const std::array<const char *, 256> *encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const;
     void cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const std::optional<std::string> &name, bool needVerticalMetrics, int *maxUsedGlyph) const;
     static void dumpString(std::span<const unsigned char> s, FoFiOutputFunc outputFunc, void *outputStream);
     static unsigned int computeTableChecksum(std::span<const unsigned char> data);

@@ -421,6 +421,7 @@ public:
         OBJECT_TYPE_CHECK(objString);
         return std::get<std::string>(data);
     }
+
     std::unique_ptr<GooString> takeString()
     {
         OBJECT_TYPE_CHECK(objString);

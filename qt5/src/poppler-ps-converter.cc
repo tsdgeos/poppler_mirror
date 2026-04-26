@@ -1,5 +1,5 @@
 /* poppler-ps-converter.cc: qt interface to poppler
- * Copyright (C) 2007, 2009, 2010, 2015, 2020, 2022, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2007, 2009, 2010, 2015, 2020, 2022, 2026, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2011 Glad Deschrijver <glad.deschrijver@gmail.com>
@@ -32,9 +32,9 @@
 
 #include "PSOutputDev.h"
 
-static void outputToQIODevice(void *stream, const char *data, size_t len)
+static void outputToQIODevice(void *stream, std::string_view string)
 {
-    static_cast<QIODevice *>(stream)->write(data, len);
+    static_cast<QIODevice *>(stream)->write(string.data(), string.length());
 }
 
 namespace Poppler {

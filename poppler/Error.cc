@@ -58,10 +58,10 @@ void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...)
     const std::string s = GooString::formatv(msg, args);
     va_end(args);
 
-    GooString sanitized;
+    std::string sanitized;
     for (const char c : s) {
         if (c < static_cast<char>(0x20) || c >= static_cast<char>(0x7f)) {
-            sanitized.appendf("<{0:02x}>", c & 0xff);
+            GooString::appendf(sanitized, "<{0:02x}>", c & 0xff);
         } else {
             sanitized.push_back(c);
         }

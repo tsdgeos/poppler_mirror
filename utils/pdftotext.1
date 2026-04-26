@@ -64,6 +64,24 @@ Keep the text in content stream order.  This is a hack which often
 "undoes" column formatting, etc.  Use of raw mode is no longer
 recommended.
 .TP
+.BI \-remove-hyphens " mode"
+Controls end-of-line hyphen handling.
+\fImode\fR is one of:
+.RS
+.TP
+.B all
+Remove end-of-line hyphens (U+002D, U+2010, U+FE63, U+FF0D) and Unicode
+soft hyphens (U+00AD), merging words across lines (default).
+.TP
+.B soft
+Remove only Unicode soft hyphens (U+00AD), merging words across lines.
+ASCII and other hyphen characters are preserved.
+.TP
+.B none
+Keep all end-of-line hyphens and line breaks unchanged.
+.RE
+This option has no effect in \-raw or \-layout mode.
+.TP
 .B \-nodiag
 Discard diagonal text (i.e., text that is not close to one of the
 0, 90, 180, or 270 degree axes). This is useful for skipping

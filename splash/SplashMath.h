@@ -28,12 +28,12 @@
 #include <cmath>
 #include "SplashTypes.h"
 
-static inline SplashCoord splashAbs(SplashCoord x)
+static inline double splashAbs(double x)
 {
     return fabs(x);
 }
 
-static inline int splashFloor(SplashCoord x)
+static inline int splashFloor(double x)
 {
 #if defined(__GNUC__) && defined(__i386__)
     // floor() and (int)() are implemented separately, which results
@@ -80,7 +80,7 @@ static inline int splashFloor(SplashCoord x)
 #endif
 }
 
-static inline int splashCeil(SplashCoord x)
+static inline int splashCeil(double x)
 {
 #if defined(__GNUC__) && defined(__i386__)
     // ceil() and (int)() are implemented separately, which results
@@ -123,7 +123,7 @@ static inline int splashCeil(SplashCoord x)
 #endif
 }
 
-static inline int splashRound(SplashCoord x)
+static inline int splashRound(double x)
 {
 #if defined(__GNUC__) && defined(__i386__)
     // this could use round-to-nearest mode and avoid the "+0.5",
@@ -168,30 +168,30 @@ static inline int splashRound(SplashCoord x)
 #endif
 }
 
-static inline SplashCoord splashAvg(SplashCoord x, SplashCoord y)
+static inline double splashAvg(double x, double y)
 {
     return 0.5 * (x + y);
 }
 
-static inline SplashCoord splashSqrt(SplashCoord x)
+static inline double splashSqrt(double x)
 {
     return sqrt(x);
 }
 
-static inline SplashCoord splashPow(SplashCoord x, SplashCoord y)
+static inline double splashPow(double x, double y)
 {
     return pow(x, y);
 }
 
-static inline SplashCoord splashDist(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1)
+static inline double splashDist(double x0, double y0, double x1, double y1)
 {
-    SplashCoord dx, dy;
+    double dx, dy;
     dx = x1 - x0;
     dy = y1 - y0;
     return splashSqrt(dx * dx + dy * dy);
 }
 
-static inline bool splashCheckDet(SplashCoord m11, SplashCoord m12, SplashCoord m21, SplashCoord m22, SplashCoord epsilon)
+static inline bool splashCheckDet(double m11, double m12, double m21, double m22, double epsilon)
 {
     return fabs(m11 * m22 - m12 * m21) >= epsilon;
 }

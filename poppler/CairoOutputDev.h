@@ -282,8 +282,8 @@ protected:
     void alignStrokeCoords(const GfxSubpath *subpath, int i, double *x, double *y);
     AnnotLink *findLinkObject(const StructElement *elem);
     static void quadToCairoRect(AnnotQuadrilaterals *quads, int idx, double destPageHeight, cairo_rectangle_t *rect);
-    bool appendLinkDestRef(GooString *s, const LinkDest *dest);
-    static void appendLinkDestXY(GooString *s, const LinkDest *dest, double destPageHeight);
+    bool appendLinkDestRef(std::string &s, const LinkDest *dest);
+    static void appendLinkDestXY(std::string &s, const LinkDest *dest, double destPageHeight);
     bool beginLinkTag(AnnotLink *annotLink);
     bool beginLink(const StructElement *linkElem);
     static void getStructElemAttributeString(const StructElement *elem);

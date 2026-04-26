@@ -39,7 +39,7 @@ class SplashFTFontFile;
 class SplashFTFont : public SplashFont
 {
 public:
-    SplashFTFont(const std::shared_ptr<SplashFTFontFile> &fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA);
+    SplashFTFont(const std::shared_ptr<SplashFTFontFile> &fontFileA, const std::array<double, 4> &matA, const std::array<double, 4> &textMatA);
 
     ~SplashFTFont() override;
 
@@ -60,7 +60,7 @@ private:
     FT_Size sizeObj;
     FT_Matrix matrix;
     FT_Matrix textMatrix;
-    SplashCoord textScale = 0;
+    double textScale = 0;
     int size;
     bool enableFreeTypeHinting;
     bool enableSlightHinting;

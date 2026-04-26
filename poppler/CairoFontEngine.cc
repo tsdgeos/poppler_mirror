@@ -17,7 +17,7 @@
 // Copyright (C) 2005-2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
-// Copyright (C) 2005, 2009, 2012, 2013, 2015, 2017-2019, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2012, 2013, 2015, 2017-2019, 2021, 2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006, 2007, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008, 2009 Chris Wilson <chris@chris-wilson.co.uk>
@@ -211,7 +211,6 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     std::vector<unsigned char> font_data;
     int i;
     std::optional<GfxFontLoc> fontLoc;
-    char **enc;
     const char *name;
     std::optional<FreeTypeFontFace> font_face;
     std::vector<int> codeToGID;
@@ -245,14 +244,14 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     switch (fontType) {
     case fontType1:
     case fontType1C:
-    case fontType1COT:
+    case fontType1COT: {
         font_face = createFreeTypeFontFace(lib, fileName, std::move(font_data));
         if (!font_face) {
             error(errSyntaxError, -1, "could not create type1 face");
             goto err2;
         }
 
-        enc = std::static_pointer_cast<Gfx8BitFont>(gfxFont)->getEncoding();
+        const std::array<const char *, 256> &enc = std::static_pointer_cast<Gfx8BitFont>(gfxFont)->getEncoding();
 
         codeToGID.resize(256);
         for (i = 0; i < 256; ++i) {
@@ -272,7 +271,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
                 }
             }
         }
-        break;
+    } break;
     case fontCIDType2:
     case fontCIDType2OT:
         if (std::static_pointer_cast<GfxCIDFont>(gfxFont)->getCIDToGIDLen() > 0) {
@@ -523,7 +522,7 @@ static cairo_status_t _render_type3_noncolor_glyph(cairo_scaled_font_t *scaled_f
 CairoType3Font *CairoType3Font::create(const std::shared_ptr<GfxFont> &gfxFont, PDFDoc *doc, CairoFontEngine *fontEngine, bool printing)
 {
     std::vector<int> codeToGID;
-    char *name;
+    const char *name;
 
     Dict *charProcs = std::static_pointer_cast<Gfx8BitFont>(gfxFont)->getCharProcs();
     Ref ref = *gfxFont->getID();
@@ -550,7 +549,7 @@ CairoType3Font *CairoType3Font::create(const std::shared_ptr<GfxFont> &gfxFont, 
     auto *info = new type3_font_info_t(gfxFont, doc, fontEngine, output_dev, gfx);
     cairo_font_face_set_user_data(font_face, &type3_font_key, reinterpret_cast<void *>(info), _free_type3_font_info);
 
-    char **enc = std::static_pointer_cast<Gfx8BitFont>(gfxFont)->getEncoding();
+    const std::array<const char *, 256> &enc = std::static_pointer_cast<Gfx8BitFont>(gfxFont)->getEncoding();
     codeToGID.resize(256);
     for (int i = 0; i < 256; ++i) {
         codeToGID[i] = EMPTY_ARRAY;

@@ -1769,7 +1769,7 @@ void FormFieldText::setTextFontSize(int fontSize)
                 defaultAppearance->push_back(' ');
             }
             if (i == idx) {
-                defaultAppearance->appendf("{0:d}", fontSize);
+                GooString::appendf(defaultAppearance->toNonConstStr(), "{0:d}", fontSize);
             } else {
                 defaultAppearance->append(daToks[i]);
             }

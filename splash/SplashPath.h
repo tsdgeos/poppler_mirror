@@ -32,7 +32,7 @@
 
 struct SplashPathPoint
 {
-    SplashCoord x, y;
+    double x, y;
 };
 
 //------------------------------------------------------------------------
@@ -81,14 +81,14 @@ public:
     void append(SplashPath *path);
 
     // Start a new subpath.
-    SplashError moveTo(SplashCoord x, SplashCoord y);
+    SplashError moveTo(double x, double y);
 
     // Add a line segment to the last subpath.
-    SplashError lineTo(SplashCoord x, SplashCoord y);
+    SplashError lineTo(double x, double y);
 
     // Add a third-order (cubic) Bezier curve segment to the last
     // subpath.
-    SplashError curveTo(SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3);
+    SplashError curveTo(double x1, double y1, double x2, double y2, double x3, double y3);
 
     // Close the last subpath, adding a line segment if necessary.  If
     // <force> is true, this adds a line segment even if the current
@@ -101,7 +101,7 @@ public:
     void addStrokeAdjustHint(int ctrl0, int ctrl1, int firstPt, int lastPt);
 
     // Add (<dx>, <dy>) to every point on this path.
-    void offset(SplashCoord dx, SplashCoord dy);
+    void offset(double dx, double dy);
 
     // Get the points on the path.
     int getLength() const { return length; }
@@ -113,7 +113,7 @@ public:
     }
 
     // Get the current point.
-    bool getCurPt(SplashCoord *x, SplashCoord *y);
+    bool getCurPt(double *x, double *y);
 
     // Reserve space for at least n points
     void reserve(int n);

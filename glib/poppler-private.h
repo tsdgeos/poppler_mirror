@@ -67,6 +67,7 @@ struct _PopplerPage
     Page *page;
     int index;
     std::shared_ptr<TextPage> text;
+    std::mutex mutex;
 };
 
 struct _PopplerFormField

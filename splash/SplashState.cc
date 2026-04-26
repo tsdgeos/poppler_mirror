@@ -212,7 +212,7 @@ void SplashState::setFillPattern(SplashPattern *fillPatternA)
     fillPattern = fillPatternA;
 }
 
-void SplashState::setLineDash(std::vector<SplashCoord> &&lineDashA, SplashCoord lineDashPhaseA)
+void SplashState::setLineDash(std::vector<double> &&lineDashA, double lineDashPhaseA)
 {
     lineDash = lineDashA;
     lineDashPhase = lineDashPhaseA;

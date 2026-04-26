@@ -35,7 +35,7 @@
 // SplashClip
 //------------------------------------------------------------------------
 
-SplashClip::SplashClip(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, bool antialiasA)
+SplashClip::SplashClip(double x0, double y0, double x1, double y1, bool antialiasA)
 {
     antialias = antialiasA;
     if (x0 < x1) {
@@ -72,7 +72,7 @@ SplashClip::SplashClip(const SplashClip *clip, PrivateTag /*unused*/)
     scanners = clip->scanners;
 }
 
-void SplashClip::resetToRect(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1)
+void SplashClip::resetToRect(double x0, double y0, double x1, double y1)
 {
     scanners = {};
 
@@ -96,7 +96,7 @@ void SplashClip::resetToRect(SplashCoord x0, SplashCoord y0, SplashCoord x1, Spl
     yMaxI = splashCeil(yMax) - 1;
 }
 
-SplashError SplashClip::clipToRect(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1)
+SplashError SplashClip::clipToRect(double x0, double y0, double x1, double y1)
 {
     if (x0 < x1) {
         if (x0 > xMin) {
@@ -189,7 +189,7 @@ static_assert(!isRect({ .x0 = 0.0, .y0 = 0.0, .x1 = 0.0, .y1 = 1.0, .dxdy = 0.0,
                       { .x0 = 2.0, .y0 = 0.0, .x1 = 0.0, .y1 = 0.0, .dxdy = 0.0, .flags = 0 }));
 }
 
-SplashError SplashClip::clipToPath(const SplashPath &path, const std::array<SplashCoord, 6> &matrix, SplashCoord flatness, bool eo)
+SplashError SplashClip::clipToPath(const SplashPath &path, const std::array<double, 6> &matrix, double flatness, bool eo)
 {
     int yMinAA, yMaxAA;
 
@@ -231,10 +231,10 @@ SplashClipResult SplashClip::testRect(int rectXMin, int rectYMin, int rectXMax, 
     // against the clipping region:
     //     x = [xMin, xMax)                (note: clipping coords are fp)
     //     y = [yMin, yMax)
-    if (static_cast<SplashCoord>(rectXMax + 1) <= xMin || static_cast<SplashCoord>(rectXMin) >= xMax || static_cast<SplashCoord>(rectYMax + 1) <= yMin || static_cast<SplashCoord>(rectYMin) >= yMax) {
+    if (static_cast<double>(rectXMax + 1) <= xMin || static_cast<double>(rectXMin) >= xMax || static_cast<double>(rectYMax + 1) <= yMin || static_cast<double>(rectYMin) >= yMax) {
         return splashClipAllOutside;
     }
-    if (static_cast<SplashCoord>(rectXMin) >= xMin && static_cast<SplashCoord>(rectXMax + 1) <= xMax && static_cast<SplashCoord>(rectYMin) >= yMin && static_cast<SplashCoord>(rectYMax + 1) <= yMax && scanners.empty()) {
+    if (static_cast<double>(rectXMin) >= xMin && static_cast<double>(rectXMax + 1) <= xMax && static_cast<double>(rectYMin) >= yMin && static_cast<double>(rectYMax + 1) <= yMax && scanners.empty()) {
         return splashClipAllInside;
     }
     return splashClipPartial;
@@ -248,10 +248,10 @@ SplashClipResult SplashClip::testSpan(int spanXMin, int spanXMax, int spanY)
     // against the clipping region:
     //     x = [xMin, xMax)                (note: clipping coords are fp)
     //     y = [yMin, yMax)
-    if (static_cast<SplashCoord>(spanXMax + 1) <= xMin || static_cast<SplashCoord>(spanXMin) >= xMax || static_cast<SplashCoord>(spanY + 1) <= yMin || static_cast<SplashCoord>(spanY) >= yMax) {
+    if (static_cast<double>(spanXMax + 1) <= xMin || static_cast<double>(spanXMin) >= xMax || static_cast<double>(spanY + 1) <= yMin || static_cast<double>(spanY) >= yMax) {
         return splashClipAllOutside;
     }
-    if (static_cast<SplashCoord>(spanXMin) < xMin || static_cast<SplashCoord>(spanXMax + 1) > xMax || static_cast<SplashCoord>(spanY) < yMin || static_cast<SplashCoord>(spanY + 1) > yMax) {
+    if (static_cast<double>(spanXMin) < xMin || static_cast<double>(spanXMax + 1) > xMax || static_cast<double>(spanY) < yMin || static_cast<double>(spanY + 1) > yMax) {
         return splashClipPartial;
     }
     if (antialias) {

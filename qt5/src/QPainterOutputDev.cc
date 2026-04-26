@@ -81,14 +81,14 @@ public:
 
 QPainterOutputDevType3Font::QPainterOutputDevType3Font(PDFDoc *doc, const std::shared_ptr<Gfx8BitFont> &font) : m_doc(doc), m_font(font)
 {
-    char *name;
+    const char *name;
     const Dict *charProcs = font->getCharProcs();
 
     // Storage for the rendered glyphs
     glyphs.resize(charProcs->getLength());
 
     // Compute the code-to-GID map
-    char **enc = font->getEncoding();
+    const std::array<const char *, 256> &enc = font->getEncoding();
 
     codeToGID.resize(256);
 

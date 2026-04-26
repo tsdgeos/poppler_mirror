@@ -140,9 +140,6 @@ public:
     // Get <i>th character.
     char getChar(size_t i) const { return (*this)[i]; }
 
-    // Change <i>th character.
-    void setChar(size_t i, char c) { (*this)[i] = c; }
-
     // Clear string to zero length.
     using std::string::clear;
 
@@ -151,8 +148,8 @@ public:
     using std::string::push_back;
 
     // Append a formatted string.
-    POPPLER_PRIVATE_EXPORT GooString *appendf(const char *fmt, ...) GOOSTRING_FORMAT;
-    POPPLER_PRIVATE_EXPORT GooString *appendfv(const char *fmt, va_list argList);
+    POPPLER_PRIVATE_EXPORT static std::string &appendf(std::string &that, const char *fmt, ...) GOOSTRING_FORMAT;
+    POPPLER_PRIVATE_EXPORT static std::string &appendfv(std::string &that, const char *fmt, va_list argList);
 
     using std::string::insert;
 

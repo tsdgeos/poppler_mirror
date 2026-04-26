@@ -40,9 +40,9 @@ static constexpr int splashMaxCurveSplits = 1 << 10;
 
 struct SplashXPathSeg
 {
-    SplashCoord x0, y0; // first endpoint
-    SplashCoord x1, y1; // second endpoint
-    SplashCoord dxdy; // slope: delta-x / delta-y
+    double x0, y0; // first endpoint
+    double x1, y1; // second endpoint
+    double dxdy; // slope: delta-x / delta-y
     unsigned int flags;
 };
 
@@ -63,7 +63,7 @@ public:
     // lines) <path>.  Transforms all points from user space to device
     // space, via <matrix>.  If <closeSubpaths> is true, closes all open
     // subpaths.
-    SplashXPath(const SplashPath &path, const std::array<SplashCoord, 6> &matrix, SplashCoord flatness, bool closeSubpaths, bool adjustLines = false, int linePosI = 0);
+    SplashXPath(const SplashPath &path, const std::array<double, 6> &matrix, double flatness, bool closeSubpaths, bool adjustLines = false, int linePosI = 0);
 
     ~SplashXPath();
 
@@ -75,19 +75,19 @@ public:
     void aaScale();
 
 protected:
-    static void transform(const std::array<SplashCoord, 6> &matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo);
-    static void strokeAdjust(SplashXPathAdjust *adjust, SplashCoord *xp, SplashCoord *yp);
+    static void transform(const std::array<double, 6> &matrix, double xi, double yi, double *xo, double *yo);
+    static void strokeAdjust(SplashXPathAdjust *adjust, double *xp, double *yp);
     void grow(int nSegs);
-    void addCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3, SplashCoord flatness);
-    void addSegment(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1);
+    void addCurve(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, double flatness);
+    void addSegment(double x0, double y0, double x1, double y1);
 
     SplashXPathSeg *segs;
     int length, size; // length and size of segs array
 
     struct CurveData
     {
-        std::array<SplashCoord, (splashMaxCurveSplits + 1) * 3> cx;
-        std::array<SplashCoord, (splashMaxCurveSplits + 1) * 3> cy;
+        std::array<double, (splashMaxCurveSplits + 1) * 3> cx;
+        std::array<double, (splashMaxCurveSplits + 1) * 3> cy;
         std::array<int, splashMaxCurveSplits + 1> cNext;
     };
     std::unique_ptr<CurveData> curveData;

@@ -873,7 +873,7 @@ std::string DefaultAppearance::toAppearanceString() const
         appearBuilder.setDrawColor(*fontColor, true);
     }
     appearBuilder.setTextFont(fontName, fontPtSize);
-    return appearBuilder.buffer()->toStr();
+    return appearBuilder.buffer();
 }
 
 //------------------------------------------------------------------------
@@ -1676,13 +1676,13 @@ void AnnotAppearanceBuilder::setDrawColor(const AnnotColor &drawColor, bool fill
 
     switch (drawColor.getSpace()) {
     case AnnotColor::colorCMYK:
-        appearBuf->appendf("{0:.5f} {1:.5f} {2:.5f} {3:.5f} {4:c}\n", values[0], values[1], values[2], values[3], fill ? 'k' : 'K');
+        GooString::appendf(appearBuf, "{0:.5f} {1:.5f} {2:.5f} {3:.5f} {4:c}\n", values[0], values[1], values[2], values[3], fill ? 'k' : 'K');
         break;
     case AnnotColor::colorRGB:
-        appearBuf->appendf("{0:.5f} {1:.5f} {2:.5f} {3:s}\n", values[0], values[1], values[2], fill ? "rg" : "RG");
+        GooString::appendf(appearBuf, "{0:.5f} {1:.5f} {2:.5f} {3:s}\n", values[0], values[1], values[2], fill ? "rg" : "RG");
         break;
     case AnnotColor::colorGray:
-        appearBuf->appendf("{0:.5f} {1:c}\n", values[0], fill ? 'g' : 'G');
+        GooString::appendf(appearBuf, "{0:.5f} {1:c}\n", values[0], fill ? 'g' : 'G');
         break;
     case AnnotColor::colorTransparent:
     default:
@@ -1693,7 +1693,7 @@ void AnnotAppearanceBuilder::setDrawColor(const AnnotColor &drawColor, bool fill
 void AnnotAppearanceBuilder::setTextFont(const std::string &fontName, double fontSize)
 {
     if (!fontName.empty()) {
-        appearBuf->appendf("/{0:s} {1:.2f} Tf\n", fontName.c_str(), fontSize);
+        GooString::appendf(appearBuf, "/{0:s} {1:.2f} Tf\n", fontName.c_str(), fontSize);
     }
 }
 
@@ -1701,17 +1701,17 @@ void AnnotAppearanceBuilder::setLineStyleForBorder(const AnnotBorder &border)
 {
     switch (border.getStyle()) {
     case AnnotBorder::borderDashed:
-        appearBuf->append("[");
+        appearBuf.append("[");
         for (double dash : border.getDash()) {
-            appearBuf->appendf(" {0:.2f}", dash);
+            GooString::appendf(appearBuf, " {0:.2f}", dash);
         }
-        appearBuf->append(" ] 0 d\n");
+        appearBuf.append(" ] 0 d\n");
         break;
     default:
-        appearBuf->append("[] 0 d\n");
+        appearBuf.append("[] 0 d\n");
         break;
     }
-    appearBuf->appendf("{0:.2f} w\n", border.getWidth());
+    GooString::appendf(appearBuf, "{0:.2f} w\n", border.getWidth());
 }
 
 // Draw an (approximate) circle of radius <r> centered at (<cx>, <cy>).
@@ -1731,17 +1731,17 @@ void AnnotAppearanceBuilder::drawCircle(double cx, double cy, double r, bool fil
 // Path will be closed if either fill or stroke is true; otherwise it's left open.
 void AnnotAppearanceBuilder::drawEllipse(double cx, double cy, double rx, double ry, bool fill, bool stroke)
 {
-    appearBuf->appendf("{0:.2f} {1:.2f} m\n", cx + rx, cy);
-    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + rx, cy + bezierCircle * ry, cx + bezierCircle * rx, cy + ry, cx, cy + ry);
-    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - bezierCircle * rx, cy + ry, cx - rx, cy + bezierCircle * ry, cx - rx, cy);
-    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - rx, cy - bezierCircle * ry, cx - bezierCircle * rx, cy - ry, cx, cy - ry);
-    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + bezierCircle * rx, cy - ry, cx + rx, cy - bezierCircle * ry, cx + rx, cy);
+    GooString::appendf(appearBuf, "{0:.2f} {1:.2f} m\n", cx + rx, cy);
+    GooString::appendf(appearBuf, "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + rx, cy + bezierCircle * ry, cx + bezierCircle * rx, cy + ry, cx, cy + ry);
+    GooString::appendf(appearBuf, "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - bezierCircle * rx, cy + ry, cx - rx, cy + bezierCircle * ry, cx - rx, cy);
+    GooString::appendf(appearBuf, "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - rx, cy - bezierCircle * ry, cx - bezierCircle * rx, cy - ry, cx, cy - ry);
+    GooString::appendf(appearBuf, "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + bezierCircle * rx, cy - ry, cx + rx, cy - bezierCircle * ry, cx + rx, cy);
     if (!fill && stroke) {
-        appearBuf->append("s\n");
+        appearBuf.append("s\n");
     } else if (fill && !stroke) {
-        appearBuf->append("f\n");
+        appearBuf.append("f\n");
     } else if (fill && stroke) {
-        appearBuf->append("b\n");
+        appearBuf.append("b\n");
     }
 }
 
@@ -1752,10 +1752,10 @@ void AnnotAppearanceBuilder::drawCircleTopLeft(double cx, double cy, double r)
     double r2;
 
     r2 = r / std::numbers::sqrt2;
-    appearBuf->appendf("{0:.2f} {1:.2f} m\n", cx + r2, cy + r2);
-    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + (1 - bezierCircle) * r2, cy + (1 + bezierCircle) * r2, cx - (1 - bezierCircle) * r2, cy + (1 + bezierCircle) * r2, cx - r2, cy + r2);
-    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - (1 + bezierCircle) * r2, cy + (1 - bezierCircle) * r2, cx - (1 + bezierCircle) * r2, cy - (1 - bezierCircle) * r2, cx - r2, cy - r2);
-    appearBuf->append("S\n");
+    GooString::appendf(appearBuf, "{0:.2f} {1:.2f} m\n", cx + r2, cy + r2);
+    GooString::appendf(appearBuf, "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + (1 - bezierCircle) * r2, cy + (1 + bezierCircle) * r2, cx - (1 - bezierCircle) * r2, cy + (1 + bezierCircle) * r2, cx - r2, cy + r2);
+    GooString::appendf(appearBuf, "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - (1 + bezierCircle) * r2, cy + (1 - bezierCircle) * r2, cx - (1 + bezierCircle) * r2, cy - (1 - bezierCircle) * r2, cx - r2, cy - r2);
+    appearBuf.append("S\n");
 }
 
 // Draw the bottom-right half of an (approximate) circle of radius <r>
@@ -1765,10 +1765,10 @@ void AnnotAppearanceBuilder::drawCircleBottomRight(double cx, double cy, double 
     double r2;
 
     r2 = r / std::numbers::sqrt2;
-    appearBuf->appendf("{0:.2f} {1:.2f} m\n", cx - r2, cy - r2);
-    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - (1 - bezierCircle) * r2, cy - (1 + bezierCircle) * r2, cx + (1 - bezierCircle) * r2, cy - (1 + bezierCircle) * r2, cx + r2, cy - r2);
-    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + (1 + bezierCircle) * r2, cy - (1 - bezierCircle) * r2, cx + (1 + bezierCircle) * r2, cy + (1 - bezierCircle) * r2, cx + r2, cy + r2);
-    appearBuf->append("S\n");
+    GooString::appendf(appearBuf, "{0:.2f} {1:.2f} m\n", cx - r2, cy - r2);
+    GooString::appendf(appearBuf, "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - (1 - bezierCircle) * r2, cy - (1 + bezierCircle) * r2, cx + (1 - bezierCircle) * r2, cy - (1 + bezierCircle) * r2, cx + r2, cy - r2);
+    GooString::appendf(appearBuf, "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + (1 + bezierCircle) * r2, cy - (1 - bezierCircle) * r2, cx + (1 + bezierCircle) * r2, cy + (1 - bezierCircle) * r2, cx + r2, cy + r2);
+    appearBuf.append("S\n");
 }
 
 void AnnotAppearanceBuilder::drawLineEndSquare(double x, double y, double size, bool fill, const Matrix &m)
@@ -1784,7 +1784,7 @@ void AnnotAppearanceBuilder::drawLineEndSquare(double x, double y, double size, 
         m.transform(x1[i], y1[i], &tx, &ty);
         appendf("{0:.2f} {1:.2f} l\n", tx, ty);
     }
-    appearBuf->append(fill ? "b\n" : "s\n");
+    appearBuf.append(fill ? "b\n" : "s\n");
 }
 
 void AnnotAppearanceBuilder::drawLineEndCircle(double x, double y, double size, bool fill, const Matrix &m)
@@ -1800,14 +1800,14 @@ void AnnotAppearanceBuilder::drawLineEndCircle(double x, double y, double size, 
     double ty[3];
 
     m.transform(x, y, &tx[0], &ty[0]);
-    appearBuf->appendf("{0:.2f} {1:.2f} m\n", tx[0], ty[0]);
+    GooString::appendf(appearBuf, "{0:.2f} {1:.2f} m\n", tx[0], ty[0]);
     for (int i = 0; i < 4; i++) {
         m.transform(x1[i], y1[i], &tx[0], &ty[0]);
         m.transform(x2[i], y2[i], &tx[1], &ty[1]);
         m.transform(x3[i], y3[i], &tx[2], &ty[2]);
-        appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", tx[0], ty[0], tx[1], ty[1], tx[2], ty[2]);
+        GooString::appendf(appearBuf, "{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", tx[0], ty[0], tx[1], ty[1], tx[2], ty[2]);
     }
-    appearBuf->append(fill ? "b\n" : "s\n");
+    appearBuf.append(fill ? "b\n" : "s\n");
 }
 
 void AnnotAppearanceBuilder::drawLineEndDiamond(double x, double y, double size, bool fill, const Matrix &m)
@@ -1823,7 +1823,7 @@ void AnnotAppearanceBuilder::drawLineEndDiamond(double x, double y, double size,
         m.transform(x1[i], y1[i], &tx, &ty);
         appendf("{0:.2f} {1:.2f} l\n", tx, ty);
     }
-    appearBuf->append(fill ? "b\n" : "s\n");
+    appearBuf.append(fill ? "b\n" : "s\n");
 }
 
 void AnnotAppearanceBuilder::drawLineEndArrow(double x, double y, double size, int orientation, bool isOpen, bool fill, const Matrix &m)
@@ -1841,9 +1841,9 @@ void AnnotAppearanceBuilder::drawLineEndArrow(double x, double y, double size, i
     appendf("{0:.2f} {1:.2f} l\n", tx, ty);
 
     if (isOpen) {
-        appearBuf->append("S\n");
+        appearBuf.append("S\n");
     } else {
-        appearBuf->append(fill ? "b\n" : "s\n");
+        appearBuf.append(fill ? "b\n" : "s\n");
     }
 }
 
@@ -1857,7 +1857,7 @@ void AnnotAppearanceBuilder::drawLineEndSlash(double x, double y, double size, c
     appendf("{0:.2f} {1:.2f} m\n", tx, ty);
     m.transform(x + xOffs, y + halfSize, &tx, &ty);
     appendf("{0:.2f} {1:.2f} l\n", tx, ty);
-    appearBuf->append("S\n");
+    appearBuf.append("S\n");
 }
 
 void AnnotAppearanceBuilder::drawLineEnding(AnnotLineEndingStyle endingStyle, double x, double y, double size, bool fill, const Matrix &m)
@@ -1928,15 +1928,15 @@ double AnnotAppearanceBuilder::lineEndingXExtendBBox(AnnotLineEndingStyle ending
     return 0;
 }
 
-Object Annot::createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, std::unique_ptr<Dict> resDict)
+Object Annot::createForm(const std::string &appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, std::unique_ptr<Dict> resDict)
 {
     return createForm(appearBuf, bbox, transparencyGroup, resDict ? Object(std::move(resDict)) : Object());
 }
 
-Object Annot::createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Object &&resDictObject)
+Object Annot::createForm(const std::string &appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Object &&resDictObject)
 {
     auto appearDict = std::make_unique<Dict>(doc->getXRef());
-    appearDict->set("Length", Object(static_cast<int>(appearBuf->size())));
+    appearDict->set("Length", Object(static_cast<int>(appearBuf.size())));
     appearDict->set("Subtype", Object(objName, "Form"));
 
     auto a = std::make_unique<Array>(doc->getXRef());
@@ -1954,7 +1954,7 @@ Object Annot::createForm(const GooString *appearBuf, const std::array<double, 4>
         appearDict->set("Resources", std::move(resDictObject));
     }
 
-    std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->size() };
+    std::vector<char> data { appearBuf.c_str(), appearBuf.c_str() + appearBuf.size() };
     auto mStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(std::move(appearDict)));
     return Object(std::move(mStream));
 }
@@ -2769,9 +2769,9 @@ void AnnotText::draw(Gfx *gfx, bool printing)
         } else {
             Object aStream = createForm(appearBuilder.buffer(), bbox, true, Object {});
 
-            GooString appearBuf("/GS0 gs\n/Fm0 Do");
+            std::string appearBuf("/GS0 gs\n/Fm0 Do");
             std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-            appearance = createForm(&appearBuf, bbox, false, std::move(resDict));
+            appearance = createForm(appearBuf, bbox, false, std::move(resDict));
         }
     }
 
@@ -3294,7 +3294,7 @@ static DrawMultiLineTextResult drawMultiLineText(const std::string &text, double
         }
         xPosPrev = xPos + totalWidth - prevBlockWidth;
 
-        result.text += builder.buffer()->toStr();
+        result.text += builder.buffer();
         result.nLines += 1;
         if (i == 0) {
             i += textLayouter.consumedText;
@@ -3408,9 +3408,9 @@ void AnnotFreeText::generateFreeTextAppearance()
     } else {
         Object aStream = createForm(appearBuilder.buffer(), bbox, true, std::move(resourceObj));
 
-        GooString appearBuf("/GS0 gs\n/Fm0 Do");
+        std::string appearBuf("/GS0 gs\n/Fm0 Do");
         std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-        newAppearance = createForm(&appearBuf, bbox, false, std::move(resDict));
+        newAppearance = createForm(appearBuf, bbox, false, std::move(resDict));
     }
     if (hasBeenUpdated) {
         // We should technically do this for all annots but AnnotFreeText
@@ -3842,9 +3842,9 @@ void AnnotLine::generateLineAppearance()
     } else {
         Object aStream = createForm(appearBuilder.buffer(), bbox, true, std::move(fontResDict));
 
-        GooString appearBuf("/GS0 gs\n/Fm0 Do");
+        std::string appearBuf("/GS0 gs\n/Fm0 Do");
         std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-        appearance = createForm(&appearBuf, bbox, false, std::move(resDict));
+        appearance = createForm(appearBuf, bbox, false, std::move(resDict));
     }
 }
 
@@ -4158,15 +4158,15 @@ void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
         const std::array<double, 4> bbox = { appearBBox->getPageXMin(), appearBBox->getPageYMin(), appearBBox->getPageXMax(), appearBBox->getPageYMax() };
         Object aStream = createForm(appearBuilder.buffer(), bbox, true, Object {});
 
-        GooString appearBuf("/GS0 gs\n/Fm0 Do");
+        std::string appearBuf("/GS0 gs\n/Fm0 Do");
         std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", 1, blendMultiply ? "Multiply" : nullptr);
         if (ca == 1) {
-            appearance = createForm(&appearBuf, bbox, false, std::move(resDict));
+            appearance = createForm(appearBuf, bbox, false, std::move(resDict));
         } else {
-            aStream = createForm(&appearBuf, bbox, true, std::move(resDict));
+            aStream = createForm(appearBuf, bbox, true, std::move(resDict));
 
             std::unique_ptr<Dict> resDict2 = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-            appearance = createForm(&appearBuf, bbox, false, std::move(resDict2));
+            appearance = createForm(appearBuf, bbox, false, std::move(resDict2));
         }
     }
 
@@ -4547,20 +4547,20 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, size_t *i, cons
 // escaping characters as appropriate.
 void AnnotAppearanceBuilder::writeString(const std::string &str)
 {
-    appearBuf->push_back('(');
+    appearBuf.push_back('(');
 
     for (const char c : str) {
         if (c == '(' || c == ')' || c == '\\') {
-            appearBuf->push_back('\\');
-            appearBuf->push_back(c);
+            appearBuf.push_back('\\');
+            appearBuf.push_back(c);
         } else if (c < 0x20) {
-            appearBuf->appendf("\\{0:03o}", static_cast<unsigned char>(c));
+            GooString::appendf(appearBuf, "\\{0:03o}", static_cast<unsigned char>(c));
         } else {
-            appearBuf->push_back(c);
+            appearBuf.push_back(c);
         }
     }
 
-    appearBuf->push_back(')');
+    appearBuf.push_back(')');
 }
 
 // Draw the variable text or caption for a field.
@@ -4668,22 +4668,22 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
 
     // setup
     if (flags & EmitMarkedContentDrawTextFlag) {
-        appearBuf->append("/Tx BMC\n");
+        appearBuf.append("/Tx BMC\n");
     }
-    appearBuf->append("q\n");
+    appearBuf.append("q\n");
     auto calculateDxDy = [this, appearCharacs, rect]() -> std::tuple<double, double> {
         const int rot = appearCharacs ? appearCharacs->getRotation() : 0;
         switch (rot) {
         case 90:
-            appearBuf->appendf("0 1 -1 0 {0:.2f} 0 cm\n", rect->x2 - rect->x1);
+            GooString::appendf(appearBuf, "0 1 -1 0 {0:.2f} 0 cm\n", rect->x2 - rect->x1);
             return { rect->y2 - rect->y1, rect->x2 - rect->x1 };
 
         case 180:
-            appearBuf->appendf("-1 0 0 -1 {0:.2f} {1:.2f} cm\n", rect->x2 - rect->x1, rect->y2 - rect->y1);
+            GooString::appendf(appearBuf, "-1 0 0 -1 {0:.2f} {1:.2f} cm\n", rect->x2 - rect->x1, rect->y2 - rect->y1);
             return { rect->x2 - rect->y2, rect->y2 - rect->y1 };
 
         case 270:
-            appearBuf->appendf("0 -1 1 0 0 {0:.2f} cm\n", rect->y2 - rect->y1);
+            GooString::appendf(appearBuf, "0 -1 1 0 0 {0:.2f} cm\n", rect->y2 - rect->y1);
             return { rect->y2 - rect->y1, rect->x2 - rect->x1 };
 
         default: // assume rot == 0
@@ -4693,7 +4693,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
     const auto dxdy = calculateDxDy();
     const double dx = std::get<0>(dxdy);
     const double dy = std::get<1>(dxdy);
-    appearBuf->append("BT\n");
+    appearBuf.append("BT\n");
     // multi-line text
     if (flags & MultilineDrawTextFlag) {
         // note: comb is ignored in multiline mode as mentioned in the spec
@@ -4703,7 +4703,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
         // compute font autosize
         if (fontSize == 0) {
             fontSize = Annot::calculateFontSize(form, font, text, wMax, dy, forceZapfDingbats);
-            daToks[tfPos + 1] = GooString().appendf("{0:.2f}", fontSize)->toStr();
+            daToks[tfPos + 1] = GooString::format("{0:.2f}", fontSize);
         }
 
         // starting y coordinate
@@ -4713,16 +4713,16 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
 
         // set the font matrix
         daToks[tmPos + 4] = "0";
-        daToks[tmPos + 5] = GooString().appendf("{0:.2f}", y)->toStr();
+        daToks[tmPos + 5] = GooString::format("{0:.2f}", y);
 
         // write the DA string
         for (const std::string &daTok : daToks) {
-            appearBuf->append(daTok);
-            appearBuf->push_back(' ');
+            appearBuf.append(daTok);
+            appearBuf.push_back(' ');
         }
 
         const DrawMultiLineTextResult textCommands = drawMultiLineText(text->toStr(), dx, form, *font, std::string(), fontSize, quadding, borderWidth + 2);
-        appearBuf->append(textCommands.text);
+        appearBuf.append(textCommands.text);
 
         // single-line text
     } else {
@@ -4740,7 +4740,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
                     fontSize = w;
                 }
                 fontSize = floor(fontSize);
-                daToks[tfPos + 1] = GooString().appendf("{0:.2f}", fontSize)->toStr();
+                daToks[tfPos + 1] = GooString::format("{0:.2f}", fontSize);
             }
 
             const HorizontalTextLayouter textLayouter(text, form, font, {}, forceZapfDingbats);
@@ -4763,13 +4763,13 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
             const double y = 0.5 * dy - 0.4 * fontSize;
 
             // set the font matrix
-            daToks[tmPos + 4] = GooString().appendf("{0:.2f}", x)->toStr();
-            daToks[tmPos + 5] = GooString().appendf("{0:.2f}", y)->toStr();
+            daToks[tmPos + 4] = GooString::format("{0:.2f}", x);
+            daToks[tmPos + 5] = GooString::format("{0:.2f}", y);
 
             // write the DA string
             for (const std::string &daTok : daToks) {
-                appearBuf->append(daTok);
-                appearBuf->push_back(' ');
+                appearBuf.append(daTok);
+                appearBuf.push_back(' ');
             }
 
             // write the text string
@@ -4786,8 +4786,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
 
                     const GfxFont *currentFont = font;
                     if (!d.fontName.empty()) {
-                        appearBuf->append(" q\n");
-                        appearBuf->appendf("/{0:s} {1:.2f} Tf\n", d.fontName.c_str(), fontSize);
+                        appearBuf.append(" q\n");
+                        GooString::appendf(appearBuf, "/{0:s} {1:.2f} Tf\n", d.fontName.c_str(), fontSize);
                         currentFont = form->getDefaultResources()->lookupFont(d.fontName.c_str()).get();
                     }
 
@@ -4799,14 +4799,14 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
                     // position the appropriate amount relative to the start of the
                     // previous character
                     const double combX = 0.5 * (w - char_dx);
-                    appearBuf->appendf("{0:.2f} 0 Td\n", combX - xPrev + w);
+                    GooString::appendf(appearBuf, "{0:.2f} 0 Td\n", combX - xPrev + w);
 
                     GooString charBuf(s, n);
                     writeString(charBuf.toStr());
-                    appearBuf->append(" Tj\n");
+                    appearBuf.append(" Tj\n");
 
                     if (!d.fontName.empty()) {
-                        appearBuf->append(" Q\n");
+                        appearBuf.append(" Q\n");
                     }
 
                     i++;
@@ -4832,7 +4832,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
                     }
                 }
                 fontSize = floor(fontSize);
-                daToks[tfPos + 1] = GooString().appendf("{0:.2f}", fontSize)->toStr();
+                daToks[tfPos + 1] = GooString::format("{0:.2f}", fontSize);
             }
 
             // compute text start position
@@ -4852,37 +4852,37 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
             const double y = 0.5 * dy - 0.4 * fontSize;
 
             // set the font matrix
-            daToks[tmPos + 4] = GooString().appendf("{0:.2f}", x)->toStr();
-            daToks[tmPos + 5] = GooString().appendf("{0:.2f}", y)->toStr();
+            daToks[tmPos + 4] = GooString::format("{0:.2f}", x);
+            daToks[tmPos + 5] = GooString::format("{0:.2f}", y);
 
             // write the DA string
             for (const std::string &daTok : daToks) {
-                appearBuf->append(daTok);
-                appearBuf->push_back(' ');
+                appearBuf.append(daTok);
+                appearBuf.push_back(' ');
             }
             // This newline is not neeed at all but it makes for easier reading
             // and our auto tests "wrongly" assume it will be there, so add it anyway
-            appearBuf->append("\n");
+            appearBuf.append("\n");
 
             // write the text strings
             for (const HorizontalTextLayouter::Data &d : textLayouter.data) {
                 if (!d.fontName.empty()) {
-                    appearBuf->append(" q\n");
-                    appearBuf->appendf("/{0:s} {1:.2f} Tf\n", d.fontName.c_str(), fontSize);
+                    appearBuf.append(" q\n");
+                    GooString::appendf(appearBuf, "/{0:s} {1:.2f} Tf\n", d.fontName.c_str(), fontSize);
                 }
                 writeString(d.text);
-                appearBuf->append(" Tj\n");
+                appearBuf.append(" Tj\n");
                 if (!d.fontName.empty()) {
-                    appearBuf->append(" Q\n");
+                    appearBuf.append(" Q\n");
                 }
             }
         }
     }
     // cleanup
-    appearBuf->append("ET\n");
-    appearBuf->append("Q\n");
+    appearBuf.append("ET\n");
+    appearBuf.append("Q\n");
     if (flags & EmitMarkedContentDrawTextFlag) {
-        appearBuf->append("EMC\n");
+        appearBuf.append("EMC\n");
     }
 
     return true;
@@ -4892,8 +4892,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
 bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect, const GooString *da, const GfxResources *resources, VariableTextQuadding quadding, XRef *xref,
                                          Dict *resourcesDict)
 {
-    std::vector<std::unique_ptr<GooString>> daToks;
-    GooString *tok;
+    std::vector<std::string> daToks;
     GooString convertedText;
     const GfxFont *font;
     double fontSize, borderWidth, x, y;
@@ -4907,24 +4906,11 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     // parse the default appearance string
     tfPos = tmPos = -1;
     if (da) {
-        size_t i = 0;
-        size_t j = 0;
-        while (i < da->size()) {
-            while (i < da->size() && Lexer::isSpace(da->getChar(i))) {
-                ++i;
-            }
-            if (i < da->size()) {
-                for (j = i + 1; j < da->size() && !Lexer::isSpace(da->getChar(j)); ++j) {
-                    ;
-                }
-                daToks.push_back(std::make_unique<GooString>(da, i, j - i));
-                i = j;
-            }
-        }
+        FormFieldText::tokenizeDA(da->toStr(), &daToks, nullptr /*searchTok*/);
         for (std::size_t k = 2; k < daToks.size(); ++k) {
-            if (k >= 2 && !(daToks[k])->compare("Tf")) {
+            if (k >= 2 && (daToks[k] == "Tf")) {
                 tfPos = k - 2;
-            } else if (k >= 6 && !(daToks[k])->compare("Tm")) {
+            } else if (k >= 6 && (daToks[k] == "Tm")) {
                 tmPos = k - 6;
             }
         }
@@ -4934,16 +4920,16 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     font = nullptr;
     fontSize = 0;
     if (tfPos >= 0) {
-        tok = daToks[tfPos].get();
-        if (!tok->empty() >= 1 && tok->getChar(0) == '/') {
-            if (!resources || !(font = resources->lookupFont(tok->c_str() + 1).get())) {
+        const std::string &tok = daToks[tfPos];
+        if (!tok.empty() && tok[0] == '/') {
+            if (!resources || !(font = resources->lookupFont(tok.c_str() + 1).get())) {
                 if (xref != nullptr && resourcesDict != nullptr) {
-                    const char *fallback = determineFallbackFont(tok->toStr(), "Helvetica");
+                    const char *fallback = determineFallbackFont(tok, "Helvetica");
                     // The font variable sometimes points to an object that needs to be deleted
                     // and sometimes not, depending on whether the call to lookupFont above fails.
                     // When the code path right here is taken, the destructor of fontToFree
                     // (which is a std::unique_ptr) will delete the font object at the end of this method.
-                    fontToFree = createAnnotDrawFont(xref, resourcesDict, tok->c_str() + 1, fallback);
+                    fontToFree = createAnnotDrawFont(xref, resourcesDict, tok.c_str() + 1, fallback);
                     font = fontToFree.get();
                 } else {
                     error(errSyntaxError, -1, "Unknown font in field's DA string");
@@ -4952,8 +4938,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         } else {
             error(errSyntaxError, -1, "Invalid font name in 'Tf' operator in field's DA string");
         }
-        tok = daToks[tfPos + 1].get();
-        fontSize = gatof(tok->c_str());
+        fontSize = gatof(daToks[tfPos + 1].c_str());
     } else {
         error(errSyntaxError, -1, "Missing 'Tf' operator in field's DA string");
     }
@@ -4986,25 +4971,25 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         }
         fontSize = floor(fontSize);
         if (tfPos >= 0) {
-            tok = daToks[tfPos + 1].get();
-            tok->clear();
-            tok->appendf("{0:.2f}", fontSize);
+            std::string &tok = daToks[tfPos + 1];
+            tok.clear();
+            GooString::appendf(tok, "{0:.2f}", fontSize);
         }
     }
     // draw the text
     y = rect->y2 - rect->y1 - 1.1 * fontSize;
     for (int i = fieldChoice->getTopIndex(); i < fieldChoice->getNumChoices(); ++i) {
         // setup
-        appearBuf->append("q\n");
+        appearBuf.append("q\n");
 
         // draw the background if selected
         if (fieldChoice->isSelected(i)) {
-            appearBuf->append("0 g f\n");
-            appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} re f\n", borderWidth, y - 0.2 * fontSize, rect->x2 - rect->x1 - 2 * borderWidth, 1.1 * fontSize);
+            appearBuf.append("0 g f\n");
+            GooString::appendf(appearBuf, "{0:.2f} {1:.2f} {2:.2f} {3:.2f} re f\n", borderWidth, y - 0.2 * fontSize, rect->x2 - rect->x1 - 2 * borderWidth, 1.1 * fontSize);
         }
 
         // setup
-        appearBuf->append("BT\n");
+        appearBuf.append("BT\n");
 
         // compute text width and start position
         size_t j = 0;
@@ -5026,37 +5011,41 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
         // set the font matrix
         if (tmPos >= 0) {
-            tok = daToks[tmPos + 4].get();
-            tok->clear();
-            tok->appendf("{0:.2f}", x);
-            tok = daToks[tmPos + 5].get();
-            tok->clear();
-            tok->appendf("{0:.2f}", y);
+            {
+                std::string &tok = daToks[tmPos + 4];
+                tok.clear();
+                GooString::appendf(tok, "{0:.2f}", x);
+            }
+            {
+                std::string &tok = daToks[tmPos + 5];
+                tok.clear();
+                GooString::appendf(tok, "{0:.2f}", y);
+            }
         }
 
         // write the DA string
-        for (const std::unique_ptr<GooString> &daTok : daToks) {
-            appearBuf->append(daTok->toStr());
-            appearBuf->push_back(' ');
+        for (const std::string &daTok : daToks) {
+            appearBuf.append(daTok);
+            appearBuf.push_back(' ');
         }
 
         // write the font matrix (if not part of the DA string)
         if (tmPos < 0) {
-            appearBuf->appendf("1 0 0 1 {0:.2f} {1:.2f} Tm\n", x, y);
+            GooString::appendf(appearBuf, "1 0 0 1 {0:.2f} {1:.2f} Tm\n", x, y);
         }
 
         // change the text color if selected
         if (fieldChoice->isSelected(i)) {
-            appearBuf->append("1 g\n");
+            appearBuf.append("1 g\n");
         }
 
         // write the text string
         writeString(convertedText.toStr());
-        appearBuf->append(" Tj\n");
+        appearBuf.append(" Tj\n");
 
         // cleanup
-        appearBuf->append("ET\n");
-        appearBuf->append("Q\n");
+        appearBuf.append("ET\n");
+        appearBuf.append("Q\n");
 
         // next line
         y -= 1.1 * fontSize;
@@ -5087,21 +5076,21 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
         double r = 0.5 * (dx < dy ? dx : dy);
         switch (border->getStyle()) {
         case AnnotBorder::borderDashed:
-            appearBuf->append("[");
+            appearBuf.append("[");
             for (double dash : border->getDash()) {
-                appearBuf->appendf(" {0:.2f}", dash);
+                GooString::appendf(appearBuf, " {0:.2f}", dash);
             }
-            appearBuf->append("] 0 d\n");
+            appearBuf.append("] 0 d\n");
             // fallthrough
         case AnnotBorder::borderSolid:
         case AnnotBorder::borderUnderlined:
-            appearBuf->appendf("{0:.2f} w\n", w);
+            GooString::appendf(appearBuf, "{0:.2f} w\n", w);
             setDrawColor(*aColor, false);
             drawCircle(0.5 * dx, 0.5 * dy, r - 0.5 * w, false);
             break;
         case AnnotBorder::borderBeveled:
         case AnnotBorder::borderInset:
-            appearBuf->appendf("{0:.2f} w\n", 0.5 * w);
+            GooString::appendf(appearBuf, "{0:.2f} w\n", 0.5 * w);
             setDrawColor(*aColor, false);
             drawCircle(0.5 * dx, 0.5 * dy, r - 0.25 * w, false);
             adjustedColor = AnnotColor(*aColor);
@@ -5117,49 +5106,49 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
     } else {
         switch (border->getStyle()) {
         case AnnotBorder::borderDashed:
-            appearBuf->append("[");
+            appearBuf.append("[");
             for (double dash : border->getDash()) {
-                appearBuf->appendf(" {0:.2f}", dash);
+                GooString::appendf(appearBuf, " {0:.2f}", dash);
             }
-            appearBuf->append("] 0 d\n");
+            appearBuf.append("] 0 d\n");
             // fallthrough
         case AnnotBorder::borderSolid:
-            appearBuf->appendf("{0:.2f} w\n", w);
+            GooString::appendf(appearBuf, "{0:.2f} w\n", w);
             setDrawColor(*aColor, false);
-            appearBuf->appendf("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re s\n", 0.5 * w, dx - w, dy - w);
+            GooString::appendf(appearBuf, "{0:.2f} {0:.2f} {1:.2f} {2:.2f} re s\n", 0.5 * w, dx - w, dy - w);
             break;
         case AnnotBorder::borderBeveled:
         case AnnotBorder::borderInset:
             adjustedColor = AnnotColor(*aColor);
             adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? 1 : -1);
             setDrawColor(adjustedColor, true);
-            appearBuf->append("0 0 m\n");
-            appearBuf->appendf("0 {0:.2f} l\n", dy);
-            appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx, dy);
-            appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx - w, dy - w);
-            appearBuf->appendf("{0:.2f} {1:.2f} l\n", w, dy - w);
-            appearBuf->appendf("{0:.2f} {0:.2f} l\n", w);
-            appearBuf->append("f\n");
+            appearBuf.append("0 0 m\n");
+            GooString::appendf(appearBuf, "0 {0:.2f} l\n", dy);
+            GooString::appendf(appearBuf, "{0:.2f} {1:.2f} l\n", dx, dy);
+            GooString::appendf(appearBuf, "{0:.2f} {1:.2f} l\n", dx - w, dy - w);
+            GooString::appendf(appearBuf, "{0:.2f} {1:.2f} l\n", w, dy - w);
+            GooString::appendf(appearBuf, "{0:.2f} {0:.2f} l\n", w);
+            appearBuf.append("f\n");
             adjustedColor = AnnotColor(*aColor);
             adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? -1 : 1);
             setDrawColor(adjustedColor, true);
-            appearBuf->append("0 0 m\n");
-            appearBuf->appendf("{0:.2f} 0 l\n", dx);
-            appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx, dy);
-            appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx - w, dy - w);
-            appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx - w, w);
-            appearBuf->appendf("{0:.2f} {0:.2f} l\n", w);
-            appearBuf->append("f\n");
+            appearBuf.append("0 0 m\n");
+            GooString::appendf(appearBuf, "{0:.2f} 0 l\n", dx);
+            GooString::appendf(appearBuf, "{0:.2f} {1:.2f} l\n", dx, dy);
+            GooString::appendf(appearBuf, "{0:.2f} {1:.2f} l\n", dx - w, dy - w);
+            GooString::appendf(appearBuf, "{0:.2f} {1:.2f} l\n", dx - w, w);
+            GooString::appendf(appearBuf, "{0:.2f} {0:.2f} l\n", w);
+            appearBuf.append("f\n");
             break;
         case AnnotBorder::borderUnderlined:
-            appearBuf->appendf("{0:.2f} w\n", w);
+            GooString::appendf(appearBuf, "{0:.2f} w\n", w);
             setDrawColor(*aColor, false);
-            appearBuf->appendf("0 0 m {0:.2f} 0 l s\n", dx);
+            GooString::appendf(appearBuf, "0 0 m {0:.2f} 0 l s\n", dx);
             break;
         }
 
         // clip to the inside of the border
-        appearBuf->appendf("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re W n\n", w, dx - 2 * w, dy - 2 * w);
+        GooString::appendf(appearBuf, "{0:.2f} {0:.2f} {1:.2f} {2:.2f} re W n\n", w, dx - 2 * w, dy - 2 * w);
     }
 }
 
@@ -5504,9 +5493,9 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
         *addedDingbatsResource = appearBuilder.getAddedDingbatsResource();
     }
 
-    const GooString *appearBuf = appearBuilder.buffer();
+    const std::string &appearBuf = appearBuilder.buffer();
     // fill the appearance stream dictionary
-    appearDict->add("Length", Object(static_cast<int>(appearBuf->size())));
+    appearDict->add("Length", Object(static_cast<int>(appearBuf.size())));
     appearDict->add("Subtype", Object(objName, "Form"));
     auto bbox = std::make_unique<Array>(doc->getXRef());
     bbox->add(Object(0));
@@ -5521,7 +5510,7 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
     }
 
     // build the appearance stream
-    std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->size() };
+    std::vector<char> data { appearBuf.c_str(), appearBuf.c_str() + appearBuf.size() };
     auto appearStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(std::move(appearDict)));
     if (hasBeenUpdated) {
         // We should technically do this for all annots but AnnotFreeText
@@ -5683,11 +5672,11 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
         movie->getAspect(&width, &height);
 
         if (width != -1 && height != -1 && !poster.isNone()) {
-            auto appearBuf = std::make_unique<GooString>();
-            appearBuf->append("q\n");
-            appearBuf->appendf("{0:d} 0 0 {1:d} 0 0 cm\n", width, height);
-            appearBuf->append("/MImg Do\n");
-            appearBuf->append("Q\n");
+            std::string appearBuf;
+            appearBuf.append("q\n");
+            GooString::appendf(appearBuf, "{0:d} 0 0 {1:d} 0 0 cm\n", width, height);
+            appearBuf.append("/MImg Do\n");
+            appearBuf.append("Q\n");
 
             auto imgDict = std::make_unique<Dict>(gfx->getXRef());
             imgDict->set("MImg", std::move(poster));
@@ -5696,7 +5685,7 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
             resDict->set("XObject", Object(std::move(imgDict)));
 
             auto formDict = std::make_unique<Dict>(gfx->getXRef());
-            formDict->set("Length", Object(static_cast<int>(appearBuf->size())));
+            formDict->set("Length", Object(static_cast<int>(appearBuf.size())));
             formDict->set("Subtype", Object(objName, "Form"));
             formDict->set("Name", Object(objName, "FRM"));
             auto bboxArray = std::make_unique<Array>(gfx->getXRef());
@@ -5715,7 +5704,7 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
             formDict->set("Matrix", Object(std::move(matrix)));
             formDict->set("Resources", Object(std::move(resDict)));
 
-            std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->size() };
+            std::vector<char> data { appearBuf.c_str(), appearBuf.c_str() + appearBuf.size() };
             auto mStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(std::move(formDict)));
 
             auto dict = std::make_unique<Dict>(gfx->getXRef());
@@ -5724,18 +5713,18 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
             auto resDict2 = std::make_unique<Dict>(gfx->getXRef());
             resDict2->set("XObject", Object(std::move(dict)));
 
-            appearBuf = std::make_unique<GooString>();
-            appearBuf->append("q\n");
-            appearBuf->appendf("0 0 {0:d} {1:d} re W n\n", width, height);
-            appearBuf->append("q\n");
-            appearBuf->appendf("0 0 {0:d} {1:d} re W n\n", width, height);
-            appearBuf->appendf("1 0 0 1 {0:d} {1:d} cm\n", width / 2, height / 2);
-            appearBuf->append("/FRM Do\n");
-            appearBuf->append("Q\n");
-            appearBuf->append("Q\n");
+            appearBuf.clear();
+            appearBuf.append("q\n");
+            GooString::appendf(appearBuf, "0 0 {0:d} {1:d} re W n\n", width, height);
+            appearBuf.append("q\n");
+            GooString::appendf(appearBuf, "0 0 {0:d} {1:d} re W n\n", width, height);
+            GooString::appendf(appearBuf, "1 0 0 1 {0:d} {1:d} cm\n", width / 2, height / 2);
+            appearBuf.append("/FRM Do\n");
+            appearBuf.append("Q\n");
+            appearBuf.append("Q\n");
 
             const std::array<double, 4> bbox = { 0, 0, static_cast<double>(width), static_cast<double>(height) };
-            appearance = createForm(appearBuf.get(), bbox, false, std::move(resDict2));
+            appearance = createForm(appearBuf, bbox, false, std::move(resDict2));
         }
     }
 
@@ -5846,7 +5835,7 @@ void AnnotStamp::generateStampCustomAppearance()
     std::unique_ptr<Dict> resDict = createResourcesDict(imgStrName.c_str(), Object(imgRef), "GS0", opacity, nullptr);
 
     const std::array<double, 4> bboxArray = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
-    const GooString *appearBuf = appearBuilder.buffer();
+    const std::string &appearBuf = appearBuilder.buffer();
     appearance = createForm(appearBuf, bboxArray, false, std::move(resDict));
 
     if (updatedAppearanceStream == Ref::INVALID()) {
@@ -6170,9 +6159,9 @@ void AnnotGeometry::draw(Gfx *gfx, bool printing)
         } else {
             Object aStream = createForm(appearBuilder.buffer(), bbox, true, Object {});
 
-            GooString appearBuf("/GS0 gs\n/Fm0 Do");
+            std::string appearBuf("/GS0 gs\n/Fm0 Do");
             std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-            appearance = createForm(&appearBuf, bbox, false, std::move(resDict));
+            appearance = createForm(appearBuf, bbox, false, std::move(resDict));
         }
     }
 
@@ -6497,9 +6486,9 @@ void AnnotPolygon::draw(Gfx *gfx, bool printing)
         } else {
             Object aStream = createForm(appearBuilder.buffer(), bbox, true, Object {});
 
-            GooString appearBuf("/GS0 gs\n/Fm0 Do");
+            std::string appearBuf("/GS0 gs\n/Fm0 Do");
             std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-            appearance = createForm(&appearBuf, bbox, false, std::move(resDict));
+            appearance = createForm(appearBuf, bbox, false, std::move(resDict));
         }
     }
 
@@ -6955,9 +6944,9 @@ void AnnotFileAttachment::draw(Gfx *gfx, bool printing)
         } else {
             Object aStream = createForm(appearBuilder.buffer(), bbox, true, Object {});
 
-            GooString appearBuf("/GS0 gs\n/Fm0 Do");
+            std::string appearBuf("/GS0 gs\n/Fm0 Do");
             std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-            appearance = createForm(&appearBuf, bbox, false, std::move(resDict));
+            appearance = createForm(appearBuf, bbox, false, std::move(resDict));
         }
     }
 
@@ -7102,9 +7091,9 @@ void AnnotSound::draw(Gfx *gfx, bool printing)
         } else {
             Object aStream = createForm(appearBuilder.buffer(), bbox, true, Object {});
 
-            GooString appearBuf("/GS0 gs\n/Fm0 Do");
+            std::string appearBuf("/GS0 gs\n/Fm0 Do");
             std::unique_ptr<Dict> resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-            appearance = createForm(&appearBuf, bbox, false, std::move(resDict));
+            appearance = createForm(appearBuf, bbox, false, std::move(resDict));
         }
     }
 
@@ -7671,7 +7660,7 @@ Annots::~Annots() = default;
 // AnnotAppearanceBuilder
 //------------------------------------------------------------------------
 
-AnnotAppearanceBuilder::AnnotAppearanceBuilder() : appearBuf { std::make_unique<GooString>() }
+AnnotAppearanceBuilder::AnnotAppearanceBuilder()
 {
     addedDingbatsResource = false;
 }
@@ -7680,7 +7669,9 @@ AnnotAppearanceBuilder::~AnnotAppearanceBuilder() = default;
 
 void AnnotAppearanceBuilder::append(const char *text)
 {
-    appearBuf->append(text);
+    if (text) {
+        appearBuf.append(text);
+    }
 }
 
 void AnnotAppearanceBuilder::appendf(const char *fmt, ...) GOOSTRING_FORMAT
@@ -7688,11 +7679,11 @@ void AnnotAppearanceBuilder::appendf(const char *fmt, ...) GOOSTRING_FORMAT
     va_list argList;
 
     va_start(argList, fmt);
-    appearBuf->appendfv(fmt, argList);
+    GooString::appendfv(appearBuf, fmt, argList);
     va_end(argList);
 }
 
-const GooString *AnnotAppearanceBuilder::buffer() const
+const std::string &AnnotAppearanceBuilder::buffer() const
 {
-    return appearBuf.get();
+    return appearBuf;
 }

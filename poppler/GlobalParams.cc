@@ -766,8 +766,8 @@ static FcPattern *buildFcPattern(const GfxFont &font, const GooString *base14Nam
     }
 
     // if the FontDescriptor specified a family name use it
-    if (font.getFamily()) {
-        family = font.getFamily()->toStr();
+    if (const auto &fontFamily = font.getFamily(); fontFamily.has_value()) {
+        family = fontFamily.value();
     }
 
     // if the FontDescriptor specified a weight use it

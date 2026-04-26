@@ -1303,17 +1303,15 @@ void PDFDoc::writeString(const std::string &s, OutStream *outStr, const unsigned
     std::string sCopy;
     if (fileKey) {
         auto *enc = new EncryptStream(std::make_unique<MemStream>(s.c_str(), 0, s.size(), Object::null()), fileKey, encAlgorithm, keyLength, ref);
-        std::string sEnc;
         int c;
         if (!enc->rewind()) {
             return;
         }
         while ((c = enc->getChar()) != EOF) {
-            sEnc.push_back(static_cast<char>(c));
+            sCopy.push_back(static_cast<char>(c));
         }
 
         delete enc;
-        sCopy = sEnc;
     } else {
         sCopy = s;
     }
@@ -1378,8 +1376,7 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
         outStr->printf("%lli ", obj->getInt64());
         break;
     case objReal: {
-        GooString s;
-        s.appendf("{0:.10g}", obj->getReal());
+        auto s = GooString::format("{0:.10g}", obj->getReal());
         outStr->printf("%s ", s.c_str());
         break;
     }
