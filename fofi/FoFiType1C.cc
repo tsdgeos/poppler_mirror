@@ -97,13 +97,18 @@ FoFiType1C::FoFiType1C(std::span<const unsigned char> data, PrivateTag /*unused*
     charsetLength = 0;
 }
 
+static void deleteEncodingAndFreeContents(const std::array<const char *, 256> *encoding)
+{
+    for (const char *glyphName : *encoding) {
+        gfree(const_cast<char *>(glyphName));
+    }
+    delete encoding;
+}
+
 FoFiType1C::~FoFiType1C()
 {
     if (encoding && encoding != &fofiType1StandardEncoding && encoding != &fofiType1ExpertEncoding) {
-        for (const char *glyphName : *encoding) {
-            gfree(const_cast<char *>(glyphName));
-        }
-        delete encoding;
+        deleteEncodingAndFreeContents(encoding);
     }
     if (privateDicts) {
         gfree(privateDicts);
@@ -2235,6 +2240,12 @@ void FoFiType1C::readFDSelect()
     }
 }
 
+template<typename PointerType, typename DeleterType>
+auto unique_ptr_with_deleter(PointerType *pointer, DeleterType deleter)
+{
+    return std::unique_ptr<PointerType, DeleterType>(pointer, deleter);
+}
+
 void FoFiType1C::buildEncoding()
 {
     char buf[256];
@@ -2246,7 +2257,7 @@ void FoFiType1C::buildEncoding()
         encoding = &fofiType1ExpertEncoding;
 
     } else {
-        auto customEncoding = std::make_unique<std::array<const char *, 256>>();
+        auto customEncoding = unique_ptr_with_deleter(new std::array<const char *, 256>(), &deleteEncodingAndFreeContents);
         customEncoding->fill(nullptr);
         int pos = topDict.encodingOffset;
         const int encFormat = getU8(pos++, &parsedOk);
