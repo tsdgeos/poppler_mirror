@@ -89,40 +89,43 @@ static const double s_minLineWidth = 0.0;
 
 static inline void convertGfxColor(SplashColorPtr dest, const SplashColorMode colorMode, const GfxColorSpace *colorSpace, const GfxColor *src)
 {
-    GfxGray gray;
-    GfxRGB rgb;
-    GfxCMYK cmyk;
-    GfxColor deviceN;
-
     switch (colorMode) {
     case splashModeMono1:
-    case splashModeMono8:
+    case splashModeMono8: {
+        GfxGray gray;
         colorSpace->getGray(src, &gray);
         dest[0] = colToByte(gray);
         break;
+    }
     case splashModeXBGR8:
         dest[3] = 255;
         // fallthrough
     case splashModeBGR8:
-    case splashModeRGB8:
+    case splashModeRGB8: {
+        GfxRGB rgb;
         colorSpace->getRGB(src, &rgb);
         dest[0] = colToByte(rgb.r);
         dest[1] = colToByte(rgb.g);
         dest[2] = colToByte(rgb.b);
         break;
-    case splashModeCMYK8:
+    }
+    case splashModeCMYK8: {
+        GfxCMYK cmyk;
         colorSpace->getCMYK(src, &cmyk);
         dest[0] = colToByte(cmyk.c);
         dest[1] = colToByte(cmyk.m);
         dest[2] = colToByte(cmyk.y);
         dest[3] = colToByte(cmyk.k);
         break;
-    case splashModeDeviceN8:
+    }
+    case splashModeDeviceN8: {
+        GfxColor deviceN;
         colorSpace->getDeviceN(src, &deviceN);
         for (int i = 0; i < SPOT_NCOMPS + 4; i++) {
             dest[i] = colToByte(deviceN.c[i]);
         }
         break;
+    }
     }
 }
 
