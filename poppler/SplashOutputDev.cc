@@ -2665,7 +2665,7 @@ void SplashOutputDev::unsetSoftMaskFromImageMask(GfxState *state, std::array<dou
     // memset(maskBitmap->getDataPtr(), 0, bitmap->getRowSize() * bitmap->getHeight());
     if (transpGroupStack->softmask != nullptr) {
         unsigned char *dest = bitmap->getAlphaPtr();
-        unsigned char *src = transpGroupStack->softmask->getDataPtr();
+        const unsigned char *src = transpGroupStack->softmask->getDataPtr();
         for (int c = 0; c < transpGroupStack->softmask->getRowSize() * transpGroupStack->softmask->getHeight(); c++) {
             dest[c] = src[c];
         }
@@ -3125,7 +3125,7 @@ bool SplashOutputDev::tilingBitmapSrc(void *data, SplashColorPtr colorLine, unsi
             }
         } else {
             const int n = imgData->bitmap->getRowSize();
-            SplashColorPtr p;
+            SplashColorConstPtr p;
             for (int m = 0; m < imgData->repeatX; m++) {
                 p = imgData->bitmap->getDataPtr() + imgData->y * imgData->bitmap->getRowSize();
                 for (int x = 0; x < n; ++x) {
@@ -3349,7 +3349,7 @@ bool SplashOutputDev::maskedImageSrc(void *data, SplashColorPtr colorLine, unsig
     GfxCMYK cmyk;
     GfxColor deviceN;
     unsigned char alpha;
-    unsigned char *maskPtr;
+    const unsigned char *maskPtr;
     int maskBit;
     int nComps, x;
 

@@ -2980,7 +2980,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     GfxState *state;
     SplashBitmap *bitmap;
     Stream *str0, *str;
-    unsigned char *p;
+    const unsigned char *p;
     unsigned char col[4];
     double hDPI2, vDPI2;
     double m0, m1, m2, m3, m4, m5;
@@ -3312,7 +3312,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
             if (processColorFormat == splashModeCMYK8 && internalColorFormat != splashModeCMYK8) {
                 str0 = new SplashBitmapCMYKEncoder(bitmap);
             } else {
-                str0 = new MemStream(reinterpret_cast<char *>(p), 0, w * h * numComps, Object::null());
+                str0 = new MemStream(reinterpret_cast<const char *>(p), 0, w * h * numComps, Object::null());
             }
             // Check for a color image that uses only gray
             if (!getOptimizeColorSpace()) {

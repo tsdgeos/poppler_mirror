@@ -1359,7 +1359,7 @@ inline void Splash::drawAAPixel(SplashPipe *pipe, int x, int y)
 #else
     int xx, yy;
 #endif
-    SplashColorPtr p;
+    SplashColorConstPtr p;
     int x0, x1, t;
 
     if (x < 0 || x >= bitmap->width || y < state->clip->getYMinI() || y > state->clip->getYMaxI()) {
@@ -1433,7 +1433,7 @@ inline void Splash::drawAALine(SplashPipe *pipe, int x0, int x1, int y, bool adj
 {
 #if splashAASize == 4
     static const int bitCount4[16] = { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4 };
-    SplashColorPtr p0, p1, p2, p3;
+    SplashColorConstPtr p0, p1, p2, p3;
     int t;
 #else
     SplashColorPtr p;
