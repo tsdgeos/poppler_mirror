@@ -95,11 +95,10 @@ static inline void convertGfxColor(SplashColorPtr dest, const SplashColorMode co
         GfxGray gray;
         colorSpace->getGray(src, &gray);
         dest[0] = colToByte(gray);
+        memset(&dest[1], 0, splashMaxColorComps - 1);
         break;
     }
     case splashModeXBGR8:
-        dest[3] = 255;
-        // fallthrough
     case splashModeBGR8:
     case splashModeRGB8: {
         GfxRGB rgb;
@@ -107,6 +106,8 @@ static inline void convertGfxColor(SplashColorPtr dest, const SplashColorMode co
         dest[0] = colToByte(rgb.r);
         dest[1] = colToByte(rgb.g);
         dest[2] = colToByte(rgb.b);
+        dest[3] = colorMode == splashModeXBGR8 ? 255 : 0;
+        memset(&dest[4], 0, splashMaxColorComps - 4);
         break;
     }
     case splashModeCMYK8: {
@@ -116,6 +117,7 @@ static inline void convertGfxColor(SplashColorPtr dest, const SplashColorMode co
         dest[1] = colToByte(cmyk.m);
         dest[2] = colToByte(cmyk.y);
         dest[3] = colToByte(cmyk.k);
+        memset(&dest[4], 0, splashMaxColorComps - 4);
         break;
     }
     case splashModeDeviceN8: {
