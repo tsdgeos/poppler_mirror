@@ -2305,7 +2305,7 @@ GfxFontDict::GfxFontDict(XRef *xref, const Ref fontDictRef, const Dict &fontDict
     }
 }
 
-std::shared_ptr<GfxFont> GfxFontDict::lookup(const char *tag) const
+std::shared_ptr<GfxFont> GfxFontDict::lookup(std::string_view tag) const
 {
     for (const auto &font : fonts) {
         if (font && font->matches(tag)) {

@@ -197,7 +197,7 @@ public:
     const Ref *getID() const { return &id; }
 
     // Does this font match the tag?
-    bool matches(const char *tagA) const { return tag == tagA; }
+    bool matches(std::string_view tagA) const { return tag == tagA; }
 
     // Get font family name.
     const std::optional<std::string> &getFamily() const { return family; }
@@ -452,7 +452,7 @@ public:
     GfxFontDict &operator=(const GfxFontDict &) = delete;
 
     // Get the specified font.
-    std::shared_ptr<GfxFont> lookup(const char *tag) const;
+    std::shared_ptr<GfxFont> lookup(std::string_view tag) const;
 
     // Iterative access.
     int getNumFonts() const { return fonts.size(); }

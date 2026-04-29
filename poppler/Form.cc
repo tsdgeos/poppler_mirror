@@ -755,7 +755,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
         if (pdfFontName.empty()) {
             return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::InternalError, .message = ERROR_IN_CODE_LOCATION };
         }
-        std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(pdfFontName.c_str());
+        std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(pdfFontName);
 
         if (fontSize == 0) {
             fontSize = Annot::calculateFontSize(form, font.get(), &signatureText, wMax / 2.0, hMax);
@@ -2748,7 +2748,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
 
     const std::string fontFamilyAndStyle = fontStyle.empty() ? fontFamily : fontFamily + " " + fontStyle;
 
-    if (forceName && defaultResources && defaultResources->lookupFont(fontFamilyAndStyle.c_str())) {
+    if (forceName && defaultResources && defaultResources->lookupFont(fontFamilyAndStyle)) {
         error(errInternal, -1, "Form::addFontToDefaultResources: Asked to forceName but font name exists {0:s}", fontFamilyAndStyle.c_str());
         return {};
     }
@@ -2991,7 +2991,7 @@ std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooStri
         addFontToDefaultResources(pdfFontNameToEmulate, "", /*forceName*/ true);
         resources = defaultResources;
     }
-    f = resources->lookupFont(pdfFontNameToEmulate.c_str());
+    f = resources->lookupFont(pdfFontNameToEmulate);
     const CharCodeToUnicode *ccToUnicode = f ? f->getToUnicode() : nullptr;
     if (!ccToUnicode) {
         error(errInternal, -1, "Form::ensureFontsForAllCharacters: No ccToUnicode, this should not happen");

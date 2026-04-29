@@ -280,7 +280,7 @@ GfxResources::GfxResources(XRef *xrefA, Dict *resDictA, GfxResources *nextA) : g
 
 GfxResources::~GfxResources() = default;
 
-std::shared_ptr<GfxFont> GfxResources::doLookupFont(const char *name) const
+std::shared_ptr<GfxFont> GfxResources::doLookupFont(std::string_view name) const
 {
     const GfxResources *resPtr;
 
@@ -294,21 +294,22 @@ std::shared_ptr<GfxFont> GfxResources::doLookupFont(const char *name) const
             }
         }
     }
-    error(errSyntaxError, -1, "Unknown font tag '{0:s}'", name);
+    const std::string nameStr { name };
+    error(errSyntaxError, -1, "Unknown font tag '{0:r}'", &nameStr);
     return nullptr;
 }
 
-std::shared_ptr<GfxFont> GfxResources::lookupFont(const char *name)
+std::shared_ptr<GfxFont> GfxResources::lookupFont(std::string_view name)
 {
     return doLookupFont(name);
 }
 
-std::shared_ptr<const GfxFont> GfxResources::lookupFont(const char *name) const
+std::shared_ptr<const GfxFont> GfxResources::lookupFont(std::string_view name) const
 {
     return doLookupFont(name);
 }
 
-Object GfxResources::lookupXObject(const char *name)
+Object GfxResources::lookupXObject(std::string_view name)
 {
     GfxResources *resPtr;
 
@@ -320,11 +321,12 @@ Object GfxResources::lookupXObject(const char *name)
             }
         }
     }
-    error(errSyntaxError, -1, "XObject '{0:s}' is unknown", name);
+    const std::string nameStr { name };
+    error(errSyntaxError, -1, "XObject '{0:r}' is unknown", &nameStr);
     return Object::null();
 }
 
-Object GfxResources::lookupXObjectNF(const char *name)
+Object GfxResources::lookupXObjectNF(std::string_view name)
 {
     GfxResources *resPtr;
 
@@ -336,11 +338,12 @@ Object GfxResources::lookupXObjectNF(const char *name)
             }
         }
     }
-    error(errSyntaxError, -1, "XObject '{0:s}' is unknown", name);
+    const std::string nameStr { name };
+    error(errSyntaxError, -1, "XObject '{0:r}' is unknown", &nameStr);
     return Object::null();
 }
 
-Object GfxResources::lookupMarkedContentNF(const char *name)
+Object GfxResources::lookupMarkedContentNF(std::string_view name)
 {
     GfxResources *resPtr;
 
@@ -352,11 +355,12 @@ Object GfxResources::lookupMarkedContentNF(const char *name)
             }
         }
     }
-    error(errSyntaxError, -1, "Marked Content '{0:s}' is unknown", name);
+    const std::string nameStr { name };
+    error(errSyntaxError, -1, "Marked Content '{0:r}' is unknown", &nameStr);
     return Object::null();
 }
 
-Object GfxResources::lookupColorSpace(const char *name)
+Object GfxResources::lookupColorSpace(std::string_view name)
 {
     GfxResources *resPtr;
 
@@ -371,7 +375,7 @@ Object GfxResources::lookupColorSpace(const char *name)
     return Object::null();
 }
 
-std::unique_ptr<GfxPattern> GfxResources::lookupPattern(const char *name, OutputDev *out, GfxState *state)
+std::unique_ptr<GfxPattern> GfxResources::lookupPattern(std::string_view name, OutputDev *out, GfxState *state)
 {
     GfxResources *resPtr;
 
@@ -384,11 +388,12 @@ std::unique_ptr<GfxPattern> GfxResources::lookupPattern(const char *name, Output
             }
         }
     }
-    error(errSyntaxError, -1, "Unknown pattern '{0:s}'", name);
+    const std::string nameStr { name };
+    error(errSyntaxError, -1, "Unknown pattern '{0:r}'", &nameStr);
     return {};
 }
 
-std::unique_ptr<GfxShading> GfxResources::lookupShading(const char *name, OutputDev *out, GfxState *state)
+std::unique_ptr<GfxShading> GfxResources::lookupShading(std::string_view name, OutputDev *out, GfxState *state)
 {
     GfxResources *resPtr;
 
@@ -400,11 +405,12 @@ std::unique_ptr<GfxShading> GfxResources::lookupShading(const char *name, Output
             }
         }
     }
-    error(errSyntaxError, -1, "ExtGState '{0:s}' is unknown", name);
+    const std::string nameStr { name };
+    error(errSyntaxError, -1, "ExtGState '{0:r}' is unknown", &nameStr);
     return {};
 }
 
-Object GfxResources::lookupGState(const char *name)
+Object GfxResources::lookupGState(std::string_view name)
 {
     Object obj = lookupGStateNF(name);
     if (obj.isNull()) {
@@ -426,7 +432,7 @@ Object GfxResources::lookupGState(const char *name)
     return item->copy();
 }
 
-Object GfxResources::lookupGStateNF(const char *name)
+Object GfxResources::lookupGStateNF(std::string_view name)
 {
     GfxResources *resPtr;
 
@@ -438,7 +444,8 @@ Object GfxResources::lookupGStateNF(const char *name)
             }
         }
     }
-    error(errSyntaxError, -1, "ExtGState '{0:s}' is unknown", name);
+    const std::string nameStr { name };
+    error(errSyntaxError, -1, "ExtGState '{0:r}' is unknown", &nameStr);
     return Object::null();
 }
 
