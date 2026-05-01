@@ -900,6 +900,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
     gfree(entries);
     capacity = 0;
     size = 0;
+    last = -1;
     entries = nullptr;
 
     if (wasReconstructed) {
@@ -1054,32 +1055,51 @@ char *XRef::constructObjectEntry(char *p, Goffset pos, int *objNum)
     //    nnn nnn obj  <-- actual object
     // and we also ignore '\0' (because it's used to terminate the
     // buffer in this damage-scanning code)
+    // though some documents seems to also have nnn\nnn\nobj\n so
+    // in those cases, we should not actually consume the newline from
+    // the data if this is not a object entry like that.
+    ptrdiff_t ateNewLines = 0;
     int num = 0;
     do {
         num = (num * 10) + (*p - '0');
         ++p;
-    } while (*p >= '0' && *p <= '9' && num < 100000000);
-    if (*p != '\t' && *p != '\x0c' && *p != ' ') {
+    } while (std::isdigit(static_cast<unsigned char>(*p)) && num < 100000000);
+    if (!std::isspace(static_cast<unsigned char>(*p))) {
         return p;
     }
     do {
+        if (*p == '\n' || ateNewLines > 0) {
+            ateNewLines++;
+        }
         ++p;
-    } while (*p == '\t' || *p == '\x0c' || *p == ' ');
+    } while (std::isspace(static_cast<unsigned char>(*p)));
     if (*p < '0' || *p > '9') {
+        if (ateNewLines > 0) {
+            p -= ateNewLines;
+        }
         return p;
     }
     int gen = 0;
     do {
         gen = (gen * 10) + (*p - '0');
+        if (ateNewLines > 0) {
+            ateNewLines++;
+        }
         ++p;
-    } while (*p >= '0' && *p <= '9' && gen < 100000000);
-    if (*p != '\t' && *p != '\x0c' && *p != ' ') {
+    } while (std::isdigit(static_cast<unsigned char>(*p)) && num < 100000000);
+    if (!std::isspace(static_cast<unsigned char>(*p))) {
         return p;
     }
     do {
+        if (*p == '\n' || ateNewLines > 0) {
+            ateNewLines++;
+        }
         ++p;
-    } while (*p == '\t' || *p == '\x0c' || *p == ' ');
+    } while (std::isspace(static_cast<unsigned char>(*p)));
     if (strncmp(p, "obj", 3) != 0) {
+        if (ateNewLines > 0) {
+            p -= ateNewLines;
+        }
         return p;
     }
 
