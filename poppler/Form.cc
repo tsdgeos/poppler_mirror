@@ -1007,6 +1007,11 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
                 continue;
             }
 
+            if (usedParents->size() > 500) {
+                error(errSyntaxError, -1, "Form kids hierarchy too deep; stopping");
+                break;
+            }
+
             if (!usedParents->contains(childRef.num)) {
                 // Field child: it could be a form field or a widget or composed dict
                 const Object &objParent = childObj.dictLookupNF("Parent");
