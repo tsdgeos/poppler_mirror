@@ -121,6 +121,7 @@ public:
     //         gs -- is like g, but treats <precision> as number of significant
     //               digits to show (eg 0.0123 with .2gs will print 0.012)
     //     c -- character (char, short or int)
+    //     r -- (const) std::string *
     //     s -- string (char *)
     //     t -- GooString *
     //     w -- blank space; arg determines width
