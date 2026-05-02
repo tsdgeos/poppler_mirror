@@ -119,21 +119,21 @@ public:
     GfxResources(const GfxResources &) = delete;
     GfxResources &operator=(const GfxResources &other) = delete;
 
-    std::shared_ptr<GfxFont> lookupFont(const char *name);
-    std::shared_ptr<const GfxFont> lookupFont(const char *name) const;
-    Object lookupXObject(const char *name);
-    Object lookupXObjectNF(const char *name);
-    Object lookupMarkedContentNF(const char *name);
-    Object lookupColorSpace(const char *name);
-    std::unique_ptr<GfxPattern> lookupPattern(const char *name, OutputDev *out, GfxState *state);
-    std::unique_ptr<GfxShading> lookupShading(const char *name, OutputDev *out, GfxState *state);
-    Object lookupGState(const char *name);
-    Object lookupGStateNF(const char *name);
+    std::shared_ptr<GfxFont> lookupFont(std::string_view name);
+    std::shared_ptr<const GfxFont> lookupFont(std::string_view name) const;
+    Object lookupXObject(std::string_view name);
+    Object lookupXObjectNF(std::string_view name);
+    Object lookupMarkedContentNF(std::string_view name);
+    Object lookupColorSpace(std::string_view name);
+    std::unique_ptr<GfxPattern> lookupPattern(std::string_view name, OutputDev *out, GfxState *state);
+    std::unique_ptr<GfxShading> lookupShading(std::string_view name, OutputDev *out, GfxState *state);
+    Object lookupGState(std::string_view name);
+    Object lookupGStateNF(std::string_view name);
 
     GfxResources *getNext() const { return next; }
 
 private:
-    std::shared_ptr<GfxFont> doLookupFont(const char *name) const;
+    std::shared_ptr<GfxFont> doLookupFont(std::string_view name) const;
 
     Ref fontDictRef;
     mutable std::unique_ptr<GfxFontDict> fonts;

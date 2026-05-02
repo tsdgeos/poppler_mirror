@@ -280,7 +280,7 @@ GfxResources::GfxResources(XRef *xrefA, Dict *resDictA, GfxResources *nextA) : g
 
 GfxResources::~GfxResources() = default;
 
-std::shared_ptr<GfxFont> GfxResources::doLookupFont(const char *name) const
+std::shared_ptr<GfxFont> GfxResources::doLookupFont(std::string_view name) const
 {
     const GfxResources *resPtr;
 
@@ -294,21 +294,22 @@ std::shared_ptr<GfxFont> GfxResources::doLookupFont(const char *name) const
             }
         }
     }
-    error(errSyntaxError, -1, "Unknown font tag '{0:s}'", name);
+    const std::string nameStr { name };
+    error(errSyntaxError, -1, "Unknown font tag '{0:r}'", &nameStr);
     return nullptr;
 }
 
-std::shared_ptr<GfxFont> GfxResources::lookupFont(const char *name)
+std::shared_ptr<GfxFont> GfxResources::lookupFont(std::string_view name)
 {
     return doLookupFont(name);
 }
 
-std::shared_ptr<const GfxFont> GfxResources::lookupFont(const char *name) const
+std::shared_ptr<const GfxFont> GfxResources::lookupFont(std::string_view name) const
 {
     return doLookupFont(name);
 }
 
-Object GfxResources::lookupXObject(const char *name)
+Object GfxResources::lookupXObject(std::string_view name)
 {
     GfxResources *resPtr;
 
@@ -320,11 +321,12 @@ Object GfxResources::lookupXObject(const char *name)
             }
         }
     }
-    error(errSyntaxError, -1, "XObject '{0:s}' is unknown", name);
+    const std::string nameStr { name };
+    error(errSyntaxError, -1, "XObject '{0:r}' is unknown", &nameStr);
     return Object::null();
 }
 
-Object GfxResources::lookupXObjectNF(const char *name)
+Object GfxResources::lookupXObjectNF(std::string_view name)
 {
     GfxResources *resPtr;
 
@@ -336,11 +338,12 @@ Object GfxResources::lookupXObjectNF(const char *name)
             }
         }
     }
-    error(errSyntaxError, -1, "XObject '{0:s}' is unknown", name);
+    const std::string nameStr { name };
+    error(errSyntaxError, -1, "XObject '{0:r}' is unknown", &nameStr);
     return Object::null();
 }
 
-Object GfxResources::lookupMarkedContentNF(const char *name)
+Object GfxResources::lookupMarkedContentNF(std::string_view name)
 {
     GfxResources *resPtr;
 
@@ -352,11 +355,12 @@ Object GfxResources::lookupMarkedContentNF(const char *name)
             }
         }
     }
-    error(errSyntaxError, -1, "Marked Content '{0:s}' is unknown", name);
+    const std::string nameStr { name };
+    error(errSyntaxError, -1, "Marked Content '{0:r}' is unknown", &nameStr);
     return Object::null();
 }
 
-Object GfxResources::lookupColorSpace(const char *name)
+Object GfxResources::lookupColorSpace(std::string_view name)
 {
     GfxResources *resPtr;
 
@@ -371,7 +375,7 @@ Object GfxResources::lookupColorSpace(const char *name)
     return Object::null();
 }
 
-std::unique_ptr<GfxPattern> GfxResources::lookupPattern(const char *name, OutputDev *out, GfxState *state)
+std::unique_ptr<GfxPattern> GfxResources::lookupPattern(std::string_view name, OutputDev *out, GfxState *state)
 {
     GfxResources *resPtr;
 
@@ -384,11 +388,12 @@ std::unique_ptr<GfxPattern> GfxResources::lookupPattern(const char *name, Output
             }
         }
     }
-    error(errSyntaxError, -1, "Unknown pattern '{0:s}'", name);
+    const std::string nameStr { name };
+    error(errSyntaxError, -1, "Unknown pattern '{0:r}'", &nameStr);
     return {};
 }
 
-std::unique_ptr<GfxShading> GfxResources::lookupShading(const char *name, OutputDev *out, GfxState *state)
+std::unique_ptr<GfxShading> GfxResources::lookupShading(std::string_view name, OutputDev *out, GfxState *state)
 {
     GfxResources *resPtr;
 
@@ -400,11 +405,12 @@ std::unique_ptr<GfxShading> GfxResources::lookupShading(const char *name, Output
             }
         }
     }
-    error(errSyntaxError, -1, "ExtGState '{0:s}' is unknown", name);
+    const std::string nameStr { name };
+    error(errSyntaxError, -1, "ExtGState '{0:r}' is unknown", &nameStr);
     return {};
 }
 
-Object GfxResources::lookupGState(const char *name)
+Object GfxResources::lookupGState(std::string_view name)
 {
     Object obj = lookupGStateNF(name);
     if (obj.isNull()) {
@@ -426,7 +432,7 @@ Object GfxResources::lookupGState(const char *name)
     return item->copy();
 }
 
-Object GfxResources::lookupGStateNF(const char *name)
+Object GfxResources::lookupGStateNF(std::string_view name)
 {
     GfxResources *resPtr;
 
@@ -438,7 +444,8 @@ Object GfxResources::lookupGStateNF(const char *name)
             }
         }
     }
-    error(errSyntaxError, -1, "ExtGState '{0:s}' is unknown", name);
+    const std::string nameStr { name };
+    error(errSyntaxError, -1, "ExtGState '{0:r}' is unknown", &nameStr);
     return Object::null();
 }
 
@@ -960,24 +967,25 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
         printf("\n");
     }
 
+    const Dict *dict = obj1.getDict();
     // parameters that are also set by individual PDF operators
-    obj2 = obj1.dictLookup("LW");
+    obj2 = dict->lookup("LW");
     if (obj2.isNum()) {
         opSetLineWidth(&obj2, 1);
     }
-    obj2 = obj1.dictLookup("LC");
+    obj2 = dict->lookup("LC");
     if (obj2.isInt()) {
         opSetLineCap(&obj2, 1);
     }
-    obj2 = obj1.dictLookup("LJ");
+    obj2 = dict->lookup("LJ");
     if (obj2.isInt()) {
         opSetLineJoin(&obj2, 1);
     }
-    obj2 = obj1.dictLookup("ML");
+    obj2 = dict->lookup("ML");
     if (obj2.isNum()) {
         opSetMiterLimit(&obj2, 1);
     }
-    obj2 = obj1.dictLookup("D");
+    obj2 = dict->lookup("D");
     if (obj2.isArrayOfLength(2)) {
         Object args2[2];
         args2[0] = obj2.arrayGet(0);
@@ -988,7 +996,7 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
     }
 #if 0 //~ need to add a new version of GfxResources::lookupFont() that
       //~ takes an indirect ref instead of a name
-  if (obj1.dictLookup("Font", &obj2)->isArray() &&
+  if (dict->lookup("Font", &obj2)->isArray() &&
       obj2.arrayGetLength() == 2) {
     obj2.arrayGet(0, &args2[0]);
     obj2.arrayGet(1, &args2[1]);
@@ -1000,13 +1008,13 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
   }
   obj2.free();
 #endif
-    obj2 = obj1.dictLookup("FL");
+    obj2 = dict->lookup("FL");
     if (obj2.isNum()) {
         opSetFlat(&obj2, 1);
     }
 
     // transparency support: blend mode, fill/stroke opacity
-    obj2 = obj1.dictLookup("BM");
+    obj2 = dict->lookup("BM");
     if (!obj2.isNull()) {
         if (GfxState::parseBlendMode(&obj2, &mode)) {
             state->setBlendMode(mode);
@@ -1015,13 +1023,13 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
             error(errSyntaxError, getPos(), "Invalid blend mode in ExtGState");
         }
     }
-    obj2 = obj1.dictLookup("ca");
+    obj2 = dict->lookup("ca");
     if (obj2.isNum()) {
         opac = obj2.getNum();
         state->setFillOpacity(opac < 0 ? 0 : opac > 1 ? 1 : opac);
         out->updateFillOpacity(state);
     }
-    obj2 = obj1.dictLookup("CA");
+    obj2 = dict->lookup("CA");
     if (obj2.isNum()) {
         opac = obj2.getNum();
         state->setStrokeOpacity(opac < 0 ? 0 : opac > 1 ? 1 : opac);
@@ -1029,12 +1037,12 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
     }
 
     // fill/stroke overprint, overprint mode
-    obj2 = obj1.dictLookup("op");
+    obj2 = dict->lookup("op");
     if ((haveFillOP = obj2.isBool())) {
         state->setFillOverprint(obj2.getBool());
         out->updateFillOverprint(state);
     }
-    obj2 = obj1.dictLookup("OP");
+    obj2 = dict->lookup("OP");
     if (obj2.isBool()) {
         state->setStrokeOverprint(obj2.getBool());
         out->updateStrokeOverprint(state);
@@ -1043,23 +1051,23 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
             out->updateFillOverprint(state);
         }
     }
-    obj2 = obj1.dictLookup("OPM");
+    obj2 = dict->lookup("OPM");
     if (obj2.isInt()) {
         state->setOverprintMode(obj2.getInt());
         out->updateOverprintMode(state);
     }
 
     // stroke adjust
-    obj2 = obj1.dictLookup("SA");
+    obj2 = dict->lookup("SA");
     if (obj2.isBool()) {
         state->setStrokeAdjust(obj2.getBool());
         out->updateStrokeAdjust(state);
     }
 
     // transfer function
-    obj2 = obj1.dictLookup("TR2");
+    obj2 = dict->lookup("TR2");
     if (obj2.isNull()) {
-        obj2 = obj1.dictLookup("TR");
+        obj2 = dict->lookup("TR");
     }
     if (obj2.isName("Default") || obj2.isName("Identity")) {
         state->setTransfer({});
@@ -1090,21 +1098,21 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
     }
 
     // alpha is shape
-    obj2 = obj1.dictLookup("AIS");
+    obj2 = dict->lookup("AIS");
     if (obj2.isBool()) {
         state->setAlphaIsShape(obj2.getBool());
         out->updateAlphaIsShape(state);
     }
 
     // text knockout
-    obj2 = obj1.dictLookup("TK");
+    obj2 = dict->lookup("TK");
     if (obj2.isBool()) {
         state->setTextKnockout(obj2.getBool());
         out->updateTextKnockout(state);
     }
 
     // soft mask
-    obj2 = obj1.dictLookup("SMask");
+    obj2 = dict->lookup("SMask");
     if (!obj2.isNull()) {
         if (obj2.isName("None")) {
             out->clearSoftMask(state);
@@ -1168,7 +1176,7 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
             error(errSyntaxError, getPos(), "Invalid soft mask in ExtGState");
         }
     }
-    obj2 = obj1.dictLookup("Font");
+    obj2 = dict->lookup("Font");
     if (obj2.isArray()) {
         if (obj2.arrayGetLength() == 2) {
             const Object &fargs0 = obj2.arrayGetNF(0);
@@ -1186,23 +1194,23 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
             error(errSyntaxError, getPos(), "Number of args mismatch for /Font in ExtGState");
         }
     }
-    obj2 = obj1.dictLookup("LW");
+    obj2 = dict->lookup("LW");
     if (obj2.isNum()) {
         opSetLineWidth(&obj2, 1);
     }
-    obj2 = obj1.dictLookup("LC");
+    obj2 = dict->lookup("LC");
     if (obj2.isInt()) {
         opSetLineCap(&obj2, 1);
     }
-    obj2 = obj1.dictLookup("LJ");
+    obj2 = dict->lookup("LJ");
     if (obj2.isInt()) {
         opSetLineJoin(&obj2, 1);
     }
-    obj2 = obj1.dictLookup("ML");
+    obj2 = dict->lookup("ML");
     if (obj2.isNum()) {
         opSetMiterLimit(&obj2, 1);
     }
-    obj2 = obj1.dictLookup("D");
+    obj2 = dict->lookup("D");
     if (obj2.isArray()) {
         if (obj2.arrayGetLength() == 2) {
             Object dargs[2];
@@ -1216,11 +1224,11 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
             error(errSyntaxError, getPos(), "Number of args mismatch for /D in ExtGState");
         }
     }
-    obj2 = obj1.dictLookup("RI");
+    obj2 = dict->lookup("RI");
     if (obj2.isName()) {
         opSetRenderingIntent(&obj2, 1);
     }
-    obj2 = obj1.dictLookup("FL");
+    obj2 = dict->lookup("FL");
     if (obj2.isNum()) {
         opSetFlat(&obj2, 1);
     }

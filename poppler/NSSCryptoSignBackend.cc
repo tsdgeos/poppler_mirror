@@ -119,7 +119,7 @@ const SEC_ASN1Template GeneralNameTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .o
  * GeneralNames ::= SEQUENCE SIZE (1..MAX) OF GeneralName
  */
 const SEC_ASN1Template GeneralNamesTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(GeneralNames) },
-                                                  { .kind = SEC_ASN1_INLINE | SEC_ASN1_CONTEXT_SPECIFIC | 4, .offset = offsetof(GeneralNames, names), .sub = GeneralNameTemplate, .size = 0 },
+                                                  { .kind = SEC_ASN1_CONTEXT_SPECIFIC | 4, .offset = offsetof(GeneralNames, names), .sub = GeneralNameTemplate, .size = 0 },
                                                   { .kind = 0, .offset = 0, .sub = nullptr, .size = 0 } };
 
 /**
@@ -162,7 +162,7 @@ const SEC_ASN1Template SigningCertificateV2Template[] = { { .kind = SEC_ASN1_SEQ
 const SEC_ASN1Template ESSCertIDv2DecodingTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(ESSCertIDv2) },
                                                          { .kind = SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL, .offset = offsetof(ESSCertIDv2, hashAlgorithm), .sub = SEC_ASN1_GET(SECOID_AlgorithmIDTemplate), .size = 0 },
                                                          { .kind = SEC_ASN1_OCTET_STRING, .offset = offsetof(ESSCertIDv2, certHash), .sub = nullptr, .size = 0 },
-                                                         { .kind = SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL | SEC_ASN1_SKIP, .offset = offsetof(ESSCertIDv2, issuerSerial), .sub = IssuerSerialTemplate, .size = 0 },
+                                                         { .kind = SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL, .offset = offsetof(ESSCertIDv2, issuerSerial), .sub = IssuerSerialTemplate, .size = 0 },
                                                          { .kind = 0, .offset = 0, .sub = nullptr, .size = 0 } };
 
 const SEC_ASN1Template SigningCertificateV2DecodingTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(SigningCertificateV2) },
@@ -172,7 +172,7 @@ const SEC_ASN1Template SigningCertificateV2DecodingTemplate[] = { { .kind = SEC_
 
 const SEC_ASN1Template ESSCertIDDecodingTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(ESSCertIDv2) },
                                                        { .kind = SEC_ASN1_OCTET_STRING, .offset = offsetof(ESSCertIDv2, certHash), .sub = nullptr, .size = 0 },
-                                                       { .kind = SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL | SEC_ASN1_SKIP, .offset = offsetof(ESSCertIDv2, issuerSerial), .sub = IssuerSerialTemplate, .size = 0 },
+                                                       { .kind = SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL, .offset = offsetof(ESSCertIDv2, issuerSerial), .sub = IssuerSerialTemplate, .size = 0 },
                                                        { .kind = 0, .offset = 0, .sub = nullptr, .size = 0 } };
 
 const SEC_ASN1Template SigningCertificateDecodingTemplate[] = { { .kind = SEC_ASN1_SEQUENCE, .offset = 0, .sub = nullptr, .size = sizeof(SigningCertificateV2) },
@@ -575,7 +575,11 @@ static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromCERT(CERTCerti
 {
     auto certInfo = std::make_unique<X509CertificateInfo>();
 
-    certInfo->setVersion(DER_GetInteger(&cert->version) + 1);
+    long version = 0;
+    if (cert->version.data && cert->version.len) {
+        version = DER_GetInteger(&cert->version);
+    }
+    certInfo->setVersion(version + 1);
     certInfo->setSerialNumber(SECItemToGooString(cert->serialNumber));
 
     // issuer info

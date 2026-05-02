@@ -68,10 +68,12 @@ std::unique_ptr<LinkAction> LinkAction::parseDest(const Object *obj)
 std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const std::optional<std::string> &baseURI)
 {
     std::set<int> seenNextActions;
-    return parseAction(obj, baseURI, &seenNextActions);
+    return parseAction(obj, baseURI, &seenNextActions, 0);
 }
 
-std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const std::optional<std::string> &baseURI, std::set<int> *seenNextActions)
+static constexpr int MAX_ACTION_DEPTH = 50;
+
+std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const std::optional<std::string> &baseURI, std::set<int> *seenNextActions, int depth)
 {
 
     if (!obj->isDict()) {
@@ -159,6 +161,11 @@ std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const std
         return nullptr;
     }
 
+    if (depth >= MAX_ACTION_DEPTH) {
+        error(errSyntaxWarning, -1, "parseAction: Next action chain too deep, stopping.");
+        return action;
+    }
+
     // parse the next actions
     const Object nextObj = obj->dictLookup("Next");
     std::vector<std::unique_ptr<LinkAction>> actionList;
@@ -176,7 +183,7 @@ std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const std
         }
 
         actionList.reserve(1);
-        actionList.push_back(parseAction(&nextObj, {}, seenNextActions));
+        actionList.push_back(parseAction(&nextObj, {}, seenNextActions, depth + 1));
     } else if (nextObj.isArray()) {
         const Array *a = nextObj.getArray();
         const int n = a->getLength();
@@ -198,7 +205,7 @@ std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const std
                 }
             }
 
-            actionList.push_back(parseAction(&obj3, {}, seenNextActions));
+            actionList.push_back(parseAction(&obj3, {}, seenNextActions, depth + 1));
         }
     }
 

@@ -3118,7 +3118,7 @@ public:
                 }
                 const std::string auxFontName = form->getFallbackFontForChar(uChar, *font);
                 if (!auxFontName.empty()) {
-                    std::shared_ptr<GfxFont> auxFont = form->getDefaultResources()->lookupFont(auxFontName.c_str());
+                    std::shared_ptr<GfxFont> auxFont = form->getDefaultResources()->lookupFont(auxFontName);
 
                     // Here we just layout one char, we don't know if the one afterwards can be layouted with the original font
                     GooString auxContents = GooString(text->toStr().substr(i, isUnicode ? 2 : 1));
@@ -4614,14 +4614,16 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
             }
         }
         if (!tok.empty() && tok[0] == '/') {
-            if (!resources || !(font = resources->lookupFont(tok.c_str() + 1).get())) {
+            const auto fontName = std::string_view(tok).substr(1);
+            if (!resources || !(font = resources->lookupFont(fontName).get())) {
                 if (xref != nullptr && resourcesDict != nullptr) {
                     const char *fallback = determineFallbackFont(tok, forceZapfDingbats ? "ZapfDingbats" : "Helvetica");
                     // The font variable sometimes points to an object that needs to be deleted
                     // and sometimes not, depending on whether the call to lookupFont above fails.
                     // When the code path right here is taken, the destructor of fontToFree
                     // (which is a std::unique_ptr) will delete the font object at the end of this method.
-                    fontToFree = createAnnotDrawFont(xref, resourcesDict, tok.c_str() + 1, fallback);
+                    const char *fontNameC = fontName.data();
+                    fontToFree = createAnnotDrawFont(xref, resourcesDict, fontNameC, fallback);
                     font = fontToFree.get();
                     if (font && forceZapfDingbats) {
                         addedDingbatsResource = true;
@@ -4788,7 +4790,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
                     if (!d.fontName.empty()) {
                         appearBuf.append(" q\n");
                         GooString::appendf(appearBuf, "/{0:s} {1:.2f} Tf\n", d.fontName.c_str(), fontSize);
-                        currentFont = form->getDefaultResources()->lookupFont(d.fontName.c_str()).get();
+                        currentFont = form->getDefaultResources()->lookupFont(d.fontName).get();
                     }
 
                     char_dx = 0.0;
@@ -4922,14 +4924,16 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     if (tfPos >= 0) {
         const std::string &tok = daToks[tfPos];
         if (!tok.empty() && tok[0] == '/') {
-            if (!resources || !(font = resources->lookupFont(tok.c_str() + 1).get())) {
+            const auto fontName = std::string_view(tok).substr(1);
+            if (!resources || !(font = resources->lookupFont(fontName).get())) {
                 if (xref != nullptr && resourcesDict != nullptr) {
                     const char *fallback = determineFallbackFont(tok, "Helvetica");
                     // The font variable sometimes points to an object that needs to be deleted
                     // and sometimes not, depending on whether the call to lookupFont above fails.
                     // When the code path right here is taken, the destructor of fontToFree
                     // (which is a std::unique_ptr) will delete the font object at the end of this method.
-                    fontToFree = createAnnotDrawFont(xref, resourcesDict, tok.c_str() + 1, fallback);
+                    const char *fontNameC = fontName.data();
+                    fontToFree = createAnnotDrawFont(xref, resourcesDict, fontNameC, fallback);
                     font = fontToFree.get();
                 } else {
                     error(errSyntaxError, -1, "Unknown font in field's DA string");
@@ -5300,7 +5304,7 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
 
         double leftFontSize = field->getCustomAppearanceLeftFontSize();
         if (leftFontSize == 0) {
-            std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(daLeft.getFontName().c_str());
+            std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(daLeft.getFontName());
             leftFontSize = Annot::calculateFontSize(form, font.get(), &leftText, wMax / 2.0, hMax);
         }
         daLeft.setFontPtSize(leftFontSize);
@@ -5312,7 +5316,7 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
 
         double fontSize = daRight.getFontPtSize();
         if (fontSize == 0) {
-            std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(daLeft.getFontName().c_str());
+            std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(daLeft.getFontName());
             fontSize = Annot::calculateFontSize(form, font.get(), &contents, wMax / 2.0, hMax);
         }
         daRight.setFontPtSize(fontSize);
@@ -5344,7 +5348,7 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const std::string &text, con
     const double textwidth = width - 2 * textmargin;
 
     // create a Helvetica fake font
-    std::shared_ptr<const GfxFont> font = form ? form->getDefaultResources()->lookupFont(da.getFontName().c_str()) : nullptr;
+    std::shared_ptr<const GfxFont> font = form ? form->getDefaultResources()->lookupFont(da.getFontName()) : nullptr;
     if (!font) {
         font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().c_str());
     }

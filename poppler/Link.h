@@ -96,7 +96,7 @@ public:
     const std::vector<std::unique_ptr<LinkAction>> &nextActions() const;
 
 private:
-    static std::unique_ptr<LinkAction> parseAction(const Object *obj, const std::optional<std::string> &baseURI, std::set<int> *seenNextActions);
+    static std::unique_ptr<LinkAction> parseAction(const Object *obj, const std::optional<std::string> &baseURI, std::set<int> *seenNextActions, int depth);
 
     std::vector<std::unique_ptr<LinkAction>> nextActionList;
 };
