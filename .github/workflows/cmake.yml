@@ -38,7 +38,7 @@ jobs:
         if [[ "${{ matrix.os }}" == "macos-14" ]]; then
           sudo xcode-select -s /Applications/Xcode_16.2.app
         fi
-        cmake -DENABLE_QT5=OFF -DCMAKE_CXX_FLAGS="-Werror -Wno-deprecated-declarations" -B ${{github.workspace}}/build -G Ninja -DFONT_CONFIGURATION=generic -DBUILD_SHARED_LIBS=OFF -DTESTDATADIR=${{github.workspace}}/testfiles
+        cmake -DENABLE_QT5=OFF -DCMAKE_CXX_FLAGS="-Werror -Wno-deprecated-declarations" -B ${{github.workspace}}/build -G Ninja -DFONT_CONFIGURATION=generic -DENABLE_GPGME=OFF -DBUILD_SHARED_LIBS=OFF -DTESTDATADIR=${{github.workspace}}/testfiles
 
 
     - name: Build
