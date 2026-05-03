@@ -504,7 +504,6 @@ public:
     void dictAdd(std::string_view key, Object &&val);
     void dictSet(std::string_view key, Object &&val);
     void dictRemove(std::string_view key);
-    bool dictIs(std::string_view dictType) const;
     Object dictLookup(std::string_view key, int recursion = 0) const;
     const Object &dictLookupNF(std::string_view key) const;
     Object dictGetVal(int i) const;

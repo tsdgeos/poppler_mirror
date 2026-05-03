@@ -2712,7 +2712,7 @@ std::string Form::findFontInDefaultResources(const std::string &fontFamily, cons
         const char *key = fontDict->getKey(i);
         if (std::string_view(key).starts_with(kOurDictFontNamePrefix)) {
             const Object fontObj = fontDict->getVal(i);
-            if (fontObj.isDict() && fontObj.dictIs("Font")) {
+            if (fontObj.isDict("Font")) {
                 const Object fontBaseFontObj = fontObj.dictLookup("BaseFont");
                 if (fontBaseFontObj.isName(fontFamilyAndStyle)) {
                     return key;

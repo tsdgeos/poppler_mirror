@@ -850,27 +850,28 @@ int Catalog::getNumPages()
             error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
             return 0;
         }
-        Object pagesDict = catDict.dictLookup("Pages");
+        Object pagesObj = catDict.dictLookup("Pages");
 
         // This should really be isDict("Pages"), but I've seen at least one
         // PDF file where the /Type entry is missing.
-        if (!pagesDict.isDict()) {
-            error(errSyntaxError, -1, "Top-level pages object is wrong type ({0:s})", pagesDict.getTypeName());
+        if (!pagesObj.isDict()) {
+            error(errSyntaxError, -1, "Top-level pages object is wrong type ({0:s})", pagesObj.getTypeName());
             return 0;
         }
 
-        Object obj = pagesDict.dictLookup("Count");
+        Dict *pagesDict = pagesObj.getDict();
+        Object obj = pagesDict->lookup("Count");
         // some PDF files actually use real numbers here ("/Count 9.0")
         if (!obj.isNum()) {
-            if (pagesDict.dictIs("Page")) {
+            if (pagesDict->is("Page")) {
                 const Object &pageRootRef = catDict.dictLookupNF("Pages");
 
                 error(errSyntaxError, -1, "Pages top-level is a single Page. The document is malformed, trying to recover...");
 
-                Dict *pageDict = pagesDict.getDict();
+                Dict *pageDict = pagesDict;
                 if (pageRootRef.isRef()) {
                     const Ref pageRef = pageRootRef.getRef();
-                    auto p = std::make_unique<Page>(doc, 1, std::move(pagesDict), pageRef, std::make_unique<PageAttrs>(nullptr, pageDict));
+                    auto p = std::make_unique<Page>(doc, 1, std::move(pagesObj), pageRef, std::make_unique<PageAttrs>(nullptr, pageDict));
                     if (p->isOk()) {
                         pages.emplace_back(std::move(p), pageRef);
                         refPageMap.emplace(pageRef, pages.size());

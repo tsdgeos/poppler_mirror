@@ -150,15 +150,9 @@ inline void Object::dictRemove(std::string_view key)
     std::get<std::shared_ptr<Dict>>(data)->remove(key);
 }
 
-inline bool Object::dictIs(std::string_view dictType) const
-{
-    OBJECT_TYPE_CHECK(objDict);
-    return std::get<std::shared_ptr<Dict>>(data)->is(dictType);
-}
-
 inline bool Object::isDict(std::string_view dictType) const
 {
-    return type == objDict && dictIs(dictType);
+    return type == objDict && std::get<std::shared_ptr<Dict>>(data)->is(dictType);
 }
 
 inline Object Object::dictLookup(std::string_view key, int recursion) const
