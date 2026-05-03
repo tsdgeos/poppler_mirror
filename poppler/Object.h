@@ -377,7 +377,7 @@ public:
     }
 
     // Special type checking.
-    bool isName(std::string_view nameA) const { return type == objName && getName() == nameA; }
+    bool isName(std::string_view nameA) const { return type == objName && getNameString() == nameA; }
     bool isArrayOfLength(int length) const;
     bool isArrayOfLengthAtLeast(int length) const;
     bool isDict(std::string_view dictType) const;
