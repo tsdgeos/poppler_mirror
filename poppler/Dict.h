@@ -167,12 +167,6 @@ inline const Object &Object::dictLookupNF(std::string_view key) const
     return std::get<std::shared_ptr<Dict>>(data)->lookupNF(key);
 }
 
-inline const char *Object::dictGetKey(int i) const
-{
-    OBJECT_TYPE_CHECK(objDict);
-    return std::get<std::shared_ptr<Dict>>(data)->getKey(i);
-}
-
 inline Object Object::dictGetVal(int i) const
 {
     OBJECT_TYPE_CHECK(objDict);

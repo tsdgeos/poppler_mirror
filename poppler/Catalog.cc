@@ -470,7 +470,7 @@ const char *Catalog::getDestsName(int i)
     if (!obj->isDict()) {
         return nullptr;
     }
-    return obj->dictGetKey(i);
+    return obj->getDict()->getKey(i);
 }
 
 std::unique_ptr<LinkDest> Catalog::getDestsDest(int i)

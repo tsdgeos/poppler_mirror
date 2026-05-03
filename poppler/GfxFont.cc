@@ -2395,17 +2395,19 @@ void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h)
             hashFontObject1(&obj2, h);
         }
         break;
-    case objDict:
+    case objDict: {
+        Dict *dict = obj->getDict();
         h->hash('d');
-        n = obj->dictGetLength();
+        n = dict->getLength();
         h->hash(reinterpret_cast<char *>(&n), sizeof(int));
         for (i = 0; i < n; ++i) {
-            p = obj->dictGetKey(i);
+            p = dict->getKey(i);
             h->hash(p, static_cast<int>(strlen(p)));
             const Object &obj2 = obj->dictGetValNF(i);
             hashFontObject1(&obj2, h);
         }
         break;
+    }
     case objStream:
         // this should never happen - streams must be indirect refs
         break;

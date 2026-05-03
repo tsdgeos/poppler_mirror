@@ -500,7 +500,6 @@ public:
 
     // Dict accessors.
     int dictGetLength() const;
-    const char *dictGetKey(int i) const;
     void dictAdd(std::string_view key, Object &&val);
     void dictSet(std::string_view key, Object &&val);
     void dictRemove(std::string_view key);

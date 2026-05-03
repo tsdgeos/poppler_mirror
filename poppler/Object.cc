@@ -117,15 +117,17 @@ void Object::print(FILE *f) const
         }
         fprintf(f, "]");
         break;
-    case objDict:
+    case objDict: {
+        Dict *dict = getDict();
         fprintf(f, "<<");
-        for (int i = 0; i < dictGetLength(); ++i) {
-            fprintf(f, " /%s ", dictGetKey(i));
-            const Object &obj = dictGetValNF(i);
+        for (int i = 0; i < dict->getLength(); ++i) {
+            fprintf(f, " /%s ", dict->getKey(i));
+            const Object &obj = dict->getValNF(i);
             obj.print(f);
         }
         fprintf(f, " >>");
         break;
+    }
     case objStream:
         fprintf(f, "<stream>");
         break;

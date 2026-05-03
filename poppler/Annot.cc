@@ -990,7 +990,7 @@ std::unique_ptr<GooString> AnnotAppearance::getStateKey(int i)
 {
     const Object &obj1 = appearDict.dictLookupNF("N");
     if (obj1.isDict()) {
-        return std::make_unique<GooString>(obj1.dictGetKey(i));
+        return std::make_unique<GooString>(obj1.getDict()->getKey(i));
     }
     return nullptr;
 }

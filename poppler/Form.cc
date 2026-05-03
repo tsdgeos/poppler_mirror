@@ -236,8 +236,9 @@ FormWidgetButton::FormWidgetButton(PDFDoc *docA, Object *dictObj, unsigned num, 
     if (obj1.isDict()) {
         Object obj2 = obj1.dictLookup("N");
         if (obj2.isDict()) {
-            for (int i = 0; i < obj2.dictGetLength(); i++) {
-                const char *key = obj2.dictGetKey(i);
+            Dict *dictN = obj2.getDict();
+            for (int i = 0; i < dictN->getLength(); i++) {
+                const char *key = dictN->getKey(i);
                 if (strcmp(key, "Off") != 0) {
                     onStr = std::make_unique<GooString>(key);
                     break;
