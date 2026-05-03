@@ -76,7 +76,7 @@ bool MarkedContentOutputDev::contentStreamMatch()
     return formStack.empty();
 }
 
-void MarkedContentOutputDev::beginMarkedContent(const char * /*name*/, Dict *properties)
+void MarkedContentOutputDev::beginMarkedContent(const std::string & /*name*/, Dict *properties)
 {
     int id = -1;
     if (properties) {

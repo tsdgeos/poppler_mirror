@@ -207,7 +207,7 @@ public:
     void beginTextObject(GfxState *state) override;
     void endTextObject(GfxState *state) override;
 
-    void beginMarkedContent(const char *name, Dict *properties) override;
+    void beginMarkedContent(const std::string &name, Dict *properties) override;
     void endMarkedContent(GfxState *state) override;
 
     //----- image drawing

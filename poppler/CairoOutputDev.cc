@@ -3573,15 +3573,15 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int wi
     cairo_pattern_destroy(pattern);
 }
 
-void CairoOutputDev::beginMarkedContent(const char *name, Dict *properties)
+void CairoOutputDev::beginMarkedContent(const std::string &name, Dict *properties)
 {
     if (!logicalStruct || !isPDF()) {
         return;
     }
 
-    if (strcmp(name, "Artifact") == 0) {
+    if (name == "Artifact") {
         markedContentStack.emplace_back(name);
-        cairo_tag_begin(cairo, name, nullptr);
+        cairo_tag_begin(cairo, name.c_str(), nullptr);
         return;
     }
 
@@ -3594,7 +3594,7 @@ void CairoOutputDev::beginMarkedContent(const char *name, Dict *properties)
         return;
     }
 
-    std::string attribs = GooString::format("tag_name='{0:s}' id='{1:d}_{2:d}'", name, currentStructParents, mcid);
+    std::string attribs = GooString::format("tag_name='{0:r}' id='{1:d}_{2:d}'", &name, currentStructParents, mcid);
     mcidEmitted.insert(std::pair<int, int>(currentStructParents, mcid));
 
     std::string tag;

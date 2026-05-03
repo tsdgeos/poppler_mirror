@@ -139,11 +139,11 @@ void OutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, i
 
 void OutputDev::endMarkedContent(GfxState * /*state*/) { }
 
-void OutputDev::beginMarkedContent(const char * /*name*/, Dict * /*properties*/) { }
+void OutputDev::beginMarkedContent(const std::string & /*name*/, Dict * /*properties*/) { }
 
-void OutputDev::markPoint(const char * /*name*/) { }
+void OutputDev::markPoint(const std::string & /*name*/) { }
 
-void OutputDev::markPoint(const char * /*name*/, Dict * /*properties*/) { }
+void OutputDev::markPoint(const std::string & /*name*/, Dict * /*properties*/) { }
 
 void OutputDev::opiBegin(GfxState * /*state*/, const Dict & /*opiDict*/) { }
 

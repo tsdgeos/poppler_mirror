@@ -310,9 +310,9 @@ public:
     //----- grouping operators
 
     virtual void endMarkedContent(GfxState *state);
-    virtual void beginMarkedContent(const char *name, Dict *properties);
-    virtual void markPoint(const char *name);
-    virtual void markPoint(const char *name, Dict *properties);
+    virtual void beginMarkedContent(const std::string &name, Dict *properties);
+    virtual void markPoint(const std::string &name);
+    virtual void markPoint(const std::string &name, Dict *properties);
 
     //----- OPI functions
     virtual void opiBegin(GfxState *state, const Dict &opiDict);

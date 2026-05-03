@@ -88,7 +88,7 @@ public:
 
     void drawChar(GfxState *state, double xx, double yy, double dx, double dy, double ox, double oy, CharCode c, int nBytes, const Unicode *u, int uLen) override;
 
-    void beginMarkedContent(const char *name, Dict *properties) override;
+    void beginMarkedContent(const std::string &name, Dict *properties) override;
     void endMarkedContent(GfxState *state) override;
 
     const TextSpanArray &getTextSpans() const;

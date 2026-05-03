@@ -5102,11 +5102,11 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs)
     pushMarkedContent();
 
     const OCGs *contentConfig = catalog->getOptContentConfig();
-    const char *name0 = args[0].getName();
-    if (strncmp(name0, "OC", 2) == 0 && contentConfig) {
+    const auto name0 = args[0].getNameString();
+    if (contentConfig && name0 == "OC") {
         if (numArgs >= 2) {
             if (args[1].isName()) {
-                const char *name1 = args[1].getName();
+                const auto name1 = args[1].getNameString();
                 MarkedContentStack *mc = mcStack;
                 mc->kind = gfxMCOptionalContent;
                 Object markedContent = res->lookupMarkedContentNF(name1);
@@ -5114,7 +5114,7 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs)
                     bool visible = contentConfig->optContentIsVisible(&markedContent);
                     mc->ocSuppressed = !visible;
                 } else {
-                    error(errSyntaxError, getPos(), "DID NOT find {0:s}", name1);
+                    error(errSyntaxError, getPos(), "DID NOT find {0:r}", &name1);
                 }
             } else {
                 error(errSyntaxError, getPos(), "Unexpected MC Type: {0:d}", args[1].getType());
@@ -5122,12 +5122,12 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs)
         } else {
             error(errSyntaxError, getPos(), "insufficient arguments for Marked Content");
         }
-    } else if (args[0].isName("Span") && numArgs == 2) {
+    } else if (numArgs == 2 && name0 == "Span") {
         Object dictToUse;
         if (args[1].isDict()) {
             dictToUse = args[1].copy();
         } else if (args[1].isName()) {
-            dictToUse = res->lookupMarkedContentNF(args[1].getName()).fetch(xref);
+            dictToUse = res->lookupMarkedContentNF(args[1].getNameString()).fetch(xref);
         }
 
         if (dictToUse.isDict()) {
@@ -5141,7 +5141,7 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs)
     }
 
     if (printCommands) {
-        printf("  marked content: %s ", args[0].getName());
+        printf("  marked content: %s ", name0.c_str());
         if (numArgs == 2) {
             args[1].print(stdout);
         }
@@ -5151,9 +5151,9 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs)
     ocState = !contentIsHidden();
 
     if (numArgs == 2 && args[1].isDict()) {
-        out->beginMarkedContent(args[0].getName(), args[1].getDict());
+        out->beginMarkedContent(name0, args[1].getDict());
     } else if (numArgs == 1) {
-        out->beginMarkedContent(args[0].getName(), nullptr);
+        out->beginMarkedContent(name0, nullptr);
     }
 }
 
@@ -5180,8 +5180,9 @@ void Gfx::opEndMarkedContent(Object /*args*/[], int /*numArgs*/)
 
 void Gfx::opMarkPoint(Object args[], int numArgs)
 {
+    const auto name0 = args[0].getNameString();
     if (printCommands) {
-        printf("  mark point: %s ", args[0].getName());
+        printf("  mark point: %s ", name0.c_str());
         if (numArgs == 2) {
             args[1].print(stdout);
         }
@@ -5190,9 +5191,9 @@ void Gfx::opMarkPoint(Object args[], int numArgs)
     }
 
     if (numArgs == 2 && args[1].isDict()) {
-        out->markPoint(args[0].getName(), args[1].getDict());
+        out->markPoint(name0, args[1].getDict());
     } else {
-        out->markPoint(args[0].getName());
+        out->markPoint(name0);
     }
 }
 
