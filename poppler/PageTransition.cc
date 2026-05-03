@@ -48,31 +48,31 @@ PageTransition::PageTransition(Object *trans)
     // get type
     obj = dict->lookup("S");
     if (obj.isName()) {
-        const char *s = obj.getName();
+        const std::string &s = obj.getNameString();
 
-        if (strcmp("R", s) == 0) {
+        if (s == "R") {
             type = transitionReplace;
-        } else if (strcmp("Split", s) == 0) {
+        } else if (s == "Split") {
             type = transitionSplit;
-        } else if (strcmp("Blinds", s) == 0) {
+        } else if (s == "Blinds") {
             type = transitionBlinds;
-        } else if (strcmp("Box", s) == 0) {
+        } else if (s == "Box") {
             type = transitionBox;
-        } else if (strcmp("Wipe", s) == 0) {
+        } else if (s == "Wipe") {
             type = transitionWipe;
-        } else if (strcmp("Dissolve", s) == 0) {
+        } else if (s == "Dissolve") {
             type = transitionDissolve;
-        } else if (strcmp("Glitter", s) == 0) {
+        } else if (s == "Glitter") {
             type = transitionGlitter;
-        } else if (strcmp("Fly", s) == 0) {
+        } else if (s == "Fly") {
             type = transitionFly;
-        } else if (strcmp("Push", s) == 0) {
+        } else if (s == "Push") {
             type = transitionPush;
-        } else if (strcmp("Cover", s) == 0) {
+        } else if (s == "Cover") {
             type = transitionCover;
-        } else if (strcmp("Uncover", s) == 0) {
+        } else if (s == "Uncover") {
             type = transitionUncover;
-        } else if (strcmp("Fade", s) == 0) {
+        } else if (s == "Fade") {
             type = transitionFade;
         }
     }
@@ -86,11 +86,11 @@ PageTransition::PageTransition(Object *trans)
     // get alignment
     obj = dict->lookup("Dm");
     if (obj.isName()) {
-        const char *dm = obj.getName();
+        const std::string &dm = obj.getNameString();
 
-        if (strcmp("H", dm) == 0) {
+        if (dm == "H") {
             alignment = transitionHorizontal;
-        } else if (strcmp("V", dm) == 0) {
+        } else if (dm == "V") {
             alignment = transitionVertical;
         }
     }
@@ -98,11 +98,11 @@ PageTransition::PageTransition(Object *trans)
     // get direction
     obj = dict->lookup("M");
     if (obj.isName()) {
-        const char *m = obj.getName();
+        const std::string &m = obj.getNameString();
 
-        if (strcmp("I", m) == 0) {
+        if (m == "I") {
             direction = transitionInward;
-        } else if (strcmp("O", m) == 0) {
+        } else if (m == "O") {
             direction = transitionOutward;
         }
     }
@@ -115,7 +115,7 @@ PageTransition::PageTransition(Object *trans)
 
     obj = dict->lookup("Di");
     if (obj.isName()) {
-        if (strcmp("None", obj.getName()) == 0) {
+        if (obj.getNameString() == "None") {
             angle = 0;
         }
     }

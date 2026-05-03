@@ -188,9 +188,9 @@ static AnnotExternalDataType parseAnnotExternalData(Dict *dict)
 
     Object obj1 = dict->lookup("Subtype");
     if (obj1.isName()) {
-        const char *typeName = obj1.getName();
+        const std::string &typeName = obj1.getNameString();
 
-        if (!strcmp(typeName, "Markup3D")) {
+        if (typeName == "Markup3D") {
             type = annotExternalDataMarkup3D;
         } else {
             type = annotExternalDataMarkupUnknown;
@@ -284,9 +284,9 @@ AnnotBorderEffect::AnnotBorderEffect(Dict *dict)
 
     obj1 = dict->lookup("S");
     if (obj1.isName()) {
-        const char *effectName = obj1.getName();
+        const std::string &effectName = obj1.getNameString();
 
-        if (!strcmp(effectName, "C")) {
+        if (effectName == "C") {
             effectType = borderEffectCloudy;
         } else {
             effectType = borderEffectNoEffect;
@@ -639,17 +639,17 @@ AnnotBorderBS::AnnotBorderBS(Dict *dict)
     // Border style
     obj1 = dict->lookup("S");
     if (obj1.isName()) {
-        const char *styleName = obj1.getName();
+        const std::string &styleName = obj1.getNameString();
 
-        if (!strcmp(styleName, "S")) {
+        if (styleName == "S") {
             style = borderSolid;
-        } else if (!strcmp(styleName, "D")) {
+        } else if (styleName == "D") {
             style = borderDashed;
-        } else if (!strcmp(styleName, "B")) {
+        } else if (styleName == "B") {
             style = borderBeveled;
-        } else if (!strcmp(styleName, "I")) {
+        } else if (styleName == "I") {
             style = borderInset;
-        } else if (!strcmp(styleName, "U")) {
+        } else if (styleName == "U") {
             style = borderUnderlined;
         } else {
             style = borderSolid;
@@ -887,13 +887,13 @@ AnnotIconFit::AnnotIconFit(Dict *dict)
 
     obj1 = dict->lookup("SW");
     if (obj1.isName()) {
-        const char *scaleName = obj1.getName();
+        const std::string &scaleName = obj1.getNameString();
 
-        if (!strcmp(scaleName, "B")) {
+        if (scaleName == "B") {
             scaleWhen = scaleBigger;
-        } else if (!strcmp(scaleName, "S")) {
+        } else if (scaleName == "S") {
             scaleWhen = scaleSmaller;
-        } else if (!strcmp(scaleName, "N")) {
+        } else if (scaleName == "N") {
             scaleWhen = scaleNever;
         } else {
             scaleWhen = scaleAlways;
@@ -904,9 +904,9 @@ AnnotIconFit::AnnotIconFit(Dict *dict)
 
     obj1 = dict->lookup("S");
     if (obj1.isName()) {
-        const char *scaleName = obj1.getName();
+        const std::string &scaleName = obj1.getNameString();
 
-        if (!strcmp(scaleName, "A")) {
+        if (scaleName == "A") {
             scale = scaleAnamorphic;
         } else {
             scale = scaleProportional;
@@ -1380,7 +1380,7 @@ void Annot::initialize(PDFDoc *docA, Dict *dict)
     //----- get the appearance state
     asObj = dict->lookup("AS");
     if (asObj.isName()) {
-        appearState = std::make_unique<GooString>(asObj.getName());
+        appearState = std::make_unique<GooString>(asObj.getNameString());
     } else if (appearStreams && appearStreams->getNumStates() != 0) {
         error(errSyntaxError, -1, "Invalid or missing AS value in annotation containing one or more appearance subdictionaries");
         // AS value is required in this case, but if the
@@ -2182,11 +2182,11 @@ void AnnotMarkup::initialize(PDFDoc *docA, Dict *dict)
 
     obj1 = dict->lookup("RT");
     if (obj1.isName()) {
-        const char *replyName = obj1.getName();
+        const std::string &replyName = obj1.getNameString();
 
-        if (!strcmp(replyName, "R")) {
+        if (replyName == "R") {
             replyTo = replyTypeR;
-        } else if (!strcmp(replyName, "Group")) {
+        } else if (replyName == "Group") {
             replyTo = replyTypeGroup;
         } else {
             replyTo = replyTypeR;
@@ -2822,15 +2822,15 @@ void AnnotLink::initialize(Dict *dict)
 
     obj1 = dict->lookup("H");
     if (obj1.isName()) {
-        const char *effect = obj1.getName();
+        const std::string &effect = obj1.getNameString();
 
-        if (!strcmp(effect, "N")) {
+        if (effect == "N") {
             linkEffect = effectNone;
-        } else if (!strcmp(effect, "I")) {
+        } else if (effect == "I") {
             linkEffect = effectInvert;
-        } else if (!strcmp(effect, "O")) {
+        } else if (effect == "O") {
             linkEffect = effectOutline;
-        } else if (!strcmp(effect, "P")) {
+        } else if (effect == "P") {
             linkEffect = effectPush;
         } else {
             linkEffect = effectInvert;
@@ -2937,13 +2937,13 @@ void AnnotFreeText::initialize(Dict *dict)
 
     obj1 = dict->lookup("IT");
     if (obj1.isName()) {
-        const char *intentName = obj1.getName();
+        const std::string &intentName = obj1.getNameString();
 
-        if (!strcmp(intentName, "FreeText")) {
+        if (intentName == "FreeText") {
             intent = intentFreeText;
-        } else if (!strcmp(intentName, "FreeTextCallout")) {
+        } else if (intentName == "FreeTextCallout") {
             intent = intentFreeTextCallout;
-        } else if (!strcmp(intentName, "FreeTextTypeWriter")) {
+        } else if (intentName == "FreeTextTypeWriter") {
             intent = intentFreeTextTypeWriter;
         } else {
             intent = intentFreeText;
@@ -3525,11 +3525,11 @@ void AnnotLine::initialize(Dict *dict)
 
     obj1 = dict->lookup("IT");
     if (obj1.isName()) {
-        const char *intentName = obj1.getName();
+        const std::string &intentName = obj1.getNameString();
 
-        if (!strcmp(intentName, "LineArrow")) {
+        if (intentName == "LineArrow") {
             intent = intentLineArrow;
-        } else if (!strcmp(intentName, "LineDimension")) {
+        } else if (intentName == "LineDimension") {
             intent = intentLineDimension;
         } else {
             intent = intentLineArrow;
@@ -3545,11 +3545,11 @@ void AnnotLine::initialize(Dict *dict)
 
     obj1 = dict->lookup("CP");
     if (obj1.isName()) {
-        const char *captionName = obj1.getName();
+        const std::string &captionName = obj1.getNameString();
 
-        if (!strcmp(captionName, "Inline")) {
+        if (captionName == "Inline") {
             captionPos = captionPosInline;
-        } else if (!strcmp(captionName, "Top")) {
+        } else if (captionName == "Top") {
             captionPos = captionPosTop;
         } else {
             captionPos = captionPosInline;
@@ -4208,13 +4208,13 @@ void AnnotWidget::initialize(Dict *dict)
 
     obj1 = dict->lookup("H");
     if (obj1.isName()) {
-        const char *modeName = obj1.getName();
+        const std::string &modeName = obj1.getNameString();
 
-        if (!strcmp(modeName, "N")) {
+        if (modeName == "N") {
             mode = highlightModeNone;
-        } else if (!strcmp(modeName, "O")) {
+        } else if (modeName == "O") {
             mode = highlightModeOutline;
-        } else if (!strcmp(modeName, "P") || !strcmp(modeName, "T")) {
+        } else if ((modeName == "P") || (modeName == "T")) {
             mode = highlightModePush;
         } else {
             mode = highlightModeInvert;
@@ -6266,11 +6266,11 @@ void AnnotPolygon::initialize(Dict *dict)
 
     obj1 = dict->lookup("IT");
     if (obj1.isName()) {
-        const char *intentName = obj1.getName();
+        const std::string &intentName = obj1.getNameString();
 
-        if (!strcmp(intentName, "PolygonCloud")) {
+        if (intentName == "PolygonCloud") {
             intent = polygonCloud;
-        } else if (!strcmp(intentName, "PolyLineDimension")) {
+        } else if (intentName == "PolyLineDimension") {
             intent = polylineDimension;
         } else {
             intent = polygonDimension;
@@ -6991,7 +6991,7 @@ void AnnotSound::initialize(Dict *dict)
 
     obj1 = dict->lookup("Name");
     if (obj1.isName()) {
-        iconName = std::make_unique<GooString>(obj1.getName());
+        iconName = std::make_unique<GooString>(obj1.getNameString());
     } else {
         iconName = std::make_unique<GooString>("Speaker");
     }
@@ -7139,13 +7139,13 @@ Annot3D::Activation::Activation(Dict *dict)
 
     obj1 = dict->lookup("A");
     if (obj1.isName()) {
-        const char *name = obj1.getName();
+        const std::string &name = obj1.getNameString();
 
-        if (!strcmp(name, "PO")) {
+        if (name == "PO") {
             aTrigger = aTriggerPageOpened;
-        } else if (!strcmp(name, "PV")) {
+        } else if (name == "PV") {
             aTrigger = aTriggerPageVisible;
-        } else if (!strcmp(name, "XA")) {
+        } else if (name == "XA") {
             aTrigger = aTriggerUserAction;
         } else {
             aTrigger = aTriggerUnknown;
@@ -7156,11 +7156,11 @@ Annot3D::Activation::Activation(Dict *dict)
 
     obj1 = dict->lookup("AIS");
     if (obj1.isName()) {
-        const char *name = obj1.getName();
+        const std::string &name = obj1.getNameString();
 
-        if (!strcmp(name, "I")) {
+        if (name == "I") {
             aState = aStateEnabled;
-        } else if (!strcmp(name, "L")) {
+        } else if (name == "L") {
             aState = aStateDisabled;
         } else {
             aState = aStateUnknown;
@@ -7171,13 +7171,13 @@ Annot3D::Activation::Activation(Dict *dict)
 
     obj1 = dict->lookup("D");
     if (obj1.isName()) {
-        const char *name = obj1.getName();
+        const std::string &name = obj1.getNameString();
 
-        if (!strcmp(name, "PC")) {
+        if (name == "PC") {
             dTrigger = dTriggerPageClosed;
-        } else if (!strcmp(name, "PI")) {
+        } else if (name == "PI") {
             dTrigger = dTriggerPageInvisible;
-        } else if (!strcmp(name, "XD")) {
+        } else if (name == "XD") {
             dTrigger = dTriggerUserAction;
         } else {
             dTrigger = dTriggerUnknown;
@@ -7188,13 +7188,13 @@ Annot3D::Activation::Activation(Dict *dict)
 
     obj1 = dict->lookup("DIS");
     if (obj1.isName()) {
-        const char *name = obj1.getName();
+        const std::string &name = obj1.getNameString();
 
-        if (!strcmp(name, "U")) {
+        if (name == "U") {
             dState = dStateUninstantiaded;
-        } else if (!strcmp(name, "I")) {
+        } else if (name == "I") {
             dState = dStateInstantiated;
-        } else if (!strcmp(name, "L")) {
+        } else if (name == "L") {
             dState = dStateLive;
         } else {
             dState = dStateUnknown;
@@ -7280,13 +7280,13 @@ AnnotRichMedia::Activation::Activation(Dict *dict)
 {
     Object obj1 = dict->lookup("Condition");
     if (obj1.isName()) {
-        const char *name = obj1.getName();
+        const std::string &name = obj1.getNameString();
 
-        if (!strcmp(name, "PO")) {
+        if (name == "PO") {
             condition = conditionPageOpened;
-        } else if (!strcmp(name, "PV")) {
+        } else if (name == "PV") {
             condition = conditionPageVisible;
-        } else if (!strcmp(name, "XA")) {
+        } else if (name == "XA") {
             condition = conditionUserAction;
         } else {
             condition = conditionUserAction;
@@ -7305,13 +7305,13 @@ AnnotRichMedia::Deactivation::Deactivation(Dict *dict)
 {
     Object obj1 = dict->lookup("Condition");
     if (obj1.isName()) {
-        const char *name = obj1.getName();
+        const std::string &name = obj1.getNameString();
 
-        if (!strcmp(name, "PC")) {
+        if (name == "PC") {
             condition = conditionPageClosed;
-        } else if (!strcmp(name, "PI")) {
+        } else if (name == "PI") {
             condition = conditionPageInvisible;
-        } else if (!strcmp(name, "XD")) {
+        } else if (name == "XD") {
             condition = conditionUserAction;
         } else {
             condition = conditionUserAction;
@@ -7410,15 +7410,15 @@ AnnotRichMedia::Configuration::Configuration(Dict *dict)
 
     obj1 = dict->lookup("Subtype");
     if (obj1.isName()) {
-        const char *subtypeName = obj1.getName();
+        const std::string &subtypeName = obj1.getNameString();
 
-        if (!strcmp(subtypeName, "3D")) {
+        if (subtypeName == "3D") {
             type = type3D;
-        } else if (!strcmp(subtypeName, "Flash")) {
+        } else if (subtypeName == "Flash") {
             type = typeFlash;
-        } else if (!strcmp(subtypeName, "Sound")) {
+        } else if (subtypeName == "Sound") {
             type = typeSound;
-        } else if (!strcmp(subtypeName, "Video")) {
+        } else if (subtypeName == "Video") {
             type = typeVideo;
         } else {
             // determine from first non null instance
@@ -7462,15 +7462,15 @@ AnnotRichMedia::Configuration::Type AnnotRichMedia::Configuration::getType() con
 AnnotRichMedia::Instance::Instance(Dict *dict)
 {
     Object obj1 = dict->lookup("Subtype");
-    const char *name = obj1.isName() ? obj1.getName() : "";
+    const std::string name = obj1.isName() ? obj1.getNameString() : "";
 
-    if (!strcmp(name, "3D")) {
+    if (name == "3D") {
         type = type3D;
-    } else if (!strcmp(name, "Flash")) {
+    } else if (name == "Flash") {
         type = typeFlash;
-    } else if (!strcmp(name, "Sound")) {
+    } else if (name == "Sound") {
         type = typeSound;
-    } else if (!strcmp(name, "Video")) {
+    } else if (name == "Video") {
         type = typeVideo;
     } else {
         type = typeFlash;
@@ -7564,45 +7564,45 @@ std::shared_ptr<Annot> Annots::createAnnot(Object &&dictObject, const Object *ob
     std::shared_ptr<Annot> annot = nullptr;
     Object obj1 = dictObject.dictLookup("Subtype");
     if (obj1.isName()) {
-        const char *typeName = obj1.getName();
+        const std::string &typeName = obj1.getNameString();
 
-        if (!strcmp(typeName, "Text")) {
+        if (typeName == "Text") {
             annot = std::make_shared<AnnotText>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "Link")) {
+        } else if (typeName == "Link") {
             annot = std::make_shared<AnnotLink>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "FreeText")) {
+        } else if (typeName == "FreeText") {
             annot = std::make_shared<AnnotFreeText>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "Line")) {
+        } else if (typeName == "Line") {
             annot = std::make_shared<AnnotLine>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "Square")) {
+        } else if (typeName == "Square") {
             annot = std::make_shared<AnnotGeometry>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "Circle")) {
+        } else if (typeName == "Circle") {
             annot = std::make_shared<AnnotGeometry>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "Polygon")) {
+        } else if (typeName == "Polygon") {
             annot = std::make_shared<AnnotPolygon>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "PolyLine")) {
+        } else if (typeName == "PolyLine") {
             annot = std::make_shared<AnnotPolygon>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "Highlight")) {
+        } else if (typeName == "Highlight") {
             annot = std::make_shared<AnnotTextMarkup>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "Underline")) {
+        } else if (typeName == "Underline") {
             annot = std::make_shared<AnnotTextMarkup>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "Squiggly")) {
+        } else if (typeName == "Squiggly") {
             annot = std::make_shared<AnnotTextMarkup>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "StrikeOut")) {
+        } else if (typeName == "StrikeOut") {
             annot = std::make_shared<AnnotTextMarkup>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "Stamp")) {
+        } else if (typeName == "Stamp") {
             annot = std::make_shared<AnnotStamp>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "Caret")) {
+        } else if (typeName == "Caret") {
             annot = std::make_shared<AnnotCaret>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "Ink")) {
+        } else if (typeName == "Ink") {
             annot = std::make_shared<AnnotInk>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "FileAttachment")) {
+        } else if (typeName == "FileAttachment") {
             annot = std::make_shared<AnnotFileAttachment>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "Sound")) {
+        } else if (typeName == "Sound") {
             annot = std::make_shared<AnnotSound>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "Movie")) {
+        } else if (typeName == "Movie") {
             annot = std::make_shared<AnnotMovie>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "Widget")) {
+        } else if (typeName == "Widget") {
             // Find the annot in forms
             if (obj->isRef()) {
                 Form *form = doc->getCatalog()->getForm();
@@ -7616,19 +7616,19 @@ std::shared_ptr<Annot> Annots::createAnnot(Object &&dictObject, const Object *ob
             if (!annot) {
                 annot = std::make_shared<AnnotWidget>(doc, std::move(dictObject), obj);
             }
-        } else if (!strcmp(typeName, "Screen")) {
+        } else if (typeName == "Screen") {
             annot = std::make_shared<AnnotScreen>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "PrinterMark")) {
+        } else if (typeName == "PrinterMark") {
             annot = std::make_shared<Annot>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "TrapNet")) {
+        } else if (typeName == "TrapNet") {
             annot = std::make_shared<Annot>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "Watermark")) {
+        } else if (typeName == "Watermark") {
             annot = std::make_shared<Annot>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "3D")) {
+        } else if (typeName == "3D") {
             annot = std::make_shared<Annot3D>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "RichMedia")) {
+        } else if (typeName == "RichMedia") {
             annot = std::make_shared<AnnotRichMedia>(doc, std::move(dictObject), obj);
-        } else if (!strcmp(typeName, "Popup")) {
+        } else if (typeName == "Popup") {
             /* Popup annots are already handled by markup annots
              * Here we only care about popup annots without a
              * markup annotation associated

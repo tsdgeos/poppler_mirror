@@ -953,12 +953,13 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
     bool alpha;
     double opac;
 
-    obj1 = res->lookupGState(args[0].getName());
+    const std::string &stateName = args[0].getNameString();
+    obj1 = res->lookupGState(stateName);
     if (obj1.isNull()) {
         return;
     }
     if (!obj1.isDict()) {
-        error(errSyntaxError, getPos(), "ExtGState '{0:s}' is wrong type", args[0].getName());
+        error(errSyntaxError, getPos(), "ExtGState '{0:r}' is wrong type", &stateName);
         return;
     }
     if (printCommands) {
@@ -1185,7 +1186,7 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
                 Object fobj = fargs0.fetch(xref);
                 if (fobj.isDict()) {
                     Ref r = fargs0.getRef();
-                    std::shared_ptr<GfxFont> font = GfxFont::makeFont(xref, args[0].getName(), r, *fobj.getDict());
+                    std::shared_ptr<GfxFont> font = GfxFont::makeFont(xref, args[0].getNameString(), r, *fobj.getDict());
                     state->setFont(font, fargs1.getNum());
                     fontChanged = true;
                 }
@@ -1469,7 +1470,7 @@ void Gfx::opSetFillColorSpace(Object args[], int /*numArgs*/)
     std::unique_ptr<GfxColorSpace> colorSpace;
     GfxColor color;
 
-    Object obj = res->lookupColorSpace(args[0].getName());
+    Object obj = res->lookupColorSpace(args[0].getNameString());
     if (obj.isNull()) {
         colorSpace = GfxColorSpace::parse(res, &args[0], out, state);
     } else {
@@ -1497,7 +1498,7 @@ void Gfx::opSetStrokeColorSpace(Object args[], int /*numArgs*/)
     GfxColor color;
 
     state->setStrokePattern(nullptr);
-    Object obj = res->lookupColorSpace(args[0].getName());
+    Object obj = res->lookupColorSpace(args[0].getNameString());
     if (obj.isNull()) {
         colorSpace = GfxColorSpace::parse(res, &args[0], out, state);
     } else {
@@ -1583,7 +1584,7 @@ void Gfx::opSetFillColorN(Object args[], int numArgs)
         }
         if (numArgs > 0) {
             std::unique_ptr<GfxPattern> pattern;
-            if (args[numArgs - 1].isName() && (pattern = res->lookupPattern(args[numArgs - 1].getName(), out, state))) {
+            if (args[numArgs - 1].isName() && (pattern = res->lookupPattern(args[numArgs - 1].getNameString(), out, state))) {
                 state->setFillPattern(std::move(pattern));
             }
         }
@@ -1636,7 +1637,7 @@ void Gfx::opSetStrokeColorN(Object args[], int numArgs)
             return;
         }
         std::unique_ptr<GfxPattern> pattern;
-        if (args[numArgs - 1].isName() && (pattern = res->lookupPattern(args[numArgs - 1].getName(), out, state))) {
+        if (args[numArgs - 1].isName() && (pattern = res->lookupPattern(args[numArgs - 1].getNameString(), out, state))) {
             state->setStrokePattern(std::move(pattern));
         }
 
@@ -2392,7 +2393,7 @@ void Gfx::opShFill(Object args[], int /*numArgs*/)
         return;
     }
 
-    if (!(shading = res->lookupShading(args[0].getName(), out, state))) {
+    if (!(shading = res->lookupShading(args[0].getNameString(), out, state))) {
         return;
     }
 
@@ -3663,7 +3664,7 @@ void Gfx::opSetFont(Object args[], int /*numArgs*/)
 {
     std::shared_ptr<GfxFont> font;
 
-    if (!(font = res->lookupFont(args[0].getName()))) {
+    if (!(font = res->lookupFont(args[0].getNameString()))) {
         // unsetting the font (drawing no text) is better than using the
         // previous one and drawing random glyphs from it
         state->setFont(nullptr, args[1].getNum());
@@ -4140,18 +4141,17 @@ void Gfx::doIncCharCount(const std::string &s)
 
 void Gfx::opXObject(Object args[], int /*numArgs*/)
 {
-    const char *name;
-
     if (!ocState && !out->needCharCount()) {
         return;
     }
-    name = args[0].getName();
+
+    const std::string &name = args[0].getNameString();
     Object obj1 = res->lookupXObject(name);
     if (obj1.isNull()) {
         return;
     }
     if (!obj1.isStream()) {
-        error(errSyntaxError, getPos(), "XObject '{0:s}' is wrong type", name);
+        error(errSyntaxError, getPos(), "XObject '{0:r}' is wrong type", &name);
         return;
     }
 
@@ -4384,7 +4384,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         }
 
         if (obj1.isName() && inlineImg) {
-            Object obj2 = res->lookupColorSpace(obj1.getName());
+            Object obj2 = res->lookupColorSpace(obj1.getNameString());
             if (!obj2.isNull()) {
                 obj1 = std::move(obj2);
             }
@@ -4531,7 +4531,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                 obj1 = maskDict->lookup("CS");
             }
             if (obj1.isName()) {
-                Object obj2 = res->lookupColorSpace(obj1.getName());
+                Object obj2 = res->lookupColorSpace(obj1.getNameString());
                 if (!obj2.isNull()) {
                     obj1 = std::move(obj2);
                 }
@@ -4990,7 +4990,7 @@ std::unique_ptr<Stream> Gfx::buildImageStream()
             if (val.isEOF() || val.isError()) {
                 break;
             }
-            dict.dictAdd(obj.getName(), std::move(val));
+            dict.dictAdd(obj.getNameString(), std::move(val));
         }
         obj = parser->getObj();
     }
@@ -5102,11 +5102,11 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs)
     pushMarkedContent();
 
     const OCGs *contentConfig = catalog->getOptContentConfig();
-    const auto name0 = args[0].getNameString();
+    const std::string &name0 = args[0].getNameString();
     if (contentConfig && name0 == "OC") {
         if (numArgs >= 2) {
             if (args[1].isName()) {
-                const auto name1 = args[1].getNameString();
+                const std::string &name1 = args[1].getNameString();
                 MarkedContentStack *mc = mcStack;
                 mc->kind = gfxMCOptionalContent;
                 Object markedContent = res->lookupMarkedContentNF(name1);
@@ -5180,7 +5180,7 @@ void Gfx::opEndMarkedContent(Object /*args*/[], int /*numArgs*/)
 
 void Gfx::opMarkPoint(Object args[], int numArgs)
 {
-    const auto name0 = args[0].getNameString();
+    const std::string &name0 = args[0].getNameString();
     if (printCommands) {
         printf("  mark point: %s ", name0.c_str());
         if (numArgs == 2) {

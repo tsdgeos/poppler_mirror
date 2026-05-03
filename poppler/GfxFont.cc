@@ -203,7 +203,7 @@ std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, std::string_view tagA, Re
     // get base font name
     Object obj1 = fontDict.lookup("BaseFont");
     if (obj1.isName()) {
-        name = obj1.getName();
+        name = obj1.getNameString();
     }
 
     // There is no BaseFont in Type 3 fonts, try fontDescriptor.FontName
@@ -212,7 +212,7 @@ std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, std::string_view tagA, Re
         if (fontDesc.isDict()) {
             Object obj2 = fontDesc.dictLookup("FontName");
             if (obj2.isName()) {
-                name = obj2.getName();
+                name = obj2.getNameString();
             }
         }
     }
@@ -221,7 +221,7 @@ std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, std::string_view tagA, Re
     if (!name) {
         Object obj2 = fontDict.lookup("Name");
         if (obj2.isName()) {
-            name = obj2.getName();
+            name = obj2.getNameString();
         }
     }
 
@@ -476,13 +476,13 @@ void GfxFont::readFontDescriptor(const Dict &fontDict)
         // get name
         obj2 = obj1.dictLookup("FontName");
         if (obj2.isName()) {
-            embFontName = std::make_unique<GooString>(obj2.getName());
+            embFontName = std::make_unique<GooString>(obj2.getNameString());
         }
         if (embFontName == nullptr) {
             // get name with typo
             obj2 = obj1.dictLookup("Fontname");
             if (obj2.isName()) {
-                embFontName = std::make_unique<GooString>(obj2.getName());
+                embFontName = std::make_unique<GooString>(obj2.getNameString());
                 error(errSyntaxWarning, -1, "The file uses Fontname instead of FontName please notify the creator that the file is broken");
             }
         }
@@ -496,23 +496,24 @@ void GfxFont::readFontDescriptor(const Dict &fontDict)
         // get stretch
         obj2 = obj1.dictLookup("FontStretch");
         if (obj2.isName()) {
-            if (strcmp(obj2.getName(), "UltraCondensed") == 0) {
+            const std::string &stretchStr = obj2.getNameString();
+            if (stretchStr == "UltraCondensed") {
                 stretch = UltraCondensed;
-            } else if (strcmp(obj2.getName(), "ExtraCondensed") == 0) {
+            } else if (stretchStr == "ExtraCondensed") {
                 stretch = ExtraCondensed;
-            } else if (strcmp(obj2.getName(), "Condensed") == 0) {
+            } else if (stretchStr == "Condensed") {
                 stretch = Condensed;
-            } else if (strcmp(obj2.getName(), "SemiCondensed") == 0) {
+            } else if (stretchStr == "SemiCondensed") {
                 stretch = SemiCondensed;
-            } else if (strcmp(obj2.getName(), "Normal") == 0) {
+            } else if (stretchStr == "Normal") {
                 stretch = Normal;
-            } else if (strcmp(obj2.getName(), "SemiExpanded") == 0) {
+            } else if (stretchStr == "SemiExpanded") {
                 stretch = SemiExpanded;
-            } else if (strcmp(obj2.getName(), "Expanded") == 0) {
+            } else if (stretchStr == "Expanded") {
                 stretch = Expanded;
-            } else if (strcmp(obj2.getName(), "ExtraExpanded") == 0) {
+            } else if (stretchStr == "ExtraExpanded") {
                 stretch = ExtraExpanded;
-            } else if (strcmp(obj2.getName(), "UltraExpanded") == 0) {
+            } else if (stretchStr == "UltraExpanded") {
                 stretch = UltraExpanded;
             } else {
                 error(errSyntaxWarning, -1, "Invalid Font Stretch");
@@ -933,7 +934,7 @@ static bool testForNumericNames(const Dict &fontDict, bool hex)
             }
         } else if (obj.isName()) {
             // All character names must successfully parse.
-            if (!parseNumericName(obj.getName(), hex, nullptr)) {
+            if (!parseNumericName(obj.getNameString().c_str(), hex, nullptr)) {
                 numeric = false;
             }
         } else {
@@ -1211,7 +1212,8 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, std::string_view tagA, Ref idA, std::option
                         if (encFree[code]) {
                             gfree(const_cast<char *>(enc[code]));
                         }
-                        enc[code] = copyString(obj3.getName());
+                        const std::string &codeName = obj3.getNameString();
+                        enc[code] = copyString(codeName.c_str(), codeName.size());
                         encFree[code] = true;
                         ++code;
                     }
@@ -2378,11 +2380,11 @@ void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h)
         const auto &s = obj->getString();
         h->hash(s.c_str(), s.size());
     } break;
-    case objName:
+    case objName: {
         h->hash('n');
-        p = obj->getName();
-        h->hash(p, static_cast<int>(strlen(p)));
-        break;
+        const std::string &s = obj->getNameString();
+        h->hash(s.c_str(), s.size());
+    } break;
     case objNull:
         h->hash('z');
         break;

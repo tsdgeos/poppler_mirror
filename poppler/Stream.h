@@ -275,7 +275,7 @@ private:
     virtual bool hasGetChars() { return false; }
     virtual int getChars(int nChars, unsigned char *buffer);
 
-    static std::unique_ptr<Stream> makeFilter(const char *name, std::unique_ptr<Stream> str, Object *params, int recursion = 0, Dict *dict = nullptr);
+    static std::unique_ptr<Stream> makeFilter(const std::string &name, std::unique_ptr<Stream> str, Object *params, int recursion = 0, Dict *dict = nullptr);
 };
 
 //------------------------------------------------------------------------

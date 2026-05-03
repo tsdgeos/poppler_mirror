@@ -151,7 +151,7 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
                 if (unlikely(recursion + 1 >= recursionLimit)) {
                     break;
                 }
-                obj.dictAdd(key.getName(), std::move(obj2));
+                obj.dictAdd(key.getNameString(), std::move(obj2));
             }
         }
         if (buf1.isEOF()) {

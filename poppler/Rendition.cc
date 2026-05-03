@@ -192,10 +192,10 @@ void MediaParameters::parseMediaPlayParameters(const Dict &playDict)
     if (tmp.isDict()) {
         Object oname = tmp.dictLookup("S");
         if (oname.isName()) {
-            const char *name = oname.getName();
-            if (!strcmp(name, "F")) {
+            const std::string &name = oname.getNameString();
+            if (name == "F") {
                 duration = -1; // infinity
-            } else if (!strcmp(name, "T")) {
+            } else if (name == "T") {
                 Object ddict = tmp.dictLookup("T");
                 if (ddict.isDict()) {
                     Object tmp2 = ddict.dictLookup("V");
@@ -286,7 +286,7 @@ MediaRendition::MediaRendition(const Dict &dict)
         hasClip = true;
         Object tmp = tmp2.dictLookup("S");
         if (tmp.isName()) {
-            if (!strcmp(tmp.getName(), "MCD")) { // media clip data
+            if (tmp.getNameString() == "MCD") { // media clip data
                 Object obj1 = tmp2.dictLookup("D");
                 if (obj1.isDict()) {
                     Object obj2 = obj1.dictLookup("F");
@@ -313,7 +313,7 @@ MediaRendition::MediaRendition(const Dict &dict)
                 if (obj1.isString()) {
                     contentType = obj1.takeString();
                 }
-            } else if (!strcmp(tmp.getName(), "MCS")) { // media clip data
+            } else if (tmp.getNameString() == "MCS") { // media clip data
                 // TODO
             }
         } else {

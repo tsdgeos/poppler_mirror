@@ -122,14 +122,14 @@ void MovieActivationParameters::parseMovieActivation(const Object *aDict)
 
     obj1 = aDict->dictLookup("Mode");
     if (obj1.isName()) {
-        const char *name = obj1.getName();
-        if (!strcmp(name, "Once")) {
+        const std::string &name = obj1.getNameString();
+        if (name == "Once") {
             repeatMode = repeatModeOnce;
-        } else if (!strcmp(name, "Open")) {
+        } else if (name == "Open") {
             repeatMode = repeatModeOpen;
-        } else if (!strcmp(name, "Repeat")) {
+        } else if (name == "Repeat") {
             repeatMode = repeatModeRepeat;
-        } else if (!strcmp(name, "Palindrome")) {
+        } else if (name == "Palindrome") {
             repeatMode = repeatModePalindrome;
         }
     }

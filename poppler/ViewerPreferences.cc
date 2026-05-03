@@ -33,46 +33,46 @@ ViewerPreferences::ViewerPreferences(const Dict &prefDict)
 
     Object obj = prefDict.lookup("NonFullScreenPageMode");
     if (obj.isName()) {
-        const char *mode = obj.getName();
-        if (!strcmp(mode, "UseNone")) {
+        const std::string &mode = obj.getNameString();
+        if (mode == "UseNone") {
             nonFullScreenPageMode = nfpmUseNone;
-        } else if (!strcmp(mode, "UseOutlines")) {
+        } else if (mode == "UseOutlines") {
             nonFullScreenPageMode = nfpmUseOutlines;
-        } else if (!strcmp(mode, "UseThumbs")) {
+        } else if (mode == "UseThumbs") {
             nonFullScreenPageMode = nfpmUseThumbs;
-        } else if (!strcmp(mode, "UseOC")) {
+        } else if (mode == "UseOC") {
             nonFullScreenPageMode = nfpmUseOC;
         }
     }
 
     obj = prefDict.lookup("Direction");
     if (obj.isName()) {
-        const char *dir = obj.getName();
-        if (!strcmp(dir, "L2R")) {
+        const std::string &dir = obj.getNameString();
+        if (dir == "L2R") {
             direction = directionL2R;
-        } else if (!strcmp(dir, "R2L")) {
+        } else if (dir == "R2L") {
             direction = directionR2L;
         }
     }
 
     obj = prefDict.lookup("PrintScaling");
     if (obj.isName()) {
-        const char *ps = obj.getName();
-        if (!strcmp(ps, "None")) {
+        const std::string &ps = obj.getNameString();
+        if (ps == "None") {
             printScaling = printScalingNone;
-        } else if (!strcmp(ps, "AppDefault")) {
+        } else if (ps == "AppDefault") {
             printScaling = printScalingAppDefault;
         }
     }
 
     obj = prefDict.lookup("Duplex");
     if (obj.isName()) {
-        const char *d = obj.getName();
-        if (!strcmp(d, "Simplex")) {
+        const std::string &d = obj.getNameString();
+        if (d == "Simplex") {
             duplex = duplexSimplex;
-        } else if (!strcmp(d, "DuplexFlipShortEdge")) {
+        } else if (d == "DuplexFlipShortEdge") {
             duplex = duplexDuplexFlipShortEdge;
-        } else if (!strcmp(d, "DuplexFlipLongEdge")) {
+        } else if (d == "DuplexFlipLongEdge") {
             duplex = duplexDuplexFlipLongEdge;
         }
     }

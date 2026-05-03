@@ -1854,7 +1854,7 @@ bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, unsi
                         continue;
                     }
                 }
-                if (type.isName() && strcmp(type.getName(), "Annot") == 0) {
+                if (type.isName() && (type.getNameString() == "Annot")) {
                     const Object &obj2 = dict->lookupNF("P");
                     if (obj2.isRef()) {
                         if (obj2.getRef().num == oldPageNum) {
@@ -1873,7 +1873,7 @@ bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, unsi
                             if (page.isDict()) {
                                 Dict *pageDict = page.getDict();
                                 Object pagetype = pageDict->lookup("Type");
-                                if (!pagetype.isName() || strcmp(pagetype.getName(), "Page") != 0) {
+                                if (!pagetype.isName() || (pagetype.getNameString() != "Page")) {
                                     continue;
                                 }
                             }

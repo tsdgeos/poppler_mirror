@@ -608,15 +608,15 @@ LinkMovie::LinkMovie(const Object *obj)
 
     tmp = obj->dictLookup("Operation");
     if (tmp.isName()) {
-        const char *name = tmp.getName();
+        const std::string &name = tmp.getNameString();
 
-        if (!strcmp(name, "Play")) {
+        if (name == "Play") {
             operation = operationTypePlay;
-        } else if (!strcmp(name, "Stop")) {
+        } else if (name == "Stop") {
             operation = operationTypeStop;
-        } else if (!strcmp(name, "Pause")) {
+        } else if (name == "Pause") {
             operation = operationTypePause;
-        } else if (!strcmp(name, "Resume")) {
+        } else if (name == "Resume") {
             operation = operationTypeResume;
         }
     }
@@ -786,14 +786,16 @@ LinkOCGState::LinkOCGState(const Object *obj)
                 }
 
                 stList.list.clear();
-                if (obj2.isName("ON")) {
+
+                const std::string &name = obj2.getNameString();
+                if (name == "ON") {
                     stList.st = On;
-                } else if (obj2.isName("OFF")) {
+                } else if (name == "OFF") {
                     stList.st = Off;
-                } else if (obj2.isName("Toggle")) {
+                } else if (name == "Toggle") {
                     stList.st = Toggle;
                 } else {
-                    error(errSyntaxWarning, -1, "Invalid name '{0:s}' in OCG Action state array", obj2.getName());
+                    error(errSyntaxWarning, -1, "Invalid name '{0:r}' in OCG Action state array", &name);
                     isValid = false;
                 }
             } else if (obj2.isRef()) {

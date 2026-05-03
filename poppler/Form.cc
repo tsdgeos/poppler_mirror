@@ -2308,8 +2308,8 @@ void FormFieldSignature::parseInfo()
 
     // check if subfilter is supported for signature validation, only detached signatures work for now
     Object subfilterName = sig_dict.dictLookup("SubFilter");
-    if (subfilterName.getType() == objName && subfilterName.getName()) {
-        signature_type = CryptoSign::signatureTypeFromString(subfilterName.getName());
+    if (subfilterName.getType() == objName) {
+        signature_type = CryptoSign::signatureTypeFromString(subfilterName.getNameString());
         switch (signature_type) {
         case CryptoSign::SignatureType::adbe_pkcs7_sha1:
         case CryptoSign::SignatureType::adbe_pkcs7_detached:
