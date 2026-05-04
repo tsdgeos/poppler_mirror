@@ -825,7 +825,7 @@ bool XRef::readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n
 
     constexpr int intNBytes = sizeof(int);
     constexpr int longLongNBytes = sizeof(long long);
-    const auto nChars = w[0] + w[1] + w[2];
+    const int nChars = w[0] + w[1] + w[2];
     std::array<unsigned char, intNBytes + 2 * longLongNBytes> xrefEntryBuffer;
 
     for (int i = first; i < first + n; ++i) {
@@ -838,12 +838,12 @@ bool XRef::readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n
 
         if (w[0] != 0) {
             for (type = 0; j < w[0]; ++j) {
-                auto c = xrefEntryBuffer[j];
+                const unsigned char c = xrefEntryBuffer[j];
                 type = (type << 8) + c;
             }
         }
         for (offset = 0; j < (w[1] + w[0]); ++j) {
-            auto c = xrefEntryBuffer[j];
+            const unsigned char c = xrefEntryBuffer[j];
             offset = (offset << 8) + c;
         }
         if (offset > offsetMax) {
@@ -851,7 +851,7 @@ bool XRef::readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n
             return false;
         }
         for (gen = 0; j < (w[2] + w[1] + w[0]); ++j) {
-            auto c = xrefEntryBuffer[j];
+            const unsigned char c = xrefEntryBuffer[j];
             gen = (gen << 8) + c;
         }
         if (gen > INT_MAX) {
