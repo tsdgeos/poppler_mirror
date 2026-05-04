@@ -198,8 +198,6 @@ private:
     std::stack<std::vector<int> *> m_codeToGIDStack;
 
     FT_Library m_ftLibrary;
-    // as of FT 2.1.8, CID fonts are indexed by CID instead of GID
-    bool m_useCIDs;
 };
 
 #endif

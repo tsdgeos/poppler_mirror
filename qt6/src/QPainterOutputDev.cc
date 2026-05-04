@@ -153,11 +153,6 @@ QPainterOutputDev::QPainterOutputDev(QPainter *painter)
     if (error) {
         qCritical() << "An error occurred will initializing the FreeType library";
     }
-
-    // as of FT 2.1.8, CID fonts are indexed by CID instead of GID
-    FT_Int major, minor, patch;
-    FT_Library_Version(m_ftLibrary, &major, &minor, &patch);
-    m_useCIDs = major > 2 || (major == 2 && (minor > 1 || (minor == 1 && patch > 7)));
 }
 
 QPainterOutputDev::~QPainterOutputDev()
@@ -591,13 +586,6 @@ void QPainterOutputDev::updateFont(GfxState *state)
         case fontCIDType0C: {
             std::vector<int> cidToGIDMap;
 
-            // check for a CFF font
-            if (!m_useCIDs) {
-                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? std::unique_ptr<FoFiType1C>(FoFiType1C::load(fontLoc->path.c_str())) : std::unique_ptr<FoFiType1C>(FoFiType1C::make(std::span(fontBuffer)));
-
-                cidToGIDMap = ff ? ff->getCIDToGIDMap() : std::vector<int> {};
-            }
-
             m_codeToGIDCache[id] = std::move(cidToGIDMap);
 
             break;
@@ -611,14 +599,6 @@ void QPainterOutputDev::updateFont(GfxState *state)
             }
 
             std::vector<int> cidToGIDMap;
-
-            if (codeToGID.empty() && !m_useCIDs) {
-                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str(), fontLoc->fontNum) : FoFiTrueType::make(std::span(fontBuffer), fontLoc->fontNum);
-
-                if (ff && ff->isOpenTypeCFF()) {
-                    cidToGIDMap = ff->getCIDToGIDMap();
-                }
-            }
 
             m_codeToGIDCache[id] = !codeToGID.empty() ? codeToGID : cidToGIDMap;
 
