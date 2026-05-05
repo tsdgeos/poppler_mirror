@@ -287,7 +287,7 @@ int main(int argc, char *argv[])
             return 3;
         }
         if (!embFile->save(targetPath)) {
-            error(errIO, -1, "Error saving embedded file as '{0:s}'", targetPath.c_str());
+            error(errIO, -1, "Error saving embedded file as '{0:r}'", &targetPath);
             return 2;
         }
     }

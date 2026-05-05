@@ -424,7 +424,7 @@ Ref embed(XRef *xref, const std::string &imagePath)
 {
     std::unique_ptr<GooFile> imageFile(GooFile::open(imagePath));
     if (!imageFile) {
-        error(errIO, -1, "Couldn't open {0:s}", imagePath.c_str());
+        error(errIO, -1, "Couldn't open {0:r}", &imagePath);
         return Ref::INVALID();
     }
     return embed(xref, *imageFile);

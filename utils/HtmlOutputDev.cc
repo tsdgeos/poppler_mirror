@@ -818,7 +818,7 @@ int HtmlPage::dumpComplexHeaders(FILE *const file, FILE *&pageFile, int page)
         }
 
         if (!pageFile) {
-            error(errIO, -1, "Couldn't open html file '{0:s}'", pageFileName.c_str());
+            error(errIO, -1, "Couldn't open html file '{0:r}'", &pageFileName);
             return 1;
         }
 
@@ -1275,7 +1275,7 @@ void HtmlOutputDev::drawJpegImage(GfxState *state, Stream *str)
     std::string fName = createImageFileName("jpg");
     f1 = dataUrls ? ims.open("wb") : fopen(fName.c_str(), "wb");
     if (!f1) {
-        error(errIO, -1, "Couldn't open image file '{0:s}'", fName.c_str());
+        error(errIO, -1, "Couldn't open image file '{0:r}'", &fName);
         return;
     }
 
@@ -1321,14 +1321,14 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
     std::string fName = createImageFileName("png");
     f1.reset(dataUrls ? ims.open("wb") : fopen(fName.c_str(), "wb"));
     if (!f1) {
-        error(errIO, -1, "Couldn't open image file '{0:s}'", fName.c_str());
+        error(errIO, -1, "Couldn't open image file '{0:r}'", &fName);
         return;
     }
 
     PNGWriter writer { isMask ? PNGWriter::MONOCHROME : PNGWriter::RGB };
     // TODO can we calculate the resolution of the image?
     if (!writer.init(f1.get(), width, height, 72, 72)) {
-        error(errInternal, -1, "Can't init PNG for image '{0:s}'", fName.c_str());
+        error(errInternal, -1, "Can't init PNG for image '{0:r}'", &fName);
         return;
     }
 
@@ -1351,7 +1351,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
             // Convert into a PNG row
             p = imgStr.getLine();
             if (!p) {
-                error(errIO, -1, "Failed to read PNG. '{0:s}' will be incorrect", fName.c_str());
+                error(errIO, -1, "Failed to read PNG. '{0:r}' will be incorrect", &fName);
                 gfree(row);
                 return;
             }
@@ -1365,7 +1365,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
             }
 
             if (!writer.writeRow(row_pointer)) {
-                error(errIO, -1, "Failed to write into PNG '{0:s}'", fName.c_str());
+                error(errIO, -1, "Failed to write into PNG '{0:r}'", &fName);
                 gfree(row);
                 return;
             }
@@ -1402,7 +1402,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
             }
 
             if (!writer.writeRow(&png_row)) {
-                error(errIO, -1, "Failed to write into PNG '{0:s}'", fName.c_str());
+                error(errIO, -1, "Failed to write into PNG '{0:r}'", &fName);
                 gfree(png_row);
                 return;
             }

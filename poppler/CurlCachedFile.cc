@@ -56,7 +56,7 @@ size_t CurlCachedFileLoader::init(CachedFile *cachedFileA)
         curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &contentLength);
         size = contentLength;
     } else {
-        error(errInternal, -1, "Failed to get size of '{0:s}'.", url.c_str());
+        error(errInternal, -1, "Failed to get size of '{0:r}'.", &url);
         size = -1;
     }
     curl_easy_reset(curl);

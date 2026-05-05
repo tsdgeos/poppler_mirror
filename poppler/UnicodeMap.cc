@@ -53,7 +53,7 @@ std::unique_ptr<UnicodeMap> UnicodeMap::parse(const std::string &encodingNameA)
     char *tokptr;
 
     if (!(f = globalParams->getUnicodeMapFile(encodingNameA))) {
-        error(errSyntaxError, -1, "Couldn't find unicodeMap file for the '{0:s}' encoding", encodingNameA.c_str());
+        error(errSyntaxError, -1, "Couldn't find unicodeMap file for the '{0:r}' encoding", &encodingNameA);
         return {};
     }
 
@@ -88,10 +88,10 @@ std::unique_ptr<UnicodeMap> UnicodeMap::parse(const std::string &encodingNameA)
                 }
                 eMap.push_back(std::move(ext));
             } else {
-                error(errSyntaxError, -1, "Bad line ({0:d}) in unicodeMap file for the '{1:s}' encoding", line, encodingNameA.c_str());
+                error(errSyntaxError, -1, "Bad line ({0:d}) in unicodeMap file for the '{1:r}' encoding", line, &encodingNameA);
             }
         } else {
-            error(errSyntaxError, -1, "Bad line ({0:d}) in unicodeMap file for the '{1:s}' encoding", line, encodingNameA.c_str());
+            error(errSyntaxError, -1, "Bad line ({0:d}) in unicodeMap file for the '{1:r}' encoding", line, &encodingNameA);
         }
         ++line;
     }

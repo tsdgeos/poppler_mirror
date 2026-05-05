@@ -3020,18 +3020,19 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
     mapping.resize(nComps);
     unsigned int newOverprintMask = 0;
     for (int i = 0; i < nComps; i++) {
-        if (names[i] == "None") {
+        const std::string &name = names[i];
+        if (name == "None") {
             mapping[i] = -1;
-        } else if (names[i] == "Cyan") {
+        } else if (name == "Cyan") {
             newOverprintMask |= 0x01;
             mapping[i] = 0;
-        } else if (names[i] == "Magenta") {
+        } else if (name == "Magenta") {
             newOverprintMask |= 0x02;
             mapping[i] = 1;
-        } else if (names[i] == "Yellow") {
+        } else if (name == "Yellow") {
             newOverprintMask |= 0x04;
             mapping[i] = 2;
-        } else if (names[i] == "Black") {
+        } else if (name == "Black") {
             newOverprintMask |= 0x08;
             mapping[i] = 3;
         } else {
@@ -3042,7 +3043,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
                 sepFunc = func.get();
             } else {
                 for (const std::unique_ptr<GfxSeparationColorSpace> &sepCS : sepsCS) {
-                    if (!sepCS->getName()->compare(names[i])) {
+                    if (!sepCS->getName()->compare(name)) {
                         sepFunc = sepCS->getFunc();
                         break;
                     }
@@ -3050,9 +3051,9 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
             }
             for (std::size_t j = 0; j < separationList->size(); j++) {
                 const std::unique_ptr<GfxSeparationColorSpace> &sepCS = (*separationList)[j];
-                if (!sepCS->getName()->compare(names[i])) {
+                if (!sepCS->getName()->compare(name)) {
                     if (sepFunc != nullptr && sepCS->getFunc()->hasDifferentResultSet(sepFunc)) {
-                        error(errSyntaxWarning, -1, "Different functions found for '{0:s}', convert immediately", names[i].c_str());
+                        error(errSyntaxWarning, -1, "Different functions found for '{0:r}', convert immediately", &name);
                         mapping.clear();
                         overprintMask = 0xffffffff;
                         return;
@@ -3066,7 +3067,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
             }
             if (!found) {
                 if (separationList->size() == maxSepComps) {
-                    error(errSyntaxWarning, -1, "Too many ({0:ulld}) spots, convert '{1:s}' immediately", static_cast<unsigned long long>(maxSepComps), names[i].c_str());
+                    error(errSyntaxWarning, -1, "Too many ({0:ulld}) spots, convert '{1:r}' immediately", static_cast<unsigned long long>(maxSepComps), &name);
                     mapping.clear();
                     overprintMask = 0xffffffff;
                     return;
@@ -3074,10 +3075,10 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
                 mapping[i] = separationList->size() + 4;
                 newOverprintMask |= startOverprintMask;
                 if (nComps == 1) {
-                    separationList->push_back(std::make_unique<GfxSeparationColorSpace>(std::make_unique<GooString>(names[i]), alt->copy(), func->copy()));
+                    separationList->push_back(std::make_unique<GfxSeparationColorSpace>(std::make_unique<GooString>(name), alt->copy(), func->copy()));
                 } else {
                     for (const std::unique_ptr<GfxSeparationColorSpace> &sepCS : sepsCS) {
-                        if (!sepCS->getName()->compare(names[i])) {
+                        if (!sepCS->getName()->compare(name)) {
                             found = true;
                             separationList->push_back(sepCS->copyAsOwnType());
                             break;

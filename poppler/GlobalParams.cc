@@ -1113,7 +1113,7 @@ FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(co
         }
     }
 
-    error(errIO, -1, "Couldn't find font file for {0:s} {1:s}", fontFamily.c_str(), fontStyle.c_str());
+    error(errIO, -1, "Couldn't find font file for {0:r} {1:r}", &fontFamily, &fontStyle);
     return {};
 }
 

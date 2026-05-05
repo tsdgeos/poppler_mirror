@@ -513,7 +513,7 @@ static PDFSubtypeConformance pdfConformanceFromString(const std::string &pdfsubv
             /**/
             break;
         }
-        error(errSyntaxWarning, -1, "Unexpected pdf subtype {0:s}", conf.c_str());
+        error(errSyntaxWarning, -1, "Unexpected pdf subtype {0:r}", &conf);
     }
 
     return subtypeConfNone;
@@ -849,7 +849,7 @@ int PDFDoc::savePageAs(const std::string &name, int pageNo)
     Object page = getXRef()->fetch(*refPage);
 
     if (!(f = openFile(name.c_str(), "wb"))) {
-        error(errIO, -1, "Couldn't open file '{0:s}'", name.c_str());
+        error(errIO, -1, "Couldn't open file '{0:r}'", &name);
         return errOpenFile;
     }
     // Calls fclose on f when the fileCloser is destroyed because it goes out of scope
@@ -995,7 +995,7 @@ int PDFDoc::saveAs(const std::string &name, PDFWriteMode mode)
     int res;
 
     if (!(f = openFile(name.c_str(), "wb"))) {
-        error(errIO, -1, "Couldn't open file '{0:s}'", name.c_str());
+        error(errIO, -1, "Couldn't open file '{0:r}'", &name);
         return errOpenFile;
     }
     outStr = new FileOutStream(f, 0);
@@ -1030,7 +1030,7 @@ int PDFDoc::saveWithoutChangesAs(const std::string &name)
     int res;
 
     if (!(f = openFile(name.c_str(), "wb"))) {
-        error(errIO, -1, "Couldn't open file '{0:s}'", name.c_str());
+        error(errIO, -1, "Couldn't open file '{0:r}'", &name);
         return errOpenFile;
     }
 

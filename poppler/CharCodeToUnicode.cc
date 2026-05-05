@@ -184,7 +184,7 @@ std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::parseCMapFromFile(const st
             return nullptr;
         }
     } else {
-        error(errSyntaxError, -1, "Couldn't find ToUnicode CMap file for '{0:s}'", fileName.c_str());
+        error(errSyntaxError, -1, "Couldn't find ToUnicode CMap file for '{0:r}'", &fileName);
     }
     return ctu;
 }
@@ -218,7 +218,7 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
                     }
                     fclose(f);
                 } else {
-                    error(errSyntaxError, -1, "Couldn't find ToUnicode CMap file for '{0:s}'", name.c_str());
+                    error(errSyntaxError, -1, "Couldn't find ToUnicode CMap file for '{0:r}'", &name);
                 }
             }
             pst->getToken(tok1, sizeof(tok1), &n1);
