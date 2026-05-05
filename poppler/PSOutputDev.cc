@@ -1770,13 +1770,14 @@ void PSOutputDev::setupResources(Dict *resDict)
     setupForms(resDict);
 
     //----- recursively scan XObjects
-    Object xObjDict = resDict->lookup("XObject");
-    if (xObjDict.isDict()) {
-        for (int i = 0; i < xObjDict.dictGetLength(); ++i) {
+    const Object xObjDictObj = resDict->lookup("XObject");
+    if (xObjDictObj.isDict()) {
+        const Dict *xObjDict = xObjDictObj.getDict();
+        for (int i = 0; i < xObjDict->getLength(); ++i) {
 
             // avoid infinite recursion on XObjects
             bool skip = false;
-            const Object &xObjRef = xObjDict.dictGetValNF(i);
+            const Object &xObjRef = xObjDict->getValNF(i);
             if (xObjRef.isRef()) {
                 const Ref ref0 = xObjRef.getRef();
                 const auto [_, inserted] = resourceIDs.insert(ref0.num);
@@ -1787,7 +1788,7 @@ void PSOutputDev::setupResources(Dict *resDict)
             if (!skip) {
 
                 // process the XObject's resource dictionary
-                Object xObj = xObjDict.dictGetVal(i);
+                Object xObj = xObjDict->getVal(i);
                 if (xObj.isStream()) {
                     Ref resObjRef;
                     Object resObj = xObj.streamGetDict()->lookup("Resources", &resObjRef);
@@ -1808,14 +1809,15 @@ void PSOutputDev::setupResources(Dict *resDict)
     }
 
     //----- recursively scan Patterns
-    Object patDict = resDict->lookup("Pattern");
-    if (patDict.isDict()) {
+    const Object patDictObj = resDict->lookup("Pattern");
+    if (patDictObj.isDict()) {
+        const Dict *patDict = patDictObj.getDict();
         inType3Char = true;
-        for (int i = 0; i < patDict.dictGetLength(); ++i) {
+        for (int i = 0; i < patDict->getLength(); ++i) {
 
             // avoid infinite recursion on Patterns
             bool skip = false;
-            const Object &patRef = patDict.dictGetValNF(i);
+            const Object &patRef = patDict->getValNF(i);
             if (patRef.isRef()) {
                 const Ref ref0 = patRef.getRef();
                 const auto [_, inserted] = resourceIDs.insert(ref0.num);
@@ -1826,7 +1828,7 @@ void PSOutputDev::setupResources(Dict *resDict)
             if (!skip) {
 
                 // process the Pattern's resource dictionary
-                Object pat = patDict.dictGetVal(i);
+                Object pat = patDict->getVal(i);
                 if (pat.isStream()) {
                     Ref resObjRef;
                     Object resObj = pat.streamGetDict()->lookup("Resources", &resObjRef);
@@ -2667,11 +2669,12 @@ void PSOutputDev::setupImages(Dict *resDict)
     }
 
     //----- recursively scan XObjects
-    Object xObjDict = resDict->lookup("XObject");
-    if (xObjDict.isDict()) {
-        for (int i = 0; i < xObjDict.dictGetLength(); ++i) {
-            const Object &xObjRef = xObjDict.dictGetValNF(i);
-            Object xObj = xObjDict.dictGetVal(i);
+    Object xObjDictObj = resDict->lookup("XObject");
+    if (xObjDictObj.isDict()) {
+        const Dict *xObjDict = xObjDictObj.getDict();
+        for (int i = 0; i < xObjDict->getLength(); ++i) {
+            const Object &xObjRef = xObjDict->getValNF(i);
+            Object xObj = xObjDict->getVal(i);
             if (xObj.isStream()) {
                 Object subtypeObj = xObj.streamGetDict()->lookup("Subtype");
                 if (subtypeObj.isName("Image")) {
@@ -2876,11 +2879,12 @@ void PSOutputDev::setupForms(Dict *resDict)
         return;
     }
 
-    Object xObjDict = resDict->lookup("XObject");
-    if (xObjDict.isDict()) {
-        for (int i = 0; i < xObjDict.dictGetLength(); ++i) {
-            const Object &xObjRef = xObjDict.dictGetValNF(i);
-            Object xObj = xObjDict.dictGetVal(i);
+    Object xObjDictObj = resDict->lookup("XObject");
+    if (xObjDictObj.isDict()) {
+        const Dict *xObjDict = xObjDictObj.getDict();
+        for (int i = 0; i < xObjDict->getLength(); ++i) {
+            const Object &xObjRef = xObjDict->getValNF(i);
+            Object xObj = xObjDict->getVal(i);
             if (xObj.isStream()) {
                 Object subtypeObj = xObj.streamGetDict()->lookup("Subtype");
                 if (subtypeObj.isName("Form")) {

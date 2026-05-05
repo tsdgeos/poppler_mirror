@@ -173,10 +173,4 @@ inline Object Object::dictGetVal(int i) const
     return std::get<std::shared_ptr<Dict>>(data)->getVal(i);
 }
 
-inline const Object &Object::dictGetValNF(int i) const
-{
-    OBJECT_TYPE_CHECK(objDict);
-    return std::get<std::shared_ptr<Dict>>(data)->getValNF(i);
-}
-
 #endif

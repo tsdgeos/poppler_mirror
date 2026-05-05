@@ -2405,7 +2405,7 @@ void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h)
         for (i = 0; i < n; ++i) {
             p = dict->getKey(i);
             h->hash(p, static_cast<int>(strlen(p)));
-            const Object &obj2 = obj->dictGetValNF(i);
+            const Object &obj2 = dict->getValNF(i);
             hashFontObject1(&obj2, h);
         }
         break;

@@ -506,7 +506,6 @@ public:
     Object dictLookup(std::string_view key, int recursion = 0) const;
     const Object &dictLookupNF(std::string_view key) const;
     Object dictGetVal(int i) const;
-    const Object &dictGetValNF(int i) const;
 
     // Stream accessors.
     [[nodiscard]] bool streamRewind();

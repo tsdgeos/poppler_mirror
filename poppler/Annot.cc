@@ -1014,9 +1014,10 @@ bool AnnotAppearance::referencesStream(const Object *stateObj, Ref refToStream)
             return true;
         }
     } else if (stateObj->isDict()) { // Test each value
-        const int size = stateObj->dictGetLength();
+        const Dict *stateDict = stateObj->getDict();
+        const int size = stateDict->getLength();
         for (int i = 0; i < size; ++i) {
-            const Object &obj1 = stateObj->dictGetValNF(i);
+            const Object &obj1 = stateDict->getValNF(i);
             if (obj1.isRef()) {
                 const Ref r = obj1.getRef();
                 if (r == refToStream) {
@@ -1081,9 +1082,10 @@ void AnnotAppearance::removeStateStreams(const Object *state)
     if (state->isRef()) {
         removeStream(state->getRef());
     } else if (state->isDict()) {
-        const int size = state->dictGetLength();
+        const Dict *stateDict = state->getDict();
+        const int size = stateDict->getLength();
         for (int i = 0; i < size; ++i) {
-            const Object &obj2 = state->dictGetValNF(i);
+            const Object &obj2 = stateDict->getValNF(i);
             if (obj2.isRef()) {
                 removeStream(obj2.getRef());
             }
