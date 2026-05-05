@@ -325,7 +325,6 @@ private:
     SplashBitmap *alpha0Bitmap; // for non-isolated groups, this is the
                                 //   bitmap containing the alpha0 values
     int alpha0X, alpha0Y; // offset within alpha0Bitmap
-    double aaGamma[splashAASize * splashAASize + 1];
     double minLineWidth;
     SplashThinLineMode thinLineMode;
     SplashClipResult opClipRes;

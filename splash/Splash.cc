@@ -60,7 +60,17 @@
 
 //------------------------------------------------------------------------
 
-#define splashAAGamma 1.5
+// C++26: make constexpr, needs constexpr std::pow
+static const std::array<double, splashAASize * splashAASize + 1> aaGamma = []() {
+    constexpr double splashAAGamma = 1.5;
+    std::array<double, splashAASize * splashAASize + 1> tGamma { 0.0 };
+    for (size_t i = 0; i < tGamma.size(); ++i) {
+        double value = static_cast<double>(i) / (splashAASize * splashAASize);
+        double expValue = std::pow(value, splashAAGamma);
+        tGamma[i] = static_cast<unsigned char>((expValue * 255) + 0.5);
+    }
+    return tGamma;
+}();
 
 // distance of Bezier control point from center for circle approximation
 // = (4 * (sqrt(2) - 1) / 3) * r
@@ -1498,17 +1508,12 @@ inline void Splash::transform(const std::array<double, 6> &matrix, double xi, do
 
 Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, SplashScreenParams *screenParams)
 {
-    int i;
-
     bitmap = bitmapA;
     vectorAntialias = vectorAntialiasA;
     inShading = false;
     state = new SplashState(bitmap->width, bitmap->height, vectorAntialias, screenParams);
     if (vectorAntialias) {
         aaBuf = new SplashBitmap(splashAASize * bitmap->width, splashAASize, 1, splashModeMono1, false);
-        for (i = 0; i <= splashAASize * splashAASize; ++i) {
-            aaGamma[i] = static_cast<unsigned char>(splashRound(splashPow(static_cast<double>(i) / static_cast<double>(splashAASize * splashAASize), splashAAGamma) * 255));
-        }
     } else {
         aaBuf = nullptr;
     }
@@ -1523,17 +1528,12 @@ Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, SplashScreenParams 
 
 Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, const SplashScreen &screenA)
 {
-    int i;
-
     bitmap = bitmapA;
     inShading = false;
     vectorAntialias = vectorAntialiasA;
     state = new SplashState(bitmap->width, bitmap->height, vectorAntialias, screenA);
     if (vectorAntialias) {
         aaBuf = new SplashBitmap(splashAASize * bitmap->width, splashAASize, 1, splashModeMono1, false);
-        for (i = 0; i <= splashAASize * splashAASize; ++i) {
-            aaGamma[i] = static_cast<unsigned char>(splashRound(splashPow(static_cast<double>(i) / static_cast<double>(splashAASize * splashAASize), splashAAGamma) * 255));
-        }
     } else {
         aaBuf = nullptr;
     }
