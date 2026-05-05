@@ -1506,25 +1506,7 @@ inline void Splash::transform(const std::array<double, 6> &matrix, double xi, do
 // Splash
 //------------------------------------------------------------------------
 
-Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, SplashScreenParams *screenParams)
-{
-    bitmap = bitmapA;
-    vectorAntialias = vectorAntialiasA;
-    inShading = false;
-    state = new SplashState(bitmap->width, bitmap->height, vectorAntialias, screenParams);
-    if (vectorAntialias) {
-        aaBuf = new SplashBitmap(splashAASize * bitmap->width, splashAASize, 1, splashModeMono1, false);
-    } else {
-        aaBuf = nullptr;
-    }
-    minLineWidth = 0;
-    thinLineMode = splashThinLineDefault;
-    debugMode = false;
-    alpha0Bitmap = nullptr;
-    groupBackBitmap = nullptr;
-    groupBackX = 0;
-    groupBackY = 0;
-}
+Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, SplashScreenParams *screenParams) : Splash(bitmapA, vectorAntialiasA, SplashScreen { screenParams }) { }
 
 Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, const SplashScreen &screenA)
 {
