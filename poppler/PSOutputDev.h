@@ -401,8 +401,8 @@ private:
     void writeDocSetup(Catalog *catalog, const std::vector<int> &pageList, bool duplexA);
 
     void writePSChar(char c);
-    void writePS(const char *s);
-    void writePSBuf(const char *s, int len);
+    void writePS(std::string_view s);
+    void writePSBuf(const char *s, size_t len);
     void writePSFmt(const char *fmt, ...) GOOSTRING_FORMAT;
     void writePSString(const std::string &s);
     void writePSName(const char *s);

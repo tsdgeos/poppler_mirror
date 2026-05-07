@@ -1708,7 +1708,7 @@ void PSOutputDev::writeDocSetup(Catalog *catalog, const std::vector<int> &pageLi
     }
     if (customCodeCbk) {
         if ((s = (*customCodeCbk)(this, psOutCustomDocSetup, 0, customCodeCbkData))) {
-            writePS(s->c_str());
+            writePS(s->toStr());
             delete s;
         }
     }
@@ -1730,7 +1730,7 @@ void PSOutputDev::writeTrailer()
     } else {
         writePS("end\n");
         writePS("%%DocumentSuppliedResources:\n");
-        writePS(embFontList.c_str());
+        writePS(embFontList);
         if (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep) {
             writePS("%%DocumentProcessColors:");
             if (processColors & psProcessCyan) {
@@ -2805,7 +2805,7 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
         // put the inner array into the outer array
         writePSFmt("{0:d} array 1 index {1:d} 2 index put\n", innerSize, outer);
         line = col = 0;
-        writePS(const_cast<char *>(doUseASCIIHex ? "dup 0 <" : "dup 0 <~"));
+        writePS(doUseASCIIHex ? "dup 0 <" : "dup 0 <~");
         for (;;) {
             do {
                 c = str->getChar();
@@ -2838,7 +2838,7 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
             // chunks are 1 or 4 bytes each, so we have to stop at 232
             // but make it 225 just to be safe
             if (col > 225) {
-                writePS(const_cast<char *>(doUseASCIIHex ? "> put\n" : "~> put\n"));
+                writePS(doUseASCIIHex ? "> put\n" : "~> put\n");
                 ++line;
                 if (line >= innerSize) {
                     break;
@@ -2852,7 +2852,7 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
             }
         }
         if (c == (doUseASCIIHex ? '>' : '~') || c == EOF) {
-            writePS(const_cast<char *>(doUseASCIIHex ? "> put\n" : "~> put\n"));
+            writePS(doUseASCIIHex ? "> put\n" : "~> put\n");
             if (useLZW || useRLE) {
                 ++line;
                 writePSFmt("{0:d} <> put\n", line);
@@ -3701,7 +3701,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
 
     if (customCodeCbk) {
         if ((s = (*customCodeCbk)(this, psOutCustomPageSetup, pageNum, customCodeCbkData))) {
-            writePS(s->c_str());
+            writePS(s->toStr());
             delete s;
         }
     }
@@ -5717,7 +5717,7 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
             }
             (void)str2->rewind();
             col = 0;
-            writePS(const_cast<char *>(useASCIIHex ? "[<" : "[<~"));
+            writePS(useASCIIHex ? "[<" : "[<~");
             do {
                 do {
                     c = str2->getChar();
@@ -5747,11 +5747,11 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
                 // chunks are 1 or 5 bytes each, so we have to stop at 245
                 // but make it 240 just to be safe
                 if (col > 240) {
-                    writePS(const_cast<char *>(useASCIIHex ? ">\n<" : "~>\n<~"));
+                    writePS(useASCIIHex ? ">\n<" : "~>\n<~");
                     col = 0;
                 }
             } while (c != (useASCIIHex ? '>' : '~') && c != EOF);
-            writePS(const_cast<char *>(useASCIIHex ? ">\n" : "~>\n"));
+            writePS(useASCIIHex ? ">\n" : "~>\n");
             // add an extra entry because the LZWDecode/RunLengthDecode filter may
             // read past the end
             writePS("<>]\n");
@@ -5853,7 +5853,7 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
         writePS("    /RunLengthDecode filter\n");
     }
     if (useCompressed) {
-        writePS(s->c_str());
+        writePS(s.value());
     }
 
     if (mode == psModeForm || inType3Char || preloadImagesForms) {
@@ -6023,7 +6023,7 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
             writePSFmt("MaskData_{0:d}_{1:d} pdfMaskInit\n", ref->getRefNum(), ref->getRefGen());
         } else {
             writePS("currentfile\n");
-            writePS(maskFilters.c_str());
+            writePS(maskFilters);
             writePS("pdfMask\n");
 
             // add FlateEncode/LZWEncode/RunLengthEncode and ASCIIHex/85 encode filters
@@ -6088,7 +6088,7 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
             }
             (void)str2->rewind();
             col = 0;
-            writePS(const_cast<char *>(useASCIIHex ? "[<" : "[<~"));
+            writePS(useASCIIHex ? "[<" : "[<~");
             do {
                 do {
                     c = str2->getChar();
@@ -6118,11 +6118,11 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
                 // chunks are 1 or 5 bytes each, so we have to stop at 245
                 // but make it 240 just to be safe
                 if (col > 240) {
-                    writePS(const_cast<char *>(useASCIIHex ? ">\n<" : "~>\n<~"));
+                    writePS(useASCIIHex ? ">\n<" : "~>\n<~");
                     col = 0;
                 }
             } while (c != (useASCIIHex ? '>' : '~') && c != EOF);
-            writePS(const_cast<char *>(useASCIIHex ? ">\n" : "~>\n"));
+            writePS(useASCIIHex ? ">\n" : "~>\n");
             // add an extra entry because the FlateEncode/LZWDecode/RunLengthDecode filter may
             // read past the end
             writePS("<>]\n");
@@ -6236,7 +6236,7 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
         writePS("    /RunLengthDecode filter\n");
     }
     if (useCompressed && s.has_value()) {
-        writePS(s->c_str());
+        writePS(s.value());
     }
 
     // end of image (data) dictionary
@@ -6256,7 +6256,7 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
         // mask data source
         if (mode == psModeForm || inType3Char || preloadImagesForms) {
             writePS("  /DataSource {pdfMaskSrc}\n");
-            writePS(maskFilters.c_str());
+            writePS(maskFilters);
         } else {
             writePS("  /DataSource maskStream\n");
         }
@@ -7128,7 +7128,7 @@ void PSOutputDev::cvtFunction(const Function *func, bool invertPSFunction)
                     break;
                 }
             }
-            writePS(codeString->c_str());
+            writePS(codeString->toStr());
             writePS("\n");
             n = func4->getOutputSize();
             for (i = 0; i < n; ++i) {
@@ -7137,7 +7137,7 @@ void PSOutputDev::cvtFunction(const Function *func, bool invertPSFunction)
             }
             writePS("}\n");
         } else {
-            writePS(func4->getCodeString()->c_str());
+            writePS(func4->getCodeString()->toStr());
             writePS("\n");
         }
         break;
@@ -7153,7 +7153,7 @@ void PSOutputDev::writePSChar(char c)
     }
 }
 
-void PSOutputDev::writePS(const char *s)
+void PSOutputDev::writePS(std::string_view s)
 {
     if (t3String) {
         t3String->append(s);
@@ -7162,15 +7162,9 @@ void PSOutputDev::writePS(const char *s)
     }
 }
 
-void PSOutputDev::writePSBuf(const char *s, int len)
+void PSOutputDev::writePSBuf(const char *s, size_t len)
 {
-    if (t3String) {
-        for (int i = 0; i < len; i++) {
-            t3String->push_back(s[i]);
-        }
-    } else {
-        (*outputFunc)(outputStream, std::string_view(s, len));
-    }
+    writePS(std::string_view { s, len });
 }
 
 void PSOutputDev::writePSFmt(const char *fmt, ...)
@@ -7178,12 +7172,8 @@ void PSOutputDev::writePSFmt(const char *fmt, ...)
     va_list args;
 
     va_start(args, fmt);
-    if (t3String) {
-        GooString::appendfv(t3String->toNonConstStr(), const_cast<char *>(fmt), args);
-    } else {
-        const std::string buf = GooString::formatv(const_cast<char *>(fmt), args);
-        (*outputFunc)(outputStream, buf);
-    }
+    const std::string buf = GooString::formatv(fmt, args);
+    writePS(buf);
     va_end(args);
 }
 
