@@ -5,7 +5,7 @@
  * Copyright (C) 2018, 2019, 2021, 2022 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2019, 2021, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
- * Copyright (C) 2020, 2022, 2025 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2020, 2022, 2025, 2026 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  * Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Marco Trevisan <mail@3v1n0.net>
@@ -268,7 +268,7 @@ PopplerDocument *poppler_document_new_from_data(char *data, int length, const ch
     if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
         /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
         str = std::make_unique<MemStream>(data, 0, length, Object::null());
-        newDoc = std::make_unique<PDFDoc>(std::move(str), password ? std::optional<GooString>(password) : std::nullopt, password ? std::optional<GooString>(password) : std::nullopt);
+        newDoc = std::make_unique<PDFDoc>(std::move(str), std::optional<GooString>(password), std::optional<GooString>(password));
     }
 
     return _poppler_document_new_from_pdfdoc(std::move(initer), std::move(newDoc), error);
@@ -329,7 +329,7 @@ PopplerDocument *poppler_document_new_from_bytes(GBytes *bytes, const char *pass
     if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
         /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
         str = std::make_unique<BytesStream>(bytes, Object::null());
-        newDoc = std::make_unique<PDFDoc>(std::move(str), password ? std::optional<GooString>(password) : std::nullopt, password ? std::optional<GooString>(password) : std::nullopt);
+        newDoc = std::make_unique<PDFDoc>(std::move(str), std::optional<GooString>(password), std::optional<GooString>(password));
     }
 
     return _poppler_document_new_from_pdfdoc(std::move(initer), std::move(newDoc), error);
@@ -390,7 +390,7 @@ PopplerDocument *poppler_document_new_from_stream(GInputStream *stream, goffset 
     auto newDoc = std::make_unique<PDFDoc>(std::move(str), password_g, password_g);
     if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
         /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
-        newDoc = std::make_unique<PDFDoc>(newDoc->getBaseStream()->copy(), password ? std::optional<GooString>(password) : std::nullopt, password ? std::optional<GooString>(password) : std::nullopt);
+        newDoc = std::make_unique<PDFDoc>(newDoc->getBaseStream()->copy(), std::optional<GooString>(password), std::optional<GooString>(password));
     }
 
     return _poppler_document_new_from_pdfdoc(std::move(initer), std::move(newDoc), error);
@@ -511,7 +511,7 @@ PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GErr
     auto newDoc = std::make_unique<PDFDoc>(std::move(stream), password_g, password_g);
     if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
         /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
-        newDoc = std::make_unique<PDFDoc>(newDoc->getBaseStream()->copy(), password ? std::optional<GooString>(password) : std::nullopt, password ? std::optional<GooString>(password) : std::nullopt);
+        newDoc = std::make_unique<PDFDoc>(newDoc->getBaseStream()->copy(), std::optional<GooString>(password), std::optional<GooString>(password));
     }
 
     return _poppler_document_new_from_pdfdoc(std::move(initer), std::move(newDoc), error);
