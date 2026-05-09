@@ -71,7 +71,7 @@ public:
 
     bool getColor(int x, int y, SplashColorPtr c) const override;
 
-    virtual GfxFunctionShading *getShading() { return shading; }
+    GfxFunctionShading *getShading() { return shading; }
 
     bool isCMYK() const override { return gfxMode == csDeviceCMYK; }
 
@@ -99,7 +99,7 @@ public:
 
     virtual bool getParameter(double xs, double ys, double *t) const = 0;
 
-    virtual GfxUnivariateShading *getShading() { return shading; }
+    GfxUnivariateShading *getShading() { return shading; }
 
     bool isCMYK() const override { return gfxMode == csDeviceCMYK; }
 
