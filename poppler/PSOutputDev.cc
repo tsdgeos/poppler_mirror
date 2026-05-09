@@ -3872,7 +3872,7 @@ void PSOutputDev::updateFillColor(GfxState *state)
             color.c[0] = gfxColorComp1;
             sepCS->getCMYK(&color, &cmyk);
             writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} {4:.4g} ({5:t}) ck\n", colToDbl(state->getFillColor()->c[0]), colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName());
-            addCustomColor(sepCS);
+            addCustomColor(*sepCS);
         } else {
             state->getFillCMYK(&cmyk);
             c = colToDbl(cmyk.c);
@@ -3937,7 +3937,7 @@ void PSOutputDev::updateStrokeColor(GfxState *state)
             color.c[0] = gfxColorComp1;
             sepCS->getCMYK(&color, &cmyk);
             writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} {4:.4g} ({5:t}) CK\n", colToDbl(state->getStrokeColor()->c[0]), colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName());
-            addCustomColor(sepCS);
+            addCustomColor(*sepCS);
         } else {
             state->getStrokeCMYK(&cmyk);
             c = colToDbl(cmyk.c);
@@ -3979,42 +3979,42 @@ void PSOutputDev::addProcessColor(double c, double m, double y, double k)
     }
 }
 
-void PSOutputDev::addCustomColor(GfxSeparationColorSpace *sepCS)
+void PSOutputDev::addCustomColor(const GfxSeparationColorSpace &sepCS)
 {
     PSOutCustomColor *cc;
     GfxColor color;
     GfxCMYK cmyk;
 
-    if (!sepCS->getName()->compare("Black")) {
+    if (!sepCS.getName()->compare("Black")) {
         processColors |= psProcessBlack;
         return;
     }
-    if (!sepCS->getName()->compare("Cyan")) {
+    if (!sepCS.getName()->compare("Cyan")) {
         processColors |= psProcessCyan;
         return;
     }
-    if (!sepCS->getName()->compare("Yellow")) {
+    if (!sepCS.getName()->compare("Yellow")) {
         processColors |= psProcessYellow;
         return;
     }
-    if (!sepCS->getName()->compare("Magenta")) {
+    if (!sepCS.getName()->compare("Magenta")) {
         processColors |= psProcessMagenta;
         return;
     }
-    if (!sepCS->getName()->compare("All")) {
+    if (!sepCS.getName()->compare("All")) {
         return;
     }
-    if (!sepCS->getName()->compare("None")) {
+    if (!sepCS.getName()->compare("None")) {
         return;
     }
     for (cc = customColors; cc; cc = cc->next) {
-        if (!cc->name->compare(sepCS->getName()->toStr())) {
+        if (!cc->name->compare(sepCS.getName()->toStr())) {
             return;
         }
     }
     color.c[0] = gfxColorComp1;
-    sepCS->getCMYK(&color, &cmyk);
-    cc = new PSOutCustomColor(colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName()->copy());
+    sepCS.getCMYK(&color, &cmyk);
+    cc = new PSOutCustomColor(colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS.getName()->copy());
     cc->next = customColors;
     customColors = cc;
 }
@@ -6580,7 +6580,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
             writePS(" {}");
         }
         if (updateColors) {
-            addCustomColor(separationCS);
+            addCustomColor(*separationCS);
         }
         break;
 

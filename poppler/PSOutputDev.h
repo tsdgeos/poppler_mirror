@@ -380,7 +380,7 @@ private:
     void setupForms(Dict *resDict);
     void setupForm(Ref id, Object *strObj);
     void addProcessColor(double c, double m, double y, double k);
-    void addCustomColor(GfxSeparationColorSpace *sepCS);
+    void addCustomColor(const GfxSeparationColorSpace &sepCS);
     void doPath(const GfxPath *path);
     void maskToClippingPath(Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert);
     void doImageL1(Object *ref, GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert);
