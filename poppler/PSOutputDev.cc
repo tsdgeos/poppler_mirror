@@ -6343,9 +6343,6 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
 
 void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, bool genXform, bool updateColors, bool map01)
 {
-    GfxCalGrayColorSpace *calGrayCS;
-    GfxCalRGBColorSpace *calRGBCS;
-    GfxLabColorSpace *labCS;
     GfxIndexedColorSpace *indexedCS;
     GfxSeparationColorSpace *separationCS;
     GfxDeviceNColorSpace *deviceNCS;
@@ -6371,8 +6368,8 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
         }
         break;
 
-    case csCalGray:
-        calGrayCS = static_cast<GfxCalGrayColorSpace *>(colorSpace);
+    case csCalGray: {
+        const GfxCalGrayColorSpace *calGrayCS = static_cast<GfxCalGrayColorSpace *>(colorSpace);
         writePS("[/CIEBasedA <<\n");
         writePSFmt(" /DecodeA {{{0:.4g} exp}} bind\n", calGrayCS->getGamma());
         writePSFmt(" /MatrixA [{0:.4g} {1:.4g} {2:.4g}]\n", calGrayCS->getWhiteX(), calGrayCS->getWhiteY(), calGrayCS->getWhiteZ());
@@ -6386,6 +6383,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
             processColors |= psProcessBlack;
         }
         break;
+    }
 
     case csDeviceRGB:
         writePS("/DeviceRGB");
@@ -6397,8 +6395,8 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
         }
         break;
 
-    case csCalRGB:
-        calRGBCS = static_cast<GfxCalRGBColorSpace *>(colorSpace);
+    case csCalRGB: {
+        const GfxCalRGBColorSpace *calRGBCS = static_cast<GfxCalRGBColorSpace *>(colorSpace);
         writePS("[/CIEBasedABC <<\n");
         writePSFmt(" /DecodeABC [{{{0:.4g} exp}} bind {{{1:.4g} exp}} bind {{{2:.4g} exp}} bind]\n", calRGBCS->getGammaR(), calRGBCS->getGammaG(), calRGBCS->getGammaB());
         writePSFmt(" /MatrixABC [{0:.4g} {1:.4g} {2:.4g} {3:.4g} {4:.4g} {5:.4g} {6:.4g} {7:.4g} {8:.4g}]\n", calRGBCS->getMatrix()[0], calRGBCS->getMatrix()[1], calRGBCS->getMatrix()[2], calRGBCS->getMatrix()[3], calRGBCS->getMatrix()[4],
@@ -6413,6 +6411,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
             processColors |= psProcessCMYK;
         }
         break;
+    }
 
     case csDeviceCMYK:
         writePS("/DeviceCMYK");
@@ -6424,8 +6423,8 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
         }
         break;
 
-    case csLab:
-        labCS = static_cast<GfxLabColorSpace *>(colorSpace);
+    case csLab: {
+        const GfxLabColorSpace *labCS = static_cast<GfxLabColorSpace *>(colorSpace);
         writePS("[/CIEBasedABC <<\n");
         if (map01) {
             writePS(" /RangeABC [0 1 0 1 0 1]\n");
@@ -6453,6 +6452,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
             processColors |= psProcessCMYK;
         }
         break;
+    }
 
     case csICCBased:
 #if USE_CMS
@@ -6508,6 +6508,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
         if (baseCS->getMode() == csDeviceN && level != psLevel3 && level != psLevel3Sep) {
             const Function *func = (static_cast<GfxDeviceNColorSpace *>(baseCS))->getTintTransformFunc();
             baseCS->getDefaultRanges(low, range, indexedCS->getIndexHigh());
+            const GfxLabColorSpace *labCS;
             if ((static_cast<GfxDeviceNColorSpace *>(baseCS))->getAlt()->getMode() == csLab) {
                 labCS = static_cast<GfxLabColorSpace *>((static_cast<GfxDeviceNColorSpace *>(baseCS))->getAlt());
             } else {
