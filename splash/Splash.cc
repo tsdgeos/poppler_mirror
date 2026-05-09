@@ -143,7 +143,7 @@ struct SplashPipe
     int x, y;
 
     // source pattern
-    SplashPattern *pattern;
+    const SplashPattern *pattern;
 
     // source alpha and color
     unsigned char aInput;
@@ -193,7 +193,7 @@ SplashPipeResultColorCtrl Splash::pipeResultColorAlphaBlend[] = { splashPipeResu
 // pipeline
 //------------------------------------------------------------------------
 
-inline void Splash::pipeInit(SplashPipe *pipe, int x, int y, SplashPattern *pattern, SplashColorPtr cSrc, unsigned char aInput, bool usesShape, bool nonIsolatedGroup, bool knockout, unsigned char knockoutOpacity)
+inline void Splash::pipeInit(SplashPipe *pipe, int x, int y, const SplashPattern *pattern, SplashColorPtr cSrc, unsigned char aInput, bool usesShape, bool nonIsolatedGroup, bool knockout, unsigned char knockoutOpacity)
 {
     pipeSetXY(pipe, x, y);
     pipe->pattern = nullptr;
@@ -6489,7 +6489,7 @@ void Splash::dumpXPath(const SplashXPath &path)
     }
 }
 
-SplashError Splash::shadedFill(const SplashPath &path, bool hasBBox, SplashPattern *pattern, bool clipToStrokePath)
+SplashError Splash::shadedFill(const SplashPath &path, bool hasBBox, const SplashPattern &pattern, bool clipToStrokePath)
 {
     SplashPipe pipe;
     int xMinI, yMinI, xMaxI, yMaxI, x0, x1, y;
@@ -6531,7 +6531,7 @@ SplashError Splash::shadedFill(const SplashPath &path, bool hasBBox, SplashPatte
         }
 
         unsigned char alpha = splashRound(clipToStrokePath ? state->strokeAlpha * 255 : state->fillAlpha * 255);
-        pipeInit(&pipe, 0, yMinI, pattern, nullptr, alpha, vectorAntialias && !hasBBox, false);
+        pipeInit(&pipe, 0, yMinI, &pattern, nullptr, alpha, vectorAntialias && !hasBBox, false);
 
         // draw the spans
         if (vectorAntialias) {
@@ -6561,7 +6561,7 @@ SplashError Splash::shadedFill(const SplashPath &path, bool hasBBox, SplashPatte
                         c3 = (*p2 >> 4);
                         c4 = (*p3 >> 4);
                     }
-                    if ((c1 & 0x03) == 0x03 && (c2 & 0x03) == 0x03 && (c3 & 0x03) == 0x03 && (c4 & 0x03) == 0x03 && c1 == c2 && c2 == c3 && c3 == c4 && pattern->testPosition(x0 - 1, y)) {
+                    if ((c1 & 0x03) == 0x03 && (c2 & 0x03) == 0x03 && (c3 & 0x03) == 0x03 && (c4 & 0x03) == 0x03 && c1 == c2 && c2 == c3 && c3 == c4 && pattern.testPosition(x0 - 1, y)) {
                         unsigned char shapeCorrection = (x0 & 1) ? 0x0f : 0xf0;
                         *p0 |= shapeCorrection;
                         *p1 |= shapeCorrection;
@@ -6586,7 +6586,7 @@ SplashError Splash::shadedFill(const SplashPath &path, bool hasBBox, SplashPatte
                         c4 = (*p3 >> 4);
                     }
 
-                    if ((c1 & 0xc) == 0x0c && (c2 & 0x0c) == 0x0c && (c3 & 0x0c) == 0x0c && (c4 & 0x0c) == 0x0c && c1 == c2 && c2 == c3 && c3 == c4 && pattern->testPosition(x1 + 1, y)) {
+                    if ((c1 & 0xc) == 0x0c && (c2 & 0x0c) == 0x0c && (c3 & 0x0c) == 0x0c && (c4 & 0x0c) == 0x0c && c1 == c2 && c2 == c3 && c3 == c4 && pattern.testPosition(x1 + 1, y)) {
                         unsigned char shapeCorrection = (x1 & 1) ? 0x0f : 0xf0;
                         *p0 |= shapeCorrection;
                         *p1 |= shapeCorrection;

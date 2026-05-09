@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2007, 2011, 2018, 2019, 2021, 2022, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007, 2011, 2018, 2019, 2021, 2022, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010-2013, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -253,12 +253,12 @@ public:
     //
     // clipToStrokePath: Whether the current clip region is a stroke path.
     //   In that case, strokeAlpha is used rather than fillAlpha.
-    SplashError shadedFill(const SplashPath &path, bool hasBBox, SplashPattern *pattern, bool clipToStrokePath);
+    SplashError shadedFill(const SplashPath &path, bool hasBBox, const SplashPattern &pattern, bool clipToStrokePath);
     // Draw a gouraud triangle shading.
     bool gouraudTriangleShadedFill(SplashGouraudColor *shading);
 
 private:
-    void pipeInit(SplashPipe *pipe, int x, int y, SplashPattern *pattern, SplashColorPtr cSrc, unsigned char aInput, bool usesShape, bool nonIsolatedGroup, bool knockout = false, unsigned char knockoutOpacity = 255);
+    void pipeInit(SplashPipe *pipe, int x, int y, const SplashPattern *pattern, SplashColorPtr cSrc, unsigned char aInput, bool usesShape, bool nonIsolatedGroup, bool knockout = false, unsigned char knockoutOpacity = 255);
     void pipeRun(SplashPipe *pipe);
     void pipeRunSimpleMono1(SplashPipe *pipe);
     void pipeRunSimpleMono8(SplashPipe *pipe);
