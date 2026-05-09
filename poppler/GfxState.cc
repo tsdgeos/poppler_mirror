@@ -5686,7 +5686,7 @@ GfxImageColorMap::~GfxImageColorMap()
     gfree(byte_lookup);
 }
 
-void GfxImageColorMap::getGray(const unsigned char *x, GfxGray *gray)
+void GfxImageColorMap::getGray(const unsigned char *x, GfxGray *gray) const
 {
     GfxColor color;
     int i;
@@ -6025,7 +6025,7 @@ void GfxImageColorMap::getDeviceNLine(unsigned char *in, unsigned char *out, int
     }
 }
 
-void GfxImageColorMap::getCMYK(const unsigned char *x, GfxCMYK *cmyk)
+void GfxImageColorMap::getCMYK(const unsigned char *x, GfxCMYK *cmyk) const
 {
     GfxColor color;
     int i;

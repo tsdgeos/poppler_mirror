@@ -362,19 +362,19 @@ private:
     void setupResources(Dict *resDict);
     void setupFonts(Dict *resDict);
     void setupFont(GfxFont *font, Dict *parentResDict);
-    void setupEmbeddedType1Font(Ref *id, GooString *psName);
+    void setupEmbeddedType1Font(const Ref *id, GooString *psName);
     void updateFontMaxValidGlyph(GfxFont *font, int maxValidGlyph);
     void setupExternalType1Font(const std::string &fileName, GooString *psName);
-    void setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psName);
-    void setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString *psName, int faceIndex);
+    void setupEmbeddedType1CFont(GfxFont *font, const Ref *id, GooString *psName);
+    void setupEmbeddedOpenTypeT1CFont(GfxFont *font, const Ref *id, GooString *psName, int faceIndex);
     void setupEmbeddedTrueTypeFont(GfxFont *font, GooString *psName, int faceIndex);
     void setupExternalTrueTypeFont(GfxFont *font, const std::string &fileName, GooString *psName, int faceIndex);
-    void setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *psName);
+    void setupEmbeddedCIDType0Font(GfxFont *font, const Ref *id, GooString *psName);
     void setupEmbeddedCIDTrueTypeFont(GfxFont *font, GooString *psName, bool needVerticalMetrics, int faceIndex);
     void setupExternalCIDTrueTypeFont(GfxFont *font, const std::string &fileName, GooString *psName, bool needVerticalMetrics, int faceIndex);
-    void setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString *psName, int faceIndex);
+    void setupEmbeddedOpenTypeCFFFont(GfxFont *font, const Ref *id, GooString *psName, int faceIndex);
     void setupType3Font(GfxFont *font, GooString *psName, Dict *parentResDict);
-    std::unique_ptr<GooString> makePSFontName(GfxFont *font, const Ref *id);
+    std::unique_ptr<GooString> makePSFontName(const GfxFont *font, const Ref *id);
     void setupImages(Dict *resDict);
     void setupImage(Ref id, Stream *str, bool mask);
     void setupForms(Dict *resDict);
@@ -383,11 +383,13 @@ private:
     void addCustomColor(const GfxSeparationColorSpace &sepCS);
     void doPath(const GfxPath *path);
     void maskToClippingPath(Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert);
-    void doImageL1(Object *ref, GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert);
-    void doImageL1Sep(GfxImageColorMap *colorMap, Stream *str, int width, int height, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert);
-    void doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert);
-    void doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert);
-    void dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, bool genXform, bool updateColors, bool map01);
+    void doImageL1(const Object *ref, const GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert);
+    void doImageL1Sep(const GfxImageColorMap *colorMap, Stream *str, int width, int height, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert);
+    void doImageL2(const GfxState *state, const Object *ref, GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight,
+                   bool maskInvert);
+    void doImageL3(const GfxState *state, const Object *ref, GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight,
+                   bool maskInvert);
+    void dumpColorSpaceL2(const GfxState *state, GfxColorSpace *colorSpace, bool genXform, bool updateColors, bool map01);
     bool tilingPatternFillL1(Object *str, int paintType, Dict *resDict, const std::array<double, 6> &mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1, double xStep, double yStep);
     bool tilingPatternFillL2(Object *str, int paintType, int tilingType, Dict *resDict, const std::array<double, 6> &mat, const std::array<double, 4> &bbox, double xStep, double yStep);
 

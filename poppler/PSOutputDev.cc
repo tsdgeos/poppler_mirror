@@ -2032,7 +2032,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
     }
 }
 
-void PSOutputDev::setupEmbeddedType1Font(Ref *id, GooString *psName)
+void PSOutputDev::setupEmbeddedType1Font(const Ref *id, GooString *psName)
 {
     static const char hexChar[17] = "0123456789abcdef";
     Dict *dict;
@@ -2278,7 +2278,7 @@ void PSOutputDev::setupExternalType1Font(const std::string &fileName, GooString 
     writePS("%%EndResource\n");
 }
 
-void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psName)
+void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, const Ref *id, GooString *psName)
 {
     // check if font is already embedded
     for (PST1FontName &it : t1FontNames) {
@@ -2308,7 +2308,7 @@ void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psN
     writePS("%%EndResource\n");
 }
 
-void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString *psName, int faceIndex)
+void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, const Ref *id, GooString *psName, int faceIndex)
 {
     // check if font is already embedded
     for (PST1FontName &it : t1FontNames) {
@@ -2438,7 +2438,7 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, const std::string 
     writePS("%%EndResource\n");
 }
 
-void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *psName)
+void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, const Ref *id, GooString *psName)
 {
     // check if font is already embedded
     for (PST1FontName &it : t1FontNames) {
@@ -2502,7 +2502,7 @@ void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, GooString *psName,
     writePS("%%EndResource\n");
 }
 
-void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString *psName, int faceIndex)
+void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, const Ref *id, GooString *psName, int faceIndex)
 {
     // check if font is already embedded
     for (PST1FontName &it : t1FontNames) {
@@ -2629,7 +2629,7 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName, Dict *parentR
 
 // Make a unique PS font name, based on the names given in the PDF
 // font object, and an object ID (font file object for
-std::unique_ptr<GooString> PSOutputDev::makePSFontName(GfxFont *font, const Ref *id)
+std::unique_ptr<GooString> PSOutputDev::makePSFontName(const GfxFont *font, const Ref *id)
 {
     const GooString *s;
 
@@ -5091,7 +5091,8 @@ void PSOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, int
     t3Cacheable = false;
 }
 
-void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert)
+void PSOutputDev::doImageL1(const Object *ref, const GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight,
+                            bool maskInvert)
 {
     unsigned char pixBuf[gfxColorMaxComps];
     GfxGray gray;
@@ -5241,7 +5242,7 @@ end:
     }
 }
 
-void PSOutputDev::doImageL1Sep(GfxImageColorMap *colorMap, Stream *str, int width, int height, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert)
+void PSOutputDev::doImageL1Sep(const GfxImageColorMap *colorMap, Stream *str, int width, int height, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert)
 {
     unsigned char pixBuf[gfxColorMaxComps];
     GfxCMYK cmyk;
@@ -5524,8 +5525,8 @@ void PSOutputDev::maskToClippingPath(Stream *maskStr, int maskWidth, int maskHei
     maskStr->close();
 }
 
-void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight,
-                            bool maskInvert)
+void PSOutputDev::doImageL2(const GfxState *state, const Object *ref, GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth,
+                            int maskHeight, bool maskInvert)
 {
     Stream *str2;
     unsigned char *line;
@@ -5966,8 +5967,8 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
 }
 
 //~ this doesn't currently support OPI
-void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight,
-                            bool maskInvert)
+void PSOutputDev::doImageL3(const GfxState *state, const Object *ref, GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth,
+                            int maskHeight, bool maskInvert)
 {
     Stream *str2;
     int n, numComps;
@@ -6341,7 +6342,7 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
     }
 }
 
-void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, bool genXform, bool updateColors, bool map01)
+void PSOutputDev::dumpColorSpaceL2(const GfxState *state, GfxColorSpace *colorSpace, bool genXform, bool updateColors, bool map01)
 {
     GfxIndexedColorSpace *indexedCS;
     GfxSeparationColorSpace *separationCS;
