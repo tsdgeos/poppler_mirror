@@ -2752,8 +2752,7 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData, int 
     int yp;
 
     if (debugMode) {
-        printf("fillImageMask: w=%d h=%d mat=[%.2f %.2f %.2f %.2f %.2f %.2f]\n", w, h, static_cast<double>(mat[0]), static_cast<double>(mat[1]), static_cast<double>(mat[2]), static_cast<double>(mat[3]), static_cast<double>(mat[4]),
-               static_cast<double>(mat[5]));
+        printf("fillImageMask: w=%d h=%d mat=[%.2f %.2f %.2f %.2f %.2f %.2f]\n", w, h, mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
     }
 
     if (w == 0 && h == 0) {
@@ -3517,8 +3516,7 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
     int yp;
 
     if (debugMode) {
-        printf("drawImage: srcMode=%d srcAlpha=%d w=%d h=%d mat=[%.2f %.2f %.2f %.2f %.2f %.2f]\n", srcMode, srcAlpha, w, h, static_cast<double>(mat[0]), static_cast<double>(mat[1]), static_cast<double>(mat[2]), static_cast<double>(mat[3]),
-               static_cast<double>(mat[4]), static_cast<double>(mat[5]));
+        printf("drawImage: srcMode=%d srcAlpha=%d w=%d h=%d mat=[%.2f %.2f %.2f %.2f %.2f %.2f]\n", srcMode, srcAlpha, w, h, mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
     }
 
     // check color modes
@@ -5436,8 +5434,8 @@ bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
         for (int i = 0; i < shading->getNTriangles(); ++i) {
             shading->getParametrizedTriangle(i, xdbl + 0, ydbl + 0, color + 0, xdbl + 1, ydbl + 1, color + 1, xdbl + 2, ydbl + 2, color + 2);
             for (int m = 0; m < 3; ++m) {
-                xt = xdbl[m] * static_cast<double>(userToCanvasMatrix[0]) + ydbl[m] * static_cast<double>(userToCanvasMatrix[2]) + static_cast<double>(userToCanvasMatrix[4]);
-                yt = xdbl[m] * static_cast<double>(userToCanvasMatrix[1]) + ydbl[m] * static_cast<double>(userToCanvasMatrix[3]) + static_cast<double>(userToCanvasMatrix[5]);
+                xt = xdbl[m] * userToCanvasMatrix[0] + ydbl[m] * userToCanvasMatrix[2] + userToCanvasMatrix[4];
+                yt = xdbl[m] * userToCanvasMatrix[1] + ydbl[m] * userToCanvasMatrix[3] + userToCanvasMatrix[5];
                 xdbl[m] = xt;
                 ydbl[m] = yt;
                 // we operate on scanlines which are integer offsets into the
@@ -5664,8 +5662,8 @@ bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
                 return false;
             }
             for (int m = 0; m < 3; ++m) {
-                xt = xdbl[m] * static_cast<double>(userToCanvasMatrix[0]) + ydbl[m] * static_cast<double>(userToCanvasMatrix[2]) + static_cast<double>(userToCanvasMatrix[4]);
-                yt = xdbl[m] * static_cast<double>(userToCanvasMatrix[1]) + ydbl[m] * static_cast<double>(userToCanvasMatrix[3]) + static_cast<double>(userToCanvasMatrix[5]);
+                xt = xdbl[m] * userToCanvasMatrix[0] + ydbl[m] * userToCanvasMatrix[2] + userToCanvasMatrix[4];
+                yt = xdbl[m] * userToCanvasMatrix[1] + ydbl[m] * userToCanvasMatrix[3] + userToCanvasMatrix[5];
                 xdbl[m] = xt;
                 ydbl[m] = yt;
                 // we operate on scanlines which are integer offsets into the
@@ -6462,10 +6460,10 @@ void Splash::dumpXPath(const SplashXPath &path)
     for (int i = 0; i < path.length; ++i) {
         const auto &seg = path.segs[i];
         if (seg.flags & splashXPathFlipped) {
-            printf("  %4d: x0=%8.2f y0=%8.2f x1=%8.2f y1=%8.2f %s%sP\n", i, static_cast<double>(seg.x1), static_cast<double>(seg.y1), static_cast<double>(seg.x0), static_cast<double>(seg.y0), //
+            printf("  %4d: x0=%8.2f y0=%8.2f x1=%8.2f y1=%8.2f %s%sP\n", i, seg.x1, seg.y1, seg.x0, seg.y0, //
                    (seg.flags & splashXPathHoriz) ? "H" : " ", (seg.flags & splashXPathVert) ? "V" : " ");
         } else {
-            printf("  %4d: x0=%8.2f y0=%8.2f x1=%8.2f y1=%8.2f %s%s \n", i, static_cast<double>(seg.x0), static_cast<double>(seg.y0), static_cast<double>(seg.x1), static_cast<double>(seg.y1), //
+            printf("  %4d: x0=%8.2f y0=%8.2f x1=%8.2f y1=%8.2f %s%s \n", i, seg.x0, seg.y0, seg.x1, seg.y1, //
                    (seg.flags & splashXPathHoriz) ? "H" : " ", (seg.flags & splashXPathVert) ? "V" : " ");
         }
     }
