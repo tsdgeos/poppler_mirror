@@ -4502,7 +4502,7 @@ bool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePatt
 
 bool SplashOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *shading)
 {
-    auto *pattern = new SplashFunctionPattern(colorMode, state, shading);
+    SplashFunctionPattern pattern(colorMode, state, shading);
     double xMin, yMin, xMax, yMax;
     bool vaa = getVectorAntialias();
     // restore vector antialias because we support it here
@@ -4510,8 +4510,8 @@ bool SplashOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sh
 
     bool retVal = false;
     // get the clip region bbox
-    if (pattern->getShading()->getHasBBox()) {
-        pattern->getShading()->getBBox(&xMin, &yMin, &xMax, &yMax);
+    if (pattern.getShading()->getHasBBox()) {
+        pattern.getShading()->getBBox(&xMin, &yMin, &xMax, &yMax);
     } else {
         state->getClipBBox(&xMin, &yMin, &xMax, &yMax);
 
@@ -4552,15 +4552,13 @@ bool SplashOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sh
     state->closePath();
     const SplashPath path = convertPath(state->getPath(), true);
 
-    pattern->getShading()->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
-    setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(), state->getOverprintMode(), nullptr);
+    pattern.getShading()->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
+    setOverprintMask(pattern.getShading()->getColorSpace(), state->getFillOverprint(), state->getOverprintMode(), nullptr);
     // If state->getStrokePattern() is set, then the current clipping region
     // is a stroke path.
-    retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), *pattern, (state->getStrokePattern() != nullptr)) == SplashError::NoError);
+    retVal = (splash->shadedFill(path, pattern.getShading()->getHasBBox(), pattern, (state->getStrokePattern() != nullptr)) == SplashError::NoError);
     state->clearPath();
     setVectorAntialias(vaa);
-
-    delete pattern;
 
     return retVal;
 }
