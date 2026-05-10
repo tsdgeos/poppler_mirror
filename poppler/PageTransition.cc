@@ -3,6 +3,7 @@
  * Copyright (C) 2010, 2017, 2020, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2015, Arseniy Lartsev <arseniy@alumni.chalmers.se>
+ * Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -10,6 +10,7 @@
 // Albert Astals Cid <aacid@kde.org> (C) 2017, 2018, 2024, 2025
 // g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk> (C) 2025
 // 2025 Arnav V <arnav0872@gmail.com> (C) 2025
+// Stefan Brüns <stefan.bruens@rwth-aachen.de> (C) 2026
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

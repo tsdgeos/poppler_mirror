@@ -13,6 +13,7 @@
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2026 Adam Sampson <ats@offog.org>
+// Copyright 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 //========================================================================
 
