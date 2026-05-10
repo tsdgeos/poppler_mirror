@@ -2377,7 +2377,7 @@ void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h)
         break;
     case objString: {
         h->hash('s');
-        const auto &s = obj->getString();
+        const std::string &s = obj->getString();
         h->hash(s.c_str(), s.size());
     } break;
     case objName: {
