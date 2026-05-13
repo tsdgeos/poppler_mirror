@@ -493,7 +493,6 @@ public:
     // Array accessors.
     int arrayGetLength() const;
     void arrayAdd(Object &&elem);
-    void arrayRemove(int i);
     Object arrayGet(int i, int recursion) const;
     const Object &arrayGetNF(int i) const;
 

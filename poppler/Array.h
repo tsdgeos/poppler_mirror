@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2017-2019, 2021, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2017-2019, 2021, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -107,12 +107,6 @@ inline void Object::arrayAdd(Object &&elem)
 {
     OBJECT_TYPE_CHECK(objArray);
     std::get<std::shared_ptr<Array>>(data)->add(std::move(elem));
-}
-
-inline void Object::arrayRemove(int i)
-{
-    OBJECT_TYPE_CHECK(objArray);
-    std::get<std::shared_ptr<Array>>(data)->remove(i);
 }
 
 inline Object Object::arrayGet(int i, int recursion = 0) const
