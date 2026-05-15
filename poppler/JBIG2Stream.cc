@@ -1852,7 +1852,9 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
         // read the collective bitmap
         if (huff && !refAgg) {
             int bmSize;
-            huffDecoder->decodeInt(&bmSize, huffBMSizeTable);
+            if (!huffDecoder->decodeInt(&bmSize, huffBMSizeTable)) {
+                return false;
+            }
             huffDecoder->reset();
             std::unique_ptr<JBIG2Bitmap> collBitmap;
             if (bmSize == 0) {
