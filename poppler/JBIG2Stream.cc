@@ -2685,6 +2685,9 @@ bool JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, const std
     // compute the skip bitmap
     if (enableSkip) {
         skipBitmap = std::make_unique<JBIG2Bitmap>(0, gridW, gridH);
+        if (!skipBitmap->isOk()) {
+            return false;
+        }
         skipBitmap->clearToZero();
         for (m = 0; m < gridH; ++m) {
             for (n = 0; n < gridW; ++n) {
