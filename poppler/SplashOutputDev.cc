@@ -2605,7 +2605,7 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *s
     str->close();
 }
 
-void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, std::array<double, 6> &baseMatrix)
+bool SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, std::array<double, 6> &baseMatrix)
 {
     std::array<double, 6> mat;
     SplashOutImageMaskData imgMaskData;
@@ -2614,18 +2614,18 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/
     static constexpr std::array<double, 4> bbox = { 0, 0, 1, 1 }; // default;
 
     if (state->getFillColorSpace()->isNonMarking()) {
-        return;
+        return false;
     }
 
     const std::array<double, 6> &ctm = state->getCTM();
     for (int i = 0; i < 6; ++i) {
         if (!std::isfinite(ctm[i])) {
-            return;
+            return false;
         }
     }
     imgMaskData.imgStr = std::make_unique<ImageStream>(str, width, 1, 1);
     if (!imgMaskData.imgStr->rewind()) {
-        return;
+        return false;
     }
 
     beginTransparencyGroup(state, bbox, nullptr, false, false, false);
@@ -2652,6 +2652,8 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/
     maskSplash->fillImageMask(&imageMaskSrc, &imgMaskData, width, height, mat, t3GlyphStack != nullptr);
     delete maskSplash;
     str->close();
+
+    return true;
 }
 
 void SplashOutputDev::unsetSoftMaskFromImageMask(GfxState *state, std::array<double, 6> &baseMatrix)
@@ -2668,7 +2670,8 @@ void SplashOutputDev::unsetSoftMaskFromImageMask(GfxState *state, std::array<dou
     if (transpGroupStack->softmask != nullptr) {
         unsigned char *dest = bitmap->getAlphaPtr();
         const unsigned char *src = transpGroupStack->softmask->getDataPtr();
-        for (int c = 0; c < transpGroupStack->softmask->getRowSize() * transpGroupStack->softmask->getHeight(); c++) {
+        const int nPixels = std::min(bitmap->getRowSize() * bitmap->getHeight(), transpGroupStack->softmask->getRowSize() * transpGroupStack->softmask->getHeight());
+        for (int c = 0; c < nPixels; c++) {
             dest[c] = src[c];
         }
         delete transpGroupStack->softmask;

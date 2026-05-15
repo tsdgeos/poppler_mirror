@@ -2013,7 +2013,10 @@ void Gfx::doPatternImageMask(Object *ref, Stream *str, int width, int height, bo
 {
     saveState();
 
-    out->setSoftMaskFromImageMask(state, ref, str, width, height, invert, inlineImg, baseMatrix);
+    if (!out->setSoftMaskFromImageMask(state, ref, str, width, height, invert, inlineImg, baseMatrix)) {
+        restoreState();
+        return;
+    }
 
     state->clearPath();
     state->moveTo(0, 0);

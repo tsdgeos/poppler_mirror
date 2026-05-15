@@ -103,9 +103,10 @@ void OutputDev::drawImageMask(GfxState * /*state*/, Object * /*ref*/, Stream *st
     }
 }
 
-void OutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> & /*baseMatrix*/)
+bool OutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> & /*baseMatrix*/)
 {
     drawImageMask(state, ref, str, width, height, invert, false, inlineImg);
+    return true;
 }
 
 void OutputDev::unsetSoftMaskFromImageMask(GfxState * /*state*/, std::array<double, 6> & /*baseMatrix*/) { }
