@@ -2678,6 +2678,9 @@ bool JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, const std
 
     // allocate the bitmap
     bitmap = std::make_unique<JBIG2Bitmap>(segNum, w, h);
+    if (!bitmap->isOk()) {
+        return false;
+    }
     if (flags & 0x80) { // HDEFPIXEL
         bitmap->clearToOne();
     } else {
