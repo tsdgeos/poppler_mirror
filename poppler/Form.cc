@@ -238,8 +238,8 @@ FormWidgetButton::FormWidgetButton(PDFDoc *docA, Object *dictObj, unsigned num, 
         if (obj2.isDict()) {
             Dict *dictN = obj2.getDict();
             for (int i = 0; i < dictN->getLength(); i++) {
-                const char *key = dictN->getKey(i);
-                if (strcmp(key, "Off") != 0) {
+                const std::string &key = dictN->getKey(i);
+                if (key != "Off") {
                     onStr = std::make_unique<GooString>(key);
                     break;
                 }
@@ -2710,8 +2710,8 @@ std::string Form::findFontInDefaultResources(const std::string &fontFamily, cons
 
     const Dict *fontDict = fontDictObj.getDict();
     for (int i = 0; i < fontDict->getLength(); ++i) {
-        const char *key = fontDict->getKey(i);
-        if (std::string_view(key).starts_with(kOurDictFontNamePrefix)) {
+        const std::string &key = fontDict->getKey(i);
+        if (key.starts_with(kOurDictFontNamePrefix)) {
             const Object fontObj = fontDict->getVal(i);
             if (fontObj.isDict("Font")) {
                 const Object fontBaseFontObj = fontObj.dictLookup("BaseFont");

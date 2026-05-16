@@ -89,7 +89,7 @@ public:
     bool lookupInt(std::string_view key, std::optional<std::string_view> alt_key, int *value) const;
 
     // Iterative accessors.
-    const char *getKey(int i) const { return entries[i].first.c_str(); }
+    const std::string &getKey(int i) const { return entries[i].first; }
     Object getVal(int i) const { return entries[i].second.fetch(xref); }
     // Same as above but if the returned object is a fetched Ref returns such Ref in returnRef, otherwise returnRef is Ref::INVALID()
     Object getVal(int i, Ref *returnRef) const;

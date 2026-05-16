@@ -5404,7 +5404,7 @@ bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldCho
 static void recursiveMergeDicts(Dict *primary, const Dict *secondary, RefRecursionChecker *alreadySeenDicts)
 {
     for (int i = 0; i < secondary->getLength(); ++i) {
-        const char *key = secondary->getKey(i);
+        const std::string &key = secondary->getKey(i);
         if (!primary->hasKey(key)) {
             primary->add(key, secondary->lookup(key).deepCopy());
         } else {

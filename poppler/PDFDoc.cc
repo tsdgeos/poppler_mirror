@@ -936,13 +936,13 @@ int PDFDoc::savePageAs(const std::string &name, int pageNo)
     outStr->printf("%d 0 obj\n", rootNum);
     outStr->printf("<< /Type /Catalog /Pages %d 0 R", rootNum + 1);
     for (int j = 0; j < catDict->getLength(); j++) {
-        const char *key = catDict->getKey(j);
-        if (strcmp(key, "Type") != 0 && strcmp(key, "Catalog") != 0 && strcmp(key, "Pages") != 0) {
+        const std::string &key = catDict->getKey(j);
+        if (key != "Type" && key != "Catalog" && key != "Pages") {
             if (j > 0) {
                 outStr->printf(" ");
             }
             Object value = catDict->getValNF(j).copy();
-            outStr->printf("/%s ", key);
+            outStr->printf("/%s ", key.c_str());
             writeObject(&value, outStr.get(), getXRef(), 0, nullptr, cryptRC4, 0, 0, 0);
         }
     }
@@ -965,12 +965,12 @@ int PDFDoc::savePageAs(const std::string &name, int pageNo)
         if (n > 0) {
             outStr->printf(" ");
         }
-        const char *key = pageDict->getKey(n);
+        const std::string &key = pageDict->getKey(n);
         Object value = pageDict->getValNF(n).copy();
-        if (strcmp(key, "Parent") == 0) {
+        if (key == "Parent") {
             outStr->printf("/Parent %d 0 R", rootNum + 1);
         } else {
-            outStr->printf("/%s ", key);
+            outStr->printf("/%s ", key.c_str());
             writeObject(&value, outStr.get(), getXRef(), 0, nullptr, cryptRC4, 0, 0, 0);
         }
     }
@@ -1242,7 +1242,7 @@ void PDFDoc::writeDictionary(Dict *dict, OutStream *outStr, XRef *xRef, unsigned
 
     outStr->printf("<<");
     for (int i = 0; i < dict->getLength(); i++) {
-        std::string keyName(dict->getKey(i));
+        const std::string &keyName = dict->getKey(i);
         outStr->printf("/%s ", sanitizedName(keyName).c_str());
         Object obj1 = dict->getValNF(i).copy();
         writeObject(&obj1, outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
@@ -1691,8 +1691,8 @@ bool PDFDoc::markDictionary(Dict *dict, XRef *xRef, XRef *countRef, unsigned int
     }
 
     for (int i = 0; i < dict->getLength(); i++) {
-        const char *key = dict->getKey(i);
-        if (strcmp(key, "Annots") != 0) {
+        const std::string &key = dict->getKey(i);
+        if (key != "Annots") {
             Object obj1 = dict->getValNF(i).copy();
             const bool success = markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
             if (unlikely(!success)) {
@@ -1822,9 +1822,9 @@ bool PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, unsigne
     pageDict->remove("StructTreeRoot");
 
     for (int n = 0; n < pageDict->getLength(); n++) {
-        const char *key = pageDict->getKey(n);
+        const std::string &key = pageDict->getKey(n);
         Object value = pageDict->getValNF(n).copy();
-        if (strcmp(key, "Parent") != 0 && strcmp(key, "Pages") != 0 && strcmp(key, "AcroForm") != 0 && strcmp(key, "Annots") != 0 && strcmp(key, "P") != 0 && strcmp(key, "Root") != 0) {
+        if (key != "Parent" && key != "Pages" && key != "AcroForm" && key != "Annots" && key != "P" && key != "Root") {
             const bool success = markObject(&value, xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
             if (unlikely(!success)) {
                 return false;
@@ -1933,7 +1933,7 @@ void PDFDoc::markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, unsigned in
     if (acroform.isDict()) {
         Dict *dict = acroform.getDict();
         for (int i = 0; i < dict->getLength(); i++) {
-            if (strcmp(dict->getKey(i), "Fields") == 0) {
+            if (dict->getKey(i) == "Fields") {
                 Object fields = dict->getValNF(i).copy();
                 modified = markAnnotations(&fields, xRef, countRef, numOffset, oldRefNum, newRefNum);
             } else {

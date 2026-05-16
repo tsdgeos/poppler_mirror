@@ -121,7 +121,7 @@ void Object::print(FILE *f) const
         Dict *dict = getDict();
         fprintf(f, "<<");
         for (int i = 0; i < dict->getLength(); ++i) {
-            fprintf(f, " /%s ", dict->getKey(i));
+            fprintf(f, " /%s ", dict->getKey(i).c_str());
             const Object &obj = dict->getValNF(i);
             obj.print(f);
         }

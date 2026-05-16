@@ -6,7 +6,7 @@
 //
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
-// Copyright 2014, 2017-2019, 2021, 2023-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright 2014, 2017-2019, 2021, 2023-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Dmytro Morgun <lztoad@gmail.com>
 // Copyright 2018, 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
@@ -372,7 +372,7 @@ enum ElementType
 static const struct TypeMapEntry
 {
     StructElement::Type type;
-    const char *name;
+    const std::string name;
     ElementType elementType;
     const AttributeMapEntry **attributes;
 } typeMap[] = {
@@ -437,7 +437,6 @@ static inline const AttributeMapEntry *getAttributeMapEntry(const AttributeMapEn
     while (*entryList) {
         const AttributeMapEntry *entry = *entryList;
         while (entry->type != Attribute::Unknown) {
-            assert(entry->name);
             if (type == entry->type) {
                 return entry;
             }
@@ -448,14 +447,14 @@ static inline const AttributeMapEntry *getAttributeMapEntry(const AttributeMapEn
     return nullptr;
 }
 
-static inline const AttributeMapEntry *getAttributeMapEntry(const AttributeMapEntry **entryList, const char *name)
+static inline const AttributeMapEntry *getAttributeMapEntry(const AttributeMapEntry **entryList, const std::string &name)
 {
     assert(entryList);
     while (*entryList) {
         const AttributeMapEntry *entry = *entryList;
         while (entry->type != Attribute::Unknown) {
             assert(entry->name);
-            if (strcmp(name, entry->name) == 0) {
+            if (name == entry->name) {
                 return entry;
             }
             entry++;
@@ -527,7 +526,7 @@ static const char *typeToName(StructElement::Type type)
     }
 
     const TypeMapEntry *entry = getTypeMapEntry(type);
-    return entry ? entry->name : "Unknown";
+    return entry ? entry->name.c_str() : "Unknown";
 }
 
 static StructElement::Type nameToType(std::string_view name)
@@ -616,7 +615,7 @@ bool Attribute::checkType(StructElement *element)
     return true;
 }
 
-Attribute::Type Attribute::getTypeForName(const char *name, StructElement *element)
+Attribute::Type Attribute::getTypeForName(const std::string &name, StructElement *element)
 {
     const AttributeMapEntry **attributes = attributeMapAll;
     if (element) {
@@ -1166,8 +1165,8 @@ void StructElement::parseAttributes(Dict *attributes, bool keepExisting)
             // Iterate over the entries of the "attributes" dictionary.
             // The /O entry (owner) is skipped.
             for (int i = 0; i < attributes->getLength(); i++) {
-                const char *key = attributes->getKey(i);
-                if (strcmp(key, "O") != 0) {
+                const std::string &key = attributes->getKey(i);
+                if (key != "O") {
                     Attribute::Type t = Attribute::getTypeForName(key, this);
 
                     // Check if the attribute is already defined.
@@ -1200,7 +1199,7 @@ void StructElement::parseAttributes(Dict *attributes, bool keepExisting)
                             delete attribute;
                         }
                     } else {
-                        error(errSyntaxWarning, -1, "Wrong Attribute '{0:s}' in element {1:s}", key, getTypeName());
+                        error(errSyntaxWarning, -1, "Wrong Attribute '{0:r}' in element {1:s}", &key, getTypeName());
                     }
                 }
             }

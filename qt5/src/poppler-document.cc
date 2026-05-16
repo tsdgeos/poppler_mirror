@@ -434,7 +434,8 @@ QStringList Document::infoKeys() const
     // somehow iterate over keys in infoDict
     keys.reserve(infoDict->getLength());
     for (int i = 0; i < infoDict->getLength(); ++i) {
-        keys.append(QString::fromLatin1(infoDict->getKey(i)));
+        const std::string &key = infoDict->getKey(i);
+        keys.append(QString::fromLatin1(key.data(), key.size()));
     }
 
     return keys;

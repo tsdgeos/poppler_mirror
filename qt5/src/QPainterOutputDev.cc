@@ -96,7 +96,7 @@ QPainterOutputDevType3Font::QPainterOutputDevType3Font(PDFDoc *doc, const std::s
         codeToGID[i] = 0;
         if (charProcs && (name = enc[i])) {
             for (int j = 0; j < charProcs->getLength(); j++) {
-                if (strcmp(name, charProcs->getKey(j)) == 0) {
+                if (charProcs->getKey(j) == name) {
                     codeToGID[i] = j;
                 }
             }

@@ -6,7 +6,7 @@
 //
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
-// Copyright 2014, 2018, 2019, 2021, 2023-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright 2014, 2018, 2019, 2021, 2023-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -155,7 +155,7 @@ private:
     std::optional<std::string> formatted;
 
     bool checkType(StructElement *element = nullptr);
-    static Type getTypeForName(const char *name, StructElement *element = nullptr);
+    static Type getTypeForName(const std::string &name, StructElement *element = nullptr);
     static Attribute *parseUserProperty(Dict *property);
 
     friend class StructElement;

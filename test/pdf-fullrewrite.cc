@@ -4,7 +4,7 @@
 //
 // Copyright 2007 Julien Rebetez
 // Copyright 2012 Fabio D'Urso
-// Copyright 2022, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright 2022, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2025 Arnav V <arnav0872@gmail.com>
 //
@@ -108,7 +108,7 @@ static bool compareDictionaries(Dict *dictA, Dict *dictB)
      * contain the same number of entries, we don't need to check that every key
      * in dictB is also contained in dictA */
     for (int i = 0; i < length; ++i) {
-        const char *key = dictA->getKey(i);
+        const std::string &key = dictA->getKey(i);
         const Object &valA = dictA->getValNF(i);
         const Object &valB = dictB->lookupNF(key);
         if (!compareObjects(&valA, &valB)) {

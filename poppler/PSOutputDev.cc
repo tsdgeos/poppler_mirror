@@ -2597,7 +2597,7 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName, Dict *parentR
             t3Cacheable = false;
             t3NeedsRestore = false;
             writePS("/");
-            writePSName(charProcs->getKey(i));
+            writePSName(charProcs->getKey(i).c_str());
             writePS(" {\n");
             Object charProc = charProcs->getVal(i);
             gfx->display(&charProc);

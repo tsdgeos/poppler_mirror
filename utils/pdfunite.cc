@@ -7,7 +7,7 @@
 // Copyright (C) 2011-2015, 2017 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Arseny Solokha <asolokha@gmx.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2012, 2014, 2017-2019, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2014, 2017-2019, 2021, 2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2015 Arthur Stavisky <vovodroid@gmail.com>
@@ -99,7 +99,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
 static void doMergeNameDict(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldRefNum, int newRefNum, Dict *srcNameDict, Dict *mergeNameDict, int numOffset)
 {
     for (int i = 0; i < mergeNameDict->getLength(); i++) {
-        const char *key = mergeNameDict->getKey(i);
+        const std::string &key = mergeNameDict->getKey(i);
         Object mergeNameTree = mergeNameDict->lookup(key);
         Object srcNameTree = srcNameDict->lookup(key);
         if (srcNameTree.isDict() && mergeNameTree.isDict()) {
@@ -407,12 +407,12 @@ int main(int argc, char *argv[])
             if (j > 0) {
                 outStr->printf(" ");
             }
-            const char *key = pageDict->getKey(j);
+            const std::string &key = pageDict->getKey(j);
             Object value = pageDict->getValNF(j).copy();
-            if (strcmp(key, "Parent") == 0) {
+            if (key == "Parent") {
                 outStr->printf("/Parent %d 0 R", rootNum + 1);
             } else {
-                outStr->printf("/%s ", key);
+                outStr->printf("/%s ", key.c_str());
                 PDFDoc::writeObject(&value, outStr, yRef, offsets[i], nullptr, cryptRC4, 0, 0, 0);
             }
         }

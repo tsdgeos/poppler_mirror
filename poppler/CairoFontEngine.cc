@@ -440,7 +440,7 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     output_dev->setType3RenderType(color ? CairoOutputDev::Type3RenderColor : CairoOutputDev::Type3RenderMask);
     charProc = charProcs->getVal(glyph);
     if (!charProc.isStream()) {
-        error(errSyntaxError, -1, "Type3 character /{0:s} value not a stream", charProcs->getKey(glyph));
+        error(errSyntaxError, -1, "Type3 character /{0:r} value not a stream", &charProcs->getKey(glyph));
         return CAIRO_STATUS_SUCCESS;
     }
     Object charProcResObject = charProc.streamGetDict()->lookup("Resources");
@@ -526,7 +526,7 @@ CairoType3Font *CairoType3Font::create(const std::shared_ptr<GfxFont> &gfxFont, 
         codeToGID[i] = EMPTY_ARRAY;
         if (charProcs && (name = enc[i])) {
             for (int j = 0; j < charProcs->getLength(); j++) {
-                if (strcmp(name, charProcs->getKey(j)) == 0) {
+                if (charProcs->getKey(j) == name) {
                     codeToGID[i] = j;
                 }
             }
