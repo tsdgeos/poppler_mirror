@@ -3808,7 +3808,6 @@ bool SplashOutputDev::checkTransparencyGroup(GfxState *state, bool knockout)
 void SplashOutputDev::beginTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool forSoftMask)
 {
     SplashTransparencyGroup *transpGroup;
-    SplashColor color;
     double xMin, yMin, xMax, yMax, x, y;
     int tx, ty, w, h;
 
@@ -3931,6 +3930,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const std::array<d
     splash->setFillPattern(transpGroup->origSplash->getFillPattern()->copy());
     splash->setStrokePattern(transpGroup->origSplash->getStrokePattern()->copy());
     if (isolated) {
+        SplashColor color;
         splashClearColor(color);
         if (colorMode == splashModeXBGR8) {
             color[3] = 255;
@@ -3940,7 +3940,11 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const std::array<d
             splash->setInTransparencyGroup(transpGroup->origBitmap, tx, ty, false, true);
         }
     } else {
-        splash->blitTransparent(*transpGroup->origBitmap, tx, ty, 0, 0, w, h);
+        if (splash->blitTransparent(*transpGroup->origBitmap, tx, ty, 0, 0, w, h) != SplashError::NoError) {
+            SplashColor color;
+            splashClearColor(color);
+            splash->clear(color, 0);
+        }
         if (!isolated && transpGroup->origBitmap->getAlphaPtr() && transpGroup->origSplash->getInNonIsolatedGroup()) {
             // when drawing a non-isolated group into another non-isolated group,
             // compute a backdrop bitmap with corrected alpha values

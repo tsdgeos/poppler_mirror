@@ -209,7 +209,7 @@ public:
     void compositeBackground(SplashColorConstPtr color);
 
     // Copy a rectangular region from <src> onto the bitmap belonging to
-    // this Splash object.  The destination alpha values are all set to
+    // this Splash object.  On success, the destination alpha values are all set to
     // zero.
     SplashError blitTransparent(const SplashBitmap &src, int xSrc, int ySrc, int xDest, int yDest, int w, int h);
     void blitImage(const SplashBitmap &src, bool srcAlpha, int xDest, int yDest);
