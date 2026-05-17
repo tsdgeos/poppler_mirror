@@ -87,7 +87,7 @@ public:
 private:
     CairoFreeTypeFont(Ref ref, cairo_font_face_t *cairo_font_face, std::vector<int> &&codeToGID, bool substitute);
 
-    static std::optional<FreeTypeFontFace> createFreeTypeFontFace(FT_Library lib, const std::string &filename, std::vector<unsigned char> &&font_data);
+    static std::optional<FreeTypeFontFace> createFreeTypeFontFace(FT_Library lib, const std::string &filename, int faceIndex, std::vector<unsigned char> &&font_data);
 };
 
 //------------------------------------------------------------------------

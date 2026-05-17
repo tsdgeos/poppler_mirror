@@ -173,20 +173,20 @@ CairoFreeTypeFont::CairoFreeTypeFont(Ref refA, cairo_font_face_t *cairo_font_fac
 CairoFreeTypeFont::~CairoFreeTypeFont() = default;
 
 // Create a cairo_font_face_t for the given font filename OR font data.
-std::optional<FreeTypeFontFace> CairoFreeTypeFont::createFreeTypeFontFace(FT_Library lib, const std::string &filename, std::vector<unsigned char> &&font_data)
+std::optional<FreeTypeFontFace> CairoFreeTypeFont::createFreeTypeFontFace(FT_Library lib, const std::string &filename, int faceIndex, std::vector<unsigned char> &&font_data)
 {
     auto *resource = new FreeTypeFontResource;
     FreeTypeFontFace font_face;
 
     if (font_data.empty()) {
-        FT_Error err = ft_new_face_from_file(lib, filename.c_str(), 0, &resource->face);
+        FT_Error err = ft_new_face_from_file(lib, filename.c_str(), faceIndex, &resource->face);
         if (err) {
             delete resource;
             return {};
         }
     } else {
         resource->font_data = std::move(font_data);
-        FT_Error err = FT_New_Memory_Face(lib, static_cast<FT_Byte *>(resource->font_data.data()), resource->font_data.size(), 0, &resource->face);
+        FT_Error err = FT_New_Memory_Face(lib, static_cast<FT_Byte *>(resource->font_data.data()), resource->font_data.size(), faceIndex, &resource->face);
         if (err) {
             delete resource;
             return {};
@@ -245,7 +245,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     case fontType1:
     case fontType1C:
     case fontType1COT: {
-        font_face = createFreeTypeFontFace(lib, fileName, std::move(font_data));
+        font_face = createFreeTypeFontFace(lib, fileName, faceIndex, std::move(font_data));
         if (!font_face) {
             error(errSyntaxError, -1, "could not create type1 face");
             goto err2;
@@ -308,7 +308,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
             std::vector<int> src = std::static_pointer_cast<Gfx8BitFont>(gfxFont)->getCodeToGIDMap(ff.get());
             codeToGID = std::move(src);
         }
-        font_face = createFreeTypeFontFace(lib, fileName, std::move(font_data));
+        font_face = createFreeTypeFontFace(lib, fileName, faceIndex, std::move(font_data));
         if (!font_face) {
             error(errSyntaxError, -1, "could not create truetype face");
             goto err2;
@@ -317,7 +317,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     }
     case fontCIDType0:
     case fontCIDType0C:
-        font_face = createFreeTypeFontFace(lib, fileName, std::move(font_data));
+        font_face = createFreeTypeFontFace(lib, fileName, faceIndex, std::move(font_data));
         if (!font_face) {
             error(errSyntaxError, -1, "could not create cid face");
             goto err2;
@@ -330,7 +330,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
             codeToGID = std::move(src);
         }
 
-        font_face = createFreeTypeFontFace(lib, fileName, std::move(font_data));
+        font_face = createFreeTypeFontFace(lib, fileName, faceIndex, std::move(font_data));
         if (!font_face) {
             error(errSyntaxError, -1, "could not create cid (OT) face");
             goto err2;
