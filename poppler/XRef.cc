@@ -1091,7 +1091,7 @@ char *XRef::constructObjectEntry(char *p, Goffset pos, int *objNum)
             ateNewLines++;
         }
         ++p;
-    } while (std::isdigit(static_cast<unsigned char>(*p)) && num < 100000000);
+    } while (std::isdigit(static_cast<unsigned char>(*p)) && gen < 100000000);
     if (!std::isspace(static_cast<unsigned char>(*p))) {
         return p;
     }
