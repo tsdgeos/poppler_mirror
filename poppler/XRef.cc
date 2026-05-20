@@ -929,7 +929,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
     bool eof = false;
     while (true) {
         if (end - p < 256 && !eof) {
-            memcpy(buf, p, end - p);
+            memmove(buf, p, end - p);
             bufPos += p - buf;
             p = buf + (end - p);
             int n = static_cast<int>(buf + 4096 - p);
