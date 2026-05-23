@@ -81,8 +81,8 @@
 
 struct Base14FontMapEntry
 {
-    const char *altName;
-    const char *base14Name;
+    const std::string altName;
+    const std::string base14Name;
 };
 
 static const Base14FontMapEntry base14FontMap[] = { { .altName = "Arial", .base14Name = "Helvetica" },
@@ -992,7 +992,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, std::string_view tagA, Ref idA, std::option
     builtinFont = nullptr;
     if (base14) {
         for (const BuiltinFont &bf : builtinFonts) {
-            if (!strcmp(base14->base14Name, bf.name)) {
+            if (base14->base14Name == bf.name) {
                 builtinFont = &bf;
                 break;
             }

@@ -36,7 +36,7 @@ using GetWidthFunction = const BuiltinFontWidth *(*)(const char *str, size_t len
 
 struct BuiltinFont
 {
-    const char *name;
+    const std::string name;
     const std::array<const char *, 256> *defaultBaseEnc;
     short ascent;
     short descent;
