@@ -16,7 +16,7 @@
 // Copyright (C) 2006, 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2007, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
-// Copyright (C) 2008-2010, 2012-2014, 2016-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2010, 2012-2014, 2016-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
@@ -671,7 +671,6 @@ LinkSound::~LinkSound() = default;
 LinkRendition::LinkRendition(const Object *obj)
 {
     operation = NoRendition;
-    media = nullptr;
     int operationCode = -1;
 
     screenRef = Ref::INVALID();
@@ -698,7 +697,7 @@ LinkRendition::LinkRendition(const Object *obj)
                 // retrieve rendition object
                 Object renditionObj = obj->dictLookup("R");
                 if (renditionObj.isDict()) {
-                    media = new MediaRendition(*renditionObj.getDict());
+                    media = std::make_unique<MediaRendition>(*renditionObj.getDict());
                 } else if (operationCode == 0 || operationCode == 4) {
                     error(errSyntaxWarning, -1, "Invalid Rendition Action: no R field with op = {0:d}", operationCode);
                     renditionObj.setToNull();
@@ -735,10 +734,7 @@ LinkRendition::LinkRendition(const Object *obj)
     }
 }
 
-LinkRendition::~LinkRendition()
-{
-    delete media;
-}
+LinkRendition::~LinkRendition() = default;
 
 //------------------------------------------------------------------------
 // LinkJavaScript
