@@ -616,7 +616,6 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps, GooSt
 {
     SysFontType sysFontType;
     std::optional<std::string> path;
-    GooString *base14Name;
     int substIdx, fontNum;
     bool embed;
 
@@ -694,14 +693,12 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps, GooSt
 
     //----- external font file for Base-14 font
     if (!ps && !isCIDFont() && (static_cast<Gfx8BitFont *>(this))->base14) {
-        base14Name = new GooString((static_cast<Gfx8BitFont *>(this))->base14->base14Name);
+        const std::string &base14Name = static_cast<Gfx8BitFont *>(this)->base14->base14Name;
         if ((path = globalParams->findBase14FontFile(base14Name, *this, substituteFontName))) {
             if (std::optional<GfxFontLoc> fontLoc = getExternalFont(*path, false)) {
-                delete base14Name;
                 return fontLoc;
             }
         }
-        delete base14Name;
     }
 
     //----- system font

@@ -456,7 +456,7 @@ static const char *findSubstituteName(const GfxFont *font, const std::unordered_
 }
 
 /* Windows implementation of external font matching code */
-std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font, SysFontType *type, int *fontNum, GooString *substituteFontName, const GooString *base14Name)
+std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font, SysFontType *type, int *fontNum, GooString *substituteFontName, const std::string *base14Name)
 {
     const SysFontInfo *fi;
     std::string path;
