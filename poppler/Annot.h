@@ -548,7 +548,7 @@ protected:
 class AnnotAppearanceBBox
 {
 public:
-    explicit AnnotAppearanceBBox(PDFRectangle *rect);
+    explicit AnnotAppearanceBBox(const PDFRectangle &rect);
 
     void setBorderWidth(double w) { borderWidth = w; }
 
@@ -716,7 +716,7 @@ public:
         actionCalculateField, ///< Performed when the field needs to be recalculated
     };
 
-    Annot(PDFDoc *docA, PDFRectangle *rectA);
+    Annot(PDFDoc *docA, const PDFRectangle &rectA);
     Annot(PDFDoc *docA, Object &&dictObject);
     Annot(PDFDoc *docA, Object &&dictObject, const Object &obj);
     bool isOk() const { return ok; }
@@ -782,7 +782,7 @@ public:
     virtual ~Annot();
 
 private:
-    void readArrayNum(Object *pdfArray, int key, double *value);
+    void readArrayNum(const Object &pdfArray, int key, double *value);
     // write vStr[i:j[ in appearBuf
 
     void initialize(PDFDoc *docA, Dict *dict);
@@ -844,7 +844,7 @@ private:
 class POPPLER_PRIVATE_EXPORT AnnotPopup : public Annot
 {
 public:
-    AnnotPopup(PDFDoc *docA, PDFRectangle *rect);
+    AnnotPopup(PDFDoc *docA, const PDFRectangle &rect);
     AnnotPopup(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotPopup() override;
 
@@ -873,7 +873,7 @@ public:
         replyTypeGroup // Group
     };
 
-    AnnotMarkup(PDFDoc *docA, PDFRectangle *rect);
+    AnnotMarkup(PDFDoc *docA, const PDFRectangle &rect);
     AnnotMarkup(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotMarkup() override;
 
@@ -936,7 +936,7 @@ public:
         stateNone // None
     };
 
-    AnnotText(PDFDoc *docA, PDFRectangle *rect);
+    AnnotText(PDFDoc *docA, const PDFRectangle &rect);
     AnnotText(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotText() override;
 
@@ -967,7 +967,7 @@ private:
 class POPPLER_PRIVATE_EXPORT AnnotMovie : public Annot
 {
 public:
-    AnnotMovie(PDFDoc *docA, PDFRectangle *rect, Movie *movieA);
+    AnnotMovie(PDFDoc *docA, const PDFRectangle &rect, const Movie &movieA);
     AnnotMovie(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotMovie() override;
 
@@ -990,7 +990,7 @@ private:
 class POPPLER_PRIVATE_EXPORT AnnotScreen : public Annot
 {
 public:
-    AnnotScreen(PDFDoc *docA, PDFRectangle *rect);
+    AnnotScreen(PDFDoc *docA, const PDFRectangle &rect);
     AnnotScreen(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotScreen() override;
 
@@ -1026,7 +1026,7 @@ public:
         effectPush // P
     };
 
-    AnnotLink(PDFDoc *docA, PDFRectangle *rect);
+    AnnotLink(PDFDoc *docA, const PDFRectangle &rect);
     AnnotLink(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotLink() override;
 
@@ -1063,7 +1063,7 @@ public:
 
     static const double undefinedFontPtSize;
 
-    AnnotFreeText(PDFDoc *docA, PDFRectangle *rect);
+    AnnotFreeText(PDFDoc *docA, const PDFRectangle &rect);
     AnnotFreeText(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotFreeText() override;
 
@@ -1127,7 +1127,7 @@ public:
         captionPosTop // Top
     };
 
-    AnnotLine(PDFDoc *docA, PDFRectangle *rect);
+    AnnotLine(PDFDoc *docA, const PDFRectangle &rect);
     AnnotLine(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotLine() override;
 
@@ -1193,7 +1193,7 @@ protected:
 class POPPLER_PRIVATE_EXPORT AnnotTextMarkup : public AnnotMarkup
 {
 public:
-    AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
+    AnnotTextMarkup(PDFDoc *docA, const PDFRectangle &rect, AnnotSubtype subType);
     AnnotTextMarkup(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotTextMarkup() override;
 
@@ -1222,7 +1222,7 @@ private:
 class POPPLER_PRIVATE_EXPORT AnnotStamp : public AnnotMarkup
 {
 public:
-    AnnotStamp(PDFDoc *docA, PDFRectangle *rect);
+    AnnotStamp(PDFDoc *docA, const PDFRectangle &rect);
     AnnotStamp(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotStamp() override;
 
@@ -1254,7 +1254,7 @@ private:
 class POPPLER_PRIVATE_EXPORT AnnotGeometry : public AnnotMarkup
 {
 public:
-    AnnotGeometry(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
+    AnnotGeometry(PDFDoc *docA, const PDFRectangle &rect, AnnotSubtype subType);
     AnnotGeometry(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotGeometry() override;
 
@@ -1290,7 +1290,7 @@ public:
         polygonDimension // PolygonDimension
     };
 
-    AnnotPolygon(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
+    AnnotPolygon(PDFDoc *docA, const PDFRectangle &rect, AnnotSubtype subType);
     AnnotPolygon(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotPolygon() override;
 
@@ -1340,7 +1340,7 @@ public:
         symbolP // P
     };
 
-    AnnotCaret(PDFDoc *docA, PDFRectangle *rect);
+    AnnotCaret(PDFDoc *docA, const PDFRectangle &rect);
     AnnotCaret(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotCaret() override;
 
@@ -1364,7 +1364,7 @@ private:
 class POPPLER_PRIVATE_EXPORT AnnotInk : public AnnotMarkup
 {
 public:
-    AnnotInk(PDFDoc *docA, PDFRectangle *rect);
+    AnnotInk(PDFDoc *docA, const PDFRectangle &rect);
     AnnotInk(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotInk() override;
 
@@ -1399,7 +1399,7 @@ private:
 class AnnotFileAttachment : public AnnotMarkup
 {
 public:
-    AnnotFileAttachment(PDFDoc *docA, PDFRectangle *rect, GooString *filename);
+    AnnotFileAttachment(PDFDoc *docA, const PDFRectangle &rect, const GooString &filename);
     AnnotFileAttachment(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotFileAttachment() override;
 
@@ -1426,7 +1426,7 @@ private:
 class AnnotSound : public AnnotMarkup
 {
 public:
-    AnnotSound(PDFDoc *docA, PDFRectangle *rect, Sound *soundA);
+    AnnotSound(PDFDoc *docA, const PDFRectangle &rect, const Sound &soundA);
     AnnotSound(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotSound() override;
 
@@ -1548,7 +1548,7 @@ class Annot3D : public Annot
     };
 
 public:
-    Annot3D(PDFDoc *docA, PDFRectangle *rect);
+    Annot3D(PDFDoc *docA, const PDFRectangle &rect);
     Annot3D(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~Annot3D() override;
 
@@ -1734,7 +1734,7 @@ public:
         std::unique_ptr<Deactivation> deactivation;
     };
 
-    AnnotRichMedia(PDFDoc *docA, PDFRectangle *rect);
+    AnnotRichMedia(PDFDoc *docA, const PDFRectangle &rect);
     AnnotRichMedia(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotRichMedia() override;
 

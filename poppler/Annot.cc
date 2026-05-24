@@ -1198,17 +1198,17 @@ std::unique_ptr<AnnotAppearanceCharacs> AnnotAppearanceCharacs::copy() const
 // AnnotAppearanceBBox
 //------------------------------------------------------------------------
 
-AnnotAppearanceBBox::AnnotAppearanceBBox(PDFRectangle *rect)
+AnnotAppearanceBBox::AnnotAppearanceBBox(const PDFRectangle &rect)
 {
-    origX = rect->x1;
-    origY = rect->y1;
+    origX = rect.x1;
+    origY = rect.y1;
     borderWidth = 0;
 
     // Initially set the same size as rect
     minX = 0;
     minY = 0;
-    maxX = rect->x2 - rect->x1;
-    maxY = rect->y2 - rect->y1;
+    maxX = rect.x2 - rect.x1;
+    maxY = rect.y2 - rect.y1;
 }
 
 void AnnotAppearanceBBox::extendTo(double x, double y)
@@ -1256,17 +1256,17 @@ double AnnotAppearanceBBox::getPageYMax() const
 
 #define annotLocker() const std::scoped_lock locker(mutex)
 
-Annot::Annot(PDFDoc *docA, PDFRectangle *rectA)
+Annot::Annot(PDFDoc *docA, const PDFRectangle &rectA)
 {
 
     flags = flagUnknown;
     type = typeUnknown;
 
     auto a = std::make_unique<Array>(docA->getXRef());
-    a->add(Object(rectA->x1));
-    a->add(Object(rectA->y1));
-    a->add(Object(rectA->x2));
-    a->add(Object(rectA->y2));
+    a->add(Object(rectA.x1));
+    a->add(Object(rectA.y1));
+    a->add(Object(rectA.x2));
+    a->add(Object(rectA.y2));
 
     annotObj = Object(std::make_unique<Dict>(docA->getXRef()));
     annotObj.dictSet("Type", Object::name("Annot"));
@@ -1652,9 +1652,9 @@ double Annot::getYMax() const
     return rect->y2;
 }
 
-void Annot::readArrayNum(Object *pdfArray, int key, double *value)
+void Annot::readArrayNum(const Object &pdfArray, int key, double *value)
 {
-    Object valueObject = pdfArray->arrayGet(key);
+    Object valueObject = pdfArray.arrayGet(key);
     if (valueObject.isNum()) {
         *value = valueObject.getNum();
     } else {
@@ -2091,7 +2091,7 @@ Object Annot::getAppearance() const
 // AnnotPopup
 //------------------------------------------------------------------------
 
-AnnotPopup::AnnotPopup(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
+AnnotPopup::AnnotPopup(PDFDoc *docA, const PDFRectangle &rectA) : Annot(docA, rectA)
 {
     type = typePopup;
 
@@ -2134,7 +2134,7 @@ void AnnotPopup::setOpen(bool openA)
 //------------------------------------------------------------------------
 // AnnotMarkup
 //------------------------------------------------------------------------
-AnnotMarkup::AnnotMarkup(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
+AnnotMarkup::AnnotMarkup(PDFDoc *docA, const PDFRectangle &rectA) : Annot(docA, rectA)
 {
     initialize(docA, annotObj.getDict());
 }
@@ -2286,7 +2286,7 @@ void AnnotMarkup::removeReferencedObjects()
 // AnnotText
 //------------------------------------------------------------------------
 
-AnnotText::AnnotText(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rectA)
+AnnotText::AnnotText(PDFDoc *docA, const PDFRectangle &rectA) : AnnotMarkup(docA, rectA)
 {
     type = typeText;
     flags |= flagNoZoom | flagNoRotate;
@@ -2763,7 +2763,7 @@ void AnnotText::draw(Gfx *gfx, bool printing)
 
         // Force 24x24 rectangle
         PDFRectangle fixedRect(rect->x1, rect->y2 - 24, rect->x1 + 24, rect->y2);
-        appearBBox = std::make_unique<AnnotAppearanceBBox>(&fixedRect);
+        appearBBox = std::make_unique<AnnotAppearanceBBox>(fixedRect);
         const std::array<double, 4> bbox = appearBBox->getBBoxRect();
         if (ca == 1) {
             appearance = createForm(appearBuilder.buffer(), bbox, false, Object {});
@@ -2788,7 +2788,7 @@ void AnnotText::draw(Gfx *gfx, bool printing)
 //------------------------------------------------------------------------
 // AnnotLink
 //------------------------------------------------------------------------
-AnnotLink::AnnotLink(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
+AnnotLink::AnnotLink(PDFDoc *docA, const PDFRectangle &rectA) : Annot(docA, rectA)
 {
     type = typeLink;
     annotObj.dictSet("Subtype", Object::name("Link"));
@@ -2877,7 +2877,7 @@ void AnnotLink::draw(Gfx *gfx, bool printing)
 //------------------------------------------------------------------------
 const double AnnotFreeText::undefinedFontPtSize = 10.;
 
-AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rectA)
+AnnotFreeText::AnnotFreeText(PDFDoc *docA, const PDFRectangle &rectA) : AnnotMarkup(docA, rectA)
 {
     type = typeFreeText;
 
@@ -3450,7 +3450,7 @@ Object AnnotFreeText::getAppearanceResDict()
 // AnnotLine
 //------------------------------------------------------------------------
 
-AnnotLine::AnnotLine(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rectA)
+AnnotLine::AnnotLine(PDFDoc *docA, const PDFRectangle &rectA) : AnnotMarkup(docA, rectA)
 {
     type = typeLine;
     annotObj.dictSet("Subtype", Object::name("Line"));
@@ -3668,7 +3668,7 @@ void AnnotLine::generateLineAppearance()
     double borderWidth, ca = opacity;
     bool fill = false;
 
-    appearBBox = std::make_unique<AnnotAppearanceBBox>(rect.get());
+    appearBBox = std::make_unique<AnnotAppearanceBBox>(*rect);
     AnnotAppearanceBuilder appearBuilder;
     appearBuilder.append("q\n");
     if (color) {
@@ -3879,7 +3879,7 @@ Object AnnotLine::getAppearanceResDict()
 //------------------------------------------------------------------------
 // AnnotTextMarkup
 //------------------------------------------------------------------------
-AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rectA, AnnotSubtype subType) : AnnotMarkup(docA, rectA)
+AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, const PDFRectangle &rectA, AnnotSubtype subType) : AnnotMarkup(docA, rectA)
 {
     switch (subType) {
     case typeHighlight:
@@ -4035,7 +4035,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
         appearBuilder.append("q\n");
 
         /* Adjust BBox */
-        appearBBox = std::make_unique<AnnotAppearanceBBox>(rect.get());
+        appearBBox = std::make_unique<AnnotAppearanceBBox>(*rect);
         for (i = 0; i < quadrilaterals->getQuadrilateralsLength(); ++i) {
             appearBBox->extendTo(quadrilaterals->getX1(i) - rect->x1, quadrilaterals->getY1(i) - rect->y1);
             appearBBox->extendTo(quadrilaterals->getX2(i) - rect->x1, quadrilaterals->getY2(i) - rect->y1);
@@ -5598,12 +5598,12 @@ void AnnotWidget::draw(Gfx *gfx, bool printing)
 //------------------------------------------------------------------------
 // AnnotMovie
 //------------------------------------------------------------------------
-AnnotMovie::AnnotMovie(PDFDoc *docA, PDFRectangle *rectA, Movie *movieA) : Annot(docA, rectA)
+AnnotMovie::AnnotMovie(PDFDoc *docA, const PDFRectangle &rectA, const Movie &movieA) : Annot(docA, rectA)
 {
     type = typeMovie;
     annotObj.dictSet("Subtype", Object::name("Movie"));
 
-    movie = movieA->copy();
+    movie = movieA.copy();
     // TODO: create movie dict from movieA
 
     initialize(annotObj.getDict());
@@ -5721,7 +5721,7 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
 //------------------------------------------------------------------------
 // AnnotScreen
 //------------------------------------------------------------------------
-AnnotScreen::AnnotScreen(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
+AnnotScreen::AnnotScreen(PDFDoc *docA, const PDFRectangle &rectA) : Annot(docA, rectA)
 {
     type = typeScreen;
 
@@ -5776,7 +5776,7 @@ std::unique_ptr<LinkAction> AnnotScreen::getAdditionalAction(AdditionalActionsTy
 //------------------------------------------------------------------------
 // AnnotStamp
 //------------------------------------------------------------------------
-AnnotStamp::AnnotStamp(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rectA)
+AnnotStamp::AnnotStamp(PDFDoc *docA, const PDFRectangle &rectA) : AnnotMarkup(docA, rectA)
 {
     type = typeStamp;
     annotObj.dictSet("Subtype", Object::name("Stamp"));
@@ -5999,7 +5999,7 @@ void AnnotStamp::setCustomImage(std::unique_ptr<AnnotStampImageHelper> &&stampIm
 //------------------------------------------------------------------------
 // AnnotGeometry
 //------------------------------------------------------------------------
-AnnotGeometry::AnnotGeometry(PDFDoc *docA, PDFRectangle *rectA, AnnotSubtype subType) : AnnotMarkup(docA, rectA)
+AnnotGeometry::AnnotGeometry(PDFDoc *docA, const PDFRectangle &rectA, AnnotSubtype subType) : AnnotMarkup(docA, rectA)
 {
     switch (subType) {
     case typeSquare:
@@ -6158,7 +6158,7 @@ void AnnotGeometry::draw(Gfx *gfx, bool printing)
 //------------------------------------------------------------------------
 // AnnotPolygon
 //------------------------------------------------------------------------
-AnnotPolygon::AnnotPolygon(PDFDoc *docA, PDFRectangle *rectA, AnnotSubtype subType) : AnnotMarkup(docA, rectA)
+AnnotPolygon::AnnotPolygon(PDFDoc *docA, const PDFRectangle &rectA, AnnotSubtype subType) : AnnotMarkup(docA, rectA)
 {
     switch (subType) {
     case typePolygon:
@@ -6422,7 +6422,7 @@ void AnnotPolygon::draw(Gfx *gfx, bool printing)
 
     annotLocker();
     if (appearance.isNull()) {
-        appearBBox = std::make_unique<AnnotAppearanceBBox>(rect.get());
+        appearBBox = std::make_unique<AnnotAppearanceBBox>(*rect);
         ca = opacity;
 
         AnnotAppearanceBuilder appearBuilder;
@@ -6489,7 +6489,7 @@ void AnnotPolygon::draw(Gfx *gfx, bool printing)
 //------------------------------------------------------------------------
 // AnnotCaret
 //------------------------------------------------------------------------
-AnnotCaret::AnnotCaret(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rectA)
+AnnotCaret::AnnotCaret(PDFDoc *docA, const PDFRectangle &rectA) : AnnotMarkup(docA, rectA)
 {
     type = typeCaret;
 
@@ -6535,7 +6535,7 @@ void AnnotCaret::setSymbol(AnnotCaretSymbol new_symbol)
 //------------------------------------------------------------------------
 // AnnotInk
 //------------------------------------------------------------------------
-AnnotInk::AnnotInk(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rectA)
+AnnotInk::AnnotInk(PDFDoc *docA, const PDFRectangle &rectA) : AnnotMarkup(docA, rectA)
 {
     type = typeInk;
 
@@ -6659,7 +6659,7 @@ void AnnotInk::generateInkAppearance()
 {
     Object newAppearance;
 
-    appearBBox = std::make_unique<AnnotAppearanceBBox>(rect.get());
+    appearBBox = std::make_unique<AnnotAppearanceBBox>(*rect);
 
     AnnotAppearanceBuilder appearBuilder;
     if (opacity != 1 || drawBelow) {
@@ -6744,12 +6744,12 @@ void AnnotInk::draw(Gfx *gfx, bool printing)
 //------------------------------------------------------------------------
 // AnnotFileAttachment
 //------------------------------------------------------------------------
-AnnotFileAttachment::AnnotFileAttachment(PDFDoc *docA, PDFRectangle *rectA, GooString *filename) : AnnotMarkup(docA, rectA)
+AnnotFileAttachment::AnnotFileAttachment(PDFDoc *docA, const PDFRectangle &rectA, const GooString &filename) : AnnotMarkup(docA, rectA)
 {
     type = typeFileAttachment;
 
     annotObj.dictSet("Subtype", Object::name("FileAttachment"));
-    annotObj.dictSet("FS", Object(std::string { filename->toStr() }));
+    annotObj.dictSet("FS", Object(std::string { filename.toStr() }));
 
     initialize(annotObj.getDict());
 }
@@ -6943,12 +6943,12 @@ void AnnotFileAttachment::draw(Gfx *gfx, bool printing)
 //------------------------------------------------------------------------
 // AnnotSound
 //------------------------------------------------------------------------
-AnnotSound::AnnotSound(PDFDoc *docA, PDFRectangle *rectA, Sound *soundA) : AnnotMarkup(docA, rectA)
+AnnotSound::AnnotSound(PDFDoc *docA, const PDFRectangle &rectA, const Sound &soundA) : AnnotMarkup(docA, rectA)
 {
     type = typeSound;
 
     annotObj.dictSet("Subtype", Object::name("Sound"));
-    annotObj.dictSet("Sound", soundA->getObject().copy());
+    annotObj.dictSet("Sound", soundA.getObject().copy());
 
     initialize(annotObj.getDict());
 }
@@ -7090,7 +7090,7 @@ void AnnotSound::draw(Gfx *gfx, bool printing)
 //------------------------------------------------------------------------
 // Annot3D
 //------------------------------------------------------------------------
-Annot3D::Annot3D(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
+Annot3D::Annot3D(PDFDoc *docA, const PDFRectangle &rectA) : Annot(docA, rectA)
 {
     type = type3D;
 
@@ -7193,7 +7193,7 @@ Annot3D::Activation::Activation(Dict *dict)
 //------------------------------------------------------------------------
 // AnnotRichMedia
 //------------------------------------------------------------------------
-AnnotRichMedia::AnnotRichMedia(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
+AnnotRichMedia::AnnotRichMedia(PDFDoc *docA, const PDFRectangle &rectA) : Annot(docA, rectA)
 {
     type = typeRichMedia;
 
