@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2025 Juraj Šarinay <juraj@sarinay.com>
+// Copyright 2026 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -12,6 +13,7 @@
 #include <config.h>
 #include <poppler-config.h>
 
+#include "Form.h"
 #include "PDFDoc.h"
 #include "PDFDocFactory.h"
 #include "GlobalParams.h"

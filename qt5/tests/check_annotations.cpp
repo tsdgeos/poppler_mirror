@@ -229,10 +229,10 @@ void TestAnnotations::checkNonMarkupAnnotations()
 
 void TestAnnotations::checkDefaultAppearance()
 {
-    std::unique_ptr<GooString> roundtripString;
+    std::string roundtripString;
     {
-        GooString daString { "/Helv 10 Tf 0.1 0.2 0.3 rg" };
-        const DefaultAppearance da { &daString };
+        const std::string daString { "/Helv 10 Tf 0.1 0.2 0.3 rg" };
+        const DefaultAppearance da { daString };
         QCOMPARE(da.getFontPtSize(), 10.);
         QVERIFY(!da.getFontName().empty());
         QCOMPARE(da.getFontName(), "Helv");
@@ -242,11 +242,11 @@ void TestAnnotations::checkDefaultAppearance()
         QCOMPARE(color->getValues()[0], 0.1);
         QCOMPARE(color->getValues()[1], 0.2);
         QCOMPARE(color->getValues()[2], 0.3);
-        roundtripString = std::make_unique<GooString>(da.toAppearanceString());
+        roundtripString = da.toAppearanceString();
     }
     {
         /* roundtrip through parse/generate/parse shall preserve values */
-        const DefaultAppearance da { roundtripString.get() };
+        const DefaultAppearance da { roundtripString };
         QCOMPARE(da.getFontPtSize(), 10.);
         QVERIFY(!da.getFontName().empty());
         QCOMPARE(da.getFontName(), "Helv");
@@ -259,8 +259,8 @@ void TestAnnotations::checkDefaultAppearance()
     }
     {
         /* parsing bad DA strings must not cause crash */
-        GooString daString { "/ % Tf 1 2 rg" };
-        const DefaultAppearance da { &daString };
+        const std::string daString { "/ % Tf 1 2 rg" };
+        const DefaultAppearance da { daString };
         QVERIFY(da.getFontName().empty());
     }
 }

@@ -2,6 +2,7 @@
 
 #include "PDFDoc.h"
 #include "GlobalParams.h"
+#include "OptionalContent.h"
 
 #include "Outline.h"
 #include "poppler-private.h"

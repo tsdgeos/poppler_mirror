@@ -45,7 +45,9 @@
 #include <config.h>
 #include <poppler-config.h>
 #include <ErrorCodes.h>
+#include <Form.h>
 #include <GlobalParams.h>
+#include <OptionalContent.h>
 #include <Outline.h>
 #include <PDFDoc.h>
 #include <Stream.h>

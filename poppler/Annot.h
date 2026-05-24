@@ -394,7 +394,7 @@ class POPPLER_PRIVATE_EXPORT DefaultAppearance
 {
 public:
     DefaultAppearance(std::string fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> &&fontColorA);
-    explicit DefaultAppearance(const GooString *da);
+    explicit DefaultAppearance(const std::string &da);
     void setFontName(const std::string &fontNameA);
     const std::string &getFontName() const { return fontName; }
     void setFontPtSize(double fontPtSizeA);
@@ -595,7 +595,7 @@ public:
     void drawLineEndArrow(double x, double y, double size, int orientation, bool isOpen, bool fill, const Matrix &m);
     void drawLineEndSlash(double x, double y, double size, const Matrix &m);
     void drawFieldBorder(const FormField *field, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect);
-    bool drawFormField(const FormField *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
+    bool drawFormField(const FormField *field, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
                        const GooString *appearState, XRef *xref, Dict *resourcesDict);
     static double lineEndingXShorten(AnnotLineEndingStyle endingStyle, double size);
     static double lineEndingXExtendBBox(AnnotLineEndingStyle endingStyle, double size);
@@ -617,18 +617,18 @@ private:
         TurnTextToStarsDrawTextFlag = 8
     };
 
-    bool drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect, const GooString *da, const GfxResources *resources, VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict);
-    bool drawFormFieldButton(const FormFieldButton *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
+    bool drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect, const std::string &da, const GfxResources *resources, VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict);
+    bool drawFormFieldButton(const FormFieldButton *field, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
                              const GooString *appearState, XRef *xref, Dict *resourcesDict);
-    bool drawFormFieldText(const FormFieldText *fieldText, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, XRef *xref,
+    bool drawFormFieldText(const FormFieldText *fieldText, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, XRef *xref,
                            Dict *resourcesDict);
-    bool drawFormFieldChoice(const FormFieldChoice *fieldChoice, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
+    bool drawFormFieldChoice(const FormFieldChoice *fieldChoice, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
                              XRef *xref, Dict *resourcesDict);
-    bool drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GooString *da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict);
+    bool drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const std::string &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict);
     void drawSignatureFieldText(const std::string &text, const Form *form, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically,
                                 bool centerHorizontally);
-    bool drawText(const GooString *text, const Form *form, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, VariableTextQuadding quadding,
-                  XRef *xref, Dict *resourcesDict, int flags = NoDrawTextFlags, int nCombs = 0);
+    bool drawText(const std::string &inputText, const Form *form, const std::string &da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
+                  VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, int flags = NoDrawTextFlags, int nCombs = 0);
     void drawArrowPath(double x, double y, const Matrix &m, int orientation = 1);
 
     std::string appearBuf;
@@ -721,7 +721,7 @@ public:
     Annot(PDFDoc *docA, Object &&dictObject, const Object *obj);
     bool isOk() const { return ok; }
 
-    static double calculateFontSize(const Form *form, const GfxFont *font, const GooString *text, double wMax, double hMax, bool forceZapfDingbats = {});
+    static double calculateFontSize(const Form *form, const GfxFont *font, const std::string &text, double wMax, double hMax, bool forceZapfDingbats = {});
 
     virtual void draw(Gfx *gfx, bool printing);
     // Get the resource dict of the appearance stream
@@ -777,7 +777,7 @@ public:
     bool inRect(double x, double y) const;
 
     // If newFontNeeded is not null, it will contain whether the given font has glyphs to represent the needed text
-    static void layoutText(const GooString *text, GooString *outBuf, size_t *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode, bool *newFontNeeded = nullptr);
+    static void layoutText(const std::string &text, GooString *outBuf, size_t *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode, bool *newFontNeeded = nullptr);
 
     virtual ~Annot();
 
@@ -1093,7 +1093,7 @@ protected:
     void generateFreeTextAppearance();
 
     // required
-    std::unique_ptr<GooString> appearanceString; // DA
+    std::string appearanceString; // DA
 
     // optional
     VariableTextQuadding quadding; // Q  (Default 0)

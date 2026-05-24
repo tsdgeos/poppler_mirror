@@ -731,8 +731,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
                                                                                                std::unique_ptr<AnnotColor> &&backgroundColor)
 {
     // Set the appearance
-    GooString *aux = getField()->getDefaultAppearance();
-    std::string originalDefaultAppearance = aux ? aux->toStr() : std::string();
+    const std::string originalDefaultAppearance = getField()->getDefaultAppearance();
 
     Form *form = doc->getCatalog()->getCreateForm();
 
@@ -760,10 +759,10 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
         std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(pdfFontName);
 
         if (fontSize == 0) {
-            fontSize = Annot::calculateFontSize(form, font.get(), &signatureText, wMax / 2.0, hMax);
+            fontSize = Annot::calculateFontSize(form, font.get(), signatureText.toStr(), wMax / 2.0, hMax);
         }
         if (leftFontSize == 0) {
-            leftFontSize = Annot::calculateFontSize(form, font.get(), &signatureTextLeft, wMax / 2.0, hMax);
+            leftFontSize = Annot::calculateFontSize(form, font.get(), signatureTextLeft.toStr(), wMax / 2.0, hMax);
         }
         const DefaultAppearance da { pdfFontName, fontSize, std::move(fontColor) };
         getField()->setDefaultAppearance(da.toAppearanceString());
@@ -1081,7 +1080,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
     // Variable Text
     obj1 = Form::fieldLookup(dict, "DA");
     if (obj1.isString()) {
-        defaultAppearance = obj1.takeString();
+        defaultAppearance = std::move(obj1.takeString()->toNonConstStr());
     }
 
     obj1 = Form::fieldLookup(dict, "Q");
@@ -1113,7 +1112,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
 
 void FormField::setDefaultAppearance(const std::string &appearance)
 {
-    defaultAppearance = std::make_unique<GooString>(appearance);
+    defaultAppearance = appearance;
 }
 
 void FormField::setPartialName(const GooString &name)
@@ -1686,7 +1685,7 @@ void FormFieldText::setContent(std::unique_ptr<GooString> new_content)
         }
         Form *form = doc->getCatalog()->getForm();
         if (form) {
-            DefaultAppearance da(defaultAppearance.get());
+            DefaultAppearance da(defaultAppearance);
             const std::string &fontName = da.getFontName();
             if (!fontName.empty()) {
                 // Use the field resource dictionary if it exists
@@ -1770,18 +1769,18 @@ void FormFieldText::setTextFontSize(int fontSize)
             error(errSyntaxError, -1, "FormFieldText:: invalid DA object");
             return;
         }
-        defaultAppearance = std::make_unique<GooString>();
+        defaultAppearance.clear();
         for (std::size_t i = 0; i < daToks.size(); ++i) {
             if (i > 0) {
-                defaultAppearance->push_back(' ');
+                defaultAppearance.push_back(' ');
             }
             if (i == idx) {
-                GooString::appendf(defaultAppearance->toNonConstStr(), "{0:d}", fontSize);
+                GooString::appendf(defaultAppearance, "{0:d}", fontSize);
             } else {
-                defaultAppearance->append(daToks[i]);
+                defaultAppearance.append(daToks[i]);
             }
         }
-        obj.dictSet("DA", Object(std::string { defaultAppearance->toStr() }));
+        obj.dictSet("DA", Object(std::string { defaultAppearance }));
         xref->setModifiedObject(&obj, ref);
         updateChildrenAppearance();
     }
@@ -2568,7 +2567,7 @@ Form::Form(PDFDoc *docA) : doc(docA)
 
     obj1 = acroForm->dictLookup("DA");
     if (obj1.isString()) {
-        defaultAppearance = obj1.takeString();
+        defaultAppearance = std::move(obj1.takeString()->toNonConstStr());
     }
 
     obj1 = acroForm->dictLookup("Q");

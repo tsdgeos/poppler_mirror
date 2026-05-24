@@ -53,6 +53,7 @@
 #include "poppler-private.h"
 
 // poppler includes
+#include <Form.h>
 #include <Page.h>
 #include <Annot.h>
 #include <Gfx.h>

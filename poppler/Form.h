@@ -373,7 +373,7 @@ public:
     void setStandAlone(bool value) { standAlone = value; }
     bool isStandAlone() const { return standAlone; }
 
-    GooString *getDefaultAppearance() const { return defaultAppearance.get(); }
+    const std::string &getDefaultAppearance() const { return defaultAppearance; }
     void setDefaultAppearance(const std::string &appearance);
 
     bool hasTextQuadding() const { return hasQuadding; }
@@ -429,7 +429,7 @@ protected:
     mutable std::unique_ptr<GooString> fullyQualifiedName;
 
     // Variable Text
-    std::unique_ptr<GooString> defaultAppearance;
+    std::string defaultAppearance;
     bool hasQuadding;
     VariableTextQuadding quadding;
 
@@ -728,7 +728,7 @@ public:
     bool getNeedAppearances() const { return needAppearances; }
     int getNumFields() const { return rootFields.size(); }
     FormField *getRootField(int i) const { return rootFields[i].get(); }
-    const GooString *getDefaultAppearance() const { return defaultAppearance.get(); }
+    const std::string &getDefaultAppearance() const { return defaultAppearance; }
     VariableTextQuadding getTextQuadding() const { return quadding; }
     GfxResources *getDefaultResources() const { return defaultResources; }
     Object *getDefaultResourcesObj() { return &resDict; }
@@ -761,7 +761,7 @@ private:
     std::vector<Ref> calculateOrder;
 
     // Variable Text
-    std::unique_ptr<GooString> defaultAppearance;
+    std::string defaultAppearance;
     VariableTextQuadding quadding;
 };
 

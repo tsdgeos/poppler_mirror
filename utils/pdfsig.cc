@@ -37,6 +37,7 @@
 #include <sstream>
 #include "parseargs.h"
 #include "goo/gbasename.h"
+#include "Form.h"
 #include "Page.h"
 #include "PDFDoc.h"
 #include "PDFDocFactory.h"

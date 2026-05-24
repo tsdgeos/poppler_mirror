@@ -15,7 +15,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dom Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2010, 2012, 2016-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2010, 2012, 2016-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011 Vittal Aithal <vittal.aithal@cognidox.com>
 // Copyright (C) 2012, 2013, 2016-2018, 2021 Adrian Johnson <ajohnson@redneon.com>
@@ -52,6 +52,7 @@
 #include "goo/GooString.h"
 #include "goo/gfile.h"
 #include "goo/glibc.h"
+#include "Annot.h"
 #include "GlobalParams.h"
 #include "Object.h"
 #include "Stream.h"

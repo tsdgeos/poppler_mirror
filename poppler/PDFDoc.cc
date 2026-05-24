@@ -90,6 +90,7 @@
 #include "GlobalParams.h"
 #include "Page.h"
 #include "Catalog.h"
+#include "Form.h"
 #include "Stream.h"
 #include "XRef.h"
 #include "Linearization.h"
