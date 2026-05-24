@@ -435,8 +435,8 @@ public:
 
     explicit AnnotIconFit(Dict *dict);
 
-    AnnotIconFitScaleWhen getScaleWhen() { return scaleWhen; }
-    AnnotIconFitScale getScale() { return scale; }
+    AnnotIconFitScaleWhen getScaleWhen() const { return scaleWhen; }
+    AnnotIconFitScale getScale() const { return scale; }
     double getLeft() const { return left; }
     double getBottom() const { return bottom; }
     bool getFullyBounds() const { return fullyBounds; }
@@ -467,11 +467,11 @@ public:
     ~AnnotAppearance();
 
     // State is ignored if no subdictionary is present
-    Object getAppearanceStream(AnnotAppearanceType type, const char *state);
+    Object getAppearanceStream(AnnotAppearanceType type, const char *state) const;
 
     // Access keys in normal appearance subdictionary (N)
-    std::unique_ptr<GooString> getStateKey(int i);
-    int getNumStates();
+    std::unique_ptr<GooString> getStateKey(int i) const;
+    int getNumStates() const;
 
     // Removes all associated streams in the xref table. Caller is required to
     // reset parent annotation's AP and AS after this call.
@@ -520,9 +520,9 @@ public:
     const AnnotColor *getBackColor() const { return backColor.get(); }
     void setBackColor(std::unique_ptr<AnnotColor> &&color) { backColor = std::move(color); }
     const GooString *getNormalCaption() const { return normalCaption.get(); }
-    const GooString *getRolloverCaption() { return rolloverCaption.get(); }
-    const GooString *getAlternateCaption() { return alternateCaption.get(); }
-    const AnnotIconFit *getIconFit() { return iconFit.get(); }
+    const GooString *getRolloverCaption() const { return rolloverCaption.get(); }
+    const GooString *getAlternateCaption() const { return alternateCaption.get(); }
+    const AnnotIconFit *getIconFit() const { return iconFit.get(); }
     AnnotAppearanceCharacsTextPos getPosition() const { return position; }
 
     std::unique_ptr<AnnotAppearanceCharacs> copy() const;
@@ -729,10 +729,10 @@ public:
 
     bool match(Ref refA) const { return ref == refA; }
 
-    double getXMin();
-    double getYMin();
-    double getXMax();
-    double getYMax();
+    double getXMin() const;
+    double getYMin() const;
+    double getXMax() const;
+    double getYMax() const;
 
     void setRect(const PDFRectangle &rect);
     void setRect(double x1, double y1, double x2, double y2);
@@ -793,7 +793,7 @@ protected:
     Object createForm(const std::string &appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, std::unique_ptr<Dict> resDict);
     Object createForm(const std::string &appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
     std::unique_ptr<Dict> createResourcesDict(const char *formName, Object &&formStream, const char *stateName, double opacity, const char *blendMode);
-    bool isVisible(bool printing);
+    bool isVisible(bool printing) const;
     int getRotation() const;
 
     // Updates the field key of the annotation dictionary
@@ -1767,7 +1767,7 @@ public:
     Annots(const Annots &) = delete;
     Annots &operator=(const Annots &) = delete;
 
-    const std::vector<std::shared_ptr<Annot>> &getAnnots() { return annots; }
+    const std::vector<std::shared_ptr<Annot>> &getAnnots() const { return annots; }
 
     void appendAnnot(std::shared_ptr<Annot> annot);
     bool removeAnnot(const std::shared_ptr<Annot> &annot);

@@ -946,7 +946,7 @@ AnnotAppearance::AnnotAppearance(PDFDoc *docA, Object *dict)
 
 AnnotAppearance::~AnnotAppearance() = default;
 
-Object AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char *state)
+Object AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char *state) const
 {
     Object apData;
 
@@ -984,7 +984,7 @@ Object AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char
     return Object();
 }
 
-std::unique_ptr<GooString> AnnotAppearance::getStateKey(int i)
+std::unique_ptr<GooString> AnnotAppearance::getStateKey(int i) const
 {
     const Object &obj1 = appearDict.dictLookupNF("N");
     if (obj1.isDict()) {
@@ -993,7 +993,7 @@ std::unique_ptr<GooString> AnnotAppearance::getStateKey(int i)
     return nullptr;
 }
 
-int AnnotAppearance::getNumStates()
+int AnnotAppearance::getNumStates() const
 {
     int res = 0;
     const Object &obj1 = appearDict.dictLookupNF("N");
@@ -1632,22 +1632,22 @@ void Annot::invalidateAppearance()
     }
 }
 
-double Annot::getXMin()
+double Annot::getXMin() const
 {
     return rect->x1;
 }
 
-double Annot::getYMin()
+double Annot::getYMin() const
 {
     return rect->y1;
 }
 
-double Annot::getXMax()
+double Annot::getXMax() const
 {
     return rect->x2;
 }
 
-double Annot::getYMax()
+double Annot::getYMax() const
 {
     return rect->y2;
 }
@@ -2000,7 +2000,7 @@ Object Annot::getAppearanceResDict()
     return Object::null();
 }
 
-bool Annot::isVisible(bool printing)
+bool Annot::isVisible(bool printing) const
 {
     // check the flags
     if ((flags & flagHidden) || (printing && !(flags & flagPrint)) || (!printing && (flags & flagNoView))) {
