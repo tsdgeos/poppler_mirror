@@ -7,7 +7,7 @@
 // Copyright (C) 2011-2015, 2017 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Arseny Solokha <asolokha@gmx.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2012, 2014, 2017-2019, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2014, 2017-2019, 2021, 2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2015 Arthur Stavisky <vovodroid@gmail.com>
@@ -99,7 +99,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
 static void doMergeNameDict(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldRefNum, int newRefNum, Dict *srcNameDict, Dict *mergeNameDict, int numOffset)
 {
     for (int i = 0; i < mergeNameDict->getLength(); i++) {
-        const char *key = mergeNameDict->getKey(i);
+        const std::string &key = mergeNameDict->getKey(i);
         Object mergeNameTree = mergeNameDict->lookup(key);
         Object srcNameTree = srcNameDict->lookup(key);
         if (srcNameTree.isDict() && mergeNameTree.isDict()) {
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
     PDFDoc::writeHeader(outStr, majorVersion, minorVersion);
 
     // handle OutputIntents, AcroForm, OCProperties & Names
-    Object intents;
+    Object intentsObj;
     Object names;
     Object afObj;
     Object ocObj;
@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
             return -1;
         }
         Dict *catDict = catObj.getDict();
-        intents = catDict->lookup("OutputIntents");
+        intentsObj = catDict->lookup("OutputIntents");
         afObj = catDict->lookupNF("AcroForm").copy();
         Ref *refPage = docs[0]->getCatalog()->getPageRef(1);
         if (!afObj.isNull() && refPage) {
@@ -232,14 +232,15 @@ int main(int argc, char *argv[])
         if (!names.isNull() && names.isDict() && refPage) {
             docs[0]->markPageObjects(names.getDict(), yRef, countRef, 0, refPage->num, refPage->num);
         }
-        if (intents.isArrayOfLengthAtLeast(1)) {
+        if (intentsObj.isArrayOfLengthAtLeast(1)) {
             for (size_t i = 1; i < docs.size(); i++) {
                 Object pagecatObj = docs[i]->getXRef()->getCatalog();
                 Dict *pagecatDict = pagecatObj.getDict();
                 Object pageintents = pagecatDict->lookup("OutputIntents");
                 if (pageintents.isArrayOfLengthAtLeast(1)) {
-                    for (int j = intents.arrayGetLength() - 1; j >= 0; j--) {
-                        Object intent = intents.arrayGet(j, 0);
+                    Array *intents = intentsObj.getArray();
+                    for (int j = intents->getLength() - 1; j >= 0; j--) {
+                        Object intent = intents->get(j, 0);
                         if (intent.isDict()) {
                             Object idf = intent.dictLookup("OutputConditionIdentifier");
                             if (idf.isString()) {
@@ -259,15 +260,15 @@ int main(int argc, char *argv[])
                                     }
                                 }
                                 if (removeIntent) {
-                                    intents.arrayRemove(j);
+                                    intents->remove(j);
                                     error(errSyntaxWarning, -1, "Output intent {0:s} missing in pdf {1:s}, removed", gidf.c_str(), docs[i]->getFileName()->c_str());
                                 }
                             } else {
-                                intents.arrayRemove(j);
+                                intents->remove(j);
                                 error(errSyntaxWarning, -1, "Invalid output intent dict, missing required OutputConditionIdentifier");
                             }
                         } else {
-                            intents.arrayRemove(j);
+                            intents->remove(j);
                         }
                     }
                 } else {
@@ -276,13 +277,15 @@ int main(int argc, char *argv[])
                 }
             }
         }
-        if (intents.isArrayOfLengthAtLeast(1)) {
-            for (int j = intents.arrayGetLength() - 1; j >= 0; j--) {
-                Object intent = intents.arrayGet(j, 0);
+        // This should not get merged with the if above beacuse we modify intentsObj inside the if above
+        if (intentsObj.isArrayOfLengthAtLeast(1)) {
+            Array *intents = intentsObj.getArray();
+            for (int j = intents->getLength() - 1; j >= 0; j--) {
+                Object intent = intents->get(j, 0);
                 if (intent.isDict()) {
                     docs[0]->markPageObjects(intent.getDict(), yRef, countRef, numOffset, 0, 0);
                 } else {
-                    intents.arrayRemove(j);
+                    intents->remove(j);
                 }
             }
         }
@@ -361,10 +364,10 @@ int main(int argc, char *argv[])
     outStr->printf("%d 0 obj\n", rootNum);
     outStr->printf("<< /Type /Catalog /Pages %d 0 R", rootNum + 1);
     // insert OutputIntents
-    if (intents.isArrayOfLengthAtLeast(1)) {
+    if (intentsObj.isArrayOfLengthAtLeast(1)) {
         outStr->printf(" /OutputIntents [");
-        for (int j = 0; j < intents.arrayGetLength(); j++) {
-            Object intent = intents.arrayGet(j, 0);
+        for (int j = 0; j < intentsObj.arrayGetLength(); j++) {
+            Object intent = intentsObj.arrayGet(j, 0);
             if (intent.isDict()) {
                 PDFDoc::writeObject(&intent, outStr, yRef, 0, nullptr, cryptRC4, 0, 0, 0);
             }
@@ -407,12 +410,12 @@ int main(int argc, char *argv[])
             if (j > 0) {
                 outStr->printf(" ");
             }
-            const char *key = pageDict->getKey(j);
+            const std::string &key = pageDict->getKey(j);
             Object value = pageDict->getValNF(j).copy();
-            if (strcmp(key, "Parent") == 0) {
+            if (key == "Parent") {
                 outStr->printf("/Parent %d 0 R", rootNum + 1);
             } else {
-                outStr->printf("/%s ", key);
+                outStr->printf("/%s ", key.c_str());
                 PDFDoc::writeObject(&value, outStr, yRef, offsets[i], nullptr, cryptRC4, 0, 0, 0);
             }
         }

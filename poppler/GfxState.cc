@@ -42,6 +42,7 @@
 // Copyright (C) 2025 Trystan Mata <trystan.mata@tytanium.xyz>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 // Copyright (C) 2026 Adam Sampson <ats@offog.org>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -233,7 +234,8 @@ std::unique_ptr<GfxColorSpace> GfxColorSpace::parse(GfxResources *res, Object *c
     }
 
     if (csObj->isName()) {
-        if (csObj->isName("DeviceGray") || csObj->isName("G")) {
+        const std::string &csName = csObj->getNameString();
+        if (csName == "DeviceGray" || csName == "G") {
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultGray");
                 if (objCS.isNull()) {
@@ -243,7 +245,7 @@ std::unique_ptr<GfxColorSpace> GfxColorSpace::parse(GfxResources *res, Object *c
             }
             return state->copyDefaultGrayColorSpace();
         }
-        if (csObj->isName("DeviceRGB") || csObj->isName("RGB")) {
+        if (csName == "DeviceRGB" || csName == "RGB") {
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultRGB");
                 if (objCS.isNull()) {
@@ -253,7 +255,7 @@ std::unique_ptr<GfxColorSpace> GfxColorSpace::parse(GfxResources *res, Object *c
             }
             return state->copyDefaultRGBColorSpace();
         }
-        if (csObj->isName("DeviceCMYK") || csObj->isName("CMYK")) {
+        if (csName == "DeviceCMYK" || csName == "CMYK") {
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultCMYK");
                 if (objCS.isNull()) {
@@ -263,10 +265,10 @@ std::unique_ptr<GfxColorSpace> GfxColorSpace::parse(GfxResources *res, Object *c
             }
             return state->copyDefaultCMYKColorSpace();
         }
-        if (csObj->isName("Pattern")) {
+        if (csName == "Pattern") {
             return std::make_unique<GfxPatternColorSpace>(nullptr);
         }
-        error(errSyntaxWarning, -1, "Bad color space '{0:s}'", csObj->getName());
+        error(errSyntaxWarning, -1, "Bad color space '{0:r}'", &csName);
 
     } else if (csObj->isArrayOfLengthAtLeast(1)) {
         obj1 = csObj->arrayGet(0);
@@ -2396,14 +2398,15 @@ std::unique_ptr<GfxColorSpace> GfxIndexedColorSpace::parse(GfxResources *res, co
     obj1 = arr.get(3);
     const int n = cs->getBase()->getNComps();
     if (obj1.isStream() && obj1.streamRewind()) {
+        Stream *stream = obj1.getStream();
         for (i = 0; i <= indexHighA; ++i) {
-            const int readChars = obj1.streamGetChars(n, &cs->lookup[i * n]);
+            const int readChars = stream->doGetChars(n, &cs->lookup[i * n]);
             for (j = readChars; j < n; ++j) {
                 error(errSyntaxWarning, -1, "Bad Indexed color space (lookup table stream too short) padding with zeroes");
                 cs->lookup[i * n + j] = 0;
             }
         }
-        obj1.streamClose();
+        stream->close();
     } else if (obj1.isString()) {
         if (obj1.getString().size() < static_cast<size_t>(indexHighA + 1) * n) {
             error(errSyntaxWarning, -1, "Bad Indexed color space (lookup table string too short)");
@@ -2890,7 +2893,7 @@ std::unique_ptr<GfxColorSpace> GfxDeviceNColorSpace::parse(GfxResources *res, co
             nCompsA = i;
             return nullptr;
         }
-        namesA.emplace_back(obj2.getName());
+        namesA.emplace_back(obj2.getNameString());
     }
     obj1 = arr.get(2);
     if (!(altA = GfxColorSpace::parse(res, &obj1, out, state, recursion + 1))) {
@@ -3017,18 +3020,19 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
     mapping.resize(nComps);
     unsigned int newOverprintMask = 0;
     for (int i = 0; i < nComps; i++) {
-        if (names[i] == "None") {
+        const std::string &name = names[i];
+        if (name == "None") {
             mapping[i] = -1;
-        } else if (names[i] == "Cyan") {
+        } else if (name == "Cyan") {
             newOverprintMask |= 0x01;
             mapping[i] = 0;
-        } else if (names[i] == "Magenta") {
+        } else if (name == "Magenta") {
             newOverprintMask |= 0x02;
             mapping[i] = 1;
-        } else if (names[i] == "Yellow") {
+        } else if (name == "Yellow") {
             newOverprintMask |= 0x04;
             mapping[i] = 2;
-        } else if (names[i] == "Black") {
+        } else if (name == "Black") {
             newOverprintMask |= 0x08;
             mapping[i] = 3;
         } else {
@@ -3039,7 +3043,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
                 sepFunc = func.get();
             } else {
                 for (const std::unique_ptr<GfxSeparationColorSpace> &sepCS : sepsCS) {
-                    if (!sepCS->getName()->compare(names[i])) {
+                    if (!sepCS->getName()->compare(name)) {
                         sepFunc = sepCS->getFunc();
                         break;
                     }
@@ -3047,9 +3051,9 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
             }
             for (std::size_t j = 0; j < separationList->size(); j++) {
                 const std::unique_ptr<GfxSeparationColorSpace> &sepCS = (*separationList)[j];
-                if (!sepCS->getName()->compare(names[i])) {
+                if (!sepCS->getName()->compare(name)) {
                     if (sepFunc != nullptr && sepCS->getFunc()->hasDifferentResultSet(sepFunc)) {
-                        error(errSyntaxWarning, -1, "Different functions found for '{0:s}', convert immediately", names[i].c_str());
+                        error(errSyntaxWarning, -1, "Different functions found for '{0:r}', convert immediately", &name);
                         mapping.clear();
                         overprintMask = 0xffffffff;
                         return;
@@ -3063,7 +3067,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
             }
             if (!found) {
                 if (separationList->size() == maxSepComps) {
-                    error(errSyntaxWarning, -1, "Too many ({0:ulld}) spots, convert '{1:s}' immediately", static_cast<unsigned long long>(maxSepComps), names[i].c_str());
+                    error(errSyntaxWarning, -1, "Too many ({0:ulld}) spots, convert '{1:r}' immediately", static_cast<unsigned long long>(maxSepComps), &name);
                     mapping.clear();
                     overprintMask = 0xffffffff;
                     return;
@@ -3071,10 +3075,10 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
                 mapping[i] = separationList->size() + 4;
                 newOverprintMask |= startOverprintMask;
                 if (nComps == 1) {
-                    separationList->push_back(std::make_unique<GfxSeparationColorSpace>(std::make_unique<GooString>(names[i]), alt->copy(), func->copy()));
+                    separationList->push_back(std::make_unique<GfxSeparationColorSpace>(std::make_unique<GooString>(name), alt->copy(), func->copy()));
                 } else {
                     for (const std::unique_ptr<GfxSeparationColorSpace> &sepCS : sepsCS) {
-                        if (!sepCS->getName()->compare(names[i])) {
+                        if (!sepCS->getName()->compare(name)) {
                             found = true;
                             separationList->push_back(sepCS->copyAsOwnType());
                             break;
@@ -5685,7 +5689,7 @@ GfxImageColorMap::~GfxImageColorMap()
     gfree(byte_lookup);
 }
 
-void GfxImageColorMap::getGray(const unsigned char *x, GfxGray *gray)
+void GfxImageColorMap::getGray(const unsigned char *x, GfxGray *gray) const
 {
     GfxColor color;
     int i;
@@ -6024,7 +6028,7 @@ void GfxImageColorMap::getDeviceNLine(unsigned char *in, unsigned char *out, int
     }
 }
 
-void GfxImageColorMap::getCMYK(const unsigned char *x, GfxCMYK *cmyk)
+void GfxImageColorMap::getCMYK(const unsigned char *x, GfxCMYK *cmyk) const
 {
     GfxColor color;
     int i;
@@ -7042,7 +7046,7 @@ bool GfxState::parseBlendMode(Object *obj, GfxBlendMode *mode)
 
     if (obj->isName()) {
         for (i = 0; i < nGfxBlendModeNames; ++i) {
-            if (!strcmp(obj->getName(), gfxBlendModeNames[i].name)) {
+            if (obj->getNameString() == gfxBlendModeNames[i].name) {
                 *mode = gfxBlendModeNames[i].mode;
                 return true;
             }
@@ -7056,7 +7060,7 @@ bool GfxState::parseBlendMode(Object *obj, GfxBlendMode *mode)
                 return false;
             }
             for (j = 0; j < nGfxBlendModeNames; ++j) {
-                if (!strcmp(obj2.getName(), gfxBlendModeNames[j].name)) {
+                if (obj2.getNameString() == gfxBlendModeNames[j].name) {
                     *mode = gfxBlendModeNames[j].mode;
                     return true;
                 }

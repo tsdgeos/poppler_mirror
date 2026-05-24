@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Kees Cook <kees@outflux.net>
-// Copyright (C) 2008, 2010, 2017-2021, 2023-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2017-2021, 2023-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Jakub Wilk <jwilk@jwilk.net>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -30,6 +30,7 @@
 // Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 // Copyright (C) 2026 Adam Sampson <ats@offog.org>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -213,6 +214,10 @@ public:
     static Object null() { return Object(objNull); }
     static Object eof() { return Object(objEOF); }
     static Object error() { return Object(objError); }
+
+    static Object name(std::string_view name) { return Object(objName, name); }
+    static Object cmd(std::string_view name) { return Object(objCmd, name); }
+    static Object hexString(std::string &&hex) { return Object(objHexString, std::move(hex)); }
     Object() : type(objNone) { }
     ~Object() = default;
 
@@ -222,14 +227,7 @@ public:
 
     explicit Object(double realA) : type { objReal }, data { realA } { }
 
-    explicit Object(std::unique_ptr<GooString> stringA) : type { objString }, data { std::move(stringA->toNonConstStr()) } { assert(stringA); }
-
     explicit Object(std::string &&stringA) : type { objString }, data { std::move(stringA) } { }
-
-    Object(ObjType typeA, std::string &&stringA) : type { typeA }, data { std::move(stringA) } { assert(typeA == objHexString); }
-
-    Object(ObjType typeA, const char *v) : Object(typeA, std::string_view(v)) { }
-    Object(ObjType typeA, std::string_view v) : type { typeA }, data { std::string { v } } { assert(typeA == objName || typeA == objCmd); }
 
     explicit Object(long long int64gA) : type { objInt64 }, data { int64gA } { }
 
@@ -378,7 +376,7 @@ public:
     }
 
     // Special type checking.
-    bool isName(std::string_view nameA) const { return type == objName && getName() == nameA; }
+    bool isName(std::string_view nameA) const { return type == objName && getNameString() == nameA; }
     bool isArrayOfLength(int length) const;
     bool isArrayOfLengthAtLeast(int length) const;
     bool isDict(std::string_view dictType) const;
@@ -495,28 +493,21 @@ public:
     // Array accessors.
     int arrayGetLength() const;
     void arrayAdd(Object &&elem);
-    void arrayRemove(int i);
     Object arrayGet(int i, int recursion) const;
     const Object &arrayGetNF(int i) const;
 
     // Dict accessors.
     int dictGetLength() const;
-    const char *dictGetKey(int i) const;
     void dictAdd(std::string_view key, Object &&val);
     void dictSet(std::string_view key, Object &&val);
     void dictRemove(std::string_view key);
-    bool dictIs(std::string_view dictType) const;
     Object dictLookup(std::string_view key, int recursion = 0) const;
     const Object &dictLookupNF(std::string_view key) const;
     Object dictGetVal(int i) const;
-    const Object &dictGetValNF(int i) const;
 
     // Stream accessors.
     [[nodiscard]] bool streamRewind();
-    void streamClose();
     int streamGetChar();
-    int streamGetChars(int nChars, unsigned char *buffer);
-    void streamSetPos(Goffset pos, int dir = 0);
     Dict *streamGetDict() const;
 
     // Output.
@@ -537,6 +528,10 @@ private:
     class PrivateTag
     {
     };
+    Object(ObjType typeA, std::string &&stringA) : type { typeA }, data { std::move(stringA) } { assert(typeA == objHexString); }
+
+    Object(ObjType typeA, std::string_view v) : type { typeA }, data { std::string { v } } { assert(typeA == objName || typeA == objCmd); }
+
     explicit Object(ObjType typeA) { type = typeA; }
     explicit Object(ObjType typeA, std::variant<std::monostate, bool, int, long long, double, std::string, std::shared_ptr<Array>, std::shared_ptr<Dict>, std::shared_ptr<Stream>, Ref> dataA, PrivateTag /*unnamed*/)
         : type { typeA }, data { std::move(dataA) }

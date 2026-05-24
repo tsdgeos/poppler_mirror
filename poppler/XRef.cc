@@ -40,6 +40,7 @@
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 // Copyright (C) 2026 Ojas Maheshwari <workonlyojas@gmail.com>
 // Copyright (C) 2026 Adam Sampson <ats@offog.org>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -401,8 +402,7 @@ XRef *XRef::copy() const
         xref->entries[i].offset = entries[i].offset;
         xref->entries[i].type = entries[i].type;
         // set the object to null, it will be fetched from the stream when needed
-        new (&xref->entries[i].obj) Object();
-        xref->entries[i].obj = Object::null();
+        new (&xref->entries[i].obj) Object(Object::null());
         xref->entries[i].flags = entries[i].flags;
         xref->entries[i].gen = entries[i].gen;
 
@@ -469,8 +469,7 @@ int XRef::resize(int newSize)
         for (int i = size; i < newSize; ++i) {
             entries[i].offset = -1;
             entries[i].type = xrefEntryNone;
-            new (&entries[i].obj) Object();
-            entries[i].obj = Object::null();
+            new (&entries[i].obj) Object(Object::null());
             entries[i].flags = 0;
             entries[i].gen = 0;
         }
@@ -751,6 +750,7 @@ bool XRef::readXRefStream(Stream *xrefStr, Goffset *pos)
             return false;
         }
     }
+
     constexpr int intNBytes = sizeof(int);
     constexpr int longLongNBytes = sizeof(long long);
     if (w[0] > intNBytes || w[1] > longLongNBytes || w[2] > longLongNBytes) {
@@ -805,7 +805,7 @@ bool XRef::readXRefStream(Stream *xrefStr, Goffset *pos)
 bool XRef::readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n)
 {
     unsigned long long offset, gen;
-    int type, c, i, j;
+    const unsigned long long offsetMax = GoffsetMax();
 
     if (first > INT_MAX - n) {
         return false;
@@ -823,31 +823,36 @@ bool XRef::readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n
             return false;
         }
     }
-    for (i = first; i < first + n; ++i) {
-        if (w[0] == 0) {
-            type = 1;
-        } else {
-            for (type = 0, j = 0; j < w[0]; ++j) {
-                if ((c = xrefStr->getChar()) == EOF) {
-                    return false;
-                }
+
+    constexpr int intNBytes = sizeof(int);
+    constexpr int longLongNBytes = sizeof(long long);
+    const int nChars = w[0] + w[1] + w[2];
+    std::array<unsigned char, intNBytes + 2 * longLongNBytes> xrefEntryBuffer;
+
+    for (int i = first; i < first + n; ++i) {
+        if (xrefStr->doGetChars(nChars, xrefEntryBuffer.data()) < nChars) {
+            return false;
+        }
+
+        int type = 1;
+        int j = 0;
+
+        if (w[0] != 0) {
+            for (type = 0; j < w[0]; ++j) {
+                const unsigned char c = xrefEntryBuffer[j];
                 type = (type << 8) + c;
             }
         }
-        for (offset = 0, j = 0; j < w[1]; ++j) {
-            if ((c = xrefStr->getChar()) == EOF) {
-                return false;
-            }
+        for (offset = 0; j < (w[1] + w[0]); ++j) {
+            const unsigned char c = xrefEntryBuffer[j];
             offset = (offset << 8) + c;
         }
-        if (offset > static_cast<unsigned long long>(GoffsetMax())) {
+        if (offset > offsetMax) {
             error(errSyntaxError, -1, "Offset inside xref table too large for fseek");
             return false;
         }
-        for (gen = 0, j = 0; j < w[2]; ++j) {
-            if ((c = xrefStr->getChar()) == EOF) {
-                return false;
-            }
+        for (gen = 0; j < (w[2] + w[1] + w[0]); ++j) {
+            const unsigned char c = xrefEntryBuffer[j];
             gen = (gen << 8) + c;
         }
         if (gen > INT_MAX) {
@@ -924,7 +929,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
     bool eof = false;
     while (true) {
         if (end - p < 256 && !eof) {
-            memcpy(buf, p, end - p);
+            memmove(buf, p, end - p);
             bufPos += p - buf;
             p = buf + (end - p);
             int n = static_cast<int>(buf + 4096 - p);
@@ -1086,7 +1091,7 @@ char *XRef::constructObjectEntry(char *p, Goffset pos, int *objNum)
             ateNewLines++;
         }
         ++p;
-    } while (std::isdigit(static_cast<unsigned char>(*p)) && num < 100000000);
+    } while (std::isdigit(static_cast<unsigned char>(*p)) && gen < 100000000);
     if (!std::isspace(static_cast<unsigned char>(*p))) {
         return p;
     }
@@ -1553,8 +1558,7 @@ bool XRef::add(int num, int gen, Goffset offs, bool used)
         for (int i = size; i < num + 1; ++i) {
             entries[i].offset = -1;
             entries[i].type = xrefEntryFree;
-            new (&entries[i].obj) Object();
-            entries[i].obj = Object::null();
+            new (&entries[i].obj) Object(Object::null());
             entries[i].flags = 0;
             entries[i].gen = 0;
         }
@@ -1651,7 +1655,7 @@ Ref XRef::addStreamObject(std::unique_ptr<Dict> dict, std::vector<char> buffer, 
     case StreamCompression::None:;
         break;
     case StreamCompression::Compress:
-        stream->getDict()->add("Filter", Object(objName, "FlateDecode"));
+        stream->getDict()->add("Filter", Object::name("FlateDecode"));
         break;
     }
     return addIndirectObject(Object(std::move(stream)));
@@ -1784,7 +1788,7 @@ void XRef::writeStreamToBuffer(GooString *stmBuf, Dict *xrefDict, XRef *xref)
     XRefStreamWriter writer(index.get(), stmBuf, offsetSize);
     writeXRef(&writer, false);
 
-    xrefDict->set("Type", Object(objName, "XRef"));
+    xrefDict->set("Type", Object::name("XRef"));
     xrefDict->set("Index", Object(std::move(index)));
     auto wArray = std::make_unique<Array>(xref);
     wArray->add(Object(1));

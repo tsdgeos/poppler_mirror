@@ -15,6 +15,7 @@
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018, 2021, 2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2026 Taufeeque Sifat <entity069@protonmail.com>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -42,7 +43,6 @@ class SplashState
 {
 public:
     // Create a new state object, initialized with default settings.
-    SplashState(int width, int height, bool vectorAntialias, SplashScreenParams *screenParams);
     SplashState(int width, int height, bool vectorAntialias, const SplashScreen &screenA);
 
     // Copy a state object.

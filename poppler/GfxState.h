@@ -1268,7 +1268,7 @@ public:
     bool useDeviceNLine() const { return (colorSpace2 && colorSpace2->useGetDeviceNLine()) || (!colorSpace2 && colorSpace->useGetDeviceNLine()); }
 
     // Convert an image pixel to a color.
-    void getGray(const unsigned char *x, GfxGray *gray);
+    void getGray(const unsigned char *x, GfxGray *gray) const;
     void getRGB(const unsigned char *x, GfxRGB *rgb);
     void getRGBLine(unsigned char *in, unsigned int *out, int length);
     void getRGBLine(unsigned char *in, unsigned char *out, int length);
@@ -1276,7 +1276,7 @@ public:
     void getGrayLine(unsigned char *in, unsigned char *out, int length);
     void getCMYKLine(unsigned char *in, unsigned char *out, int length);
     void getDeviceNLine(unsigned char *in, unsigned char *out, int length);
-    void getCMYK(const unsigned char *x, GfxCMYK *cmyk);
+    void getCMYK(const unsigned char *x, GfxCMYK *cmyk) const;
     void getDeviceN(const unsigned char *x, GfxColor *deviceN);
     void getColor(const unsigned char *x, GfxColor *color);
 

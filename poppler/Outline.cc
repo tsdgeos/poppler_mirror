@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2008, 2016-2019, 2021, 2023, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2016-2019, 2021, 2023, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Nick Jones <nick.jones@network-box.com>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -23,6 +23,7 @@
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 RM <rm+git@arcsin.org>
 // Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -86,11 +87,11 @@ static void insertChildHelper(const std::string &itemTitle, int destPageNum, uns
         // alternately, could put 0, or omit it
         a->add(Object(destPageNum - 1));
     }
-    a->add(Object(objName, "Fit"));
+    a->add(Object::name("Fit"));
 
     Object outlineItem = Object(std::make_unique<Dict>(xref));
 
-    outlineItem.dictSet("Title", Object(std::make_unique<GooString>(itemTitle)));
+    outlineItem.dictSet("Title", Object(std::string { itemTitle }));
     outlineItem.dictSet("Dest", Object(std::move(a)));
     outlineItem.dictSet("Count", Object(1));
     outlineItem.dictAdd("Parent", Object(parentObjRef));
@@ -289,7 +290,7 @@ int Outline::addOutlineTreeNodeList(const std::vector<OutlineTreeNode> &nodeList
             // alternately, could put 0, or omit it
             a->add(Object(node.destPageNum - 1));
         }
-        a->add(Object(objName, "Fit"));
+        a->add(Object::name("Fit"));
 
         Object outlineItem = Object(std::make_unique<Dict>(doc->getXRef()));
         Ref outlineItemRef = doc->getXRef()->addIndirectObject(outlineItem);
@@ -299,7 +300,7 @@ int Outline::addOutlineTreeNodeList(const std::vector<OutlineTreeNode> &nodeList
         }
         lastRef = outlineItemRef;
 
-        outlineItem.dictSet("Title", Object(std::make_unique<GooString>(node.title)));
+        outlineItem.dictSet("Title", Object(std::string { node.title }));
         outlineItem.dictSet("Dest", Object(std::move(a)));
         itemCount++;
 
@@ -493,9 +494,8 @@ void OutlineItem::open()
 void OutlineItem::setTitle(const std::string &titleA)
 {
     Object dict = xref->fetch(ref);
-    auto g = std::make_unique<GooString>(titleA);
-    title = TextStringToUCS4(g->toStr());
-    dict.dictSet("Title", Object(std::move(g)));
+    title = TextStringToUCS4(titleA);
+    dict.dictSet("Title", Object(std::string { titleA }));
     xref->setModifiedObject(&dict, ref);
 }
 
@@ -509,13 +509,14 @@ bool OutlineItem::setPageDest(int i)
     }
 
     obj1 = dict.dictLookup("Dest");
-    if (!obj1.isNull()) {
-        int arrayLength = obj1.arrayGetLength();
+    if (obj1.isArray()) {
+        Array *array = obj1.getArray();
+        const int arrayLength = array->getLength();
         for (int index = 0; index < arrayLength; index++) {
-            obj1.arrayRemove(0);
+            array->remove(0);
         }
-        obj1.arrayAdd(Object(i - 1));
-        obj1.arrayAdd(Object(objName, "Fit"));
+        array->add(Object(i - 1));
+        array->add(Object::name("Fit"));
 
         // unique_ptr will destroy previous on assignment
         action = LinkAction::parseDest(&obj1);

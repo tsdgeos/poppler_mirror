@@ -981,7 +981,7 @@ gint poppler_form_field_choice_get_n_items(PopplerFormField *field)
 {
     g_return_val_if_fail(field->widget->getType() == formChoice, -1);
 
-    return static_cast<FormWidgetChoice *>(field->widget)->getNumChoices();
+    return static_cast<FormWidgetChoice *>(field->widget)->getChoices().size();
 }
 
 /**

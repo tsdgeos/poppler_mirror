@@ -6,7 +6,7 @@
 //
 // Copyright 2006 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright 2007, 2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2007-2010, 2012, 2015-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2010, 2012, 2015-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Mark Riedesel <mark@klowner.com>
 // Copyright 2011 Pino Toscano <pino@kde.org>
 // Copyright 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -238,13 +238,20 @@ protected:
 // FormWidgetChoice
 //------------------------------------------------------------------------
 
+struct FormFieldChoiceOption
+{
+    std::unique_ptr<GooString> exportVal; // the export value ("internal" name)
+    std::unique_ptr<GooString> optionName; // displayed name
+    bool selected = false; // if this choice is selected
+};
+
 class POPPLER_PRIVATE_EXPORT FormWidgetChoice : public FormWidget
 {
 public:
     FormWidgetChoice(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
     ~FormWidgetChoice() override;
 
-    int getNumChoices() const;
+    const std::vector<FormFieldChoiceOption> &getChoices() const;
     // return the display name of the i-th choice (UTF16BE)
     const GooString *getChoice(int i) const;
     const GooString *getExportVal(int i) const;
@@ -366,7 +373,7 @@ public:
     void setStandAlone(bool value) { standAlone = value; }
     bool isStandAlone() const { return standAlone; }
 
-    GooString *getDefaultAppearance() const { return defaultAppearance.get(); }
+    const std::string &getDefaultAppearance() const { return defaultAppearance; }
     void setDefaultAppearance(const std::string &appearance);
 
     bool hasTextQuadding() const { return hasQuadding; }
@@ -422,7 +429,7 @@ protected:
     mutable std::unique_ptr<GooString> fullyQualifiedName;
 
     // Variable Text
-    std::unique_ptr<GooString> defaultAppearance;
+    std::string defaultAppearance;
     bool hasQuadding;
     VariableTextQuadding quadding;
 
@@ -543,9 +550,9 @@ public:
 
     ~FormFieldChoice() override;
 
-    int getNumChoices() const { return numChoices; }
-    const GooString *getChoice(int i) const { return choices ? choices[i].optionName.get() : nullptr; }
-    const GooString *getExportVal(int i) const { return choices ? choices[i].exportVal.get() : nullptr; }
+    const std::vector<FormFieldChoiceOption> &getChoices() const { return choices; }
+    const GooString *getChoice(int i) const { return choices[i].optionName.get(); }
+    const GooString *getExportVal(int i) const { return choices[i].exportVal.get(); }
     // For multi-select choices it returns the first one
     const GooString *getSelectedChoice() const;
     const GooString *getAppearanceSelectedChoice() const { return appearanceSelectedChoice ? appearanceSelectedChoice.get() : getSelectedChoice(); }
@@ -568,7 +575,7 @@ public:
 
     bool isSelected(int i) const { return choices[i].selected; }
 
-    int getNumSelected();
+    int getNumSelected() const;
 
     bool isCombo() const { return combo; }
     bool hasEdit() const { return edit; }
@@ -593,16 +600,8 @@ protected:
     bool doNotSpellCheck;
     bool doCommitOnSelChange;
 
-    struct ChoiceOpt
-    {
-        std::unique_ptr<GooString> exportVal; // the export value ("internal" name)
-        std::unique_ptr<GooString> optionName; // displayed name
-        bool selected = false; // if this choice is selected
-    };
-
-    int numChoices;
-    ChoiceOpt *choices;
-    bool *defaultChoices;
+    std::vector<FormFieldChoiceOption> choices;
+    std::vector<bool> defaultChoices;
     std::unique_ptr<GooString> editedChoice;
     std::unique_ptr<GooString> appearanceSelectedChoice;
     int topIdx; // TI
@@ -724,12 +723,12 @@ public:
     // If needed adds fonts to the default resources dictionary, font names will be popplerfontXXX
     // If fieldResources is not nullptr, it is used instead of the to query the font to emulate instead of the default resources
     // Returns a list of all the added fonts (if any)
-    std::vector<AddFontResult> ensureFontsForAllCharacters(const GooString *unicodeText, const std::string &pdfFontNameToEmulate, GfxResources *fieldResources = nullptr);
+    std::vector<AddFontResult> ensureFontsForAllCharacters(const std::string &unicodeText, const std::string &pdfFontNameToEmulate, GfxResources *fieldResources = nullptr);
 
     bool getNeedAppearances() const { return needAppearances; }
     int getNumFields() const { return rootFields.size(); }
     FormField *getRootField(int i) const { return rootFields[i].get(); }
-    const GooString *getDefaultAppearance() const { return defaultAppearance.get(); }
+    const std::string &getDefaultAppearance() const { return defaultAppearance; }
     VariableTextQuadding getTextQuadding() const { return quadding; }
     GfxResources *getDefaultResources() const { return defaultResources; }
     Object *getDefaultResourcesObj() { return &resDict; }
@@ -762,7 +761,7 @@ private:
     std::vector<Ref> calculateOrder;
 
     // Variable Text
-    std::unique_ptr<GooString> defaultAppearance;
+    std::string defaultAppearance;
     VariableTextQuadding quadding;
 };
 

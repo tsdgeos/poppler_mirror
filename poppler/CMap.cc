@@ -21,6 +21,7 @@
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 // Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -79,7 +80,7 @@ std::shared_ptr<CMap> CMap::parse(const std::string &collectionA, Object *obj, R
     if (obj->isName()) {
         const GooString cMapNameA(obj->getNameString());
         if (!(cMap = globalParams->getCMap(collectionA, cMapNameA.toStr()))) {
-            error(errSyntaxError, -1, "Unknown CMap '{0:t}' for character collection '{1:s}'", &cMapNameA, collectionA.c_str());
+            error(errSyntaxError, -1, "Unknown CMap '{0:t}' for character collection '{1:r}'", &cMapNameA, &collectionA);
         }
     } else if (obj->isStream()) {
         if (!(cMap = CMap::parse(nullptr, collectionA, obj->getStream(), recursion))) {
@@ -106,7 +107,7 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectio
             return std::shared_ptr<CMap>(new CMap(std::make_unique<GooString>(collectionA), std::make_unique<GooString>(cMapNameA), GfxFont::WritingMode::Vertical));
         }
 
-        error(errSyntaxError, -1, "Couldn't find '{0:s}' CMap file for '{1:s}' collection", cMapNameA.c_str(), collectionA.c_str());
+        error(errSyntaxError, -1, "Couldn't find '{0:r}' CMap file for '{1:r}' collection", &cMapNameA, &collectionA);
         return {};
     }
 

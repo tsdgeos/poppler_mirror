@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
-// Copyright 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright 2025, 2026 Albert Astals Cid <aacid@kde.org>
 //========================================================================
 
 // Simple tests of reading signatures
@@ -14,6 +14,7 @@
 // that will have an expiry date, and adding time bombs to unit tests is
 // probably not a good idea.
 #include <QtTest/QTest>
+#include "Form.h"
 #include "PDFDoc.h"
 #include "GlobalParams.h"
 #include "SignatureInfo.h"

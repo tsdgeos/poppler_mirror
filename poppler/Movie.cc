@@ -9,6 +9,7 @@
 // Albert Astals Cid <aacid@kde.org> (c) 2010, 2017-2019, 2022, 2024
 // Evgeny Stambulchik <fnevgeny@gmail.com> (c) 2019
 // g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk> (c) 2025, 2026
+// Stefan Brüns <stefan.bruens@rwth-aachen.de> (c) 2026
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -122,14 +123,14 @@ void MovieActivationParameters::parseMovieActivation(const Object *aDict)
 
     obj1 = aDict->dictLookup("Mode");
     if (obj1.isName()) {
-        const char *name = obj1.getName();
-        if (!strcmp(name, "Once")) {
+        const std::string &name = obj1.getNameString();
+        if (name == "Once") {
             repeatMode = repeatModeOnce;
-        } else if (!strcmp(name, "Open")) {
+        } else if (name == "Open") {
             repeatMode = repeatModeOpen;
-        } else if (!strcmp(name, "Repeat")) {
+        } else if (name == "Repeat") {
             repeatMode = repeatModeRepeat;
-        } else if (!strcmp(name, "Palindrome")) {
+        } else if (name == "Palindrome") {
             repeatMode = repeatModePalindrome;
         }
     }

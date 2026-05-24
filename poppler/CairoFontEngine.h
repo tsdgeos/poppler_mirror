@@ -15,7 +15,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2018, 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2018, 2019, 2021, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008, 2017, 2022, 2024 Adrian Johnson <ajohnson@redneon.com>
@@ -23,6 +23,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2022 Marek Kasik <mkasik@redhat.com>
+// Copyright (C) 2026 lilydjwg <lilydjwg@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -81,13 +82,13 @@ struct FreeTypeFontFace
 class CairoFreeTypeFont : public CairoFont
 {
 public:
-    static CairoFreeTypeFont *create(const std::shared_ptr<GfxFont> &gfxFont, XRef *xref, FT_Library lib, bool useCIDs);
+    static CairoFreeTypeFont *create(const std::shared_ptr<GfxFont> &gfxFont, XRef *xref, FT_Library lib);
     ~CairoFreeTypeFont() override;
 
 private:
     CairoFreeTypeFont(Ref ref, cairo_font_face_t *cairo_font_face, std::vector<int> &&codeToGID, bool substitute);
 
-    static std::optional<FreeTypeFontFace> createFreeTypeFontFace(FT_Library lib, const std::string &filename, std::vector<unsigned char> &&font_data);
+    static std::optional<FreeTypeFontFace> createFreeTypeFontFace(FT_Library lib, const std::string &filename, int faceIndex, std::vector<unsigned char> &&font_data);
 };
 
 //------------------------------------------------------------------------
@@ -123,7 +124,6 @@ public:
 
 private:
     FT_Library lib;
-    bool useCIDs;
     mutable std::mutex mutex;
 
     // Cache of CairoFont for current document

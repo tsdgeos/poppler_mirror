@@ -21,6 +21,7 @@
 // Copyright (C) 2019, 2021, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 <r.coeffier@bee-buzziness.com>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -287,7 +288,7 @@ int main(int argc, char *argv[])
             return 3;
         }
         if (!embFile->save(targetPath)) {
-            error(errIO, -1, "Error saving embedded file as '{0:s}'", targetPath.c_str());
+            error(errIO, -1, "Error saving embedded file as '{0:r}'", &targetPath);
             return 2;
         }
     }

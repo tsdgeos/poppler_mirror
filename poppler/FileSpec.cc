@@ -14,6 +14,7 @@
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -182,8 +183,8 @@ Object FileSpec::newFileSpecObject(XRef *xref, GooFile *file, const std::string 
     efDict->set("F", Object(streamRef));
 
     auto fsDict = std::make_unique<Dict>(xref);
-    fsDict->set("Type", Object(objName, "Filespec"));
-    fsDict->set("UF", Object(std::make_unique<GooString>(fileName)));
+    fsDict->set("Type", Object::name("Filespec"));
+    fsDict->set("UF", Object(std::string { fileName }));
     fsDict->set("EF", Object(std::move(efDict)));
 
     return Object(std::move(fsDict));

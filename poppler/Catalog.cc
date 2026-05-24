@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2013, 2015, 2017-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015, 2017-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jeff Muizelaar <jrmuizel@nit.ca>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
@@ -46,6 +46,7 @@
 // Copyright (C) 2025 Aaron Nguyen <aaron.nguyen@veeva.com>
 // Copyright (C) 2025 Trystan Mata <trystan.mata@tytanium.xyz>
 // Copyright (C) 2026 Adam Sampson <ats@offog.org>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -173,13 +174,14 @@ std::unique_ptr<GooString> Catalog::readMetadata()
     if (!metadata.isStream()) {
         return {};
     }
-    Object obj = metadata.streamGetDict()->lookup("Subtype");
+    Stream *metadataStream = metadata.getStream();
+    Object obj = metadataStream->getDict()->lookup("Subtype");
     if (!obj.isName("XML")) {
         error(errSyntaxWarning, -1, "Unknown Metadata type: '{0:s}'", obj.isName() ? obj.getName() : "???");
     }
     std::unique_ptr<GooString> s = std::make_unique<GooString>();
-    metadata.getStream()->fillGooString(s.get());
-    metadata.streamClose();
+    metadataStream->fillGooString(s.get());
+    metadataStream->close();
     return s;
 }
 
@@ -418,7 +420,7 @@ std::unique_ptr<LinkDest> Catalog::findDest(const GooString *name)
 {
     // try named destination dictionary then name tree
     if (getDests()->isDict()) {
-        Object obj1 = getDests()->dictLookup(name->c_str());
+        Object obj1 = getDests()->dictLookup(*name);
         return createLinkDest(&obj1);
     }
 
@@ -468,7 +470,7 @@ const char *Catalog::getDestsName(int i)
     if (!obj->isDict()) {
         return nullptr;
     }
-    return obj->dictGetKey(i);
+    return obj->getDict()->getKey(i).c_str();
 }
 
 std::unique_ptr<LinkDest> Catalog::getDestsDest(int i)
@@ -557,7 +559,7 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
         const bool addFile = !fileAlreadyAdded && (sameFileName || fileName < efNameI->toStr());
         if (addFile) {
             // If the new name is smaller lexicographically than an existing file add it in its correct position
-            embeddedFilesNamesArray->add(Object(std::make_unique<GooString>(fileName)));
+            embeddedFilesNamesArray->add(Object(std::string { fileName }));
             embeddedFilesNamesArray->add(Object(fileSpecRef));
             fileAlreadyAdded = true;
         }
@@ -565,13 +567,13 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
             // If the new name is the same lexicographically than an existing file then don't add the existing file (i.e. replace)
             continue;
         }
-        embeddedFilesNamesArray->add(Object(efNameI->copy()));
+        embeddedFilesNamesArray->add(Object(std::string { efNameI->toStr() }));
         embeddedFilesNamesArray->add(ef->getValue(i)->copy());
     }
 
     if (!fileAlreadyAdded) {
         // The new file is bigger lexicographically than the existing ones
-        embeddedFilesNamesArray->add(Object(std::make_unique<GooString>(fileName)));
+        embeddedFilesNamesArray->add(Object(std::string { fileName }));
         embeddedFilesNamesArray->add(Object(fileSpecRef));
     }
 
@@ -848,27 +850,28 @@ int Catalog::getNumPages()
             error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
             return 0;
         }
-        Object pagesDict = catDict.dictLookup("Pages");
+        Object pagesObj = catDict.dictLookup("Pages");
 
         // This should really be isDict("Pages"), but I've seen at least one
         // PDF file where the /Type entry is missing.
-        if (!pagesDict.isDict()) {
-            error(errSyntaxError, -1, "Top-level pages object is wrong type ({0:s})", pagesDict.getTypeName());
+        if (!pagesObj.isDict()) {
+            error(errSyntaxError, -1, "Top-level pages object is wrong type ({0:s})", pagesObj.getTypeName());
             return 0;
         }
 
-        Object obj = pagesDict.dictLookup("Count");
+        Dict *pagesDict = pagesObj.getDict();
+        Object obj = pagesDict->lookup("Count");
         // some PDF files actually use real numbers here ("/Count 9.0")
         if (!obj.isNum()) {
-            if (pagesDict.dictIs("Page")) {
+            if (pagesDict->is("Page")) {
                 const Object &pageRootRef = catDict.dictLookupNF("Pages");
 
                 error(errSyntaxError, -1, "Pages top-level is a single Page. The document is malformed, trying to recover...");
 
-                Dict *pageDict = pagesDict.getDict();
+                Dict *pageDict = pagesDict;
                 if (pageRootRef.isRef()) {
                     const Ref pageRef = pageRootRef.getRef();
-                    auto p = std::make_unique<Page>(doc, 1, std::move(pagesDict), pageRef, std::make_unique<PageAttrs>(nullptr, pageDict));
+                    auto p = std::make_unique<Page>(doc, 1, std::move(pagesObj), pageRef, std::make_unique<PageAttrs>(nullptr, pageDict));
                     if (p->isOk()) {
                         pages.emplace_back(std::move(p), pageRef);
                         refPageMap.emplace(pageRef, pages.size());
@@ -1016,7 +1019,7 @@ Object *Catalog::getCreateOutline()
 
     // setup an empty outline dict
     outline = Object(std::make_unique<Dict>(doc->getXRef()));
-    outline.dictSet("Type", Object(objName, "Outlines"));
+    outline.dictSet("Type", Object::name("Outlines"));
     outline.dictSet("Count", Object(0));
 
     const Ref outlineRef = doc->getXRef()->addIndirectObject(outline);

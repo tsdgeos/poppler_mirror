@@ -1852,7 +1852,9 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
         // read the collective bitmap
         if (huff && !refAgg) {
             int bmSize;
-            huffDecoder->decodeInt(&bmSize, huffBMSizeTable);
+            if (!huffDecoder->decodeInt(&bmSize, huffBMSizeTable)) {
+                return false;
+            }
             huffDecoder->reset();
             std::unique_ptr<JBIG2Bitmap> collBitmap;
             if (bmSize == 0) {
@@ -2676,6 +2678,9 @@ bool JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, const std
 
     // allocate the bitmap
     bitmap = std::make_unique<JBIG2Bitmap>(segNum, w, h);
+    if (!bitmap->isOk()) {
+        return false;
+    }
     if (flags & 0x80) { // HDEFPIXEL
         bitmap->clearToOne();
     } else {
@@ -2685,6 +2690,9 @@ bool JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, const std
     // compute the skip bitmap
     if (enableSkip) {
         skipBitmap = std::make_unique<JBIG2Bitmap>(0, gridW, gridH);
+        if (!skipBitmap->isOk()) {
+            return false;
+        }
         skipBitmap->clearToZero();
         for (m = 0; m < gridH; ++m) {
             for (n = 0; n < gridW; ++n) {

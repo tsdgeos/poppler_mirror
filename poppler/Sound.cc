@@ -3,6 +3,7 @@
  * Copyright (C) 2009, 2017-2020, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2020, Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,14 +88,14 @@ Sound::Sound(const Object &obj, bool readAttrs)
         // encoding format
         tmp = dict->lookup("E");
         if (tmp.isName()) {
-            const char *enc = tmp.getName();
-            if (strcmp("Raw", enc) == 0) {
+            const std::string &enc = tmp.getNameString();
+            if ("Raw" == enc) {
                 encoding = soundRaw;
-            } else if (strcmp("Signed", enc) == 0) {
+            } else if ("Signed" == enc) {
                 encoding = soundSigned;
-            } else if (strcmp("muLaw", enc) == 0) {
+            } else if ("muLaw" == enc) {
                 encoding = soundMuLaw;
-            } else if (strcmp("ALaw", enc) == 0) {
+            } else if ("ALaw" == enc) {
                 encoding = soundALaw;
             }
         }

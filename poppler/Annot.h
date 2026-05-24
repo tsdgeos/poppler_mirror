@@ -394,7 +394,7 @@ class POPPLER_PRIVATE_EXPORT DefaultAppearance
 {
 public:
     DefaultAppearance(std::string fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> &&fontColorA);
-    explicit DefaultAppearance(const GooString *da);
+    explicit DefaultAppearance(const std::string &da);
     void setFontName(const std::string &fontNameA);
     const std::string &getFontName() const { return fontName; }
     void setFontPtSize(double fontPtSizeA);
@@ -435,8 +435,8 @@ public:
 
     explicit AnnotIconFit(Dict *dict);
 
-    AnnotIconFitScaleWhen getScaleWhen() { return scaleWhen; }
-    AnnotIconFitScale getScale() { return scale; }
+    AnnotIconFitScaleWhen getScaleWhen() const { return scaleWhen; }
+    AnnotIconFitScale getScale() const { return scale; }
     double getLeft() const { return left; }
     double getBottom() const { return bottom; }
     bool getFullyBounds() const { return fullyBounds; }
@@ -467,11 +467,11 @@ public:
     ~AnnotAppearance();
 
     // State is ignored if no subdictionary is present
-    Object getAppearanceStream(AnnotAppearanceType type, const char *state);
+    Object getAppearanceStream(AnnotAppearanceType type, const char *state) const;
 
     // Access keys in normal appearance subdictionary (N)
-    std::unique_ptr<GooString> getStateKey(int i);
-    int getNumStates();
+    std::unique_ptr<GooString> getStateKey(int i) const;
+    int getNumStates() const;
 
     // Removes all associated streams in the xref table. Caller is required to
     // reset parent annotation's AP and AS after this call.
@@ -481,9 +481,9 @@ public:
     bool referencesStream(Ref refToStream);
 
 private:
-    static bool referencesStream(const Object *stateObj, Ref refToStream);
+    static bool referencesStream(const Object &stateObj, Ref refToStream);
     void removeStream(Ref refToStream);
-    void removeStateStreams(const Object *state);
+    void removeStateStreams(const Object &state);
 
 protected:
     PDFDoc *doc;
@@ -520,9 +520,9 @@ public:
     const AnnotColor *getBackColor() const { return backColor.get(); }
     void setBackColor(std::unique_ptr<AnnotColor> &&color) { backColor = std::move(color); }
     const GooString *getNormalCaption() const { return normalCaption.get(); }
-    const GooString *getRolloverCaption() { return rolloverCaption.get(); }
-    const GooString *getAlternateCaption() { return alternateCaption.get(); }
-    const AnnotIconFit *getIconFit() { return iconFit.get(); }
+    const GooString *getRolloverCaption() const { return rolloverCaption.get(); }
+    const GooString *getAlternateCaption() const { return alternateCaption.get(); }
+    const AnnotIconFit *getIconFit() const { return iconFit.get(); }
     AnnotAppearanceCharacsTextPos getPosition() const { return position; }
 
     std::unique_ptr<AnnotAppearanceCharacs> copy() const;
@@ -548,7 +548,7 @@ protected:
 class AnnotAppearanceBBox
 {
 public:
-    explicit AnnotAppearanceBBox(PDFRectangle *rect);
+    explicit AnnotAppearanceBBox(const PDFRectangle &rect);
 
     void setBorderWidth(double w) { borderWidth = w; }
 
@@ -594,9 +594,9 @@ public:
     void drawLineEndDiamond(double x, double y, double size, bool fill, const Matrix &m);
     void drawLineEndArrow(double x, double y, double size, int orientation, bool isOpen, bool fill, const Matrix &m);
     void drawLineEndSlash(double x, double y, double size, const Matrix &m);
-    void drawFieldBorder(const FormField *field, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect);
-    bool drawFormField(const FormField *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
-                       const GooString *appearState, XRef *xref, Dict *resourcesDict);
+    void drawFieldBorder(const FormField &field, const AnnotBorder &border, const AnnotAppearanceCharacs &appearCharacs, const PDFRectangle &rect);
+    bool drawFormField(const FormField &field, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle &rect,
+                       const GooString *appearState, XRef &xref, Dict &resourcesDict);
     static double lineEndingXShorten(AnnotLineEndingStyle endingStyle, double size);
     static double lineEndingXExtendBBox(AnnotLineEndingStyle endingStyle, double size);
     void writeString(const std::string &str);
@@ -617,18 +617,18 @@ private:
         TurnTextToStarsDrawTextFlag = 8
     };
 
-    bool drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect, const GooString *da, const GfxResources *resources, VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict);
-    bool drawFormFieldButton(const FormFieldButton *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
-                             const GooString *appearState, XRef *xref, Dict *resourcesDict);
-    bool drawFormFieldText(const FormFieldText *fieldText, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, XRef *xref,
-                           Dict *resourcesDict);
-    bool drawFormFieldChoice(const FormFieldChoice *fieldChoice, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
-                             XRef *xref, Dict *resourcesDict);
-    bool drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GooString *da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict);
-    void drawSignatureFieldText(const std::string &text, const Form *form, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically,
+    bool drawListBox(const FormFieldChoice &fieldChoice, const AnnotBorder *border, const PDFRectangle &rect, const std::string &da, const GfxResources *resources, VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict);
+    bool drawFormFieldButton(const FormFieldButton &field, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle &rect,
+                             const GooString *appearState, XRef &xref, Dict &resourcesDict);
+    bool drawFormFieldText(const FormFieldText &fieldText, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle &rect, XRef &xref,
+                           Dict &resourcesDict);
+    bool drawFormFieldChoice(const FormFieldChoice &fieldChoice, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle &rect,
+                             XRef &xref, Dict &resourcesDict);
+    bool drawSignatureFieldText(const FormFieldSignature &field, const Form *form, const std::string &da, const AnnotBorder *border, const PDFRectangle &rect, XRef &xref, Dict &resourcesDict);
+    void drawSignatureFieldText(const std::string &text, const Form *form, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle &rect, XRef &xref, Dict &resourcesDict, double leftMargin, bool centerVertically,
                                 bool centerHorizontally);
-    bool drawText(const GooString *text, const Form *form, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, VariableTextQuadding quadding,
-                  XRef *xref, Dict *resourcesDict, int flags = NoDrawTextFlags, int nCombs = 0);
+    bool drawText(const std::string &inputText, const Form *form, const std::string &da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle &rect,
+                  VariableTextQuadding quadding, XRef &xref, Dict &resourcesDict, int flags = NoDrawTextFlags, int nCombs = 0);
     void drawArrowPath(double x, double y, const Matrix &m, int orientation = 1);
 
     std::string appearBuf;
@@ -716,23 +716,23 @@ public:
         actionCalculateField, ///< Performed when the field needs to be recalculated
     };
 
-    Annot(PDFDoc *docA, PDFRectangle *rectA);
+    Annot(PDFDoc *docA, const PDFRectangle &rectA);
     Annot(PDFDoc *docA, Object &&dictObject);
-    Annot(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    Annot(PDFDoc *docA, Object &&dictObject, const Object &obj);
     bool isOk() const { return ok; }
 
-    static double calculateFontSize(const Form *form, const GfxFont *font, const GooString *text, double wMax, double hMax, bool forceZapfDingbats = {});
+    static double calculateFontSize(const Form *form, const GfxFont &font, const std::string &text, double wMax, double hMax, bool forceZapfDingbats = {});
 
     virtual void draw(Gfx *gfx, bool printing);
     // Get the resource dict of the appearance stream
     virtual Object getAppearanceResDict();
 
-    bool match(const Ref *refA) const { return ref == *refA; }
+    bool match(Ref refA) const { return ref == refA; }
 
-    double getXMin();
-    double getYMin();
-    double getXMax();
-    double getYMax();
+    double getXMin() const;
+    double getYMin() const;
+    double getXMax() const;
+    double getYMax() const;
 
     void setRect(const PDFRectangle &rect);
     void setRect(double x1, double y1, double x2, double y2);
@@ -757,7 +757,7 @@ public:
     AnnotSubtype getType() const { return type; }
     const PDFRectangle &getRect() const { return *rect; }
     void getRect(double *x1, double *y1, double *x2, double *y2) const;
-    const GooString *getContents() const { return contents.get(); }
+    const GooString &getContents() const { return contents; }
     int getPageNum() const { return page; }
     const GooString *getUniqueName() const { return name.get(); }
     const GooString *getModified() const { return modified.get(); }
@@ -777,12 +777,12 @@ public:
     bool inRect(double x, double y) const;
 
     // If newFontNeeded is not null, it will contain whether the given font has glyphs to represent the needed text
-    static void layoutText(const GooString *text, GooString *outBuf, size_t *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode, bool *newFontNeeded = nullptr);
+    static void layoutText(const std::string &text, GooString *outBuf, size_t *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode, bool *newFontNeeded = nullptr);
 
     virtual ~Annot();
 
 private:
-    void readArrayNum(Object *pdfArray, int key, double *value);
+    void readArrayNum(const Object &pdfArray, int key, double *value);
     // write vStr[i:j[ in appearBuf
 
     void initialize(PDFDoc *docA, Dict *dict);
@@ -793,7 +793,7 @@ protected:
     Object createForm(const std::string &appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, std::unique_ptr<Dict> resDict);
     Object createForm(const std::string &appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
     std::unique_ptr<Dict> createResourcesDict(const char *formName, Object &&formStream, const char *stateName, double opacity, const char *blendMode);
-    bool isVisible(bool printing);
+    bool isVisible(bool printing) const;
     int getRotation() const;
 
     // Updates the field key of the annotation dictionary
@@ -810,7 +810,7 @@ protected:
     std::unique_ptr<PDFRectangle> rect; // Rect
 
     // optional data
-    std::unique_ptr<GooString> contents; // Contents
+    GooString contents; // Contents
     std::unique_ptr<GooString> modified; // M
     int page; // P
     unsigned int flags; // F (must be a 32 bit unsigned int)
@@ -844,8 +844,8 @@ private:
 class POPPLER_PRIVATE_EXPORT AnnotPopup : public Annot
 {
 public:
-    AnnotPopup(PDFDoc *docA, PDFRectangle *rect);
-    AnnotPopup(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotPopup(PDFDoc *docA, const PDFRectangle &rect);
+    AnnotPopup(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotPopup() override;
 
     bool hasParent() const { return parentRef != Ref::INVALID(); }
@@ -873,8 +873,8 @@ public:
         replyTypeGroup // Group
     };
 
-    AnnotMarkup(PDFDoc *docA, PDFRectangle *rect);
-    AnnotMarkup(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotMarkup(PDFDoc *docA, const PDFRectangle &rect);
+    AnnotMarkup(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotMarkup() override;
 
     // getters
@@ -936,8 +936,8 @@ public:
         stateNone // None
     };
 
-    AnnotText(PDFDoc *docA, PDFRectangle *rect);
-    AnnotText(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotText(PDFDoc *docA, const PDFRectangle &rect);
+    AnnotText(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotText() override;
 
     void draw(Gfx *gfx, bool printing) override;
@@ -967,8 +967,8 @@ private:
 class POPPLER_PRIVATE_EXPORT AnnotMovie : public Annot
 {
 public:
-    AnnotMovie(PDFDoc *docA, PDFRectangle *rect, Movie *movieA);
-    AnnotMovie(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotMovie(PDFDoc *docA, const PDFRectangle &rect, const Movie &movieA);
+    AnnotMovie(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotMovie() override;
 
     void draw(Gfx *gfx, bool printing) override;
@@ -990,8 +990,8 @@ private:
 class POPPLER_PRIVATE_EXPORT AnnotScreen : public Annot
 {
 public:
-    AnnotScreen(PDFDoc *docA, PDFRectangle *rect);
-    AnnotScreen(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotScreen(PDFDoc *docA, const PDFRectangle &rect);
+    AnnotScreen(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotScreen() override;
 
     const GooString *getTitle() const { return title.get(); }
@@ -1026,8 +1026,8 @@ public:
         effectPush // P
     };
 
-    AnnotLink(PDFDoc *docA, PDFRectangle *rect);
-    AnnotLink(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotLink(PDFDoc *docA, const PDFRectangle &rect);
+    AnnotLink(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotLink() override;
 
     void draw(Gfx *gfx, bool printing) override;
@@ -1063,8 +1063,8 @@ public:
 
     static const double undefinedFontPtSize;
 
-    AnnotFreeText(PDFDoc *docA, PDFRectangle *rect);
-    AnnotFreeText(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotFreeText(PDFDoc *docA, const PDFRectangle &rect);
+    AnnotFreeText(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotFreeText() override;
 
     void draw(Gfx *gfx, bool printing) override;
@@ -1093,7 +1093,7 @@ protected:
     void generateFreeTextAppearance();
 
     // required
-    std::unique_ptr<GooString> appearanceString; // DA
+    std::string appearanceString; // DA
 
     // optional
     VariableTextQuadding quadding; // Q  (Default 0)
@@ -1127,8 +1127,8 @@ public:
         captionPosTop // Top
     };
 
-    AnnotLine(PDFDoc *docA, PDFRectangle *rect);
-    AnnotLine(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotLine(PDFDoc *docA, const PDFRectangle &rect);
+    AnnotLine(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotLine() override;
 
     void draw(Gfx *gfx, bool printing) override;
@@ -1193,8 +1193,8 @@ protected:
 class POPPLER_PRIVATE_EXPORT AnnotTextMarkup : public AnnotMarkup
 {
 public:
-    AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
-    AnnotTextMarkup(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotTextMarkup(PDFDoc *docA, const PDFRectangle &rect, AnnotSubtype subType);
+    AnnotTextMarkup(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotTextMarkup() override;
 
     void draw(Gfx *gfx, bool printing) override;
@@ -1222,8 +1222,8 @@ private:
 class POPPLER_PRIVATE_EXPORT AnnotStamp : public AnnotMarkup
 {
 public:
-    AnnotStamp(PDFDoc *docA, PDFRectangle *rect);
-    AnnotStamp(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotStamp(PDFDoc *docA, const PDFRectangle &rect);
+    AnnotStamp(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotStamp() override;
 
     void draw(Gfx *gfx, bool printing) override;
@@ -1254,8 +1254,8 @@ private:
 class POPPLER_PRIVATE_EXPORT AnnotGeometry : public AnnotMarkup
 {
 public:
-    AnnotGeometry(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
-    AnnotGeometry(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotGeometry(PDFDoc *docA, const PDFRectangle &rect, AnnotSubtype subType);
+    AnnotGeometry(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotGeometry() override;
 
     void draw(Gfx *gfx, bool printing) override;
@@ -1290,8 +1290,8 @@ public:
         polygonDimension // PolygonDimension
     };
 
-    AnnotPolygon(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
-    AnnotPolygon(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotPolygon(PDFDoc *docA, const PDFRectangle &rect, AnnotSubtype subType);
+    AnnotPolygon(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotPolygon() override;
 
     void draw(Gfx *gfx, bool printing) override;
@@ -1340,8 +1340,8 @@ public:
         symbolP // P
     };
 
-    AnnotCaret(PDFDoc *docA, PDFRectangle *rect);
-    AnnotCaret(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotCaret(PDFDoc *docA, const PDFRectangle &rect);
+    AnnotCaret(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotCaret() override;
 
     void setSymbol(AnnotCaretSymbol new_symbol);
@@ -1364,8 +1364,8 @@ private:
 class POPPLER_PRIVATE_EXPORT AnnotInk : public AnnotMarkup
 {
 public:
-    AnnotInk(PDFDoc *docA, PDFRectangle *rect);
-    AnnotInk(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotInk(PDFDoc *docA, const PDFRectangle &rect);
+    AnnotInk(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotInk() override;
 
     void draw(Gfx *gfx, bool printing) override;
@@ -1399,8 +1399,8 @@ private:
 class AnnotFileAttachment : public AnnotMarkup
 {
 public:
-    AnnotFileAttachment(PDFDoc *docA, PDFRectangle *rect, GooString *filename);
-    AnnotFileAttachment(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotFileAttachment(PDFDoc *docA, const PDFRectangle &rect, const GooString &filename);
+    AnnotFileAttachment(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotFileAttachment() override;
 
     void draw(Gfx *gfx, bool printing) override;
@@ -1426,8 +1426,8 @@ private:
 class AnnotSound : public AnnotMarkup
 {
 public:
-    AnnotSound(PDFDoc *docA, PDFRectangle *rect, Sound *soundA);
-    AnnotSound(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotSound(PDFDoc *docA, const PDFRectangle &rect, const Sound &soundA);
+    AnnotSound(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotSound() override;
 
     void draw(Gfx *gfx, bool printing) override;
@@ -1461,7 +1461,7 @@ public:
         highlightModePush // P,T
     };
 
-    AnnotWidget(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotWidget(PDFDoc *docA, Object &&dictObject, const Object &obj);
     AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormField *fieldA);
     ~AnnotWidget() override;
 
@@ -1548,8 +1548,8 @@ class Annot3D : public Annot
     };
 
 public:
-    Annot3D(PDFDoc *docA, PDFRectangle *rect);
-    Annot3D(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    Annot3D(PDFDoc *docA, const PDFRectangle &rect);
+    Annot3D(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~Annot3D() override;
 
     // getters
@@ -1734,8 +1734,8 @@ public:
         std::unique_ptr<Deactivation> deactivation;
     };
 
-    AnnotRichMedia(PDFDoc *docA, PDFRectangle *rect);
-    AnnotRichMedia(PDFDoc *docA, Object &&dictObject, const Object *obj);
+    AnnotRichMedia(PDFDoc *docA, const PDFRectangle &rect);
+    AnnotRichMedia(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotRichMedia() override;
 
     Content *getContent() const;
@@ -1767,14 +1767,14 @@ public:
     Annots(const Annots &) = delete;
     Annots &operator=(const Annots &) = delete;
 
-    const std::vector<std::shared_ptr<Annot>> &getAnnots() { return annots; }
+    const std::vector<std::shared_ptr<Annot>> &getAnnots() const { return annots; }
 
     void appendAnnot(std::shared_ptr<Annot> annot);
     bool removeAnnot(const std::shared_ptr<Annot> &annot);
 
 private:
-    std::shared_ptr<Annot> createAnnot(Object &&dictObject, const Object *obj);
-    std::shared_ptr<Annot> findAnnot(Ref *ref);
+    std::shared_ptr<Annot> createAnnot(Object &&dictObject, const Object &obj);
+    std::shared_ptr<Annot> findAnnot(Ref ref);
 
     PDFDoc *doc;
     std::vector<std::shared_ptr<Annot>> annots;

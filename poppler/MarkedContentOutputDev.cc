@@ -10,6 +10,7 @@
 // Copyright 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
+// Copyright 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 //========================================================================
 
@@ -76,7 +77,7 @@ bool MarkedContentOutputDev::contentStreamMatch()
     return formStack.empty();
 }
 
-void MarkedContentOutputDev::beginMarkedContent(const char * /*name*/, Dict *properties)
+void MarkedContentOutputDev::beginMarkedContent(const std::string & /*name*/, Dict *properties)
 {
     int id = -1;
     if (properties) {

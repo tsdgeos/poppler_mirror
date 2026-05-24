@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2009, 2014, 2015, 2017-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2014, 2015, 2017-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -61,12 +61,13 @@
 #include "XRef.h"
 #include "Catalog.h"
 #include "Page.h"
-#include "Annot.h"
 #include "ErrorCodes.h"
-#include "Form.h"
-#include "OptionalContent.h"
 #include "Stream.h"
 
+class AnnotColor;
+class AnnotWidget;
+class FormFieldSignature;
+class FormWidget;
 class GooString;
 class GooFile;
 class BaseStream;
@@ -346,7 +347,7 @@ public:
         Ref ref;
         std::shared_ptr<AnnotWidget> annotWidget = nullptr;
         FormWidget *formWidget = nullptr;
-        std::unique_ptr<::FormFieldSignature> field = nullptr;
+        std::unique_ptr<::FormFieldSignature> field;
     };
 
     std::variant<SignatureData, CryptoSign::SigningErrorMessage> createSignature(::Page *destPage, std::unique_ptr<GooString> &&partialFieldName, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft,

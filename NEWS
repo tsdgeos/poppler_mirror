@@ -1,3 +1,21 @@
+Release 26.05.0:
+        core:
+         * Improve reconstruction of damaged files. Issue #1693
+         * PSOutputDev: Remove "pipe as filename" feature
+         * PSOutputDev: Respect pre-existing PageSize policies. Issue #1610
+         * Internal code improvements
+         * Fix crashes in malformed documents
+
+        glib:
+         * Improve PopplerPage thread-safety
+
+        utils:
+         * pdftotext: Add -remove-hyphens option
+         * pdftotext: Do not abort on empty strings. Issue #1699
+
+        build system:
+         * Increase minimum required dependency versions to those of Ubuntu 24.04
+
 Release 26.04.0:
         core:
          * Splash: Improve knockout groups rendering. Issue #1538

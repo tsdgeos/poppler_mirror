@@ -18,6 +18,7 @@
 // Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2016 Alok Anand <alok4nand@gmail.com>
 // Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -47,7 +48,8 @@ SecurityHandler *SecurityHandler::make(PDFDoc *docA, Object *encryptDictA)
     if (filterObj.isName("Standard")) {
         secHdlr = new StandardSecurityHandler(docA, encryptDictA);
     } else if (filterObj.isName()) {
-        error(errSyntaxError, -1, "Couldn't find the '{0:s}' security handler", filterObj.getName());
+        const std::string &filterName = filterObj.getNameString();
+        error(errSyntaxError, -1, "Couldn't find the '{0:r}' security handler", &filterName);
         secHdlr = nullptr;
     } else {
         error(errSyntaxError, -1, "Missing or invalid 'Filter' entry in encryption dictionary");
@@ -147,12 +149,12 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
                 Object cryptFiltersObj = encryptDictA->dictLookup("CF");
                 Object streamFilterObj = encryptDictA->dictLookup("StmF");
                 Object stringFilterObj = encryptDictA->dictLookup("StrF");
-                if (cryptFiltersObj.isDict() && streamFilterObj.isName() && stringFilterObj.isName() && !strcmp(streamFilterObj.getName(), stringFilterObj.getName())) {
-                    if (!strcmp(streamFilterObj.getName(), "Identity")) {
+                if (cryptFiltersObj.isDict() && streamFilterObj.isName() && stringFilterObj.isName() && (streamFilterObj.getNameString() == stringFilterObj.getNameString())) {
+                    if (streamFilterObj.getNameString() == "Identity") {
                         // no encryption on streams or strings
                         encVersion = encRevision = -1;
                     } else {
-                        Object cryptFilterObj = cryptFiltersObj.dictLookup(streamFilterObj.getName());
+                        Object cryptFilterObj = cryptFiltersObj.dictLookup(streamFilterObj.getNameString());
                         if (cryptFilterObj.isDict()) {
                             Object cfmObj = cryptFilterObj.dictLookup("CFM");
                             if (cfmObj.isName("V2")) {

@@ -29,6 +29,7 @@
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -300,8 +301,11 @@ public:
     // If 'invert' is false, a sample value of 0 marks the page with the current color,
     // and a 1 leaves the previous contents unchanged. If 'invert' is true, these meanings are reversed.
     virtual void drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg);
-    virtual void setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> &baseMatrix);
+
+    // A call to setSoftMaskFromImageMask will be followed by a call to unsetSoftMaskFromImageMask unless setSoftMaskFromImageMask returns false.
+    virtual bool setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> &baseMatrix);
     virtual void unsetSoftMaskFromImageMask(GfxState *state, std::array<double, 6> &baseMatrix);
+
     virtual void drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg);
     virtual void drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate);
     virtual void drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,
@@ -310,9 +314,9 @@ public:
     //----- grouping operators
 
     virtual void endMarkedContent(GfxState *state);
-    virtual void beginMarkedContent(const char *name, Dict *properties);
-    virtual void markPoint(const char *name);
-    virtual void markPoint(const char *name, Dict *properties);
+    virtual void beginMarkedContent(const std::string &name, Dict *properties);
+    virtual void markPoint(const std::string &name);
+    virtual void markPoint(const std::string &name, Dict *properties);
 
     //----- OPI functions
     virtual void opiBegin(GfxState *state, const Dict &opiDict);

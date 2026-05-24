@@ -30,8 +30,8 @@ AnnotStampImageHelper::AnnotStampImageHelper(PDFDoc *docA, int widthA, int heigh
     sMaskRef = softMaskRef;
 
     auto dict = std::make_unique<Dict>(docA->getXRef());
-    dict->add("Type", Object(objName, "XObject"));
-    dict->add("Subtype", Object(objName, "Image"));
+    dict->add("Type", Object::name("XObject"));
+    dict->add("Subtype", Object::name("Image"));
     dict->add("Width", Object(width));
     dict->add("Height", Object(height));
     dict->add("ImageMask", Object(false));
@@ -40,13 +40,13 @@ AnnotStampImageHelper::AnnotStampImageHelper(PDFDoc *docA, int widthA, int heigh
 
     switch (colorSpace) {
     case ColorSpace::DeviceGray:
-        dict->add("ColorSpace", Object(objName, "DeviceGray"));
+        dict->add("ColorSpace", Object::name("DeviceGray"));
         break;
     case ColorSpace::DeviceRGB:
-        dict->add("ColorSpace", Object(objName, "DeviceRGB"));
+        dict->add("ColorSpace", Object::name("DeviceRGB"));
         break;
     case ColorSpace::DeviceCMYK:
-        dict->add("ColorSpace", Object(objName, "DeviceCMYK"));
+        dict->add("ColorSpace", Object::name("DeviceCMYK"));
         break;
     }
 

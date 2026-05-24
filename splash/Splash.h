@@ -12,13 +12,14 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2007, 2011, 2018, 2019, 2021, 2022, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007, 2011, 2018, 2019, 2021, 2022, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010-2013, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Tobias Deiminger <haxtibal@posteo.de>
 // Copyright (C) 2026 Taufeeque Sifat <entity069@protonmail.com>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -208,7 +209,7 @@ public:
     void compositeBackground(SplashColorConstPtr color);
 
     // Copy a rectangular region from <src> onto the bitmap belonging to
-    // this Splash object.  The destination alpha values are all set to
+    // this Splash object.  On success, the destination alpha values are all set to
     // zero.
     SplashError blitTransparent(const SplashBitmap &src, int xSrc, int ySrc, int xDest, int yDest, int w, int h);
     void blitImage(const SplashBitmap &src, bool srcAlpha, int xDest, int yDest);
@@ -253,12 +254,12 @@ public:
     //
     // clipToStrokePath: Whether the current clip region is a stroke path.
     //   In that case, strokeAlpha is used rather than fillAlpha.
-    SplashError shadedFill(const SplashPath &path, bool hasBBox, SplashPattern *pattern, bool clipToStrokePath);
+    SplashError shadedFill(const SplashPath &path, bool hasBBox, const SplashPattern &pattern, bool clipToStrokePath);
     // Draw a gouraud triangle shading.
     bool gouraudTriangleShadedFill(SplashGouraudColor *shading);
 
 private:
-    void pipeInit(SplashPipe *pipe, int x, int y, SplashPattern *pattern, SplashColorPtr cSrc, unsigned char aInput, bool usesShape, bool nonIsolatedGroup, bool knockout = false, unsigned char knockoutOpacity = 255);
+    void pipeInit(SplashPipe *pipe, int x, int y, const SplashPattern *pattern, SplashColorPtr cSrc, unsigned char aInput, bool usesShape, bool nonIsolatedGroup, bool knockout = false, unsigned char knockoutOpacity = 255);
     void pipeRun(SplashPipe *pipe);
     void pipeRunSimpleMono1(SplashPipe *pipe);
     void pipeRunSimpleMono8(SplashPipe *pipe);
@@ -325,7 +326,6 @@ private:
     SplashBitmap *alpha0Bitmap; // for non-isolated groups, this is the
                                 //   bitmap containing the alpha0 values
     int alpha0X, alpha0Y; // offset within alpha0Bitmap
-    double aaGamma[splashAASize * splashAASize + 1];
     double minLineWidth;
     SplashThinLineMode thinLineMode;
     SplashClipResult opClipRes;

@@ -53,6 +53,7 @@
 #include "poppler-private.h"
 
 // poppler includes
+#include <Form.h>
 #include <Page.h>
 #include <Annot.h>
 #include <Gfx.h>
@@ -1425,7 +1426,7 @@ QString Annotation::contents() const
         return d->contents;
     }
 
-    return UnicodeParsedString(d->pdfAnnot->getContents());
+    return UnicodeParsedString(&d->pdfAnnot->getContents());
 }
 
 void Annotation::setContents(const QString &contents)
@@ -1791,7 +1792,7 @@ void Annotation::setPopup(const Annotation::Popup &popup)
 
     // Create a new AnnotPopup and assign it to pdfAnnot
     PDFRectangle rect = d->toPdfRectangle( popup.geometry() );
-    AnnotPopup * p = new AnnotPopup( d->pdfPage->getDoc(), &rect );
+    AnnotPopup * p = new AnnotPopup( d->pdfPage->getDoc(), rect );
     p->setOpen( !(popup.flags() & Annotation::Hidden) );
     if (!popup.summary().isEmpty())
     {
@@ -1924,13 +1925,13 @@ std::shared_ptr<Annot> TextAnnotationPrivate::createNativeAnnot(::Page *destPage
     // Set pdfAnnot
     PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
     if (textType == TextAnnotation::Linked) {
-        pdfAnnot = std::make_shared<AnnotText>(destPage->getDoc(), &rect);
+        pdfAnnot = std::make_shared<AnnotText>(destPage->getDoc(), rect);
     } else {
         const double pointSize = textFont ? textFont->pointSizeF() : AnnotFreeText::undefinedFontPtSize;
         if (pointSize < 0) {
             qWarning() << "TextAnnotationPrivate::createNativeAnnot: font pointSize < 0";
         }
-        pdfAnnot = std::make_shared<AnnotFreeText>(destPage->getDoc(), &rect);
+        pdfAnnot = std::make_shared<AnnotFreeText>(destPage->getDoc(), rect);
     }
 
     // Set properties
@@ -1965,7 +1966,7 @@ void TextAnnotationPrivate::setDefaultAppearanceToNative()
                 }
 
                 if (!fontName.empty()) {
-                    form->ensureFontsForAllCharacters(pdfAnnot->getContents(), fontName);
+                    form->ensureFontsForAllCharacters(pdfAnnot->getContents().toStr(), fontName);
                 } else {
                     fontName = "Invalid_font";
                 }
@@ -2401,9 +2402,9 @@ std::shared_ptr<Annot> LineAnnotationPrivate::createNativeAnnot(::Page *destPage
     // Set pdfAnnot
     PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
     if (lineType == LineAnnotation::StraightLine) {
-        pdfAnnot = std::make_shared<AnnotLine>(doc->doc.get(), &rect);
+        pdfAnnot = std::make_shared<AnnotLine>(doc->doc.get(), rect);
     } else {
-        pdfAnnot = std::make_shared<AnnotPolygon>(doc->doc.get(), &rect, lineClosed ? Annot::typePolygon : Annot::typePolyLine);
+        pdfAnnot = std::make_shared<AnnotPolygon>(doc->doc.get(), rect, lineClosed ? Annot::typePolygon : Annot::typePolyLine);
     }
 
     // Set properties
@@ -2959,7 +2960,7 @@ std::shared_ptr<Annot> GeomAnnotationPrivate::createNativeAnnot(::Page *destPage
 
     // Set pdfAnnot
     PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
-    pdfAnnot = std::make_shared<AnnotGeometry>(destPage->getDoc(), &rect, type);
+    pdfAnnot = std::make_shared<AnnotGeometry>(destPage->getDoc(), rect, type);
 
     // Set properties
     flushBaseAnnotationProperties();
@@ -3184,7 +3185,7 @@ std::shared_ptr<Annot> HighlightAnnotationPrivate::createNativeAnnot(::Page *des
 
     // Set pdfAnnot
     PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
-    pdfAnnot = std::make_shared<AnnotTextMarkup>(destPage->getDoc(), &rect, toAnnotSubType(highlightType));
+    pdfAnnot = std::make_shared<AnnotTextMarkup>(destPage->getDoc(), rect, toAnnotSubType(highlightType));
 
     // Set properties
     flushBaseAnnotationProperties();
@@ -3389,7 +3390,7 @@ std::shared_ptr<Annot> StampAnnotationPrivate::createNativeAnnot(::Page *destPag
 
     // Set pdfAnnot
     PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
-    pdfAnnot = std::make_shared<AnnotStamp>(destPage->getDoc(), &rect);
+    pdfAnnot = std::make_shared<AnnotStamp>(destPage->getDoc(), rect);
 
     // Set properties
     flushBaseAnnotationProperties();
@@ -3626,7 +3627,7 @@ std::shared_ptr<Annot> InkAnnotationPrivate::createNativeAnnot(::Page *destPage,
 
     // Set pdfAnnot
     PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
-    pdfAnnot = std::make_shared<AnnotInk>(destPage->getDoc(), &rect);
+    pdfAnnot = std::make_shared<AnnotInk>(destPage->getDoc(), rect);
 
     // Set properties
     flushBaseAnnotationProperties();
@@ -4138,7 +4139,7 @@ std::shared_ptr<Annot> CaretAnnotationPrivate::createNativeAnnot(::Page *destPag
 
     // Set pdfAnnot
     PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
-    pdfAnnot = std::make_shared<AnnotCaret>(destPage->getDoc(), &rect);
+    pdfAnnot = std::make_shared<AnnotCaret>(destPage->getDoc(), rect);
 
     // Set properties
     flushBaseAnnotationProperties();

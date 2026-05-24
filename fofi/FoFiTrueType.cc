@@ -698,7 +698,7 @@ int FoFiTrueType::getEmbeddingRights() const
     return 3;
 }
 
-void FoFiTrueType::convertToType42(const char *psName, const std::array<const char *, 256> *encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::convertToType42(const std::string &psName, const std::array<const char *, 256> *encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const
 {
     int maxUsedGlyph;
     bool ok;
@@ -745,7 +745,7 @@ void FoFiTrueType::convertToType1(const char *psName, FoFiOutputFunc outputFunc,
     ff->convertToType1(psName, outputFunc, outputStream);
 }
 
-void FoFiTrueType::convertToCIDType2(const char *psName, const std::vector<int> &cidMap, bool needVerticalMetrics, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::convertToCIDType2(const std::string &psName, const std::vector<int> &cidMap, bool needVerticalMetrics, FoFiOutputFunc outputFunc, void *outputStream) const
 {
     bool ok;
 

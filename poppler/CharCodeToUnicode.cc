@@ -29,6 +29,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 <corentinf@free.fr>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -184,7 +185,7 @@ std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::parseCMapFromFile(const st
             return nullptr;
         }
     } else {
-        error(errSyntaxError, -1, "Couldn't find ToUnicode CMap file for '{0:s}'", fileName.c_str());
+        error(errSyntaxError, -1, "Couldn't find ToUnicode CMap file for '{0:r}'", &fileName);
     }
     return ctu;
 }
@@ -218,7 +219,7 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
                     }
                     fclose(f);
                 } else {
-                    error(errSyntaxError, -1, "Couldn't find ToUnicode CMap file for '{0:s}'", name.c_str());
+                    error(errSyntaxError, -1, "Couldn't find ToUnicode CMap file for '{0:r}'", &name);
                 }
             }
             pst->getToken(tok1, sizeof(tok1), &n1);

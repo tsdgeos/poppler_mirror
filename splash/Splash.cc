@@ -19,7 +19,7 @@
 // Copyright (C) 2012 Markus Trippelsdorf <markus@trippelsdorf.de>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Matthias Kramm <kramm@quiss.org>
-// Copyright (C) 2018, 2019, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+// Copyright (C) 2018, 2019, 2025, 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
@@ -60,7 +60,17 @@
 
 //------------------------------------------------------------------------
 
-#define splashAAGamma 1.5
+// C++26: make constexpr, needs constexpr std::pow
+static const std::array<double, splashAASize * splashAASize + 1> aaGamma = []() {
+    constexpr double splashAAGamma = 1.5;
+    std::array<double, splashAASize * splashAASize + 1> tGamma { 0.0 };
+    for (size_t i = 0; i < tGamma.size(); ++i) {
+        double value = static_cast<double>(i) / (splashAASize * splashAASize);
+        double expValue = std::pow(value, splashAAGamma);
+        tGamma[i] = static_cast<unsigned char>((expValue * 255) + 0.5);
+    }
+    return tGamma;
+}();
 
 // distance of Bezier control point from center for circle approximation
 // = (4 * (sqrt(2) - 1) / 3) * r
@@ -143,7 +153,7 @@ struct SplashPipe
     int x, y;
 
     // source pattern
-    SplashPattern *pattern;
+    const SplashPattern *pattern;
 
     // source alpha and color
     unsigned char aInput;
@@ -193,7 +203,7 @@ SplashPipeResultColorCtrl Splash::pipeResultColorAlphaBlend[] = { splashPipeResu
 // pipeline
 //------------------------------------------------------------------------
 
-inline void Splash::pipeInit(SplashPipe *pipe, int x, int y, SplashPattern *pattern, SplashColorPtr cSrc, unsigned char aInput, bool usesShape, bool nonIsolatedGroup, bool knockout, unsigned char knockoutOpacity)
+inline void Splash::pipeInit(SplashPipe *pipe, int x, int y, const SplashPattern *pattern, SplashColorPtr cSrc, unsigned char aInput, bool usesShape, bool nonIsolatedGroup, bool knockout, unsigned char knockoutOpacity)
 {
     pipeSetXY(pipe, x, y);
     pipe->pattern = nullptr;
@@ -1496,44 +1506,16 @@ inline void Splash::transform(const std::array<double, 6> &matrix, double xi, do
 // Splash
 //------------------------------------------------------------------------
 
-Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, SplashScreenParams *screenParams)
-{
-    int i;
-
-    bitmap = bitmapA;
-    vectorAntialias = vectorAntialiasA;
-    inShading = false;
-    state = new SplashState(bitmap->width, bitmap->height, vectorAntialias, screenParams);
-    if (vectorAntialias) {
-        aaBuf = new SplashBitmap(splashAASize * bitmap->width, splashAASize, 1, splashModeMono1, false);
-        for (i = 0; i <= splashAASize * splashAASize; ++i) {
-            aaGamma[i] = static_cast<unsigned char>(splashRound(splashPow(static_cast<double>(i) / static_cast<double>(splashAASize * splashAASize), splashAAGamma) * 255));
-        }
-    } else {
-        aaBuf = nullptr;
-    }
-    minLineWidth = 0;
-    thinLineMode = splashThinLineDefault;
-    debugMode = false;
-    alpha0Bitmap = nullptr;
-    groupBackBitmap = nullptr;
-    groupBackX = 0;
-    groupBackY = 0;
-}
+Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, SplashScreenParams *screenParams) : Splash(bitmapA, vectorAntialiasA, SplashScreen { screenParams }) { }
 
 Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, const SplashScreen &screenA)
 {
-    int i;
-
     bitmap = bitmapA;
     inShading = false;
     vectorAntialias = vectorAntialiasA;
     state = new SplashState(bitmap->width, bitmap->height, vectorAntialias, screenA);
     if (vectorAntialias) {
         aaBuf = new SplashBitmap(splashAASize * bitmap->width, splashAASize, 1, splashModeMono1, false);
-        for (i = 0; i <= splashAASize * splashAASize; ++i) {
-            aaGamma[i] = static_cast<unsigned char>(splashRound(splashPow(static_cast<double>(i) / static_cast<double>(splashAASize * splashAASize), splashAAGamma) * 255));
-        }
     } else {
         aaBuf = nullptr;
     }
@@ -2770,8 +2752,7 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData, int 
     int yp;
 
     if (debugMode) {
-        printf("fillImageMask: w=%d h=%d mat=[%.2f %.2f %.2f %.2f %.2f %.2f]\n", w, h, static_cast<double>(mat[0]), static_cast<double>(mat[1]), static_cast<double>(mat[2]), static_cast<double>(mat[3]), static_cast<double>(mat[4]),
-               static_cast<double>(mat[5]));
+        printf("fillImageMask: w=%d h=%d mat=[%.2f %.2f %.2f %.2f %.2f %.2f]\n", w, h, mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
     }
 
     if (w == 0 && h == 0) {
@@ -3535,8 +3516,7 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
     int yp;
 
     if (debugMode) {
-        printf("drawImage: srcMode=%d srcAlpha=%d w=%d h=%d mat=[%.2f %.2f %.2f %.2f %.2f %.2f]\n", srcMode, srcAlpha, w, h, static_cast<double>(mat[0]), static_cast<double>(mat[1]), static_cast<double>(mat[2]), static_cast<double>(mat[3]),
-               static_cast<double>(mat[4]), static_cast<double>(mat[5]));
+        printf("drawImage: srcMode=%d srcAlpha=%d w=%d h=%d mat=[%.2f %.2f %.2f %.2f %.2f %.2f]\n", srcMode, srcAlpha, w, h, mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
     }
 
     // check color modes
@@ -5454,8 +5434,8 @@ bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
         for (int i = 0; i < shading->getNTriangles(); ++i) {
             shading->getParametrizedTriangle(i, xdbl + 0, ydbl + 0, color + 0, xdbl + 1, ydbl + 1, color + 1, xdbl + 2, ydbl + 2, color + 2);
             for (int m = 0; m < 3; ++m) {
-                xt = xdbl[m] * static_cast<double>(userToCanvasMatrix[0]) + ydbl[m] * static_cast<double>(userToCanvasMatrix[2]) + static_cast<double>(userToCanvasMatrix[4]);
-                yt = xdbl[m] * static_cast<double>(userToCanvasMatrix[1]) + ydbl[m] * static_cast<double>(userToCanvasMatrix[3]) + static_cast<double>(userToCanvasMatrix[5]);
+                xt = xdbl[m] * userToCanvasMatrix[0] + ydbl[m] * userToCanvasMatrix[2] + userToCanvasMatrix[4];
+                yt = xdbl[m] * userToCanvasMatrix[1] + ydbl[m] * userToCanvasMatrix[3] + userToCanvasMatrix[5];
                 xdbl[m] = xt;
                 ydbl[m] = yt;
                 // we operate on scanlines which are integer offsets into the
@@ -5682,8 +5662,8 @@ bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
                 return false;
             }
             for (int m = 0; m < 3; ++m) {
-                xt = xdbl[m] * static_cast<double>(userToCanvasMatrix[0]) + ydbl[m] * static_cast<double>(userToCanvasMatrix[2]) + static_cast<double>(userToCanvasMatrix[4]);
-                yt = xdbl[m] * static_cast<double>(userToCanvasMatrix[1]) + ydbl[m] * static_cast<double>(userToCanvasMatrix[3]) + static_cast<double>(userToCanvasMatrix[5]);
+                xt = xdbl[m] * userToCanvasMatrix[0] + ydbl[m] * userToCanvasMatrix[2] + userToCanvasMatrix[4];
+                yt = xdbl[m] * userToCanvasMatrix[1] + ydbl[m] * userToCanvasMatrix[3] + userToCanvasMatrix[5];
                 xdbl[m] = xt;
                 ydbl[m] = yt;
                 // we operate on scanlines which are integer offsets into the
@@ -6480,16 +6460,16 @@ void Splash::dumpXPath(const SplashXPath &path)
     for (int i = 0; i < path.length; ++i) {
         const auto &seg = path.segs[i];
         if (seg.flags & splashXPathFlipped) {
-            printf("  %4d: x0=%8.2f y0=%8.2f x1=%8.2f y1=%8.2f %s%sP\n", i, static_cast<double>(seg.x1), static_cast<double>(seg.y1), static_cast<double>(seg.x0), static_cast<double>(seg.y0), //
+            printf("  %4d: x0=%8.2f y0=%8.2f x1=%8.2f y1=%8.2f %s%sP\n", i, seg.x1, seg.y1, seg.x0, seg.y0, //
                    (seg.flags & splashXPathHoriz) ? "H" : " ", (seg.flags & splashXPathVert) ? "V" : " ");
         } else {
-            printf("  %4d: x0=%8.2f y0=%8.2f x1=%8.2f y1=%8.2f %s%s \n", i, static_cast<double>(seg.x0), static_cast<double>(seg.y0), static_cast<double>(seg.x1), static_cast<double>(seg.y1), //
+            printf("  %4d: x0=%8.2f y0=%8.2f x1=%8.2f y1=%8.2f %s%s \n", i, seg.x0, seg.y0, seg.x1, seg.y1, //
                    (seg.flags & splashXPathHoriz) ? "H" : " ", (seg.flags & splashXPathVert) ? "V" : " ");
         }
     }
 }
 
-SplashError Splash::shadedFill(const SplashPath &path, bool hasBBox, SplashPattern *pattern, bool clipToStrokePath)
+SplashError Splash::shadedFill(const SplashPath &path, bool hasBBox, const SplashPattern &pattern, bool clipToStrokePath)
 {
     SplashPipe pipe;
     int xMinI, yMinI, xMaxI, yMaxI, x0, x1, y;
@@ -6531,7 +6511,7 @@ SplashError Splash::shadedFill(const SplashPath &path, bool hasBBox, SplashPatte
         }
 
         unsigned char alpha = splashRound(clipToStrokePath ? state->strokeAlpha * 255 : state->fillAlpha * 255);
-        pipeInit(&pipe, 0, yMinI, pattern, nullptr, alpha, vectorAntialias && !hasBBox, false);
+        pipeInit(&pipe, 0, yMinI, &pattern, nullptr, alpha, vectorAntialias && !hasBBox, false);
 
         // draw the spans
         if (vectorAntialias) {
@@ -6561,7 +6541,7 @@ SplashError Splash::shadedFill(const SplashPath &path, bool hasBBox, SplashPatte
                         c3 = (*p2 >> 4);
                         c4 = (*p3 >> 4);
                     }
-                    if ((c1 & 0x03) == 0x03 && (c2 & 0x03) == 0x03 && (c3 & 0x03) == 0x03 && (c4 & 0x03) == 0x03 && c1 == c2 && c2 == c3 && c3 == c4 && pattern->testPosition(x0 - 1, y)) {
+                    if ((c1 & 0x03) == 0x03 && (c2 & 0x03) == 0x03 && (c3 & 0x03) == 0x03 && (c4 & 0x03) == 0x03 && c1 == c2 && c2 == c3 && c3 == c4 && pattern.testPosition(x0 - 1, y)) {
                         unsigned char shapeCorrection = (x0 & 1) ? 0x0f : 0xf0;
                         *p0 |= shapeCorrection;
                         *p1 |= shapeCorrection;
@@ -6586,7 +6566,7 @@ SplashError Splash::shadedFill(const SplashPath &path, bool hasBBox, SplashPatte
                         c4 = (*p3 >> 4);
                     }
 
-                    if ((c1 & 0xc) == 0x0c && (c2 & 0x0c) == 0x0c && (c3 & 0x0c) == 0x0c && (c4 & 0x0c) == 0x0c && c1 == c2 && c2 == c3 && c3 == c4 && pattern->testPosition(x1 + 1, y)) {
+                    if ((c1 & 0xc) == 0x0c && (c2 & 0x0c) == 0x0c && (c3 & 0x0c) == 0x0c && (c4 & 0x0c) == 0x0c && c1 == c2 && c2 == c3 && c3 == c4 && pattern.testPosition(x1 + 1, y)) {
                         unsigned char shapeCorrection = (x1 & 1) ? 0x0f : 0xf0;
                         *p0 |= shapeCorrection;
                         *p1 |= shapeCorrection;

@@ -2,6 +2,7 @@
 
 #include "PDFDoc.h"
 #include "GlobalParams.h"
+#include "OptionalContent.h"
 
 #include <poppler-qt6.h>
 #include <poppler-optcontent-private.h>

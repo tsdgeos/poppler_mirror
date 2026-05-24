@@ -45,6 +45,7 @@
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2025 Martin Emrich <dev@martinemrich.me>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -188,7 +189,7 @@ std::unique_ptr<Stream> Stream::addFilters(std::unique_ptr<Stream> str, Dict *di
         params = dict->lookup("DP", recursion);
     }
     if (obj.isName()) {
-        str = makeFilter(obj.getName(), std::move(str), &params, recursion, dict);
+        str = makeFilter(obj.getNameString(), std::move(str), &params, recursion, dict);
     } else if (obj.isArray()) {
         for (i = 0; i < obj.arrayGetLength(); ++i) {
             obj2 = obj.arrayGet(i, recursion);
@@ -198,7 +199,7 @@ std::unique_ptr<Stream> Stream::addFilters(std::unique_ptr<Stream> str, Dict *di
                 params2.setToNull();
             }
             if (obj2.isName()) {
-                str = makeFilter(obj2.getName(), std::move(str), &params2, recursion);
+                str = makeFilter(obj2.getNameString(), std::move(str), &params2, recursion);
             } else {
                 error(errSyntaxError, -1, "Bad filter name");
                 str = wrapEOFStream(std::move(str));
@@ -247,7 +248,7 @@ private:
 
 BaseStreamStream::~BaseStreamStream() = default;
 
-std::unique_ptr<Stream> Stream::makeFilter(const char *name, std::unique_ptr<Stream> str, Object *params, int recursion, Dict *dict)
+std::unique_ptr<Stream> Stream::makeFilter(const std::string &name, std::unique_ptr<Stream> str, Object *params, int recursion, Dict *dict)
 {
     int pred; // parameters
     int colors;
@@ -258,11 +259,11 @@ std::unique_ptr<Stream> Stream::makeFilter(const char *name, std::unique_ptr<Str
     int columns, rows;
     Object obj;
 
-    if (!strcmp(name, "ASCIIHexDecode") || !strcmp(name, "AHx")) {
+    if (name == "ASCIIHexDecode" || name == "AHx") {
         str = std::make_unique<ASCIIHexStream>(std::move(str));
-    } else if (!strcmp(name, "ASCII85Decode") || !strcmp(name, "A85")) {
+    } else if (name == "ASCII85Decode" || name == "A85") {
         str = std::make_unique<ASCII85Stream>(std::move(str));
-    } else if (!strcmp(name, "LZWDecode") || !strcmp(name, "LZW")) {
+    } else if (name == "LZWDecode" || name == "LZW") {
         pred = 1;
         columns = 1;
         colors = 1;
@@ -291,9 +292,9 @@ std::unique_ptr<Stream> Stream::makeFilter(const char *name, std::unique_ptr<Str
             }
         }
         str = std::make_unique<LZWStream>(std::move(str), pred, columns, colors, bits, early);
-    } else if (!strcmp(name, "RunLengthDecode") || !strcmp(name, "RL")) {
+    } else if (name == "RunLengthDecode" || name == "RL") {
         str = std::make_unique<RunLengthStream>(std::move(str));
-    } else if (!strcmp(name, "CCITTFaxDecode") || !strcmp(name, "CCF")) {
+    } else if (name == "CCITTFaxDecode" || name == "CCF") {
         encoding = 0;
         endOfLine = false;
         byteAlign = false;
@@ -337,7 +338,7 @@ std::unique_ptr<Stream> Stream::makeFilter(const char *name, std::unique_ptr<Str
             }
         }
         str = std::make_unique<CCITTFaxStream>(std::move(str), encoding, endOfLine, byteAlign, columns, rows, endOfBlock, black, damagedRowsBeforeError);
-    } else if (!strcmp(name, "DCTDecode") || !strcmp(name, "DCT")) {
+    } else if (name == "DCTDecode" || name == "DCT") {
 #if HAVE_DCT_DECODER
         int colorXform = -1;
         if (params->isDict()) {
@@ -348,10 +349,10 @@ std::unique_ptr<Stream> Stream::makeFilter(const char *name, std::unique_ptr<Str
         }
         str = std::make_unique<DCTStream>(std::move(str), colorXform, dict, recursion);
 #else
-        error(errSyntaxError, str->getPos(), "Unknown filter '{0:s}'", name);
+        error(errSyntaxError, str->getPos(), "Unknown filter '{0:r}'", &name);
         str = wrapEOFStream(std::move(str));
 #endif
-    } else if (!strcmp(name, "FlateDecode") || !strcmp(name, "Fl")) {
+    } else if (name == "FlateDecode" || name == "Fl") {
         pred = 1;
         columns = 1;
         colors = 1;
@@ -375,7 +376,7 @@ std::unique_ptr<Stream> Stream::makeFilter(const char *name, std::unique_ptr<Str
             }
         }
         str = std::make_unique<FlateStream>(std::move(str), pred, columns, colors, bits);
-    } else if (!strcmp(name, "JBIG2Decode")) {
+    } else if (name == "JBIG2Decode") {
         Object globals;
         if (params->isDict()) {
             XRef *xref = params->getDict()->getXRef();
@@ -383,21 +384,21 @@ std::unique_ptr<Stream> Stream::makeFilter(const char *name, std::unique_ptr<Str
             globals = obj.fetch(xref, recursion);
         }
         str = std::make_unique<JBIG2Stream>(std::move(str), std::move(globals), &obj);
-    } else if (!strcmp(name, "JPXDecode")) {
+    } else if (name == "JPXDecode") {
 #if HAVE_JPX_DECODER
         str = std::make_unique<JPXStream>(std::move(str));
 #else
-        error(errSyntaxError, str->getPos(), "Unknown filter '{0:s}'", name);
+        error(errSyntaxError, str->getPos(), "Unknown filter '{0:r}'", &name);
         str = wrapEOFStream(std::move(str));
 #endif
-    } else if (!strcmp(name, "Crypt")) {
+    } else if (name == "Crypt") {
         if (str->getKind() == strCrypt) {
             str = std::make_unique<BaseStreamStream>(std::move(str));
         } else {
             error(errSyntaxError, str->getPos(), "Can't revert non decrypt streams");
         }
     } else {
-        error(errSyntaxError, str->getPos(), "Unknown filter '{0:s}'", name);
+        error(errSyntaxError, str->getPos(), "Unknown filter '{0:r}'", &name);
         str = wrapEOFStream(std::move(str));
     }
     return str;

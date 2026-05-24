@@ -71,7 +71,7 @@ public:
 
     bool getColor(int x, int y, SplashColorPtr c) const override;
 
-    virtual GfxFunctionShading *getShading() { return shading; }
+    GfxFunctionShading *getShading() { return shading; }
 
     bool isCMYK() const override { return gfxMode == csDeviceCMYK; }
 
@@ -99,7 +99,7 @@ public:
 
     virtual bool getParameter(double xs, double ys, double *t) const = 0;
 
-    virtual GfxUnivariateShading *getShading() { return shading; }
+    GfxUnivariateShading *getShading() { return shading; }
 
     bool isCMYK() const override { return gfxMode == csDeviceCMYK; }
 
@@ -284,7 +284,7 @@ public:
 
     //----- image drawing
     void drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg) override;
-    void setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> &baseMatrix) override;
+    bool setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> &baseMatrix) override;
     void unsetSoftMaskFromImageMask(GfxState *state, std::array<double, 6> &baseMatrix) override;
     void drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg) override;
     void drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate) override;

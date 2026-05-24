@@ -45,6 +45,7 @@
 // Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -560,7 +561,7 @@ AnnotLink *CairoOutputDev::findLinkObject(const StructElement *elem)
     if (elem->isObjectRef()) {
         Ref ref = elem->getObjectRef();
         for (const std::shared_ptr<Annot> &annot : annotations) {
-            if (annot->getType() == Annot::typeLink && annot->match(&ref)) {
+            if (annot->getType() == Annot::typeLink && annot->match(ref)) {
                 return static_cast<AnnotLink *>(annot.get());
             }
         }
@@ -2540,7 +2541,7 @@ void CairoOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *st
     drawImageMaskRegular(state, str, width, height, invert, interpolate);
 }
 
-void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, std::array<double, 6> & /*baseMatrix*/)
+bool CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, std::array<double, 6> & /*baseMatrix*/)
 {
 
     /* FIXME: Doesn't the image mask support any colorspace? */
@@ -2600,6 +2601,8 @@ void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/,
     saveState(state);
     static constexpr std::array<double, 4> bbox = { 0, 0, 1, 1 }; // dummy
     beginTransparencyGroup(state, bbox, state->getFillColorSpace(), true, false, false);
+
+    return true;
 }
 
 void CairoOutputDev::unsetSoftMaskFromImageMask(GfxState *state, std::array<double, 6> & /*baseMatrix*/)
@@ -3573,15 +3576,15 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int wi
     cairo_pattern_destroy(pattern);
 }
 
-void CairoOutputDev::beginMarkedContent(const char *name, Dict *properties)
+void CairoOutputDev::beginMarkedContent(const std::string &name, Dict *properties)
 {
     if (!logicalStruct || !isPDF()) {
         return;
     }
 
-    if (strcmp(name, "Artifact") == 0) {
+    if (name == "Artifact") {
         markedContentStack.emplace_back(name);
-        cairo_tag_begin(cairo, name, nullptr);
+        cairo_tag_begin(cairo, name.c_str(), nullptr);
         return;
     }
 
@@ -3594,7 +3597,7 @@ void CairoOutputDev::beginMarkedContent(const char *name, Dict *properties)
         return;
     }
 
-    std::string attribs = GooString::format("tag_name='{0:s}' id='{1:d}_{2:d}'", name, currentStructParents, mcid);
+    std::string attribs = GooString::format("tag_name='{0:r}' id='{1:d}_{2:d}'", &name, currentStructParents, mcid);
     mcidEmitted.insert(std::pair<int, int>(currentStructParents, mcid));
 
     std::string tag;
@@ -3702,7 +3705,7 @@ void CairoImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *st
     }
 }
 
-void CairoImageOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> & /*baseMatrix*/)
+bool CairoImageOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> & /*baseMatrix*/)
 {
     cairo_t *cr;
     cairo_surface_t *surface;
@@ -3731,6 +3734,8 @@ void CairoImageOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref,
         cairo_surface_destroy(surface);
         cairo_destroy(cr);
     }
+
+    return true;
 }
 
 void CairoImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg)

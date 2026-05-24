@@ -1,6 +1,7 @@
 /* poppler-action.cc: glib wrapper for poppler	      -*- c-basic-offset: 8 -*-
  * Copyright (C) 2005, Red Hat, Inc.
  * Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2026 Albert astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -485,7 +486,7 @@ static AnnotMovie *find_annot_movie_for_action(PopplerDocument *document, const 
     if (annotObj.isDict()) {
         Object tmp;
 
-        annot = new AnnotMovie(document->doc.get(), std::move(annotObj), &tmp);
+        annot = new AnnotMovie(document->doc.get(), std::move(annotObj), tmp);
         if (!annot->isOk()) {
             delete annot;
             annot = nullptr;

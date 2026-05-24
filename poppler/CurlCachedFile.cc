@@ -8,6 +8,7 @@
 // Copyright 2010, 2011 Hib Eris <hib@hiberis.nl>
 // Copyright 2010, 2019, 2021, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2024 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 //========================================================================
 
@@ -56,7 +57,7 @@ size_t CurlCachedFileLoader::init(CachedFile *cachedFileA)
         curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &contentLength);
         size = contentLength;
     } else {
-        error(errInternal, -1, "Failed to get size of '{0:s}'.", url.c_str());
+        error(errInternal, -1, "Failed to get size of '{0:r}'.", &url);
         size = -1;
     }
     curl_easy_reset(curl);

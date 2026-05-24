@@ -30,6 +30,7 @@
 // Copyright (C) 2022 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -207,12 +208,12 @@ public:
     void beginTextObject(GfxState *state) override;
     void endTextObject(GfxState *state) override;
 
-    void beginMarkedContent(const char *name, Dict *properties) override;
+    void beginMarkedContent(const std::string &name, Dict *properties) override;
     void endMarkedContent(GfxState *state) override;
 
     //----- image drawing
     void drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg) override;
-    void setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> &baseMatrix) override;
+    bool setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> &baseMatrix) override;
     void unsetSoftMaskFromImageMask(GfxState *state, std::array<double, 6> &baseMatrix) override;
     void drawImageMaskRegular(GfxState *state, Stream *str, int width, int height, bool invert, bool interpolate);
 
@@ -491,7 +492,7 @@ public:
     void drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,
                              bool maskInterpolate) override;
     void drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate) override;
-    void setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> &baseMatrix) override;
+    bool setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> &baseMatrix) override;
     void unsetSoftMaskFromImageMask(GfxState * /*state*/, std::array<double, 6> & /*baseMatrix*/) override { }
 
     //----- transparency groups and soft masks

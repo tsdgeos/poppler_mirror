@@ -16,6 +16,7 @@
 // Copyright (C) 2019, 2021, 2022, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2020 Peter Wang <novalazy@gmail.com>
 // Copyright (C) 2026 Taufeeque Sifat <entity069@protonmail.com>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -37,60 +38,6 @@
 
 // number of components in each color mode
 int splashColorModeNComps[] = { 1, 1, 3, 3, 4, 4, 4 + SPOT_NCOMPS };
-
-SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScreenParams *screenParams)
-{
-    SplashColor color;
-    int i;
-
-    matrix[0] = 1;
-    matrix[1] = 0;
-    matrix[2] = 0;
-    matrix[3] = 1;
-    matrix[4] = 0;
-    matrix[5] = 0;
-    memset(&color, 0, sizeof(SplashColor));
-    strokePattern = new SplashSolidColor(color);
-    fillPattern = new SplashSolidColor(color);
-    screen = new SplashScreen(screenParams);
-    blendFunc = nullptr;
-    strokeAlpha = 1;
-    fillAlpha = 1;
-    multiplyPatternAlpha = false;
-    patternStrokeAlpha = 1;
-    patternFillAlpha = 1;
-    lineWidth = 1;
-    lineCap = SplashLineCap::Butt;
-    lineJoin = SplashLineJoin::Miter;
-    miterLimit = 10;
-    flatness = 1;
-    lineDashPhase = 0;
-    strokeAdjust = false;
-    clip = std::make_unique<SplashClip>(0, 0, width - 0.001, height - 0.001, vectorAntialias);
-    softMask = nullptr;
-    deleteSoftMask = false;
-    inNonIsolatedGroup = false;
-    inKnockoutGroup = false;
-    fillOverprint = false;
-    strokeOverprint = false;
-    overprintMode = 0;
-    for (i = 0; i < 256; ++i) {
-        rgbTransferR[i] = static_cast<unsigned char>(i);
-        rgbTransferG[i] = static_cast<unsigned char>(i);
-        rgbTransferB[i] = static_cast<unsigned char>(i);
-        grayTransfer[i] = static_cast<unsigned char>(i);
-        cmykTransferC[i] = static_cast<unsigned char>(i);
-        cmykTransferM[i] = static_cast<unsigned char>(i);
-        cmykTransferY[i] = static_cast<unsigned char>(i);
-        cmykTransferK[i] = static_cast<unsigned char>(i);
-        for (auto &cp : deviceNTransfer) {
-            cp[i] = static_cast<unsigned char>(i);
-        }
-    }
-    overprintMask = 0xffffffff;
-    overprintAdditive = false;
-    next = nullptr;
-}
 
 SplashState::SplashState(int width, int height, bool vectorAntialias, const SplashScreen &screenA)
 {

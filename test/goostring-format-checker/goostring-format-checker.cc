@@ -8,6 +8,7 @@
  * Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2021, 2025 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
  */
 
 #include <cctype>
@@ -322,9 +323,8 @@ int GooStringFormatCheckerVisitor::verifyPlaceholder(const CallExpr *callExpr, c
             diag->Report(argExpr->getExprLoc(), diag_wrongArgExprType) << "GooString *" << placeholderText << qualType.getAsString();
         }
     } else if (format == "r") {
-        const CXXRecordDecl *pointeeType = valueType->isPointerType() ? valueType->getPointeeType()->getAsCXXRecordDecl() : 0;
-        if (pointeeType == 0 || (pointeeType->getQualifiedNameAsString() != "std::string" && qualType.getAsString() != "const std::string *")) {
-            diag->Report(argExpr->getExprLoc(), diag_wrongArgExprType) << "std::string *" << placeholderText << qualType.getAsString();
+        if (!valueType->isPointerType() || valueType->getPointeeType().withConst().getAsString() != "const std::string") {
+            diag->Report(argExpr->getExprLoc(), diag_wrongArgExprType) << "(const) std::string *" << placeholderText << qualType.getAsString();
         }
     } else {
         diag->Report(placeholderLocation, diag_badType) << placeholderText;

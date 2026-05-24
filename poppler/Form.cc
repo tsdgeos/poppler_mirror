@@ -40,7 +40,8 @@
 // Copyright 2024 Vincent Lefevre <vincent@vinc17.net>
 // Copyright 2025, 2026 Juraj Šarinay <juraj@sarinay.com>
 // Copyright 2025 Blair Bonnett <blair.bonnett@gmail.com>
-// Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
+// Copyright 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
+// Copyright 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 //========================================================================
 
@@ -235,9 +236,10 @@ FormWidgetButton::FormWidgetButton(PDFDoc *docA, Object *dictObj, unsigned num, 
     if (obj1.isDict()) {
         Object obj2 = obj1.dictLookup("N");
         if (obj2.isDict()) {
-            for (int i = 0; i < obj2.dictGetLength(); i++) {
-                const char *key = obj2.dictGetKey(i);
-                if (strcmp(key, "Off") != 0) {
+            Dict *dictN = obj2.getDict();
+            for (int i = 0; i < dictN->getLength(); i++) {
+                const std::string &key = dictN->getKey(i);
+                if (key != "Off") {
                     onStr = std::make_unique<GooString>(key);
                     break;
                 }
@@ -444,7 +446,7 @@ FormWidgetChoice::~FormWidgetChoice() = default;
 
 bool FormWidgetChoice::_checkRange(int i) const
 {
-    if (i < 0 || i >= parent()->getNumChoices()) {
+    if (i < 0 || static_cast<size_t>(i) >= getChoices().size()) {
         error(errInternal, -1, "FormWidgetChoice::_checkRange i out of range : {0:d}", i);
         return false;
     }
@@ -511,9 +513,9 @@ void FormWidgetChoice::setAppearanceChoiceContent(std::unique_ptr<GooString> new
     parent()->setAppearanceChoiceContent(std::move(new_content));
 }
 
-int FormWidgetChoice::getNumChoices() const
+const std::vector<FormFieldChoiceOption> &FormWidgetChoice::getChoices() const
 {
-    return parent()->getNumChoices();
+    return parent()->getChoices();
 }
 
 const GooString *FormWidgetChoice::getChoice(int i) const
@@ -645,7 +647,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
 
     // Incremental save to avoid breaking any existing signatures
     if (doc->saveAs(saveFilename, writeForceIncremental) != errNone) {
-        error(errIO, -1, "signDocument: error saving to file \"{0:s}\"", saveFilename.c_str());
+        error(errIO, -1, "signDocument: error saving to file \"{0:r}\"", &saveFilename);
         return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::WriteFailed, .message = ERROR_IN_CODE_LOCATION };
     }
 
@@ -729,8 +731,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
                                                                                                std::unique_ptr<AnnotColor> &&backgroundColor)
 {
     // Set the appearance
-    GooString *aux = getField()->getDefaultAppearance();
-    std::string originalDefaultAppearance = aux ? aux->toStr() : std::string();
+    const std::string originalDefaultAppearance = getField()->getDefaultAppearance();
 
     Form *form = doc->getCatalog()->getCreateForm();
 
@@ -758,15 +759,15 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
         std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(pdfFontName);
 
         if (fontSize == 0) {
-            fontSize = Annot::calculateFontSize(form, font.get(), &signatureText, wMax / 2.0, hMax);
+            fontSize = Annot::calculateFontSize(form, *font, signatureText.toStr(), wMax / 2.0, hMax);
         }
         if (leftFontSize == 0) {
-            leftFontSize = Annot::calculateFontSize(form, font.get(), &signatureTextLeft, wMax / 2.0, hMax);
+            leftFontSize = Annot::calculateFontSize(form, *font, signatureTextLeft.toStr(), wMax / 2.0, hMax);
         }
         const DefaultAppearance da { pdfFontName, fontSize, std::move(fontColor) };
         getField()->setDefaultAppearance(da.toAppearanceString());
-        form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
-        form->ensureFontsForAllCharacters(&signatureTextLeft, pdfFontName);
+        form->ensureFontsForAllCharacters(signatureText.toStr(), pdfFontName);
+        form->ensureFontsForAllCharacters(signatureTextLeft.toStr(), pdfFontName);
     }
     auto appearCharacs = std::make_unique<AnnotAppearanceCharacs>(nullptr);
     appearCharacs->setBorderColor(std::move(borderColor));
@@ -928,19 +929,19 @@ bool FormWidgetSignature::updateSignature(FILE *f, Goffset sigStart, Goffset sig
 
 bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooString &name, int placeholderLength, const GooString *reason, const GooString *location, CryptoSign::SignatureType signatureType)
 {
-    vObj.dictAdd("Type", Object(objName, "Sig"));
-    vObj.dictAdd("Filter", Object(objName, "Adobe.PPKLite"));
-    vObj.dictAdd("SubFilter", Object(objName, toStdString(signatureType).c_str()));
-    vObj.dictAdd("Name", Object(name.copy()));
-    vObj.dictAdd("M", Object(timeToDateString(nullptr)));
+    vObj.dictAdd("Type", Object::name("Sig"));
+    vObj.dictAdd("Filter", Object::name("Adobe.PPKLite"));
+    vObj.dictAdd("SubFilter", Object::name(toStdString(signatureType)));
+    vObj.dictAdd("Name", Object(std::string { name.toStr() }));
+    vObj.dictAdd("M", Object(std::string { timeToDateString(nullptr)->toStr() }));
     if (reason && !reason->empty()) {
-        vObj.dictAdd("Reason", Object(reason->copy()));
+        vObj.dictAdd("Reason", Object(std::string { reason->toStr() }));
     }
     if (location && !location->empty()) {
-        vObj.dictAdd("Location", Object(location->copy()));
+        vObj.dictAdd("Location", Object(std::string { location->toStr() }));
     }
 
-    vObj.dictAdd("Contents", Object(objHexString, std::string(placeholderLength, '\0')));
+    vObj.dictAdd("Contents", Object::hexString(std::string(placeholderLength, '\0')));
     Object bObj(std::make_unique<Array>(xref));
     // reserve space in byte range for maximum number of bytes
     bObj.arrayAdd(Object(0LL));
@@ -1079,7 +1080,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
     // Variable Text
     obj1 = Form::fieldLookup(dict, "DA");
     if (obj1.isString()) {
-        defaultAppearance = obj1.takeString();
+        defaultAppearance = std::move(obj1.takeString()->toNonConstStr());
     }
 
     obj1 = Form::fieldLookup(dict, "Q");
@@ -1111,14 +1112,14 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
 
 void FormField::setDefaultAppearance(const std::string &appearance)
 {
-    defaultAppearance = std::make_unique<GooString>(appearance);
+    defaultAppearance = appearance;
 }
 
 void FormField::setPartialName(const GooString &name)
 {
     partialName = name.copy();
 
-    obj.getDict()->set("T", Object(name.copy()));
+    obj.getDict()->set("T", Object(std::string { name.toStr() }));
     xref->setModifiedObject(&obj, ref);
 }
 
@@ -1567,7 +1568,7 @@ bool FormFieldButton::getState(const char *state) const
 
 void FormFieldButton::updateState(const char *state)
 {
-    appearanceState = Object(objName, state);
+    appearanceState = Object::name(state);
     obj.getDict()->set("V", appearanceState.copy());
     xref->setModifiedObject(&obj, ref);
 }
@@ -1684,14 +1685,14 @@ void FormFieldText::setContent(std::unique_ptr<GooString> new_content)
         }
         Form *form = doc->getCatalog()->getForm();
         if (form) {
-            DefaultAppearance da(defaultAppearance.get());
+            DefaultAppearance da(defaultAppearance);
             const std::string &fontName = da.getFontName();
             if (!fontName.empty()) {
                 // Use the field resource dictionary if it exists
                 Object fieldResourcesDictObj = obj.dictLookup("DR");
                 if (fieldResourcesDictObj.isDict()) {
                     GfxResources fieldResources(doc->getXRef(), fieldResourcesDictObj.getDict(), form->getDefaultResources());
-                    const std::vector<Form::AddFontResult> newFonts = form->ensureFontsForAllCharacters(content.get(), fontName, &fieldResources);
+                    const std::vector<Form::AddFontResult> newFonts = form->ensureFontsForAllCharacters(content->toStr(), fontName, &fieldResources);
                     // If we added new fonts to the Form object default resuources we also need to add them (we only add the ref so this is cheap)
                     // to the field DR dictionary
                     if (!newFonts.empty()) {
@@ -1707,7 +1708,7 @@ void FormFieldText::setContent(std::unique_ptr<GooString> new_content)
                         setDefaultAppearance(da.toAppearanceString());
                     }
                 } else {
-                    form->ensureFontsForAllCharacters(content.get(), fontName);
+                    form->ensureFontsForAllCharacters(content->toStr(), fontName);
                 }
             } else {
                 // This is wrong, there has to be a Tf in DA
@@ -1715,7 +1716,7 @@ void FormFieldText::setContent(std::unique_ptr<GooString> new_content)
         }
     }
 
-    obj.getDict()->set("V", Object(content ? content->copy() : std::make_unique<GooString>("")));
+    obj.getDict()->set("V", Object(content ? std::string { content->toStr() } : std::string()));
     xref->setModifiedObject(&obj, ref);
     updateChildrenAppearance();
 }
@@ -1768,18 +1769,18 @@ void FormFieldText::setTextFontSize(int fontSize)
             error(errSyntaxError, -1, "FormFieldText:: invalid DA object");
             return;
         }
-        defaultAppearance = std::make_unique<GooString>();
+        defaultAppearance.clear();
         for (std::size_t i = 0; i < daToks.size(); ++i) {
             if (i > 0) {
-                defaultAppearance->push_back(' ');
+                defaultAppearance.push_back(' ');
             }
             if (i == idx) {
-                GooString::appendf(defaultAppearance->toNonConstStr(), "{0:d}", fontSize);
+                GooString::appendf(defaultAppearance, "{0:d}", fontSize);
             } else {
-                defaultAppearance->append(daToks[i]);
+                defaultAppearance.append(daToks[i]);
             }
         }
-        obj.dictSet("DA", Object(defaultAppearance->copy()));
+        obj.dictSet("DA", Object(std::string { defaultAppearance }));
         xref->setModifiedObject(&obj, ref);
         updateChildrenAppearance();
     }
@@ -1829,9 +1830,7 @@ std::optional<size_t> FormFieldText::parseDA(std::vector<std::string> *daToks) c
 //------------------------------------------------------------------------
 FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, FormField *parentA, std::set<int> *usedParents) : FormField(docA, std::move(aobj), refA, parentA, usedParents, formChoice)
 {
-    numChoices = 0;
-    choices = nullptr;
-    defaultChoices = nullptr;
+    int numChoices = 0;
     editedChoice = nullptr;
     appearanceSelectedChoice = nullptr;
     topIdx = 0;
@@ -1873,7 +1872,7 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
     obj1 = Form::fieldLookup(dict, "Opt");
     if (obj1.isArray()) {
         numChoices = obj1.arrayGetLength();
-        choices = new ChoiceOpt[numChoices];
+        choices.resize(numChoices);
 
         for (int i = 0; i < numChoices; i++) {
             Object obj2 = obj1.arrayGet(i);
@@ -1935,14 +1934,14 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
     obj1 = Form::fieldLookup(dict, key);
     if (obj1.isString() || obj1.isArray()) {
         if (fillType == fillDefaultValue) {
-            defaultChoices = new bool[numChoices];
-            memset(defaultChoices, 0, sizeof(bool) * numChoices);
+            defaultChoices.resize(choices.size());
         }
 
         if (obj1.isString()) {
             bool optionFound = false;
 
-            for (int i = 0; i < numChoices; i++) {
+            const size_t numChoices = choices.size();
+            for (size_t i = 0; i < numChoices; i++) {
                 if (choices[i].exportVal) {
                     if (choices[i].exportVal->compare(obj1.getString()) == 0) {
                         optionFound = true;
@@ -1968,7 +1967,8 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
                 editedChoice = obj1.takeString();
             }
         } else if (obj1.isArray()) {
-            for (int i = 0; i < numChoices; i++) {
+            const size_t numChoices = choices.size();
+            for (size_t i = 0; i < numChoices; i++) {
                 for (int j = 0; j < obj1.arrayGetLength(); j++) {
                     const Object obj2 = obj1.arrayGet(j);
                     if (!obj2.isString()) {
@@ -2002,11 +2002,7 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
     }
 }
 
-FormFieldChoice::~FormFieldChoice()
-{
-    delete[] choices;
-    delete[] defaultChoices;
-}
+FormFieldChoice::~FormFieldChoice() = default;
 
 void FormFieldChoice::print(int indent)
 {
@@ -2020,7 +2016,7 @@ void FormFieldChoice::updateSelection()
 
     if (edit && editedChoice) {
         // This is an editable combo-box with user-entered text
-        objV = Object(editedChoice->copy());
+        objV = Object(std::string { editedChoice->toStr() });
     } else {
         const int numSelected = getNumSelected();
 
@@ -2031,9 +2027,10 @@ void FormFieldChoice::updateSelection()
 
         if (numSelected == 0) {
             // No options are selected
-            objV = Object(std::make_unique<GooString>(""));
+            objV = Object(std::string());
         } else if (numSelected == 1) {
             // Only one option is selected
+            const int numChoices = choices.size();
             for (int i = 0; i < numChoices; i++) {
                 if (choices[i].selected) {
                     if (multiselect) {
@@ -2041,9 +2038,9 @@ void FormFieldChoice::updateSelection()
                     }
 
                     if (choices[i].exportVal) {
-                        objV = Object(choices[i].exportVal->copy());
+                        objV = Object(std::string { choices[i].exportVal->toStr() });
                     } else if (choices[i].optionName) {
-                        objV = Object(choices[i].optionName->copy());
+                        objV = Object(std::string { choices[i].optionName->toStr() });
                     }
 
                     break; // We've just written the selected option. No need to keep on scanning
@@ -2052,6 +2049,7 @@ void FormFieldChoice::updateSelection()
         } else {
             // More than one option is selected
             objV = Object(std::make_unique<Array>(xref));
+            const int numChoices = choices.size();
             for (int i = 0; i < numChoices; i++) {
                 if (choices[i].selected) {
                     if (multiselect) {
@@ -2059,9 +2057,9 @@ void FormFieldChoice::updateSelection()
                     }
 
                     if (choices[i].exportVal) {
-                        objV.arrayAdd(Object(choices[i].exportVal->copy()));
+                        objV.arrayAdd(Object(std::string { choices[i].exportVal->toStr() }));
                     } else if (choices[i].optionName) {
-                        objV.arrayAdd(Object(choices[i].optionName->copy()));
+                        objV.arrayAdd(Object(std::string { choices[i].optionName->toStr() }));
                     }
                 }
             }
@@ -2076,8 +2074,8 @@ void FormFieldChoice::updateSelection()
 
 void FormFieldChoice::unselectAll()
 {
-    for (int i = 0; i < numChoices; i++) {
-        choices[i].selected = false;
+    for (FormFieldChoiceOption &choice : choices) {
+        choice.selected = false;
     }
 }
 
@@ -2146,11 +2144,11 @@ const GooString *FormFieldChoice::getEditChoice() const
     return editedChoice.get();
 }
 
-int FormFieldChoice::getNumSelected()
+int FormFieldChoice::getNumSelected() const
 {
     int cnt = 0;
-    for (int i = 0; i < numChoices; i++) {
-        if (choices[i].selected) {
+    for (const FormFieldChoiceOption &choice : choices) {
+        if (choice.selected) {
             cnt++;
         }
     }
@@ -2163,9 +2161,9 @@ const GooString *FormFieldChoice::getSelectedChoice() const
         return editedChoice.get();
     }
 
-    for (int i = 0; i < numChoices; i++) {
-        if (choices[i].optionName && choices[i].selected) {
-            return choices[i].optionName.get();
+    for (const FormFieldChoiceOption &choice : choices) {
+        if (choice.optionName && choice.selected) {
+            return choice.optionName.get();
         }
     }
 
@@ -2177,8 +2175,8 @@ void FormFieldChoice::reset(const std::vector<std::string> &excludedFields)
     if (!isAmongExcludedFields(excludedFields)) {
         editedChoice.reset();
 
-        if (defaultChoices) {
-            for (int i = 0; i < numChoices; i++) {
+        if (defaultChoices.size() == choices.size()) {
+            for (size_t i = 0; i < choices.size(); i++) {
                 choices[i].selected = defaultChoices[i];
             }
         } else {
@@ -2306,8 +2304,8 @@ void FormFieldSignature::parseInfo()
 
     // check if subfilter is supported for signature validation, only detached signatures work for now
     Object subfilterName = sig_dict.dictLookup("SubFilter");
-    if (subfilterName.getType() == objName && subfilterName.getName()) {
-        signature_type = CryptoSign::signatureTypeFromString(subfilterName.getName());
+    if (subfilterName.getType() == objName) {
+        signature_type = CryptoSign::signatureTypeFromString(subfilterName.getNameString());
         switch (signature_type) {
         case CryptoSign::SignatureType::adbe_pkcs7_sha1:
         case CryptoSign::SignatureType::adbe_pkcs7_detached:
@@ -2569,7 +2567,7 @@ Form::Form(PDFDoc *docA) : doc(docA)
 
     obj1 = acroForm->dictLookup("DA");
     if (obj1.isString()) {
-        defaultAppearance = obj1.takeString();
+        defaultAppearance = std::move(obj1.takeString()->toNonConstStr());
     }
 
     obj1 = acroForm->dictLookup("Q");
@@ -2708,10 +2706,10 @@ std::string Form::findFontInDefaultResources(const std::string &fontFamily, cons
 
     const Dict *fontDict = fontDictObj.getDict();
     for (int i = 0; i < fontDict->getLength(); ++i) {
-        const char *key = fontDict->getKey(i);
-        if (std::string_view(key).starts_with(kOurDictFontNamePrefix)) {
+        const std::string &key = fontDict->getKey(i);
+        if (key.starts_with(kOurDictFontNamePrefix)) {
             const Object fontObj = fontDict->getVal(i);
-            if (fontObj.isDict() && fontObj.dictIs("Font")) {
+            if (fontObj.isDict("Font")) {
                 const Object fontBaseFontObj = fontObj.dictLookup("BaseFont");
                 if (fontBaseFontObj.isName(fontFamilyAndStyle)) {
                     return key;
@@ -2741,20 +2739,20 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &fontFamil
 Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle, bool fontSubstitutedIn, bool forceName)
 {
     if (!filepath.ends_with(".ttf") && !filepath.ends_with(".ttc") && !filepath.ends_with(".otf")) {
-        error(errIO, -1, "We only support embedding ttf/ttc/otf fonts for now. The font file for {0:s} {1:s} was {2:s}", fontFamily.c_str(), fontStyle.c_str(), filepath.c_str());
+        error(errIO, -1, "We only support embedding ttf/ttc/otf fonts for now. The font file for {0:r} {1:r} was {2:r}", &fontFamily, &fontStyle, &filepath);
         return {};
     }
 
     const FoFiIdentifierType fontFoFiType = FoFiIdentifier::identifyFile(filepath.c_str());
     if (fontFoFiType != fofiIdTrueType && fontFoFiType != fofiIdTrueTypeCollection && fontFoFiType != fofiIdOpenTypeCFF8Bit && fontFoFiType != fofiIdOpenTypeCFFCID) {
-        error(errIO, -1, "We only support embedding ttf/ttc/otf fonts for now. The font file for {0:s} {1:s} was {2:s} of type {3:d}", fontFamily.c_str(), fontStyle.c_str(), filepath.c_str(), fontFoFiType);
+        error(errIO, -1, "We only support embedding ttf/ttc/otf fonts for now. The font file for {0:r} {1:r} was {2:r} of type {3:d}", &fontFamily, &fontStyle, &filepath, fontFoFiType);
         return {};
     }
 
     const std::string fontFamilyAndStyle = fontStyle.empty() ? fontFamily : fontFamily + " " + fontStyle;
 
     if (forceName && defaultResources && defaultResources->lookupFont(fontFamilyAndStyle)) {
-        error(errInternal, -1, "Form::addFontToDefaultResources: Asked to forceName but font name exists {0:s}", fontFamilyAndStyle.c_str());
+        error(errInternal, -1, "Form::addFontToDefaultResources: Asked to forceName but font name exists {0:r}", &fontFamilyAndStyle);
         return {};
     }
 
@@ -2765,25 +2763,25 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
 
     XRef *xref = doc->getXRef();
     Object fontDict(std::make_unique<Dict>(xref));
-    fontDict.dictSet("Type", Object(objName, "Font"));
-    fontDict.dictSet("Subtype", Object(objName, (embedActualFont ? "Type0" : "Type1")));
-    fontDict.dictSet("BaseFont", Object(objName, fontFamilyAndStyle.c_str()));
+    fontDict.dictSet("Type", Object::name("Font"));
+    fontDict.dictSet("Subtype", Object::name((embedActualFont ? "Type0" : "Type1")));
+    fontDict.dictSet("BaseFont", Object::name(fontFamilyAndStyle));
 
     if (embedActualFont) {
-        fontDict.dictSet("Encoding", Object(objName, "Identity-H"));
+        fontDict.dictSet("Encoding", Object::name("Identity-H"));
         std::unique_ptr<Array> descendantFonts = std::make_unique<Array>(xref);
 
         const bool isTrueType = (fontFoFiType == fofiIdTrueType || fontFoFiType == fofiIdTrueTypeCollection);
         std::unique_ptr<Dict> descendantFont = std::make_unique<Dict>(xref);
-        descendantFont->set("Type", Object(objName, "Font"));
-        descendantFont->set("Subtype", Object(objName, isTrueType ? "CIDFontType2" : "CIDFontType0"));
-        descendantFont->set("BaseFont", Object(objName, fontFamilyAndStyle.c_str()));
+        descendantFont->set("Type", Object::name("Font"));
+        descendantFont->set("Subtype", Object::name(isTrueType ? "CIDFontType2" : "CIDFontType0"));
+        descendantFont->set("BaseFont", Object::name(fontFamilyAndStyle));
 
         {
             // We only support fonts with identity cmaps for now
             auto cidSystemInfo = std::make_unique<Dict>(xref);
-            cidSystemInfo->set("Registry", Object(std::make_unique<GooString>("Adobe")));
-            cidSystemInfo->set("Ordering", Object(std::make_unique<GooString>("Identity")));
+            cidSystemInfo->set("Registry", Object(std::string { "Adobe" }));
+            cidSystemInfo->set("Ordering", Object(std::string { "Identity" }));
             cidSystemInfo->set("Supplement", Object(0));
             descendantFont->set("CIDSystemInfo", Object(std::move(cidSystemInfo)));
         }
@@ -2797,20 +2795,20 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
 
         FT_Face face;
         if (ft_new_face_from_file(freetypeLib, filepath.c_str(), faceIndex, &face)) {
-            error(errIO, -1, "ft_new_face_from_file failed for {0:s}", filepath.c_str());
+            error(errIO, -1, "ft_new_face_from_file failed for {0:r}", &filepath);
             return {};
         }
         const std::unique_ptr<FT_Face, void (*)(FT_Face *)> faceDeleter(&face, [](FT_Face *f) { FT_Done_Face(*f); });
 
         if (FT_Set_Char_Size(face, 1000, 1000, 0, 0)) {
-            error(errIO, -1, "FT_Set_Char_Size failed for {0:s}", filepath.c_str());
+            error(errIO, -1, "FT_Set_Char_Size failed for {0:r}", &filepath);
             return {};
         }
 
         {
             std::unique_ptr<Dict> fontDescriptor = std::make_unique<Dict>(xref);
-            fontDescriptor->set("Type", Object(objName, "FontDescriptor"));
-            fontDescriptor->set("FontName", Object(objName, fontFamilyAndStyle.c_str()));
+            fontDescriptor->set("Type", Object::name("FontDescriptor"));
+            fontDescriptor->set("FontName", Object::name(fontFamilyAndStyle));
 
             // a bit arbirary but the Flags field is mandatory...
             const std::string lowerCaseFontFamily = GooString::toLowerCase(fontFamily);
@@ -2834,24 +2832,24 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
             {
                 const std::unique_ptr<GooFile> file(GooFile::open(filepath));
                 if (!file) {
-                    error(errIO, -1, "Failed to open {0:s}", filepath.c_str());
+                    error(errIO, -1, "Failed to open {0:r}", &filepath);
                     return {};
                 }
                 const Goffset fileSize = file->size();
                 if (fileSize < 0) {
-                    error(errIO, -1, "Failed to get file size for {0:s}", filepath.c_str());
+                    error(errIO, -1, "Failed to get file size for {0:r}", &filepath);
                     return {};
                 }
                 // GooFile::read only takes an integer so for now we don't support huge fonts
                 if (fileSize > std::numeric_limits<int>::max()) {
-                    error(errIO, -1, "Font size is too big {0:s}", filepath.c_str());
+                    error(errIO, -1, "Font size is too big {0:r}", &filepath);
                     return {};
                 }
                 std::vector<char> data;
                 data.resize(fileSize);
                 const Goffset bytesRead = file->read(data.data(), static_cast<int>(fileSize), 0);
                 if (bytesRead != fileSize) {
-                    error(errIO, -1, "Failed to read contents of {0:s}", filepath.c_str());
+                    error(errIO, -1, "Failed to read contents of {0:r}", &filepath);
                     return {};
                 }
 
@@ -2860,7 +2858,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                     fontDescriptor->set("FontFile2", Object(fontFile2Ref));
                 } else {
                     auto fontFileStreamDict = std::make_unique<Dict>(xref);
-                    fontFileStreamDict->set("Subtype", Object(objName, "OpenType"));
+                    fontFileStreamDict->set("Subtype", Object::name("OpenType"));
                     const Ref fontFile3Ref = xref->addStreamObject(std::move(fontFileStreamDict), std::move(data), StreamCompression::Compress);
                     fontDescriptor->set("FontFile3", Object(fontFile3Ref));
                 }
@@ -2881,7 +2879,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                 unicodeBMPCMap = fft->findCmap(3, 1);
             }
             if (unicodeBMPCMap < 0) {
-                error(errIO, -1, "Font does not have an unicode BMP cmap {0:s}", filepath.c_str());
+                error(errIO, -1, "Font does not have an unicode BMP cmap {0:r}", &filepath);
                 return {};
             }
 
@@ -2987,7 +2985,7 @@ std::string Form::getFallbackFontForChar(Unicode uChar, const GfxFont &fontToEmu
     return findFontInDefaultResources(res.family, res.style);
 }
 
-std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooString *unicodeText, const std::string &pdfFontNameToEmulate, GfxResources *fieldResources)
+std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const std::string &unicodeText, const std::string &pdfFontNameToEmulate, GfxResources *fieldResources)
 {
     GfxResources *resources = fieldResources ? fieldResources : defaultResources;
     std::shared_ptr<GfxFont> f;
@@ -3007,9 +3005,9 @@ std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooStri
 
     // If the text has some characters that are not available in the font, try adding a font for those
     std::unordered_set<Unicode> seen;
-    for (size_t i = 2; i < unicodeText->size(); i += 2) {
-        Unicode uChar = static_cast<unsigned char>(unicodeText->getChar(i)) << 8;
-        uChar += static_cast<unsigned char>(unicodeText->getChar(i + 1));
+    for (size_t i = 2; i < unicodeText.size(); i += 2) {
+        Unicode uChar = static_cast<unsigned char>(unicodeText[i]) << 8;
+        uChar += static_cast<unsigned char>(unicodeText[i + 1]);
 
         if (uChar < 128 && !std::isprint(static_cast<unsigned char>(uChar))) {
             continue;

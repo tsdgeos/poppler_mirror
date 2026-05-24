@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2010, 2017-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2017-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -89,7 +89,7 @@ public:
     bool lookupInt(std::string_view key, std::optional<std::string_view> alt_key, int *value) const;
 
     // Iterative accessors.
-    const char *getKey(int i) const { return entries[i].first.c_str(); }
+    const std::string &getKey(int i) const { return entries[i].first; }
     Object getVal(int i) const { return entries[i].second.fetch(xref); }
     // Same as above but if the returned object is a fetched Ref returns such Ref in returnRef, otherwise returnRef is Ref::INVALID()
     Object getVal(int i, Ref *returnRef) const;
@@ -150,15 +150,9 @@ inline void Object::dictRemove(std::string_view key)
     std::get<std::shared_ptr<Dict>>(data)->remove(key);
 }
 
-inline bool Object::dictIs(std::string_view dictType) const
-{
-    OBJECT_TYPE_CHECK(objDict);
-    return std::get<std::shared_ptr<Dict>>(data)->is(dictType);
-}
-
 inline bool Object::isDict(std::string_view dictType) const
 {
-    return type == objDict && dictIs(dictType);
+    return type == objDict && std::get<std::shared_ptr<Dict>>(data)->is(dictType);
 }
 
 inline Object Object::dictLookup(std::string_view key, int recursion) const
@@ -173,22 +167,10 @@ inline const Object &Object::dictLookupNF(std::string_view key) const
     return std::get<std::shared_ptr<Dict>>(data)->lookupNF(key);
 }
 
-inline const char *Object::dictGetKey(int i) const
-{
-    OBJECT_TYPE_CHECK(objDict);
-    return std::get<std::shared_ptr<Dict>>(data)->getKey(i);
-}
-
 inline Object Object::dictGetVal(int i) const
 {
     OBJECT_TYPE_CHECK(objDict);
     return std::get<std::shared_ptr<Dict>>(data)->getVal(i);
-}
-
-inline const Object &Object::dictGetValNF(int i) const
-{
-    OBJECT_TYPE_CHECK(objDict);
-    return std::get<std::shared_ptr<Dict>>(data)->getValNF(i);
 }
 
 #endif

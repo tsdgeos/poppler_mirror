@@ -9,6 +9,7 @@
 // Copyright 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 //========================================================================
 
@@ -88,7 +89,7 @@ public:
 
     void drawChar(GfxState *state, double xx, double yy, double dx, double dy, double ox, double oy, CharCode c, int nBytes, const Unicode *u, int uLen) override;
 
-    void beginMarkedContent(const char *name, Dict *properties) override;
+    void beginMarkedContent(const std::string &name, Dict *properties) override;
     void endMarkedContent(GfxState *state) override;
 
     const TextSpanArray &getTextSpans() const;

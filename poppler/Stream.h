@@ -37,6 +37,7 @@
 // Copyright (C) 2024 Fernando Herrera <fherrera@onirica.com>
 // Copyright (C) 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -275,7 +276,7 @@ private:
     virtual bool hasGetChars() { return false; }
     virtual int getChars(int nChars, unsigned char *buffer);
 
-    static std::unique_ptr<Stream> makeFilter(const char *name, std::unique_ptr<Stream> str, Object *params, int recursion = 0, Dict *dict = nullptr);
+    static std::unique_ptr<Stream> makeFilter(const std::string &name, std::unique_ptr<Stream> str, Object *params, int recursion = 0, Dict *dict = nullptr);
 };
 
 //------------------------------------------------------------------------
@@ -1544,22 +1545,10 @@ inline bool Object::streamRewind()
     return std::get<std::shared_ptr<Stream>>(data)->rewind();
 }
 
-inline void Object::streamClose()
-{
-    OBJECT_TYPE_CHECK(objStream);
-    std::get<std::shared_ptr<Stream>>(data)->close();
-}
-
 inline int Object::streamGetChar()
 {
     OBJECT_TYPE_CHECK(objStream);
     return std::get<std::shared_ptr<Stream>>(data)->getChar();
-}
-
-inline int Object::streamGetChars(int nChars, unsigned char *buffer)
-{
-    OBJECT_TYPE_CHECK(objStream);
-    return std::get<std::shared_ptr<Stream>>(data)->doGetChars(nChars, buffer);
 }
 
 inline Dict *Object::streamGetDict() const

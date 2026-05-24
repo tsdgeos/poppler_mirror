@@ -22,6 +22,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -102,9 +103,10 @@ void OutputDev::drawImageMask(GfxState * /*state*/, Object * /*ref*/, Stream *st
     }
 }
 
-void OutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> & /*baseMatrix*/)
+bool OutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> & /*baseMatrix*/)
 {
     drawImageMask(state, ref, str, width, height, invert, false, inlineImg);
+    return true;
 }
 
 void OutputDev::unsetSoftMaskFromImageMask(GfxState * /*state*/, std::array<double, 6> & /*baseMatrix*/) { }
@@ -139,11 +141,11 @@ void OutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, i
 
 void OutputDev::endMarkedContent(GfxState * /*state*/) { }
 
-void OutputDev::beginMarkedContent(const char * /*name*/, Dict * /*properties*/) { }
+void OutputDev::beginMarkedContent(const std::string & /*name*/, Dict * /*properties*/) { }
 
-void OutputDev::markPoint(const char * /*name*/) { }
+void OutputDev::markPoint(const std::string & /*name*/) { }
 
-void OutputDev::markPoint(const char * /*name*/, Dict * /*properties*/) { }
+void OutputDev::markPoint(const std::string & /*name*/, Dict * /*properties*/) { }
 
 void OutputDev::opiBegin(GfxState * /*state*/, const Dict & /*opiDict*/) { }
 

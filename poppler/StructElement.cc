@@ -6,13 +6,14 @@
 //
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
-// Copyright 2014, 2017-2019, 2021, 2023-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright 2014, 2017-2019, 2021, 2023-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Dmytro Morgun <lztoad@gmail.com>
 // Copyright 2018, 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2026 Adam Sampson <ats@offog.org>
+// Copyright 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 //========================================================================
 
@@ -196,16 +197,16 @@ struct AttributeDefaults
 {
     AttributeDefaults() = default; // needed to support old clang
 
-    Object Inline = Object(objName, "Inline");
-    Object LrTb = Object(objName, "LrTb");
-    Object Normal = Object(objName, "Normal");
-    Object Distribute = Object(objName, "Distribute");
-    Object off = Object(objName, "off");
+    Object Inline = Object::name("Inline");
+    Object LrTb = Object::name("LrTb");
+    Object Normal = Object::name("Normal");
+    Object Distribute = Object::name("Distribute");
+    Object off = Object::name("off");
     Object Zero = Object(0.0);
-    Object Auto = Object(objName, "Auto");
-    Object Start = Object(objName, "Start");
-    Object None = Object(objName, "None");
-    Object Before = Object(objName, "Before");
+    Object Auto = Object::name("Auto");
+    Object Start = Object::name("Start");
+    Object None = Object::name("None");
+    Object Before = Object::name("Before");
     Object Nat1 = Object(1);
 };
 
@@ -371,7 +372,7 @@ enum ElementType
 static const struct TypeMapEntry
 {
     StructElement::Type type;
-    const char *name;
+    const std::string name;
     ElementType elementType;
     const AttributeMapEntry **attributes;
 } typeMap[] = {
@@ -436,7 +437,6 @@ static inline const AttributeMapEntry *getAttributeMapEntry(const AttributeMapEn
     while (*entryList) {
         const AttributeMapEntry *entry = *entryList;
         while (entry->type != Attribute::Unknown) {
-            assert(entry->name);
             if (type == entry->type) {
                 return entry;
             }
@@ -447,14 +447,14 @@ static inline const AttributeMapEntry *getAttributeMapEntry(const AttributeMapEn
     return nullptr;
 }
 
-static inline const AttributeMapEntry *getAttributeMapEntry(const AttributeMapEntry **entryList, const char *name)
+static inline const AttributeMapEntry *getAttributeMapEntry(const AttributeMapEntry **entryList, const std::string &name)
 {
     assert(entryList);
     while (*entryList) {
         const AttributeMapEntry *entry = *entryList;
         while (entry->type != Attribute::Unknown) {
             assert(entry->name);
-            if (strcmp(name, entry->name) == 0) {
+            if (name == entry->name) {
                 return entry;
             }
             entry++;
@@ -474,10 +474,10 @@ static inline const OwnerMapEntry *getOwnerMapEntry(Attribute::Owner owner)
     return nullptr;
 }
 
-static inline const OwnerMapEntry *getOwnerMapEntry(const char *name)
+static inline const OwnerMapEntry *getOwnerMapEntry(std::string_view name)
 {
     for (const OwnerMapEntry &entry : ownerMap) {
-        if (strcmp(name, entry.name) == 0) {
+        if (name == entry.name) {
             return &entry;
         }
     }
@@ -490,7 +490,7 @@ static const char *ownerToName(Attribute::Owner owner)
     return entry ? entry->name : "UnknownOwner";
 }
 
-static Attribute::Owner nameToOwner(const char *name)
+static Attribute::Owner nameToOwner(std::string_view name)
 {
     const OwnerMapEntry *entry = getOwnerMapEntry(name);
     return entry ? entry->owner : Attribute::UnknownOwner;
@@ -506,10 +506,10 @@ static inline const TypeMapEntry *getTypeMapEntry(StructElement::Type type)
     return nullptr;
 }
 
-static inline const TypeMapEntry *getTypeMapEntry(const char *name)
+static inline const TypeMapEntry *getTypeMapEntry(std::string_view name)
 {
     for (const TypeMapEntry &entry : typeMap) {
-        if (strcmp(name, entry.name) == 0) {
+        if (name == entry.name) {
             return &entry;
         }
     }
@@ -526,10 +526,10 @@ static const char *typeToName(StructElement::Type type)
     }
 
     const TypeMapEntry *entry = getTypeMapEntry(type);
-    return entry ? entry->name : "Unknown";
+    return entry ? entry->name.c_str() : "Unknown";
 }
 
-static StructElement::Type nameToType(const char *name)
+static StructElement::Type nameToType(std::string_view name)
 {
     const TypeMapEntry *entry = getTypeMapEntry(name);
     return entry ? entry->type : StructElement::Unknown;
@@ -615,7 +615,7 @@ bool Attribute::checkType(StructElement *element)
     return true;
 }
 
-Attribute::Type Attribute::getTypeForName(const char *name, StructElement *element)
+Attribute::Type Attribute::getTypeForName(const std::string &name, StructElement *element)
 {
     const AttributeMapEntry **attributes = attributeMapAll;
     if (element) {
@@ -868,23 +868,23 @@ const TextSpanArray &StructElement::getTextSpansInternal(MarkedContentOutputDev 
     treeRoot->getDoc()->displayPages(&mcdev, startPage, endPage, 72.0, 72.0, 0, true, false, false);
     return mcdev.getTextSpans();
 }
-static StructElement::Type roleMapResolve(Dict *roleMap, const char *name)
+static StructElement::Type roleMapResolve(Dict *roleMap, std::string_view name)
 {
     Object resolved = roleMap->lookup(name);
     std::set<std::string> recursion;
     while (true) {
         if (resolved.isName()) {
-            if (!recursion.insert(resolved.getName()).second) {
+            if (!recursion.insert(resolved.getNameString()).second) {
                 // circular reference
                 error(errSyntaxWarning, -1, "RoleMap entries contains circular references");
                 return StructElement::Unknown;
             }
 
-            StructElement::Type type = nameToType(resolved.getName());
+            StructElement::Type type = nameToType(resolved.getNameString());
             if (type != StructElement::Unknown) {
                 return type;
             }
-            resolved = roleMap->lookup(resolved.getName());
+            resolved = roleMap->lookup(resolved.getNameString());
             continue;
         }
 
@@ -924,13 +924,13 @@ void StructElement::parse(Dict *element)
 
     // Type name may not be standard, resolve through RoleMap first.
     if (treeRoot->getRoleMap()) {
-        type = roleMapResolve(treeRoot->getRoleMap(), obj.getName());
+        type = roleMapResolve(treeRoot->getRoleMap(), obj.getNameString());
     }
 
     // Resolving through RoleMap may leave type as Unknown, e.g. for types
     // which are not present in it, yet they are standard element types.
     if (type == Unknown) {
-        type = nameToType(obj.getName());
+        type = nameToType(obj.getNameString());
     }
 
     // At this point either the type name must have been resolved.
@@ -1016,7 +1016,7 @@ void StructElement::parse(Dict *element)
     if (treeRoot->getClassMap()) {
         Object classes = element->lookup("C");
         if (classes.isName()) {
-            Object attr = treeRoot->getClassMap()->lookup(classes.getName());
+            Object attr = treeRoot->getClassMap()->lookup(classes.getNameString());
             if (attr.isDict()) {
                 parseAttributes(attr.getDict(), true);
             } else if (attr.isArray()) {
@@ -1159,13 +1159,14 @@ void StructElement::parseAttributes(Dict *attributes, bool keepExisting)
     } else if (owner.isName()) {
         // In this case /P contains standard attributes.
         // Check first if the owner is a valid standard one.
-        Attribute::Owner ownerValue = nameToOwner(owner.getName());
+        const std::string &ownerName = owner.getNameString();
+        Attribute::Owner ownerValue = nameToOwner(ownerName);
         if (ownerValue != Attribute::UnknownOwner) {
             // Iterate over the entries of the "attributes" dictionary.
             // The /O entry (owner) is skipped.
             for (int i = 0; i < attributes->getLength(); i++) {
-                const char *key = attributes->getKey(i);
-                if (strcmp(key, "O") != 0) {
+                const std::string &key = attributes->getKey(i);
+                if (key != "O") {
                     Attribute::Type t = Attribute::getTypeForName(key, this);
 
                     // Check if the attribute is already defined.
@@ -1198,12 +1199,12 @@ void StructElement::parseAttributes(Dict *attributes, bool keepExisting)
                             delete attribute;
                         }
                     } else {
-                        error(errSyntaxWarning, -1, "Wrong Attribute '{0:s}' in element {1:s}", key, getTypeName());
+                        error(errSyntaxWarning, -1, "Wrong Attribute '{0:r}' in element {1:s}", &key, getTypeName());
                     }
                 }
             }
         } else {
-            error(errSyntaxWarning, -1, "O object is invalid value ({0:s})", owner.getName());
+            error(errSyntaxWarning, -1, "O object is invalid value ({0:r})", &ownerName);
         }
     } else if (!owner.isNull()) {
         error(errSyntaxWarning, -1, "O is wrong type ({0:s})", owner.getTypeName());

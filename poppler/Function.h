@@ -19,6 +19,7 @@
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -255,7 +256,7 @@ public:
 
 private:
     bool parseCode(Stream *str, int *codePtr, int &recursionCounter);
-    std::unique_ptr<GooString> getToken(Stream *str);
+    std::string getToken(Stream *str);
     void resizeCode(int newSize);
     void exec(PSStack *stack, int codePtr) const;
 

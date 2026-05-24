@@ -8,6 +8,7 @@
 // Copyright (C) 2023 Jordan Abrahams-Whitehead <ajordanr@google.com>
 // Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2026 Aditya Tiwari <suntiwari3495@gmail.com>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // This file is licensed under the GPLv2 or later
 //
@@ -62,9 +63,9 @@ protected:
     static std::unique_ptr<Dict> createImageDict(XRef *xref, const char *colorSpace, const int width, const int height, const int bitsPerComponent)
     {
         auto imageDict = std::make_unique<Dict>(xref);
-        imageDict->add("Type", Object(objName, "XObject"));
-        imageDict->add("Subtype", Object(objName, "Image"));
-        imageDict->add("ColorSpace", Object(objName, colorSpace));
+        imageDict->add("Type", Object::name("XObject"));
+        imageDict->add("Subtype", Object::name("Image"));
+        imageDict->add("ColorSpace", Object::name(colorSpace));
         imageDict->add("Width", Object(width));
         imageDict->add("Height", Object(height));
         imageDict->add("BitsPerComponent", Object(bitsPerComponent));
@@ -365,7 +366,7 @@ Ref JpegEmbedder::embedImage(XRef *xref)
         return Ref::INVALID();
     }
     std::unique_ptr<Dict> baseImageDict = createImageDict(xref, DEVICE_RGB, m_width, m_height, 8);
-    baseImageDict->add("Filter", Object(objName, "DCTDecode"));
+    baseImageDict->add("Filter", Object::name("DCTDecode"));
     Ref baseImageRef = xref->addStreamObject(std::move(baseImageDict), std::move(m_fileContent), StreamCompression::None);
     return baseImageRef;
 }
@@ -424,7 +425,7 @@ Ref embed(XRef *xref, const std::string &imagePath)
 {
     std::unique_ptr<GooFile> imageFile(GooFile::open(imagePath));
     if (!imageFile) {
-        error(errIO, -1, "Couldn't open {0:s}", imagePath.c_str());
+        error(errIO, -1, "Couldn't open {0:r}", &imagePath);
         return Ref::INVALID();
     }
     return embed(xref, *imageFile);

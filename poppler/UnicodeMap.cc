@@ -21,6 +21,7 @@
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -53,7 +54,7 @@ std::unique_ptr<UnicodeMap> UnicodeMap::parse(const std::string &encodingNameA)
     char *tokptr;
 
     if (!(f = globalParams->getUnicodeMapFile(encodingNameA))) {
-        error(errSyntaxError, -1, "Couldn't find unicodeMap file for the '{0:s}' encoding", encodingNameA.c_str());
+        error(errSyntaxError, -1, "Couldn't find unicodeMap file for the '{0:r}' encoding", &encodingNameA);
         return {};
     }
 
@@ -88,10 +89,10 @@ std::unique_ptr<UnicodeMap> UnicodeMap::parse(const std::string &encodingNameA)
                 }
                 eMap.push_back(std::move(ext));
             } else {
-                error(errSyntaxError, -1, "Bad line ({0:d}) in unicodeMap file for the '{1:s}' encoding", line, encodingNameA.c_str());
+                error(errSyntaxError, -1, "Bad line ({0:d}) in unicodeMap file for the '{1:r}' encoding", line, &encodingNameA);
             }
         } else {
-            error(errSyntaxError, -1, "Bad line ({0:d}) in unicodeMap file for the '{1:s}' encoding", line, encodingNameA.c_str());
+            error(errSyntaxError, -1, "Bad line ({0:d}) in unicodeMap file for the '{1:r}' encoding", line, &encodingNameA);
         }
         ++line;
     }

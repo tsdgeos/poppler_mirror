@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2005-2013, 2016-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006-2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2006 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
@@ -510,12 +510,13 @@ void Page::removeAnnot(const std::shared_ptr<Annot> &annot)
     Ref annotRef = annot->getRef();
 
     pageLocker();
-    Object annArray = getAnnotsObject();
-    if (annArray.isArray()) {
+    Object annArrayObj = getAnnotsObject();
+    if (annArrayObj.isArray()) {
+        Array *annArray = annArrayObj.getArray();
         int idx = -1;
         // Get annotation position
-        for (int i = 0; idx == -1 && i < annArray.arrayGetLength(); ++i) {
-            const Object &tmp = annArray.arrayGetNF(i);
+        for (int i = 0; idx == -1 && i < annArray->getLength(); ++i) {
+            const Object &tmp = annArray->getNF(i);
             if (tmp.isRef()) {
                 const Ref currAnnot = tmp.getRef();
                 if (currAnnot == annotRef) {
@@ -529,16 +530,16 @@ void Page::removeAnnot(const std::shared_ptr<Annot> &annot)
             return;
         }
         annots->removeAnnot(annot); // Gracefully fails on popup windows
-        annArray.arrayRemove(idx);
+        annArray->remove(idx);
 
         if (annotsObj.isRef()) {
-            xref->setModifiedObject(&annArray, annotsObj.getRef());
+            xref->setModifiedObject(&annArrayObj, annotsObj.getRef());
         } else {
             xref->setModifiedObject(&pageObj, pageRef);
         }
     }
     annot->removeReferencedObjects(); // Note: Might recurse in removeAnnot again
-    if (annArray.isArray()) {
+    if (annArrayObj.isArray()) {
         xref->removeIndirectObject(annotRef);
     }
     annot->setPage(0, false);

@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2012, 2015-2025 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2012, 2015-2026 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
@@ -497,10 +497,10 @@ QStringList FormFieldChoice::choices() const
 {
     auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
     QStringList ret;
-    int num = fwc->getNumChoices();
-    ret.reserve(num);
-    for (int i = 0; i < num; ++i) {
-        ret.append(UnicodeParsedString(fwc->getChoice(i)));
+    const std::vector<FormFieldChoiceOption> &choices = fwc->getChoices();
+    ret.reserve(choices.size());
+    for (const FormFieldChoiceOption &choice : choices) {
+        ret.append(UnicodeParsedString(choice.optionName.get()));
     }
     return ret;
 }
@@ -509,11 +509,11 @@ QVector<QPair<QString, QString>> FormFieldChoice::choicesWithExportValues() cons
 {
     auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
     QVector<QPair<QString, QString>> ret;
-    const int num = fwc->getNumChoices();
-    ret.reserve(num);
-    for (int i = 0; i < num; ++i) {
-        const QString display = UnicodeParsedString(fwc->getChoice(i));
-        const GooString *exportValueG = fwc->getExportVal(i);
+    const std::vector<FormFieldChoiceOption> &choices = fwc->getChoices();
+    ret.reserve(choices.size());
+    for (const FormFieldChoiceOption &choice : choices) {
+        const QString display = UnicodeParsedString(choice.optionName.get());
+        const GooString *exportValueG = choice.exportVal.get();
         const QString exportValue = exportValueG ? UnicodeParsedString(exportValueG) : display;
         ret.append({ display, exportValue });
     }
@@ -535,7 +535,7 @@ bool FormFieldChoice::multiSelect() const
 QList<int> FormFieldChoice::currentChoices() const
 {
     auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
-    int num = fwc->getNumChoices();
+    const int num = fwc->getChoices().size();
     QList<int> choices;
     for (int i = 0; i < num; ++i) {
         if (fwc->isSelected(i)) {

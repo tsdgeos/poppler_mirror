@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2008, 2010, 2012, 2017, 2019, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2012, 2017, 2019, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Jakub Alba <jakubalba@gmail.com>
@@ -117,15 +117,17 @@ void Object::print(FILE *f) const
         }
         fprintf(f, "]");
         break;
-    case objDict:
+    case objDict: {
+        Dict *dict = getDict();
         fprintf(f, "<<");
-        for (int i = 0; i < dictGetLength(); ++i) {
-            fprintf(f, " /%s ", dictGetKey(i));
-            const Object &obj = dictGetValNF(i);
+        for (int i = 0; i < dict->getLength(); ++i) {
+            fprintf(f, " /%s ", dict->getKey(i).c_str());
+            const Object &obj = dict->getValNF(i);
             obj.print(f);
         }
         fprintf(f, " >>");
         break;
+    }
     case objStream:
         fprintf(f, "<stream>");
         break;

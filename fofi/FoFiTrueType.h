@@ -113,7 +113,7 @@ public:
     // If <encoding> is NULL, the encoding is unknown or undefined.  The
     // <codeToGID> array specifies the mapping from char codes to GIDs.
     // (Not useful for OpenType CFF fonts.)
-    void convertToType42(const char *psName, const std::array<const char *, 256> *encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const;
+    void convertToType42(const std::string &psName, const std::array<const char *, 256> *encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const;
 
     // Convert to a Type 1 font, suitable for embedding in a PostScript
     // file.  This is only useful with 8-bit fonts.  <psName> is
@@ -126,7 +126,7 @@ public:
     // name (so we don't need to depend on the 'name' table in the
     // font).  The <cidMap> array maps CIDs to GIDs; it has <nCIDs>
     // entries.  (Not useful for OpenType CFF fonts.)
-    void convertToCIDType2(const char *psName, const std::vector<int> &cidMap, bool needVerticalMetrics, FoFiOutputFunc outputFunc, void *outputStream) const;
+    void convertToCIDType2(const std::string &psName, const std::vector<int> &cidMap, bool needVerticalMetrics, FoFiOutputFunc outputFunc, void *outputStream) const;
 
     // Convert to a Type 0 CIDFont, suitable for embedding in a
     // PostScript file.  <psName> will be used as the PostScript font

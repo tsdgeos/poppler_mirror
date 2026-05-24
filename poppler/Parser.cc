@@ -25,6 +25,7 @@
 // Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -70,16 +71,17 @@ Object Parser::getObj(int recursion)
     return getObj(false, nullptr, cryptRC4, 0, 0, 0, recursion);
 }
 
-static std::unique_ptr<GooString> decryptedString(const std::string &s, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
+static std::string decryptedString(const std::string &s, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
 {
     DecryptStream decrypt(std::make_unique<MemStream>(s.c_str(), 0, s.size(), Object::null()), fileKey, encAlgorithm, keyLength, { .num = objNum, .gen = objGen });
     if (!decrypt.rewind()) {
         return {};
     }
-    std::unique_ptr<GooString> res = std::make_unique<GooString>();
+    std::string res;
+    res.reserve(s.size());
     int c;
     while ((c = decrypt.getChar()) != EOF) {
-        res->push_back(static_cast<char>(c));
+        res.push_back(static_cast<char>(c));
     }
     return res;
 }
@@ -149,7 +151,7 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
                 if (unlikely(recursion + 1 >= recursionLimit)) {
                     break;
                 }
-                obj.dictAdd(key.getName(), std::move(obj2));
+                obj.dictAdd(key.getNameString(), std::move(obj2));
             }
         }
         if (buf1.isEOF()) {
@@ -164,7 +166,7 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
             if (!isSigDict) {
                 const Object &contentsObj = dict->lookupNF("Contents");
                 if (contentsObj.isString()) {
-                    std::unique_ptr<GooString> s = decryptedString(contentsObj.getString(), fileKey, encAlgorithm, keyLength, objNum, objGen);
+                    std::string s = decryptedString(contentsObj.getString(), fileKey, encAlgorithm, keyLength, objNum, objGen);
                     dict->set("Contents", Object(std::move(s)));
                 }
             }
@@ -203,7 +205,7 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
 
         // string
     } else if (decryptString && buf1.isString() && fileKey) {
-        std::unique_ptr<GooString> s2 = decryptedString(buf1.getString(), fileKey, encAlgorithm, keyLength, objNum, objGen);
+        std::string s2 = decryptedString(buf1.getString(), fileKey, encAlgorithm, keyLength, objNum, objGen);
         obj = Object(std::move(s2));
         shift();
 
