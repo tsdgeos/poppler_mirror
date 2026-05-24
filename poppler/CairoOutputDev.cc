@@ -561,7 +561,7 @@ AnnotLink *CairoOutputDev::findLinkObject(const StructElement *elem)
     if (elem->isObjectRef()) {
         Ref ref = elem->getObjectRef();
         for (const std::shared_ptr<Annot> &annot : annotations) {
-            if (annot->getType() == Annot::typeLink && annot->match(&ref)) {
+            if (annot->getType() == Annot::typeLink && annot->match(ref)) {
                 return static_cast<AnnotLink *>(annot.get());
             }
         }

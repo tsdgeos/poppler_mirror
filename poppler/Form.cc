@@ -759,10 +759,10 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
         std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(pdfFontName);
 
         if (fontSize == 0) {
-            fontSize = Annot::calculateFontSize(form, font.get(), signatureText.toStr(), wMax / 2.0, hMax);
+            fontSize = Annot::calculateFontSize(form, *font, signatureText.toStr(), wMax / 2.0, hMax);
         }
         if (leftFontSize == 0) {
-            leftFontSize = Annot::calculateFontSize(form, font.get(), signatureTextLeft.toStr(), wMax / 2.0, hMax);
+            leftFontSize = Annot::calculateFontSize(form, *font, signatureTextLeft.toStr(), wMax / 2.0, hMax);
         }
         const DefaultAppearance da { pdfFontName, fontSize, std::move(fontColor) };
         getField()->setDefaultAppearance(da.toAppearanceString());

@@ -1004,15 +1004,15 @@ int AnnotAppearance::getNumStates()
 }
 
 // Test if stateObj (a Ref or a Dict) points to the specified stream
-bool AnnotAppearance::referencesStream(const Object *stateObj, Ref refToStream)
+bool AnnotAppearance::referencesStream(const Object &stateObj, Ref refToStream)
 {
-    if (stateObj->isRef()) {
-        const Ref r = stateObj->getRef();
+    if (stateObj.isRef()) {
+        const Ref r = stateObj.getRef();
         if (r == refToStream) {
             return true;
         }
-    } else if (stateObj->isDict()) { // Test each value
-        const Dict *stateDict = stateObj->getDict();
+    } else if (stateObj.isDict()) { // Test each value
+        const Dict *stateDict = stateObj.getDict();
         const int size = stateDict->getLength();
         for (int i = 0; i < size; ++i) {
             const Object &obj1 = stateDict->getValNF(i);
@@ -1034,19 +1034,19 @@ bool AnnotAppearance::referencesStream(Ref refToStream)
 
     // Scan each state's ref/subdictionary
     const Object &objN = appearDict.dictLookupNF("N");
-    found = referencesStream(&objN, refToStream);
+    found = referencesStream(objN, refToStream);
     if (found) {
         return true;
     }
 
     const Object &objR = appearDict.dictLookupNF("R");
-    found = referencesStream(&objR, refToStream);
+    found = referencesStream(objR, refToStream);
     if (found) {
         return true;
     }
 
     const Object &objD = appearDict.dictLookupNF("D");
-    found = referencesStream(&objD, refToStream);
+    found = referencesStream(objD, refToStream);
     return found;
 }
 
@@ -1075,12 +1075,12 @@ void AnnotAppearance::removeStream(Ref refToStream)
 }
 
 // Removes stream if obj is a Ref, or removes pointed streams if obj is a Dict
-void AnnotAppearance::removeStateStreams(const Object *state)
+void AnnotAppearance::removeStateStreams(const Object &state)
 {
-    if (state->isRef()) {
-        removeStream(state->getRef());
-    } else if (state->isDict()) {
-        const Dict *stateDict = state->getDict();
+    if (state.isRef()) {
+        removeStream(state.getRef());
+    } else if (state.isDict()) {
+        const Dict *stateDict = state.getDict();
         const int size = stateDict->getLength();
         for (int i = 0; i < size; ++i) {
             const Object &obj2 = stateDict->getValNF(i);
@@ -1094,11 +1094,11 @@ void AnnotAppearance::removeStateStreams(const Object *state)
 void AnnotAppearance::removeAllStreams()
 {
     const Object &objN = appearDict.dictLookupNF("N");
-    removeStateStreams(&objN);
+    removeStateStreams(objN);
     const Object &objR = appearDict.dictLookupNF("R");
-    removeStateStreams(&objR);
+    removeStateStreams(objR);
     const Object &objD = appearDict.dictLookupNF("D");
-    removeStateStreams(&objD);
+    removeStateStreams(objD);
 }
 
 //------------------------------------------------------------------------
@@ -1286,11 +1286,11 @@ Annot::Annot(PDFDoc *docA, Object &&dictObject)
     initialize(docA, annotObj.getDict());
 }
 
-Annot::Annot(PDFDoc *docA, Object &&dictObject, const Object *obj)
+Annot::Annot(PDFDoc *docA, Object &&dictObject, const Object &obj)
 {
-    if (obj->isRef()) {
+    if (obj.isRef()) {
         hasRef = true;
-        ref = obj->getRef();
+        ref = obj.getRef();
     } else {
         hasRef = false;
     }
@@ -2099,7 +2099,7 @@ AnnotPopup::AnnotPopup(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
     initialize(annotObj.getDict());
 }
 
-AnnotPopup::AnnotPopup(PDFDoc *docA, Object &&dictObject, const Object *obj) : Annot(docA, std::move(dictObject), obj)
+AnnotPopup::AnnotPopup(PDFDoc *docA, Object &&dictObject, const Object &obj) : Annot(docA, std::move(dictObject), obj)
 {
     type = typePopup;
     initialize(annotObj.getDict());
@@ -2139,7 +2139,7 @@ AnnotMarkup::AnnotMarkup(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
     initialize(docA, annotObj.getDict());
 }
 
-AnnotMarkup::AnnotMarkup(PDFDoc *docA, Object &&dictObject, const Object *obj) : Annot(docA, std::move(dictObject), obj)
+AnnotMarkup::AnnotMarkup(PDFDoc *docA, Object &&dictObject, const Object &obj) : Annot(docA, std::move(dictObject), obj)
 {
     initialize(docA, annotObj.getDict());
 }
@@ -2158,7 +2158,7 @@ void AnnotMarkup::initialize(PDFDoc *docA, Dict *dict)
     Object popupObj = dict->lookup("Popup");
     const Object &obj2 = dict->lookupNF("Popup");
     if (popupObj.isDict() && obj2.isRef()) {
-        popup = std::make_unique<AnnotPopup>(docA, std::move(popupObj), &obj2);
+        popup = std::make_unique<AnnotPopup>(docA, std::move(popupObj), obj2);
     }
 
     opacity = dict->lookup("CA").getNumWithDefaultValue(1.0);
@@ -2295,7 +2295,7 @@ AnnotText::AnnotText(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rect
     initialize(annotObj.getDict());
 }
 
-AnnotText::AnnotText(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
+AnnotText::AnnotText(PDFDoc *docA, Object &&dictObject, const Object &obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
 
     type = typeText;
@@ -2795,7 +2795,7 @@ AnnotLink::AnnotLink(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
     initialize(annotObj.getDict());
 }
 
-AnnotLink::AnnotLink(PDFDoc *docA, Object &&dictObject, const Object *obj) : Annot(docA, std::move(dictObject), obj)
+AnnotLink::AnnotLink(PDFDoc *docA, Object &&dictObject, const Object &obj) : Annot(docA, std::move(dictObject), obj)
 {
 
     type = typeLink;
@@ -2887,7 +2887,7 @@ AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(do
     initialize(annotObj.getDict());
 }
 
-AnnotFreeText::AnnotFreeText(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
+AnnotFreeText::AnnotFreeText(PDFDoc *docA, Object &&dictObject, const Object &obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     type = typeFreeText;
     initialize(annotObj.getDict());
@@ -3088,7 +3088,7 @@ class HorizontalTextLayouter
 public:
     HorizontalTextLayouter() = default;
 
-    HorizontalTextLayouter(const std::string &text, const Form *form, const GfxFont *font, std::optional<double> availableWidth, const bool noReencode)
+    HorizontalTextLayouter(const std::string &text, const Form *form, const GfxFont &font, std::optional<double> availableWidth, const bool noReencode)
     {
         size_t i = 0;
         double blockWidth;
@@ -3097,7 +3097,7 @@ public:
         const bool isUnicode = hasUnicodeByteOrderMark(text);
         int charCount;
 
-        Annot::layoutText(text, &outputText, &i, *font, &blockWidth, availableWidth ? *availableWidth : 0.0, &charCount, noReencode, !noReencode ? &newFontNeeded : nullptr);
+        Annot::layoutText(text, &outputText, &i, font, &blockWidth, availableWidth ? *availableWidth : 0.0, &charCount, noReencode, !noReencode ? &newFontNeeded : nullptr);
         data.emplace_back(outputText.toStr(), std::string(), blockWidth, charCount);
         if (availableWidth) {
             *availableWidth -= blockWidth;
@@ -3117,7 +3117,7 @@ public:
                 } else {
                     uChar = pdfDocEncoding[text[i] & 0xff];
                 }
-                const std::string auxFontName = form->getFallbackFontForChar(uChar, *font);
+                const std::string auxFontName = form->getFallbackFontForChar(uChar, font);
                 if (!auxFontName.empty()) {
                     std::shared_ptr<GfxFont> auxFont = form->getDefaultResources()->lookupFont(auxFontName);
 
@@ -3148,7 +3148,7 @@ public:
             }
             // Now layout the rest of the text with the original font
             if (!availableWidth || *availableWidth > 0) {
-                Annot::layoutText(text, &outputText, &i, *font, &blockWidth, availableWidth ? *availableWidth : 0.0, &charCount, false, &newFontNeeded);
+                Annot::layoutText(text, &outputText, &i, font, &blockWidth, availableWidth ? *availableWidth : 0.0, &charCount, false, &newFontNeeded);
                 if (availableWidth) {
                     *availableWidth -= blockWidth;
                 }
@@ -3199,7 +3199,7 @@ public:
     int consumedText;
 };
 
-double Annot::calculateFontSize(const Form *form, const GfxFont *font, const std::string &text, double wMax, double hMax, const bool forceZapfDingbats)
+double Annot::calculateFontSize(const Form *form, const GfxFont &font, const std::string &text, double wMax, double hMax, const bool forceZapfDingbats)
 {
     const bool isUnicode = hasUnicodeByteOrderMark(text);
     double fontSize;
@@ -3249,7 +3249,7 @@ static DrawMultiLineTextResult drawMultiLineText(const std::string &text, double
         if (!hasUnicodeByteOrderMark(lineText.toStr()) && hasUnicodeByteOrderMark(text)) {
             prependUnicodeByteOrderMark(lineText.toNonConstStr());
         }
-        const HorizontalTextLayouter textLayouter(lineText.toStr(), form, &font, availableTextWidthInFontPtSize, false);
+        const HorizontalTextLayouter textLayouter(lineText.toStr(), form, font, availableTextWidthInFontPtSize, false);
 
         const double totalWidth = textLayouter.totalWidth() * fontSize;
 
@@ -3458,7 +3458,7 @@ AnnotLine::AnnotLine(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rect
     initialize(annotObj.getDict());
 }
 
-AnnotLine::AnnotLine(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
+AnnotLine::AnnotLine(PDFDoc *docA, Object &&dictObject, const Object &obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     type = typeLine;
     initialize(annotObj.getDict());
@@ -3908,7 +3908,7 @@ AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rectA, AnnotSubtype
     initialize(annotObj.getDict());
 }
 
-AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
+AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, Object &&dictObject, const Object &obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     // the real type will be read in initialize()
     type = typeHighlight;
@@ -4181,14 +4181,14 @@ void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
 // AnnotWidget
 //------------------------------------------------------------------------
 
-AnnotWidget::AnnotWidget(PDFDoc *docA, Object &&dictObject, const Object *obj) : Annot(docA, std::move(dictObject), obj)
+AnnotWidget::AnnotWidget(PDFDoc *docA, Object &&dictObject, const Object &obj) : Annot(docA, std::move(dictObject), obj)
 {
     type = typeWidget;
     field = nullptr;
     initialize(annotObj.getDict());
 }
 
-AnnotWidget::AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormField *fieldA) : Annot(docA, dictObject->copy(), obj)
+AnnotWidget::AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormField *fieldA) : Annot(docA, dictObject->copy(), *obj)
 {
     type = typeWidget;
     field = fieldA;
@@ -4560,7 +4560,7 @@ void AnnotAppearanceBuilder::writeString(const std::string &str)
 
 // Draw the variable text or caption for a field.
 bool AnnotAppearanceBuilder::drawText(const std::string &inputText, const Form *form, const std::string &inputDA, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
-                                      const PDFRectangle *rect, const VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, const int flags, const int nCombs)
+                                      const PDFRectangle &rect, const VariableTextQuadding quadding, XRef &xref, Dict &resourcesDict, const int flags, const int nCombs)
 {
     const bool forceZapfDingbats = flags & ForceZapfDingbatsDrawTextFlag;
 
@@ -4598,7 +4598,6 @@ bool AnnotAppearanceBuilder::drawText(const std::string &inputText, const Form *
     if (tfPos >= 0) {
         std::string &tok = daToks[tfPos];
         if (forceZapfDingbats) {
-            assert(xref != nullptr);
             if (tok != "/ZaDb") {
                 tok = "/ZaDb";
             }
@@ -4606,19 +4605,15 @@ bool AnnotAppearanceBuilder::drawText(const std::string &inputText, const Form *
         if (!tok.empty() && tok[0] == '/') {
             const auto fontName = std::string_view(tok).substr(1);
             if (!resources || !(font = resources->lookupFont(fontName).get())) {
-                if (xref != nullptr && resourcesDict != nullptr) {
-                    const char *fallback = determineFallbackFont(tok, forceZapfDingbats ? "ZapfDingbats" : "Helvetica");
-                    // The font variable sometimes points to an object that needs to be deleted
-                    // and sometimes not, depending on whether the call to lookupFont above fails.
-                    // When the code path right here is taken, the destructor of fontToFree
-                    // (which is a std::unique_ptr) will delete the font object at the end of this method.
-                    fontToFree = createAnnotDrawFont(xref, resourcesDict, fontName, fallback);
-                    font = fontToFree.get();
-                    if (font && forceZapfDingbats) {
-                        addedDingbatsResource = true;
-                    }
-                } else {
-                    error(errSyntaxError, -1, "Unknown font in field's DA string");
+                const char *fallback = determineFallbackFont(tok, forceZapfDingbats ? "ZapfDingbats" : "Helvetica");
+                // The font variable sometimes points to an object that needs to be deleted
+                // and sometimes not, depending on whether the call to lookupFont above fails.
+                // When the code path right here is taken, the destructor of fontToFree
+                // (which is a std::unique_ptr) will delete the font object at the end of this method.
+                fontToFree = createAnnotDrawFont(&xref, &resourcesDict, fontName, fallback);
+                font = fontToFree.get();
+                if (font && forceZapfDingbats) {
+                    addedDingbatsResource = true;
                 }
             }
         } else {
@@ -4662,23 +4657,23 @@ bool AnnotAppearanceBuilder::drawText(const std::string &inputText, const Form *
         appearBuf.append("/Tx BMC\n");
     }
     appearBuf.append("q\n");
-    auto calculateDxDy = [this, appearCharacs, rect]() -> std::tuple<double, double> {
+    auto calculateDxDy = [this, appearCharacs, &rect]() -> std::tuple<double, double> {
         const int rot = appearCharacs ? appearCharacs->getRotation() : 0;
         switch (rot) {
         case 90:
-            GooString::appendf(appearBuf, "0 1 -1 0 {0:.2f} 0 cm\n", rect->x2 - rect->x1);
-            return { rect->y2 - rect->y1, rect->x2 - rect->x1 };
+            GooString::appendf(appearBuf, "0 1 -1 0 {0:.2f} 0 cm\n", rect.x2 - rect.x1);
+            return { rect.y2 - rect.y1, rect.x2 - rect.x1 };
 
         case 180:
-            GooString::appendf(appearBuf, "-1 0 0 -1 {0:.2f} {1:.2f} cm\n", rect->x2 - rect->x1, rect->y2 - rect->y1);
-            return { rect->x2 - rect->y2, rect->y2 - rect->y1 };
+            GooString::appendf(appearBuf, "-1 0 0 -1 {0:.2f} {1:.2f} cm\n", rect.x2 - rect.x1, rect.y2 - rect.y1);
+            return { rect.x2 - rect.y2, rect.y2 - rect.y1 };
 
         case 270:
-            GooString::appendf(appearBuf, "0 -1 1 0 0 {0:.2f} cm\n", rect->y2 - rect->y1);
-            return { rect->y2 - rect->y1, rect->x2 - rect->x1 };
+            GooString::appendf(appearBuf, "0 -1 1 0 0 {0:.2f} cm\n", rect.y2 - rect.y1);
+            return { rect.y2 - rect.y1, rect.x2 - rect.x1 };
 
         default: // assume rot == 0
-            return { rect->x2 - rect->x1, rect->y2 - rect->y1 };
+            return { rect.x2 - rect.x1, rect.y2 - rect.y1 };
         }
     };
     const auto dxdy = calculateDxDy();
@@ -4693,7 +4688,7 @@ bool AnnotAppearanceBuilder::drawText(const std::string &inputText, const Form *
 
         // compute font autosize
         if (fontSize == 0) {
-            fontSize = Annot::calculateFontSize(form, font, textToDraw, wMax, dy, forceZapfDingbats);
+            fontSize = Annot::calculateFontSize(form, *font, textToDraw, wMax, dy, forceZapfDingbats);
             daToks[tfPos + 1] = GooString::format("{0:.2f}", fontSize);
         }
 
@@ -4734,7 +4729,7 @@ bool AnnotAppearanceBuilder::drawText(const std::string &inputText, const Form *
                 daToks[tfPos + 1] = GooString::format("{0:.2f}", fontSize);
             }
 
-            const HorizontalTextLayouter textLayouter(textToDraw, form, font, {}, forceZapfDingbats);
+            const HorizontalTextLayouter textLayouter(textToDraw, form, *font, {}, forceZapfDingbats);
 
             const int charCount = std::min(textLayouter.totalCharCount(), nCombs);
 
@@ -4809,7 +4804,7 @@ bool AnnotAppearanceBuilder::drawText(const std::string &inputText, const Form *
 
             // regular (non-comb) formatting
         } else {
-            const HorizontalTextLayouter textLayouter(textToDraw, form, font, {}, forceZapfDingbats);
+            const HorizontalTextLayouter textLayouter(textToDraw, form, *font, {}, forceZapfDingbats);
 
             const double usedWidthUnscaled = textLayouter.totalWidth();
 
@@ -4880,7 +4875,7 @@ bool AnnotAppearanceBuilder::drawText(const std::string &inputText, const Form *
 }
 
 // Draw the variable text or caption for a field.
-bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect, const std::string &da, const GfxResources *resources, VariableTextQuadding quadding, XRef *xref,
+bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice &fieldChoice, const AnnotBorder *border, const PDFRectangle &rect, const std::string &da, const GfxResources *resources, VariableTextQuadding quadding, XRef *xref,
                                          Dict *resourcesDict)
 {
     std::vector<std::string> daToks;
@@ -4939,7 +4934,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     // get the border width
     borderWidth = border ? border->getWidth() : 0;
 
-    const std::vector<FormFieldChoiceOption> &choices = fieldChoice->getChoices();
+    const std::vector<FormFieldChoiceOption> &choices = fieldChoice.getChoices();
 
     // compute font autosize
     if (fontSize == 0) {
@@ -4956,8 +4951,8 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
                 wMax = w;
             }
         }
-        fontSize = rect->y2 - rect->y1 - 2 * borderWidth;
-        const double fontSize2 = (rect->x2 - rect->x1 - 4 - 2 * borderWidth) / wMax;
+        fontSize = rect.y2 - rect.y1 - 2 * borderWidth;
+        const double fontSize2 = (rect.x2 - rect.x1 - 4 - 2 * borderWidth) / wMax;
         if (fontSize2 < fontSize) {
             fontSize = fontSize2;
         }
@@ -4969,15 +4964,15 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         }
     }
     // draw the text
-    y = rect->y2 - rect->y1 - 1.1 * fontSize;
-    for (size_t i = fieldChoice->getTopIndex(); i < choices.size(); ++i) {
+    y = rect.y2 - rect.y1 - 1.1 * fontSize;
+    for (size_t i = fieldChoice.getTopIndex(); i < choices.size(); ++i) {
         // setup
         appearBuf.append("q\n");
 
         // draw the background if selected
         if (choices[i].selected) {
             appearBuf.append("0 g f\n");
-            GooString::appendf(appearBuf, "{0:.2f} {1:.2f} {2:.2f} {3:.2f} re f\n", borderWidth, y - 0.2 * fontSize, rect->x2 - rect->x1 - 2 * borderWidth, 1.1 * fontSize);
+            GooString::appendf(appearBuf, "{0:.2f} {1:.2f} {2:.2f} {3:.2f} re f\n", borderWidth, y - 0.2 * fontSize, rect.x2 - rect.x1 - 2 * borderWidth, 1.1 * fontSize);
         }
 
         // setup
@@ -4996,10 +4991,10 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
             x = borderWidth + 2;
             break;
         case VariableTextQuadding::centered:
-            x = (rect->x2 - rect->x1 - w) / 2;
+            x = (rect.x2 - rect.x1 - w) / 2;
             break;
         case VariableTextQuadding::rightJustified:
-            x = rect->x2 - rect->x1 - borderWidth - 2 - w;
+            x = rect.x2 - rect.x1 - borderWidth - 2 - w;
             break;
         }
 
@@ -5048,30 +5043,30 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     return true;
 }
 
-void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect)
+void AnnotAppearanceBuilder::drawFieldBorder(const FormField &field, const AnnotBorder &border, const AnnotAppearanceCharacs &appearCharacs, const PDFRectangle &rect)
 {
     AnnotColor adjustedColor;
-    const double w = border->getWidth();
+    const double w = border.getWidth();
 
-    const AnnotColor *aColor = appearCharacs->getBorderColor();
+    const AnnotColor *aColor = appearCharacs.getBorderColor();
     if (!aColor) {
-        aColor = appearCharacs->getBackColor();
+        aColor = appearCharacs.getBackColor();
     }
     if (!aColor) {
         return;
     }
 
-    const double dx = rect->x2 - rect->x1;
-    const double dy = rect->y2 - rect->y1;
+    const double dx = rect.x2 - rect.x1;
+    const double dy = rect.y2 - rect.y1;
 
     // radio buttons with no caption have a round border
-    const bool hasCaption = appearCharacs->getNormalCaption() != nullptr;
-    if (field->getType() == formButton && static_cast<const FormFieldButton *>(field)->getButtonType() == formButtonRadio && !hasCaption) {
+    const bool hasCaption = appearCharacs.getNormalCaption() != nullptr;
+    if (field.getType() == formButton && static_cast<const FormFieldButton &>(field).getButtonType() == formButtonRadio && !hasCaption) {
         double r = 0.5 * (dx < dy ? dx : dy);
-        switch (border->getStyle()) {
+        switch (border.getStyle()) {
         case AnnotBorder::borderDashed:
             appearBuf.append("[");
-            for (double dash : border->getDash()) {
+            for (double dash : border.getDash()) {
                 GooString::appendf(appearBuf, " {0:.2f}", dash);
             }
             appearBuf.append("] 0 d\n");
@@ -5088,20 +5083,20 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
             setDrawColor(*aColor, false);
             drawCircle(0.5 * dx, 0.5 * dy, r - 0.25 * w, false);
             adjustedColor = AnnotColor(*aColor);
-            adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? 1 : -1);
+            adjustedColor.adjustColor(border.getStyle() == AnnotBorder::borderBeveled ? 1 : -1);
             setDrawColor(adjustedColor, false);
             drawCircleTopLeft(0.5 * dx, 0.5 * dy, r - 0.75 * w);
             adjustedColor = AnnotColor(*aColor);
-            adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? -1 : 1);
+            adjustedColor.adjustColor(border.getStyle() == AnnotBorder::borderBeveled ? -1 : 1);
             setDrawColor(adjustedColor, false);
             drawCircleBottomRight(0.5 * dx, 0.5 * dy, r - 0.75 * w);
             break;
         }
     } else {
-        switch (border->getStyle()) {
+        switch (border.getStyle()) {
         case AnnotBorder::borderDashed:
             appearBuf.append("[");
-            for (double dash : border->getDash()) {
+            for (double dash : border.getDash()) {
                 GooString::appendf(appearBuf, " {0:.2f}", dash);
             }
             appearBuf.append("] 0 d\n");
@@ -5114,7 +5109,7 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
         case AnnotBorder::borderBeveled:
         case AnnotBorder::borderInset:
             adjustedColor = AnnotColor(*aColor);
-            adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? 1 : -1);
+            adjustedColor.adjustColor(border.getStyle() == AnnotBorder::borderBeveled ? 1 : -1);
             setDrawColor(adjustedColor, true);
             appearBuf.append("0 0 m\n");
             GooString::appendf(appearBuf, "0 {0:.2f} l\n", dy);
@@ -5124,7 +5119,7 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
             GooString::appendf(appearBuf, "{0:.2f} {0:.2f} l\n", w);
             appearBuf.append("f\n");
             adjustedColor = AnnotColor(*aColor);
-            adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? -1 : 1);
+            adjustedColor.adjustColor(border.getStyle() == AnnotBorder::borderBeveled ? -1 : 1);
             setDrawColor(adjustedColor, true);
             appearBuf.append("0 0 m\n");
             GooString::appendf(appearBuf, "{0:.2f} 0 l\n", dx);
@@ -5146,21 +5141,21 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
     }
 }
 
-bool AnnotAppearanceBuilder::drawFormField(const FormField *field, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
-                                           const GooString *appearState, XRef *xref, Dict *resourcesDict)
+bool AnnotAppearanceBuilder::drawFormField(const FormField &field, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle &rect,
+                                           const GooString *appearState, XRef &xref, Dict &resourcesDict)
 {
     // draw the field contents
-    switch (field->getType()) {
+    switch (field.getType()) {
     case formButton:
-        return drawFormFieldButton(static_cast<const FormFieldButton *>(field), form, resources, da, border, appearCharacs, rect, appearState, xref, resourcesDict);
+        return drawFormFieldButton(static_cast<const FormFieldButton &>(field), form, resources, da, border, appearCharacs, rect, appearState, xref, resourcesDict);
         break;
     case formText:
-        return drawFormFieldText(static_cast<const FormFieldText *>(field), form, resources, da, border, appearCharacs, rect, xref, resourcesDict);
+        return drawFormFieldText(static_cast<const FormFieldText &>(field), form, resources, da, border, appearCharacs, rect, xref, resourcesDict);
     case formChoice:
-        return drawFormFieldChoice(static_cast<const FormFieldChoice *>(field), form, resources, da, border, appearCharacs, rect, xref, resourcesDict);
+        return drawFormFieldChoice(static_cast<const FormFieldChoice &>(field), form, resources, da, border, appearCharacs, rect, xref, resourcesDict);
         break;
     case formSignature:
-        return drawSignatureFieldText(static_cast<const FormFieldSignature *>(field), form, da, border, rect, xref, resourcesDict);
+        return drawSignatureFieldText(static_cast<const FormFieldSignature &>(field), form, da, border, rect, xref, resourcesDict);
         break;
     case formUndef:
     default:
@@ -5170,26 +5165,26 @@ bool AnnotAppearanceBuilder::drawFormField(const FormField *field, const Form *f
     return false;
 }
 
-bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
-                                                 const PDFRectangle *rect, const GooString *appearState, XRef *xref, Dict *resourcesDict)
+bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton &field, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
+                                                 const PDFRectangle &rect, const GooString *appearState, XRef &xref, Dict &resourcesDict)
 {
     const GooString *caption = nullptr;
     if (appearCharacs) {
         caption = appearCharacs->getNormalCaption();
     }
 
-    switch (field->getButtonType()) {
+    switch (field.getButtonType()) {
     case formButtonRadio: {
         //~ Acrobat doesn't draw a caption if there is no AP dict (?)
-        if (appearState && appearState->compare("Off") != 0 && field->getState(appearState->c_str())) {
+        if (appearState && appearState->compare("Off") != 0 && field.getState(appearState->c_str())) {
             if (caption) {
                 return drawText(caption->toStr(), form, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             }
             if (appearCharacs) {
                 const AnnotColor *aColor = appearCharacs->getBorderColor();
                 if (aColor) {
-                    const double dx = rect->x2 - rect->x1;
-                    const double dy = rect->y2 - rect->y1;
+                    const double dx = rect.x2 - rect.x1;
+                    const double dy = rect.y2 - rect.y1;
                     setDrawColor(*aColor, true);
                     drawCircle(0.5 * dx, 0.5 * dy, 0.2 * (dx < dy ? dx : dy), true);
                 }
@@ -5216,29 +5211,29 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
     return true;
 }
 
-bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
-                                               const PDFRectangle *rect, XRef *xref, Dict *resourcesDict)
+bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText &fieldText, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
+                                               const PDFRectangle &rect, XRef &xref, Dict &resourcesDict)
 {
     VariableTextQuadding quadding;
     const GooString *contents;
 
-    contents = fieldText->getAppearanceContent();
+    contents = fieldText.getAppearanceContent();
     if (contents) {
-        if (fieldText->hasTextQuadding()) {
-            quadding = fieldText->getTextQuadding();
+        if (fieldText.hasTextQuadding()) {
+            quadding = fieldText.getTextQuadding();
         } else if (form) {
             quadding = form->getTextQuadding();
         } else {
             quadding = VariableTextQuadding::leftJustified;
         }
 
-        const int nCombs = fieldText->isComb() ? fieldText->getMaxLen() : 0;
+        const int nCombs = fieldText.isComb() ? fieldText.getMaxLen() : 0;
 
         int flags = EmitMarkedContentDrawTextFlag;
-        if (fieldText->isMultiline()) {
+        if (fieldText.isMultiline()) {
             flags = flags | MultilineDrawTextFlag;
         }
-        if (fieldText->isPassword()) {
+        if (fieldText.isPassword()) {
             flags = flags | TurnTextToStarsDrawTextFlag;
         }
         return drawText(contents->toStr(), form, da, resources, border, appearCharacs, rect, quadding, xref, resourcesDict, flags, nCombs);
@@ -5257,29 +5252,29 @@ static void setChildDictEntryValue(Dict *parentDict, const char *childDictName, 
     childDictionaryObj.dictSet(childDictEntryName, Object(childDictEntryValue));
 }
 
-bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const std::string &_da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict)
+bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature &field, const Form *form, const std::string &_da, const AnnotBorder *border, const PDFRectangle &rect, XRef &xref, Dict &resourcesDict)
 {
-    const std::string &contents = field->getCustomAppearanceContent().toStr();
+    const std::string &contents = field.getCustomAppearanceContent().toStr();
     if (contents.empty()) {
         return false;
     }
 
-    if (field->getImageResource() != Ref::INVALID()) {
-        const double width = rect->x2 - rect->x1;
-        const double height = rect->y2 - rect->y1;
+    if (field.getImageResource() != Ref::INVALID()) {
+        const double width = rect.x2 - rect.x1;
+        const double height = rect.y2 - rect.y1;
         static const char *imageResourceId = "SigImg";
-        setChildDictEntryValue(resourcesDict, "XObject", imageResourceId, field->getImageResource(), xref);
+        setChildDictEntryValue(&resourcesDict, "XObject", imageResourceId, field.getImageResource(), &xref);
         Matrix matrix = { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
         matrix.scale(width, height);
         const std::string imgBuffer = GooString::format("\nq {0:.1g} {1:.1g} {2:.1g} {3:.1g} {4:.1g} {5:.1g} cm /{6:s} Do Q\n", matrix.m[0], matrix.m[1], matrix.m[2], matrix.m[3], matrix.m[4], matrix.m[5], imageResourceId);
         append(imgBuffer.c_str());
     }
 
-    const std::string &leftText = field->getCustomAppearanceLeftContent().toStr();
+    const std::string &leftText = field.getCustomAppearanceLeftContent().toStr();
     if (leftText.empty()) {
         drawSignatureFieldText(contents, form, DefaultAppearance(_da), border, rect, xref, resourcesDict, 0, false /* don't center vertically */, false /* don't center horizontally */);
     } else {
-        const double halfWidth = (rect->x2 - rect->x1) / 2;
+        const double halfWidth = (rect.x2 - rect.x1) / 2;
 
         double borderWidth = 0;
 
@@ -5287,38 +5282,38 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
             borderWidth = border->getWidth();
         }
 
-        const double wMax = (rect->x2 - rect->x1) - 2 * borderWidth - 4;
-        const double hMax = (rect->y2 - rect->y1) - 2 * borderWidth;
+        const double wMax = (rect.x2 - rect.x1) - 2 * borderWidth - 4;
+        const double hMax = (rect.y2 - rect.y1) - 2 * borderWidth;
 
         DefaultAppearance daLeft(_da);
 
-        double leftFontSize = field->getCustomAppearanceLeftFontSize();
+        double leftFontSize = field.getCustomAppearanceLeftFontSize();
         if (leftFontSize == 0) {
             std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(daLeft.getFontName());
-            leftFontSize = Annot::calculateFontSize(form, font.get(), leftText, wMax / 2.0, hMax);
+            leftFontSize = Annot::calculateFontSize(form, *font, leftText, wMax / 2.0, hMax);
         }
         daLeft.setFontPtSize(leftFontSize);
 
-        PDFRectangle rectLeft(rect->x1, rect->y1, rect->x1 + halfWidth, rect->y2);
-        drawSignatureFieldText(leftText, form, daLeft, border, &rectLeft, xref, resourcesDict, 0, true /* center vertically */, true /* center horizontally */);
+        PDFRectangle rectLeft(rect.x1, rect.y1, rect.x1 + halfWidth, rect.y2);
+        drawSignatureFieldText(leftText, form, daLeft, border, rectLeft, xref, resourcesDict, 0, true /* center vertically */, true /* center horizontally */);
 
         DefaultAppearance daRight(_da);
 
         double fontSize = daRight.getFontPtSize();
         if (fontSize == 0) {
             std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(daLeft.getFontName());
-            fontSize = Annot::calculateFontSize(form, font.get(), contents, wMax / 2.0, hMax);
+            fontSize = Annot::calculateFontSize(form, *font, contents, wMax / 2.0, hMax);
         }
         daRight.setFontPtSize(fontSize);
 
-        PDFRectangle rectRight(rectLeft.x2, rect->y1, rect->x2, rect->y2);
-        drawSignatureFieldText(contents, form, daRight, border, &rectRight, xref, resourcesDict, halfWidth, true /* center vertically */, false /* don't center horizontally */);
+        PDFRectangle rectRight(rectLeft.x2, rect.y1, rect.x2, rect.y2);
+        drawSignatureFieldText(contents, form, daRight, border, rectRight, xref, resourcesDict, halfWidth, true /* center vertically */, false /* don't center horizontally */);
     }
 
     return true;
 }
 
-void AnnotAppearanceBuilder::drawSignatureFieldText(const std::string &text, const Form *form, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin,
+void AnnotAppearanceBuilder::drawSignatureFieldText(const std::string &text, const Form *form, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle &rect, XRef &xref, Dict &resourcesDict, double leftMargin,
                                                     bool centerVertically, bool centerHorizontally)
 {
     double borderWidth = 0;
@@ -5332,15 +5327,15 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const std::string &text, con
     }
 
     // Box size
-    const double width = rect->x2 - rect->x1;
-    const double height = rect->y2 - rect->y1;
+    const double width = rect.x2 - rect.x1;
+    const double height = rect.y2 - rect.y1;
     const double textmargin = borderWidth * 2;
     const double textwidth = width - 2 * textmargin;
 
     // create a Helvetica fake font
     std::shared_ptr<const GfxFont> font = form ? form->getDefaultResources()->lookupFont(da.getFontName()) : nullptr;
     if (!font) {
-        font = createAnnotDrawFont(xref, resourcesDict, da.getFontName());
+        font = createAnnotDrawFont(&xref, &resourcesDict, da.getFontName());
     }
 
     // Setup text clipping
@@ -5361,29 +5356,29 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const std::string &text, con
     append("ET Q\n");
 }
 
-bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldChoice, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
-                                                 const PDFRectangle *rect, XRef *xref, Dict *resourcesDict)
+bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice &fieldChoice, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
+                                                 const PDFRectangle &rect, XRef &xref, Dict &resourcesDict)
 {
     const GooString *selected;
     VariableTextQuadding quadding;
 
-    if (fieldChoice->hasTextQuadding()) {
-        quadding = fieldChoice->getTextQuadding();
+    if (fieldChoice.hasTextQuadding()) {
+        quadding = fieldChoice.getTextQuadding();
     } else if (form) {
         quadding = form->getTextQuadding();
     } else {
         quadding = VariableTextQuadding::leftJustified;
     }
 
-    if (fieldChoice->isCombo()) {
-        selected = fieldChoice->getAppearanceSelectedChoice();
+    if (fieldChoice.isCombo()) {
+        selected = fieldChoice.getAppearanceSelectedChoice();
         if (selected) {
             return drawText(selected->toStr(), form, da, resources, border, appearCharacs, rect, quadding, xref, resourcesDict, EmitMarkedContentDrawTextFlag);
             //~ Acrobat draws a popup icon on the right side
         }
         // list box
     } else {
-        return drawListBox(fieldChoice, border, rect, da, resources, quadding, xref, resourcesDict);
+        return drawListBox(fieldChoice, border, rect, da, resources, quadding, &xref, &resourcesDict);
     }
 
     return true;
@@ -5435,7 +5430,7 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
 
     // draw the border
     if (appearCharacs && border && border->getWidth() > 0) {
-        appearBuilder.drawFieldBorder(field, border.get(), appearCharacs.get(), rect.get());
+        appearBuilder.drawFieldBorder(*field, *border, *appearCharacs, *rect);
     }
 
     const std::string &fieldDA = field->getDefaultAppearance();
@@ -5473,9 +5468,9 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
     auto appearDict = std::make_unique<Dict>(doc->getXRef());
     {
         const std::string &daToUse = fieldDA.empty() && form ? form->getDefaultAppearance() : fieldDA;
-        const bool success = appearBuilder.drawFormField(field, form, resources, daToUse, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), resourcesDictObj.getDict());
+        const bool success = appearBuilder.drawFormField(*field, form, resources, daToUse, border.get(), appearCharacs.get(), *rect, appearState.get(), *doc->getXRef(), *resourcesDictObj.getDict());
         if (!success && form && daToUse != form->getDefaultAppearance()) {
-            appearBuilder.drawFormField(field, form, resources, form->getDefaultAppearance(), border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), resourcesDictObj.getDict());
+            appearBuilder.drawFormField(*field, form, resources, form->getDefaultAppearance(), border.get(), appearCharacs.get(), *rect, appearState.get(), *doc->getXRef(), *resourcesDictObj.getDict());
         }
     }
 
@@ -5614,7 +5609,7 @@ AnnotMovie::AnnotMovie(PDFDoc *docA, PDFRectangle *rectA, Movie *movieA) : Annot
     initialize(annotObj.getDict());
 }
 
-AnnotMovie::AnnotMovie(PDFDoc *docA, Object &&dictObject, const Object *obj) : Annot(docA, std::move(dictObject), obj)
+AnnotMovie::AnnotMovie(PDFDoc *docA, Object &&dictObject, const Object &obj) : Annot(docA, std::move(dictObject), obj)
 {
     type = typeMovie;
     initialize(annotObj.getDict());
@@ -5734,7 +5729,7 @@ AnnotScreen::AnnotScreen(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
     initialize(annotObj.getDict());
 }
 
-AnnotScreen::AnnotScreen(PDFDoc *docA, Object &&dictObject, const Object *obj) : Annot(docA, std::move(dictObject), obj)
+AnnotScreen::AnnotScreen(PDFDoc *docA, Object &&dictObject, const Object &obj) : Annot(docA, std::move(dictObject), obj)
 {
     type = typeScreen;
     initialize(annotObj.getDict());
@@ -5788,7 +5783,7 @@ AnnotStamp::AnnotStamp(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, re
     initialize(annotObj.getDict());
 }
 
-AnnotStamp::AnnotStamp(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
+AnnotStamp::AnnotStamp(PDFDoc *docA, Object &&dictObject, const Object &obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     type = typeStamp;
     initialize(annotObj.getDict());
@@ -6020,7 +6015,7 @@ AnnotGeometry::AnnotGeometry(PDFDoc *docA, PDFRectangle *rectA, AnnotSubtype sub
     initialize(annotObj.getDict());
 }
 
-AnnotGeometry::AnnotGeometry(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
+AnnotGeometry::AnnotGeometry(PDFDoc *docA, Object &&dictObject, const Object &obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     // the real type will be read in initialize()
     type = typeSquare;
@@ -6185,7 +6180,7 @@ AnnotPolygon::AnnotPolygon(PDFDoc *docA, PDFRectangle *rectA, AnnotSubtype subTy
     initialize(annotObj.getDict());
 }
 
-AnnotPolygon::AnnotPolygon(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
+AnnotPolygon::AnnotPolygon(PDFDoc *docA, Object &&dictObject, const Object &obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     // the real type will be read in initialize()
     type = typePolygon;
@@ -6502,7 +6497,7 @@ AnnotCaret::AnnotCaret(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, re
     initialize(annotObj.getDict());
 }
 
-AnnotCaret::AnnotCaret(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
+AnnotCaret::AnnotCaret(PDFDoc *docA, Object &&dictObject, const Object &obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     type = typeCaret;
     initialize(annotObj.getDict());
@@ -6559,7 +6554,7 @@ AnnotInk::AnnotInk(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rectA)
     initialize(annotObj.getDict());
 }
 
-AnnotInk::AnnotInk(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
+AnnotInk::AnnotInk(PDFDoc *docA, Object &&dictObject, const Object &obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     type = typeInk;
     initialize(annotObj.getDict());
@@ -6759,7 +6754,7 @@ AnnotFileAttachment::AnnotFileAttachment(PDFDoc *docA, PDFRectangle *rectA, GooS
     initialize(annotObj.getDict());
 }
 
-AnnotFileAttachment::AnnotFileAttachment(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
+AnnotFileAttachment::AnnotFileAttachment(PDFDoc *docA, Object &&dictObject, const Object &obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     type = typeFileAttachment;
     initialize(annotObj.getDict());
@@ -6958,7 +6953,7 @@ AnnotSound::AnnotSound(PDFDoc *docA, PDFRectangle *rectA, Sound *soundA) : Annot
     initialize(annotObj.getDict());
 }
 
-AnnotSound::AnnotSound(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
+AnnotSound::AnnotSound(PDFDoc *docA, Object &&dictObject, const Object &obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     type = typeSound;
     initialize(annotObj.getDict());
@@ -7104,7 +7099,7 @@ Annot3D::Annot3D(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
     initialize(annotObj.getDict());
 }
 
-Annot3D::Annot3D(PDFDoc *docA, Object &&dictObject, const Object *obj) : Annot(docA, std::move(dictObject), obj)
+Annot3D::Annot3D(PDFDoc *docA, Object &&dictObject, const Object &obj) : Annot(docA, std::move(dictObject), obj)
 {
     type = type3D;
     initialize(annotObj.getDict());
@@ -7207,7 +7202,7 @@ AnnotRichMedia::AnnotRichMedia(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, 
     initialize(annotObj.getDict());
 }
 
-AnnotRichMedia::AnnotRichMedia(PDFDoc *docA, Object &&dictObject, const Object *obj) : Annot(docA, std::move(dictObject), obj)
+AnnotRichMedia::AnnotRichMedia(PDFDoc *docA, Object &&dictObject, const Object &obj) : Annot(docA, std::move(dictObject), obj)
 {
     type = typeRichMedia;
     initialize(annotObj.getDict());
@@ -7512,7 +7507,7 @@ Annots::Annots(PDFDoc *docA, int page, Object *annotsObj)
             Object obj1 = annotsObj->arrayGet(i);
             if (obj1.isDict()) {
                 const Object &obj2 = annotsObj->arrayGetNF(i);
-                std::shared_ptr<Annot> annot = createAnnot(std::move(obj1), &obj2);
+                std::shared_ptr<Annot> annot = createAnnot(std::move(obj1), obj2);
                 if (annot) {
                     if (annot.use_count() > 100000) {
                         error(errSyntaxError, -1, "Annotations likely malformed. Too many references. Stopping processing annots on page {0:d}", page);
@@ -7546,7 +7541,7 @@ bool Annots::removeAnnot(const std::shared_ptr<Annot> &annot)
     return true;
 }
 
-std::shared_ptr<Annot> Annots::createAnnot(Object &&dictObject, const Object *obj)
+std::shared_ptr<Annot> Annots::createAnnot(Object &&dictObject, const Object &obj)
 {
     std::shared_ptr<Annot> annot = nullptr;
     Object obj1 = dictObject.dictLookup("Subtype");
@@ -7591,10 +7586,10 @@ std::shared_ptr<Annot> Annots::createAnnot(Object &&dictObject, const Object *ob
             annot = std::make_shared<AnnotMovie>(doc, std::move(dictObject), obj);
         } else if (typeName == "Widget") {
             // Find the annot in forms
-            if (obj->isRef()) {
+            if (obj.isRef()) {
                 Form *form = doc->getCatalog()->getForm();
                 if (form) {
-                    FormWidget *widget = form->findWidgetByRef(obj->getRef());
+                    FormWidget *widget = form->findWidgetByRef(obj.getRef());
                     if (widget) {
                         annot = widget->getWidgetAnnotation();
                     }
@@ -7634,7 +7629,7 @@ std::shared_ptr<Annot> Annots::createAnnot(Object &&dictObject, const Object *ob
     return annot;
 }
 
-std::shared_ptr<Annot> Annots::findAnnot(Ref *ref)
+std::shared_ptr<Annot> Annots::findAnnot(Ref ref)
 {
     for (const auto &annot : annots) {
         if (annot->match(ref)) {
