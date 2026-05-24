@@ -3090,16 +3090,16 @@ class HorizontalTextLayouter
 public:
     HorizontalTextLayouter() = default;
 
-    HorizontalTextLayouter(const GooString *text, const Form *form, const GfxFont *font, std::optional<double> availableWidth, const bool noReencode)
+    HorizontalTextLayouter(const GooString &text, const Form *form, const GfxFont *font, std::optional<double> availableWidth, const bool noReencode)
     {
         size_t i = 0;
         double blockWidth;
         bool newFontNeeded = false;
         GooString outputText;
-        const bool isUnicode = hasUnicodeByteOrderMark(text->toStr());
+        const bool isUnicode = hasUnicodeByteOrderMark(text.toStr());
         int charCount;
 
-        Annot::layoutText(text, &outputText, &i, *font, &blockWidth, availableWidth ? *availableWidth : 0.0, &charCount, noReencode, !noReencode ? &newFontNeeded : nullptr);
+        Annot::layoutText(&text, &outputText, &i, *font, &blockWidth, availableWidth ? *availableWidth : 0.0, &charCount, noReencode, !noReencode ? &newFontNeeded : nullptr);
         data.emplace_back(outputText.toStr(), std::string(), blockWidth, charCount);
         if (availableWidth) {
             *availableWidth -= blockWidth;
@@ -3114,17 +3114,17 @@ public:
             } else {
                 Unicode uChar;
                 if (isUnicode) {
-                    uChar = static_cast<unsigned char>(text->getChar(i)) << 8;
-                    uChar += static_cast<unsigned char>(text->getChar(i + 1));
+                    uChar = static_cast<unsigned char>(text.getChar(i)) << 8;
+                    uChar += static_cast<unsigned char>(text.getChar(i + 1));
                 } else {
-                    uChar = pdfDocEncoding[text->getChar(i) & 0xff];
+                    uChar = pdfDocEncoding[text.getChar(i) & 0xff];
                 }
                 const std::string auxFontName = form->getFallbackFontForChar(uChar, *font);
                 if (!auxFontName.empty()) {
                     std::shared_ptr<GfxFont> auxFont = form->getDefaultResources()->lookupFont(auxFontName);
 
                     // Here we just layout one char, we don't know if the one afterwards can be layouted with the original font
-                    GooString auxContents = GooString(text->toStr().substr(i, isUnicode ? 2 : 1));
+                    GooString auxContents = GooString(text.toStr().substr(i, isUnicode ? 2 : 1));
                     if (isUnicode) {
                         prependUnicodeByteOrderMark(auxContents.toNonConstStr());
                     }
@@ -3150,7 +3150,7 @@ public:
             }
             // Now layout the rest of the text with the original font
             if (!availableWidth || *availableWidth > 0) {
-                Annot::layoutText(text, &outputText, &i, *font, &blockWidth, availableWidth ? *availableWidth : 0.0, &charCount, false, &newFontNeeded);
+                Annot::layoutText(&text, &outputText, &i, *font, &blockWidth, availableWidth ? *availableWidth : 0.0, &charCount, false, &newFontNeeded);
                 if (availableWidth) {
                     *availableWidth -= blockWidth;
                 }
@@ -3215,7 +3215,7 @@ double Annot::calculateFontSize(const Form *form, const GfxFont *font, const Goo
             if (!hasUnicodeByteOrderMark(lineText.toStr()) && isUnicode) {
                 prependUnicodeByteOrderMark(lineText.toNonConstStr());
             }
-            const HorizontalTextLayouter textLayouter(&lineText, form, font, availableWidthInFontSize, forceZapfDingbats);
+            const HorizontalTextLayouter textLayouter(lineText, form, font, availableWidthInFontSize, forceZapfDingbats);
             y -= fontSize;
             if (i == 0) {
                 i += textLayouter.consumedText;
@@ -3251,7 +3251,7 @@ static DrawMultiLineTextResult drawMultiLineText(const std::string &text, double
         if (!hasUnicodeByteOrderMark(lineText.toStr()) && hasUnicodeByteOrderMark(text)) {
             prependUnicodeByteOrderMark(lineText.toNonConstStr());
         }
-        const HorizontalTextLayouter textLayouter(&lineText, form, &font, availableTextWidthInFontPtSize, false);
+        const HorizontalTextLayouter textLayouter(lineText, form, &font, availableTextWidthInFontPtSize, false);
 
         const double totalWidth = textLayouter.totalWidth() * fontSize;
 
@@ -4747,7 +4747,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
                 daToks[tfPos + 1] = GooString::format("{0:.2f}", fontSize);
             }
 
-            const HorizontalTextLayouter textLayouter(text, form, font, {}, forceZapfDingbats);
+            const HorizontalTextLayouter textLayouter(*text, form, font, {}, forceZapfDingbats);
 
             const int charCount = std::min(textLayouter.totalCharCount(), nCombs);
 
@@ -4822,7 +4822,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
 
             // regular (non-comb) formatting
         } else {
-            const HorizontalTextLayouter textLayouter(text, form, font, {}, forceZapfDingbats);
+            const HorizontalTextLayouter textLayouter(*text, form, font, {}, forceZapfDingbats);
 
             const double usedWidthUnscaled = textLayouter.totalWidth();
 
