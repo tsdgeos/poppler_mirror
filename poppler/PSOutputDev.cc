@@ -894,7 +894,7 @@ static const char *cmapProlog[] = { "/CIDInit /ProcSet findresource begin",
 
 struct PSSubstFont
 {
-    const char *psName; // PostScript name
+    const std::string psName; // PostScript name
     double mWidth; // width of 'm' character
 };
 
