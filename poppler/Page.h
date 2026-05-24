@@ -240,6 +240,7 @@ private:
     int num; // page number
     std::unique_ptr<PageAttrs> attrs; // page attributes
     std::unique_ptr<Annots> annots; // annotations
+    std::once_flag annotsInitializationFlag;
     Object annotsObj; // annotations array
     Object contents; // page contents
     Object thumb; // page thumbnail
@@ -256,6 +257,7 @@ private:
     // they are 'de facto' being used to implement tooltips. See #34
     std::vector<std::unique_ptr<FormField>> standaloneFields;
     void loadStandaloneFields(Form *form);
+    void initializeAnnots();
 };
 
 #endif
