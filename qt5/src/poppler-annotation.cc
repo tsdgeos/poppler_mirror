@@ -1425,7 +1425,7 @@ QString Annotation::contents() const
         return d->contents;
     }
 
-    return UnicodeParsedString(d->pdfAnnot->getContents());
+    return UnicodeParsedString(&d->pdfAnnot->getContents());
 }
 
 void Annotation::setContents(const QString &contents)
@@ -1965,7 +1965,7 @@ void TextAnnotationPrivate::setDefaultAppearanceToNative()
                 }
 
                 if (!fontName.empty()) {
-                    form->ensureFontsForAllCharacters(pdfAnnot->getContents()->toStr(), fontName);
+                    form->ensureFontsForAllCharacters(pdfAnnot->getContents().toStr(), fontName);
                 } else {
                     fontName = "Invalid_font";
                 }

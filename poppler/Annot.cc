@@ -1340,9 +1340,9 @@ void Annot::initialize(PDFDoc *docA, Dict *dict)
 
     obj1 = dict->lookup("Contents");
     if (obj1.isString()) {
-        contents = obj1.takeString();
+        contents = GooString(obj1.getString());
     } else {
-        contents = std::make_unique<GooString>();
+        contents.clear();
     }
 
     // Note: This value is overwritten by Annots ctor
@@ -1499,16 +1499,16 @@ void Annot::setContents(std::unique_ptr<GooString> &&new_content)
     annotLocker();
 
     if (new_content) {
-        contents = std::move(new_content);
+        contents = GooString(new_content->toStr());
         // append the unicode marker <FE FF> if needed
-        if (!hasUnicodeByteOrderMark(contents->toStr())) {
-            prependUnicodeByteOrderMark(contents->toNonConstStr());
+        if (!hasUnicodeByteOrderMark(contents.toStr())) {
+            prependUnicodeByteOrderMark(contents.toNonConstStr());
         }
     } else {
-        contents = std::make_unique<GooString>();
+        contents.clear();
     }
 
-    update("Contents", Object(std::string { contents->toStr() }));
+    update("Contents", Object(std::string { contents.toStr() }));
 }
 
 void Annot::setName(GooString *new_name)
@@ -3337,9 +3337,6 @@ void AnnotFreeText::generateFreeTextAppearance()
     if (!da.getFontColor()) {
         da.setFontColor(std::make_unique<AnnotColor>(0, 0, 0));
     }
-    if (!contents) {
-        contents = std::make_unique<GooString>();
-    }
 
     // Draw box
     bool doFill = (color && color->getSpace() != AnnotColor::colorTransparent);
@@ -3399,7 +3396,7 @@ void AnnotFreeText::generateFreeTextAppearance()
     // Set font state
     appearBuilder.setDrawColor(*da.getFontColor(), true);
     appearBuilder.appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", textmargin, height - textmargin);
-    const DrawMultiLineTextResult textCommands = drawMultiLineText(contents->toStr(), textwidth, form, *font, da.getFontName(), da.getFontPtSize(), quadding, 0 /*borderWidth*/);
+    const DrawMultiLineTextResult textCommands = drawMultiLineText(contents.toStr(), textwidth, form, *font, da.getFontName(), da.getFontPtSize(), quadding, 0 /*borderWidth*/);
     appearBuilder.append(textCommands.text.c_str());
     appearBuilder.append("ET Q\n");
 
@@ -3720,10 +3717,10 @@ void AnnotLine::generateLineAppearance()
         font = createAnnotDrawFont(doc->getXRef(), fontResDict.get());
         int lines = 0;
         size_t i = 0;
-        while (i < contents->size()) {
+        while (i < contents.size()) {
             GooString out;
             double linewidth;
-            layoutText(contents.get(), &out, &i, *font, &linewidth, 0, nullptr, false);
+            layoutText(&contents, &out, &i, *font, &linewidth, 0, nullptr, false);
             linewidth *= fontsize;
             if (linewidth > captionwidth) {
                 captionwidth = linewidth;
@@ -3804,10 +3801,10 @@ void AnnotLine::generateLineAppearance()
         // Draw text
         size_t i = 0;
         double xposPrev = 0;
-        while (i < contents->size()) {
+        while (i < contents.size()) {
             GooString out;
             double linewidth, xpos;
-            layoutText(contents.get(), &out, &i, *font, &linewidth, 0, nullptr, false);
+            layoutText(&contents, &out, &i, *font, &linewidth, 0, nullptr, false);
             linewidth *= fontsize;
             xpos = (captionwidth - linewidth) / 2;
             appearBuilder.appendf("{0:.2f} {1:.2f} Td\n", xpos - xposPrev, -fontsize);

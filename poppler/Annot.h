@@ -757,7 +757,7 @@ public:
     AnnotSubtype getType() const { return type; }
     const PDFRectangle &getRect() const { return *rect; }
     void getRect(double *x1, double *y1, double *x2, double *y2) const;
-    const GooString *getContents() const { return contents.get(); }
+    const GooString &getContents() const { return contents; }
     int getPageNum() const { return page; }
     const GooString *getUniqueName() const { return name.get(); }
     const GooString *getModified() const { return modified.get(); }
@@ -810,7 +810,7 @@ protected:
     std::unique_ptr<PDFRectangle> rect; // Rect
 
     // optional data
-    std::unique_ptr<GooString> contents; // Contents
+    GooString contents; // Contents
     std::unique_ptr<GooString> modified; // M
     int page; // P
     unsigned int flags; // F (must be a 32 bit unsigned int)

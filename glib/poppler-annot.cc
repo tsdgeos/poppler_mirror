@@ -1025,13 +1025,12 @@ PopplerAnnotType poppler_annot_get_annot_type(PopplerAnnot *poppler_annot)
  **/
 gchar *poppler_annot_get_contents(PopplerAnnot *poppler_annot)
 {
-    const GooString *contents;
 
     g_return_val_if_fail(POPPLER_IS_ANNOT(poppler_annot), NULL);
 
-    contents = poppler_annot->annot->getContents();
+    const GooString &contents = poppler_annot->annot->getContents();
 
-    return contents && !contents->empty() ? _poppler_goo_string_to_utf8(contents->toStr()) : nullptr;
+    return !contents.empty() ? _poppler_goo_string_to_utf8(contents.toStr()) : nullptr;
 }
 
 /**
@@ -2034,7 +2033,7 @@ static void poppler_annot_free_text_set_da_to_native(PopplerAnnotFreeText *poppl
             }
 
             if (!font_name.empty()) {
-                form->ensureFontsForAllCharacters(annot->getContents()->toStr(), font_name);
+                form->ensureFontsForAllCharacters(annot->getContents().toStr(), font_name);
             }
         }
         size = poppler_annot->font_desc->size_pt;
