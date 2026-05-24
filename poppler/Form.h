@@ -568,7 +568,7 @@ public:
 
     bool isSelected(int i) const { return choices[i].selected; }
 
-    int getNumSelected();
+    int getNumSelected() const;
 
     bool isCombo() const { return combo; }
     bool hasEdit() const { return edit; }

@@ -2148,7 +2148,7 @@ const GooString *FormFieldChoice::getEditChoice() const
     return editedChoice.get();
 }
 
-int FormFieldChoice::getNumSelected()
+int FormFieldChoice::getNumSelected() const
 {
     int cnt = 0;
     for (int i = 0; i < numChoices; i++) {
