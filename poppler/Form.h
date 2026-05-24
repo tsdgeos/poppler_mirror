@@ -238,13 +238,20 @@ protected:
 // FormWidgetChoice
 //------------------------------------------------------------------------
 
+struct FormFieldChoiceOption
+{
+    std::unique_ptr<GooString> exportVal; // the export value ("internal" name)
+    std::unique_ptr<GooString> optionName; // displayed name
+    bool selected = false; // if this choice is selected
+};
+
 class POPPLER_PRIVATE_EXPORT FormWidgetChoice : public FormWidget
 {
 public:
     FormWidgetChoice(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
     ~FormWidgetChoice() override;
 
-    int getNumChoices() const;
+    const std::vector<FormFieldChoiceOption> &getChoices() const;
     // return the display name of the i-th choice (UTF16BE)
     const GooString *getChoice(int i) const;
     const GooString *getExportVal(int i) const;
@@ -543,9 +550,9 @@ public:
 
     ~FormFieldChoice() override;
 
-    int getNumChoices() const { return numChoices; }
-    const GooString *getChoice(int i) const { return choices ? choices[i].optionName.get() : nullptr; }
-    const GooString *getExportVal(int i) const { return choices ? choices[i].exportVal.get() : nullptr; }
+    const std::vector<FormFieldChoiceOption> &getChoices() const { return choices; }
+    const GooString *getChoice(int i) const { return choices[i].optionName.get(); }
+    const GooString *getExportVal(int i) const { return choices[i].exportVal.get(); }
     // For multi-select choices it returns the first one
     const GooString *getSelectedChoice() const;
     const GooString *getAppearanceSelectedChoice() const { return appearanceSelectedChoice ? appearanceSelectedChoice.get() : getSelectedChoice(); }
@@ -593,15 +600,7 @@ protected:
     bool doNotSpellCheck;
     bool doCommitOnSelChange;
 
-    struct ChoiceOpt
-    {
-        std::unique_ptr<GooString> exportVal; // the export value ("internal" name)
-        std::unique_ptr<GooString> optionName; // displayed name
-        bool selected = false; // if this choice is selected
-    };
-
-    int numChoices;
-    ChoiceOpt *choices;
+    std::vector<FormFieldChoiceOption> choices;
     std::vector<bool> defaultChoices;
     std::unique_ptr<GooString> editedChoice;
     std::unique_ptr<GooString> appearanceSelectedChoice;

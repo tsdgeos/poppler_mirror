@@ -446,7 +446,7 @@ FormWidgetChoice::~FormWidgetChoice() = default;
 
 bool FormWidgetChoice::_checkRange(int i) const
 {
-    if (i < 0 || i >= parent()->getNumChoices()) {
+    if (i < 0 || static_cast<size_t>(i) >= getChoices().size()) {
         error(errInternal, -1, "FormWidgetChoice::_checkRange i out of range : {0:d}", i);
         return false;
     }
@@ -513,9 +513,9 @@ void FormWidgetChoice::setAppearanceChoiceContent(std::unique_ptr<GooString> new
     parent()->setAppearanceChoiceContent(std::move(new_content));
 }
 
-int FormWidgetChoice::getNumChoices() const
+const std::vector<FormFieldChoiceOption> &FormWidgetChoice::getChoices() const
 {
-    return parent()->getNumChoices();
+    return parent()->getChoices();
 }
 
 const GooString *FormWidgetChoice::getChoice(int i) const
@@ -1831,8 +1831,7 @@ std::optional<size_t> FormFieldText::parseDA(std::vector<std::string> *daToks) c
 //------------------------------------------------------------------------
 FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, FormField *parentA, std::set<int> *usedParents) : FormField(docA, std::move(aobj), refA, parentA, usedParents, formChoice)
 {
-    numChoices = 0;
-    choices = nullptr;
+    int numChoices = 0;
     editedChoice = nullptr;
     appearanceSelectedChoice = nullptr;
     topIdx = 0;
@@ -1874,7 +1873,7 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
     obj1 = Form::fieldLookup(dict, "Opt");
     if (obj1.isArray()) {
         numChoices = obj1.arrayGetLength();
-        choices = new ChoiceOpt[numChoices];
+        choices.resize(numChoices);
 
         for (int i = 0; i < numChoices; i++) {
             Object obj2 = obj1.arrayGet(i);
@@ -1936,13 +1935,14 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
     obj1 = Form::fieldLookup(dict, key);
     if (obj1.isString() || obj1.isArray()) {
         if (fillType == fillDefaultValue) {
-            defaultChoices.resize(numChoices);
+            defaultChoices.resize(choices.size());
         }
 
         if (obj1.isString()) {
             bool optionFound = false;
 
-            for (int i = 0; i < numChoices; i++) {
+            const size_t numChoices = choices.size();
+            for (size_t i = 0; i < numChoices; i++) {
                 if (choices[i].exportVal) {
                     if (choices[i].exportVal->compare(obj1.getString()) == 0) {
                         optionFound = true;
@@ -1968,7 +1968,8 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
                 editedChoice = obj1.takeString();
             }
         } else if (obj1.isArray()) {
-            for (int i = 0; i < numChoices; i++) {
+            const size_t numChoices = choices.size();
+            for (size_t i = 0; i < numChoices; i++) {
                 for (int j = 0; j < obj1.arrayGetLength(); j++) {
                     const Object obj2 = obj1.arrayGet(j);
                     if (!obj2.isString()) {
@@ -2002,10 +2003,7 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
     }
 }
 
-FormFieldChoice::~FormFieldChoice()
-{
-    delete[] choices;
-}
+FormFieldChoice::~FormFieldChoice() = default;
 
 void FormFieldChoice::print(int indent)
 {
@@ -2033,6 +2031,7 @@ void FormFieldChoice::updateSelection()
             objV = Object(std::string());
         } else if (numSelected == 1) {
             // Only one option is selected
+            const int numChoices = choices.size();
             for (int i = 0; i < numChoices; i++) {
                 if (choices[i].selected) {
                     if (multiselect) {
@@ -2051,6 +2050,7 @@ void FormFieldChoice::updateSelection()
         } else {
             // More than one option is selected
             objV = Object(std::make_unique<Array>(xref));
+            const int numChoices = choices.size();
             for (int i = 0; i < numChoices; i++) {
                 if (choices[i].selected) {
                     if (multiselect) {
@@ -2075,8 +2075,8 @@ void FormFieldChoice::updateSelection()
 
 void FormFieldChoice::unselectAll()
 {
-    for (int i = 0; i < numChoices; i++) {
-        choices[i].selected = false;
+    for (FormFieldChoiceOption &choice : choices) {
+        choice.selected = false;
     }
 }
 
@@ -2148,8 +2148,8 @@ const GooString *FormFieldChoice::getEditChoice() const
 int FormFieldChoice::getNumSelected() const
 {
     int cnt = 0;
-    for (int i = 0; i < numChoices; i++) {
-        if (choices[i].selected) {
+    for (const FormFieldChoiceOption &choice : choices) {
+        if (choice.selected) {
             cnt++;
         }
     }
@@ -2162,9 +2162,9 @@ const GooString *FormFieldChoice::getSelectedChoice() const
         return editedChoice.get();
     }
 
-    for (int i = 0; i < numChoices; i++) {
-        if (choices[i].optionName && choices[i].selected) {
-            return choices[i].optionName.get();
+    for (const FormFieldChoiceOption &choice : choices) {
+        if (choice.optionName && choice.selected) {
+            return choice.optionName.get();
         }
     }
 
@@ -2176,8 +2176,8 @@ void FormFieldChoice::reset(const std::vector<std::string> &excludedFields)
     if (!isAmongExcludedFields(excludedFields)) {
         editedChoice.reset();
 
-        if (defaultChoices.size() == static_cast<size_t>(numChoices)) {
-            for (int i = 0; i < numChoices; i++) {
+        if (defaultChoices.size() == choices.size()) {
+            for (size_t i = 0; i < choices.size(); i++) {
                 choices[i].selected = defaultChoices[i];
             }
         } else {

@@ -498,10 +498,10 @@ QStringList FormFieldChoice::choices() const
 {
     auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
     QStringList ret;
-    int num = fwc->getNumChoices();
-    ret.reserve(num);
-    for (int i = 0; i < num; ++i) {
-        ret.append(UnicodeParsedString(fwc->getChoice(i)));
+    const std::vector<FormFieldChoiceOption> &choices = fwc->getChoices();
+    ret.reserve(choices.size());
+    for (const FormFieldChoiceOption &choice : choices) {
+        ret.append(UnicodeParsedString(choice.optionName.get()));
     }
     return ret;
 }
@@ -510,14 +510,15 @@ QVector<QPair<QString, QString>> FormFieldChoice::choicesWithExportValues() cons
 {
     auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
     QVector<QPair<QString, QString>> ret;
-    const int num = fwc->getNumChoices();
-    ret.reserve(num);
-    for (int i = 0; i < num; ++i) {
-        const QString display = UnicodeParsedString(fwc->getChoice(i));
-        const GooString *exportValueG = fwc->getExportVal(i);
+    const std::vector<FormFieldChoiceOption> &choices = fwc->getChoices();
+    ret.reserve(choices.size());
+    for (const FormFieldChoiceOption &choice : choices) {
+        const QString display = UnicodeParsedString(choice.optionName.get());
+        const GooString *exportValueG = choice.exportVal.get();
         const QString exportValue = exportValueG ? UnicodeParsedString(exportValueG) : display;
         ret.append({ display, exportValue });
     }
+
     return ret;
 }
 
@@ -536,7 +537,7 @@ bool FormFieldChoice::multiSelect() const
 QList<int> FormFieldChoice::currentChoices() const
 {
     auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
-    int num = fwc->getNumChoices();
+    const int num = fwc->getChoices().size();
     QList<int> choices;
     for (int i = 0; i < num; ++i) {
         if (fwc->isSelected(i)) {

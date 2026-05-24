@@ -4951,17 +4951,19 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     // get the border width
     borderWidth = border ? border->getWidth() : 0;
 
+    const std::vector<FormFieldChoiceOption> &choices = fieldChoice->getChoices();
+
     // compute font autosize
     if (fontSize == 0) {
         double wMax = 0;
-        for (int i = 0; i < fieldChoice->getNumChoices(); ++i) {
-            size_t j = 0;
-            if (fieldChoice->getChoice(i) == nullptr) {
+        for (const FormFieldChoiceOption &choice : choices) {
+            if (!choice.optionName) {
                 error(errSyntaxError, -1, "Invalid annotation listbox");
                 return false;
             }
+            size_t j = 0;
             double w;
-            Annot::layoutText(fieldChoice->getChoice(i), &convertedText, &j, *font, &w, 0.0, nullptr, false);
+            Annot::layoutText(choice.optionName.get(), &convertedText, &j, *font, &w, 0.0, nullptr, false);
             if (w > wMax) {
                 wMax = w;
             }
@@ -4980,12 +4982,12 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     }
     // draw the text
     y = rect->y2 - rect->y1 - 1.1 * fontSize;
-    for (int i = fieldChoice->getTopIndex(); i < fieldChoice->getNumChoices(); ++i) {
+    for (size_t i = fieldChoice->getTopIndex(); i < choices.size(); ++i) {
         // setup
         appearBuf.append("q\n");
 
         // draw the background if selected
-        if (fieldChoice->isSelected(i)) {
+        if (choices[i].selected) {
             appearBuf.append("0 g f\n");
             GooString::appendf(appearBuf, "{0:.2f} {1:.2f} {2:.2f} {3:.2f} re f\n", borderWidth, y - 0.2 * fontSize, rect->x2 - rect->x1 - 2 * borderWidth, 1.1 * fontSize);
         }
@@ -4996,7 +4998,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         // compute text width and start position
         size_t j = 0;
         double w;
-        Annot::layoutText(fieldChoice->getChoice(i), &convertedText, &j, *font, &w, 0.0, nullptr, false);
+        Annot::layoutText(choices[i].optionName.get(), &convertedText, &j, *font, &w, 0.0, nullptr, false);
         w *= fontSize;
         switch (quadding) {
         case VariableTextQuadding::leftJustified:
@@ -5037,7 +5039,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         }
 
         // change the text color if selected
-        if (fieldChoice->isSelected(i)) {
+        if (choices[i].selected) {
             appearBuf.append("1 g\n");
         }
 
