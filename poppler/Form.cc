@@ -767,8 +767,8 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
         }
         const DefaultAppearance da { pdfFontName, fontSize, std::move(fontColor) };
         getField()->setDefaultAppearance(da.toAppearanceString());
-        form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
-        form->ensureFontsForAllCharacters(&signatureTextLeft, pdfFontName);
+        form->ensureFontsForAllCharacters(signatureText.toStr(), pdfFontName);
+        form->ensureFontsForAllCharacters(signatureTextLeft.toStr(), pdfFontName);
     }
     auto appearCharacs = std::make_unique<AnnotAppearanceCharacs>(nullptr);
     appearCharacs->setBorderColor(std::move(borderColor));
@@ -1693,7 +1693,7 @@ void FormFieldText::setContent(std::unique_ptr<GooString> new_content)
                 Object fieldResourcesDictObj = obj.dictLookup("DR");
                 if (fieldResourcesDictObj.isDict()) {
                     GfxResources fieldResources(doc->getXRef(), fieldResourcesDictObj.getDict(), form->getDefaultResources());
-                    const std::vector<Form::AddFontResult> newFonts = form->ensureFontsForAllCharacters(content.get(), fontName, &fieldResources);
+                    const std::vector<Form::AddFontResult> newFonts = form->ensureFontsForAllCharacters(content->toStr(), fontName, &fieldResources);
                     // If we added new fonts to the Form object default resuources we also need to add them (we only add the ref so this is cheap)
                     // to the field DR dictionary
                     if (!newFonts.empty()) {
@@ -1709,7 +1709,7 @@ void FormFieldText::setContent(std::unique_ptr<GooString> new_content)
                         setDefaultAppearance(da.toAppearanceString());
                     }
                 } else {
-                    form->ensureFontsForAllCharacters(content.get(), fontName);
+                    form->ensureFontsForAllCharacters(content->toStr(), fontName);
                 }
             } else {
                 // This is wrong, there has to be a Tf in DA
@@ -2989,7 +2989,7 @@ std::string Form::getFallbackFontForChar(Unicode uChar, const GfxFont &fontToEmu
     return findFontInDefaultResources(res.family, res.style);
 }
 
-std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooString *unicodeText, const std::string &pdfFontNameToEmulate, GfxResources *fieldResources)
+std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const std::string &unicodeText, const std::string &pdfFontNameToEmulate, GfxResources *fieldResources)
 {
     GfxResources *resources = fieldResources ? fieldResources : defaultResources;
     std::shared_ptr<GfxFont> f;
@@ -3009,9 +3009,9 @@ std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooStri
 
     // If the text has some characters that are not available in the font, try adding a font for those
     std::unordered_set<Unicode> seen;
-    for (size_t i = 2; i < unicodeText->size(); i += 2) {
-        Unicode uChar = static_cast<unsigned char>(unicodeText->getChar(i)) << 8;
-        uChar += static_cast<unsigned char>(unicodeText->getChar(i + 1));
+    for (size_t i = 2; i < unicodeText.size(); i += 2) {
+        Unicode uChar = static_cast<unsigned char>(unicodeText[i]) << 8;
+        uChar += static_cast<unsigned char>(unicodeText[i + 1]);
 
         if (uChar < 128 && !std::isprint(static_cast<unsigned char>(uChar))) {
             continue;

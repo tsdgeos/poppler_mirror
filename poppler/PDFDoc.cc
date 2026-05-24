@@ -2224,8 +2224,8 @@ std::variant<PDFDoc::SignatureData, CryptoSign::SigningErrorMessage> PDFDoc::cre
         const DefaultAppearance da { pdfFontName, fontSize, std::move(fontColor) };
         annotObj.dictSet("DA", Object(da.toAppearanceString()));
 
-        form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
-        form->ensureFontsForAllCharacters(&signatureTextLeft, pdfFontName);
+        form->ensureFontsForAllCharacters(signatureText.toStr(), pdfFontName);
+        form->ensureFontsForAllCharacters(signatureTextLeft.toStr(), pdfFontName);
     }
 
     const Ref ref = getXRef()->addIndirectObject(annotObj);

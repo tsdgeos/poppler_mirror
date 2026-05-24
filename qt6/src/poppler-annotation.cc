@@ -1607,7 +1607,7 @@ void TextAnnotationPrivate::setDefaultAppearanceToNative()
                 }
 
                 if (!fontName.empty()) {
-                    form->ensureFontsForAllCharacters(pdfAnnot->getContents(), fontName);
+                    form->ensureFontsForAllCharacters(pdfAnnot->getContents()->toStr(), fontName);
                 } else {
                     fontName = "Invalid_font";
                 }

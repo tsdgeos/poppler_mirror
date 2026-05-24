@@ -6,7 +6,7 @@
 //
 // Copyright 2006 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright 2007, 2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2007-2010, 2012, 2015-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2010, 2012, 2015-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Mark Riedesel <mark@klowner.com>
 // Copyright 2011 Pino Toscano <pino@kde.org>
 // Copyright 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -724,7 +724,7 @@ public:
     // If needed adds fonts to the default resources dictionary, font names will be popplerfontXXX
     // If fieldResources is not nullptr, it is used instead of the to query the font to emulate instead of the default resources
     // Returns a list of all the added fonts (if any)
-    std::vector<AddFontResult> ensureFontsForAllCharacters(const GooString *unicodeText, const std::string &pdfFontNameToEmulate, GfxResources *fieldResources = nullptr);
+    std::vector<AddFontResult> ensureFontsForAllCharacters(const std::string &unicodeText, const std::string &pdfFontNameToEmulate, GfxResources *fieldResources = nullptr);
 
     bool getNeedAppearances() const { return needAppearances; }
     int getNumFields() const { return rootFields.size(); }

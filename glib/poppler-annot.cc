@@ -2034,7 +2034,7 @@ static void poppler_annot_free_text_set_da_to_native(PopplerAnnotFreeText *poppl
             }
 
             if (!font_name.empty()) {
-                form->ensureFontsForAllCharacters(annot->getContents(), font_name);
+                form->ensureFontsForAllCharacters(annot->getContents()->toStr(), font_name);
             }
         }
         size = poppler_annot->font_desc->size_pt;
