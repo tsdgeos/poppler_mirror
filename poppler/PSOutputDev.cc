@@ -7186,13 +7186,13 @@ void PSOutputDev::writePSFmt(const char *fmt, ...)
 
 void PSOutputDev::writePSString(const std::string &s)
 {
-    unsigned char *p;
+    const unsigned char *p;
     int n, line;
     char buf[8];
 
     writePSChar('(');
     line = 1;
-    for (p = const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(s.c_str())), n = s.size(); n; ++p, --n) {
+    for (p = reinterpret_cast<const unsigned char *>(s.c_str()), n = s.size(); n; ++p, --n) {
         if (line >= 64) {
             writePSChar('\\');
             writePSChar('\n');

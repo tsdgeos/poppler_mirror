@@ -258,7 +258,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
         for (i = 0; i < 256; ++i) {
             codeToGID[i] = 0;
             if ((name = enc[i])) {
-                codeToGID[i] = FT_Get_Name_Index(font_face->face, const_cast<char *>(name));
+                codeToGID[i] = FT_Get_Name_Index(font_face->face, name);
                 if (codeToGID[i] == 0) {
                     Unicode u;
                     u = globalParams->mapNameToUnicodeText(name);
@@ -267,7 +267,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
                 if (codeToGID[i] == 0) {
                     name = GfxFont::getAlternateName(name);
                     if (name) {
-                        codeToGID[i] = FT_Get_Name_Index(font_face->face, const_cast<char *>(name));
+                        codeToGID[i] = FT_Get_Name_Index(font_face->face, name);
                     }
                 }
             }

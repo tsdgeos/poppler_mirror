@@ -1487,7 +1487,7 @@ void Annot::update(const char *key, Object &&value)
         annotObj.dictSet("M", Object(std::string { modified->toStr() }));
     }
 
-    annotObj.dictSet(const_cast<char *>(key), std::move(value));
+    annotObj.dictSet(key, std::move(value));
 
     doc->getXRef()->setModifiedObject(&annotObj, ref);
 
