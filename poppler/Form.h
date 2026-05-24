@@ -602,7 +602,7 @@ protected:
 
     int numChoices;
     ChoiceOpt *choices;
-    bool *defaultChoices;
+    std::vector<bool> defaultChoices;
     std::unique_ptr<GooString> editedChoice;
     std::unique_ptr<GooString> appearanceSelectedChoice;
     int topIdx; // TI

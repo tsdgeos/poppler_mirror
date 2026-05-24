@@ -1833,7 +1833,6 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
 {
     numChoices = 0;
     choices = nullptr;
-    defaultChoices = nullptr;
     editedChoice = nullptr;
     appearanceSelectedChoice = nullptr;
     topIdx = 0;
@@ -1937,8 +1936,7 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
     obj1 = Form::fieldLookup(dict, key);
     if (obj1.isString() || obj1.isArray()) {
         if (fillType == fillDefaultValue) {
-            defaultChoices = new bool[numChoices];
-            memset(defaultChoices, 0, sizeof(bool) * numChoices);
+            defaultChoices.resize(numChoices);
         }
 
         if (obj1.isString()) {
@@ -2007,7 +2005,6 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
 FormFieldChoice::~FormFieldChoice()
 {
     delete[] choices;
-    delete[] defaultChoices;
 }
 
 void FormFieldChoice::print(int indent)
@@ -2179,7 +2176,7 @@ void FormFieldChoice::reset(const std::vector<std::string> &excludedFields)
     if (!isAmongExcludedFields(excludedFields)) {
         editedChoice.reset();
 
-        if (defaultChoices) {
+        if (defaultChoices.size() == static_cast<size_t>(numChoices)) {
             for (int i = 0; i < numChoices; i++) {
                 choices[i].selected = defaultChoices[i];
             }
