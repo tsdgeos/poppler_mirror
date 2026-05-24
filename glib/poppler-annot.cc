@@ -287,7 +287,7 @@ static AnnotQuadrilaterals *create_annot_quads_from_poppler_quads(GArray *quads)
 
 /* If @crop_box parameter is non null, it will substract the crop_box offset
  * from the coordinates of the returned #PopplerQuadrilateral array */
-static GArray *create_poppler_quads_from_annot_quads(AnnotQuadrilaterals *quads_array, const PDFRectangle *crop_box)
+static GArray *create_poppler_quads_from_annot_quads(const AnnotQuadrilaterals *quads_array, const PDFRectangle *crop_box)
 {
     GArray *quads;
     guint quads_len;
@@ -699,7 +699,7 @@ PopplerAnnot *_poppler_annot_screen_new(PopplerDocument *doc, const std::shared_
 {
     PopplerAnnot *poppler_annot;
     AnnotScreen *annot_screen;
-    LinkAction *action;
+    const LinkAction *action;
 
     poppler_annot = _poppler_create_annot(POPPLER_TYPE_ANNOT_SCREEN, annot);
     annot_screen = static_cast<AnnotScreen *>(poppler_annot->annot.get());
@@ -1888,7 +1888,7 @@ GArray *poppler_annot_text_markup_get_quadrilaterals(PopplerAnnotTextMarkup *pop
 
     annot = static_cast<AnnotTextMarkup *>(POPPLER_ANNOT(poppler_annot)->annot.get());
     crop_box = _poppler_annot_get_cropbox(POPPLER_ANNOT(poppler_annot));
-    AnnotQuadrilaterals *quads = annot->getQuadrilaterals();
+    const AnnotQuadrilaterals *quads = annot->getQuadrilaterals();
 
     return create_poppler_quads_from_annot_quads(quads, crop_box);
 }
@@ -1938,14 +1938,14 @@ PopplerAnnotFreeTextQuadding poppler_annot_free_text_get_quadding(PopplerAnnotFr
 PopplerAnnotCalloutLine *poppler_annot_free_text_get_callout_line(PopplerAnnotFreeText *poppler_annot)
 {
     AnnotFreeText *annot;
-    AnnotCalloutLine *line;
+    const AnnotCalloutLine *line;
 
     g_return_val_if_fail(POPPLER_IS_ANNOT_FREE_TEXT(poppler_annot), NULL);
 
     annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT(poppler_annot)->annot.get());
 
     if ((line = annot->getCalloutLine())) {
-        AnnotCalloutMultiLine *multiline;
+        const AnnotCalloutMultiLine *multiline;
         auto *callout = g_new0(PopplerAnnotCalloutLine, 1);
 
         callout->x1 = line->getX1();
@@ -1953,7 +1953,7 @@ PopplerAnnotCalloutLine *poppler_annot_free_text_get_callout_line(PopplerAnnotFr
         callout->x2 = line->getX2();
         callout->y2 = line->getY2();
 
-        if ((multiline = dynamic_cast<AnnotCalloutMultiLine *>(line))) {
+        if ((multiline = dynamic_cast<const AnnotCalloutMultiLine *>(line))) {
             callout->multiline = TRUE;
             callout->x3 = multiline->getX3();
             callout->y3 = multiline->getY3();
@@ -2544,7 +2544,7 @@ gboolean poppler_annot_stamp_set_custom_image(PopplerAnnotStamp *poppler_annot, 
  */
 gboolean poppler_annot_get_border_width(PopplerAnnot *poppler_annot, double *width)
 {
-    AnnotBorder *b = poppler_annot->annot->getBorder();
+    const AnnotBorder *b = poppler_annot->annot->getBorder();
     if (b) {
         *width = b->getWidth();
         return TRUE;

@@ -236,7 +236,7 @@ void FormField::setPrintable(bool value)
 
 std::unique_ptr<Link> FormField::activationAction() const
 {
-    if (::LinkAction *act = m_formData->fm->getActivationAction()) {
+    if (const ::LinkAction *act = m_formData->fm->getActivationAction()) {
         return PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
     }
 

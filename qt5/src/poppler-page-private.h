@@ -1,6 +1,6 @@
 /* poppler-page.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
- * Copyright (C) 2007, 2012, 2025, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2007, 2012, 2025, 2026, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2015 Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2018, 2021 Nelson Benítez León <nbenitezl@gmail.com>
@@ -45,14 +45,14 @@ class PageTransition;
 class PageData
 {
 public:
-    Link *convertLinkActionToLink(::LinkAction *a, const QRectF &linkArea) const;
+    Link *convertLinkActionToLink(const ::LinkAction *a, const QRectF &linkArea) const;
 
     DocumentData *parentDoc;
     ::Page *page;
     int index;
     PageTransition *transition;
 
-    static Link *convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc, const QRectF &linkArea);
+    static Link *convertLinkActionToLink(const ::LinkAction *a, DocumentData *parentDoc, const QRectF &linkArea);
 
     std::unique_ptr<TextPage> prepareTextSearch(const QString &text, Page::Rotation rotate, QVector<Unicode> *u) const;
     static bool performSingleTextSearch(TextPage *textPage, QVector<Unicode> &u, double &sLeft, double &sTop, double &sRight, double &sBottom, Page::SearchDirection direction, bool sCase, bool sWords, bool sDiacritics, bool sAcrossLines);

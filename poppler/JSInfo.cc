@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2017, 2020, 2021, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2017, 2020, 2021, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
@@ -48,7 +48,7 @@ void JSInfo::printJS(std::string_view js)
     }
 }
 
-void JSInfo::scanLinkAction(LinkAction *link, const char *action)
+void JSInfo::scanLinkAction(const LinkAction *link, const char *action)
 {
     if (!link) {
         return;
@@ -57,7 +57,7 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action)
     if (link->getKind() == actionJavaScript) {
         hasJS = true;
         if (print) {
-            auto *linkjs = static_cast<LinkJavaScript *>(link);
+            const auto *linkjs = static_cast<const LinkJavaScript *>(link);
             if (linkjs->isOk()) {
                 const std::string &s = linkjs->getScript();
                 fprintf(file, "%s:\n", action);
@@ -68,7 +68,7 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action)
     }
 
     if (link->getKind() == actionRendition) {
-        auto *linkr = static_cast<LinkRendition *>(link);
+        const auto *linkr = static_cast<const LinkRendition *>(link);
         if (!linkr->getScript().empty()) {
             hasJS = true;
             if (print) {

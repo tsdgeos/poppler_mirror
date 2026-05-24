@@ -2513,7 +2513,7 @@ public:
     };
 
     /// \cond PRIVATE
-    explicit SoundObject(Sound *popplersound);
+    explicit SoundObject(const Sound *popplersound);
     /// \endcond
 
     ~SoundObject();

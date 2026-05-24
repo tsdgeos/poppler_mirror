@@ -206,7 +206,7 @@ const GooString *FormWidget::getFullyQualifiedName()
     return field->getFullyQualifiedName();
 }
 
-LinkAction *FormWidget::getActivationAction()
+const LinkAction *FormWidget::getActivationAction()
 {
     return widget ? widget->getAction() : nullptr;
 }

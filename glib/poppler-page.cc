@@ -1459,7 +1459,7 @@ void poppler_page_free_annot_mapping(GList *list)
 
 /* Adds or removes (according to @add parameter) the passed in @crop_box from the
  * passed in @quads and returns it as a new #AnnotQuadrilaterals object */
-AnnotQuadrilaterals *new_quads_from_offset_cropbox(const PDFRectangle *crop_box, AnnotQuadrilaterals *quads, gboolean add)
+AnnotQuadrilaterals *new_quads_from_offset_cropbox(const PDFRectangle *crop_box, const AnnotQuadrilaterals *quads, gboolean add)
 {
     int len = quads->getQuadrilateralsLength();
     auto quads_array = std::make_unique<AnnotQuadrilaterals::AnnotQuadrilateral[]>(len);
@@ -1535,7 +1535,7 @@ void _page_unrotate_xy(Page *page, double *x, double *y)
     }
 }
 
-AnnotQuadrilaterals *_page_new_quads_unrotated(Page *page, AnnotQuadrilaterals *quads)
+AnnotQuadrilaterals *_page_new_quads_unrotated(Page *page, const AnnotQuadrilaterals *quads)
 {
     double x1, y1, x2, y2, x3, y3, x4, y4;
     int len = quads->getQuadrilateralsLength();

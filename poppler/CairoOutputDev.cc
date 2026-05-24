@@ -422,7 +422,7 @@ void CairoOutputDev::endForm(Object * /*obj*/, Ref /*id*/)
     }
 }
 
-void CairoOutputDev::quadToCairoRect(AnnotQuadrilaterals *quads, int idx, double pageHeight, cairo_rectangle_t *rect)
+void CairoOutputDev::quadToCairoRect(const AnnotQuadrilaterals *quads, int idx, double pageHeight, cairo_rectangle_t *rect)
 {
     double x1, x2, y1, y2;
     x1 = x2 = quads->getX1(idx);
@@ -491,7 +491,7 @@ bool CairoOutputDev::beginLinkTag(AnnotLink *annotLink)
 
     auto attrib = GooString::format("link_page={0:d} ", page_num);
     attrib.append("rect=[");
-    AnnotQuadrilaterals *quads = annotLink->getQuadrilaterals();
+    const AnnotQuadrilaterals *quads = annotLink->getQuadrilaterals();
     if (quads && quads->getQuadrilateralsLength() > 0) {
         for (int i = 0; i < quads->getQuadrilateralsLength(); i++) {
             cairo_rectangle_t rect;

@@ -8,7 +8,7 @@
  * Copyright (C) 2023-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Jan-Michael Brummer <jan-michael.brummer1@volkswagen.de>
  * Copyright (C) 2025 lbaudin <lbaudin@gnome.org>
- * Copyright (C) 2025 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2025, 2026 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -182,7 +182,7 @@ gboolean poppler_form_field_is_read_only(PopplerFormField *field)
  */
 PopplerAction *poppler_form_field_get_action(PopplerFormField *field)
 {
-    LinkAction *action;
+    const LinkAction *action;
 
     if (field->action) {
         return field->action;
