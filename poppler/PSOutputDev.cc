@@ -2079,7 +2079,7 @@ void PSOutputDev::setupEmbeddedType1Font(const Ref *id, GooString *psName)
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
     embFontList.append("%%+ font ");
-    embFontList.append(psName->c_str());
+    embFontList.append(psName->toStr());
     embFontList.append("\n");
 
     if (strObj.streamGetChar() == 0x80 && strObj.streamGetChar() == 1) {
@@ -2220,7 +2220,7 @@ void PSOutputDev::setupExternalType1Font(const std::string &fileName, GooString 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
     embFontList.append("%%+ font ");
-    embFontList.append(psName->c_str());
+    embFontList.append(psName->toStr());
     embFontList.append("\n");
 
     // copy the font file
@@ -2295,7 +2295,7 @@ void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, const Ref *id, GooStrin
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
     embFontList.append("%%+ font ");
-    embFontList.append(psName->c_str());
+    embFontList.append(psName->toStr());
     embFontList.append("\n");
 
     // convert it to a Type 1 font
@@ -2325,7 +2325,7 @@ void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, const Ref *id, Goo
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
     embFontList.append("%%+ font ");
-    embFontList.append(psName->c_str());
+    embFontList.append(psName->toStr());
     embFontList.append("\n");
 
     // convert it to a Type 1 font
@@ -2347,7 +2347,7 @@ void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, GooString *psName, in
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
     embFontList.append("%%+ font ");
-    embFontList.append(psName->c_str());
+    embFontList.append(psName->toStr());
     embFontList.append("\n");
 
     // convert it to a Type 42 font
@@ -2371,7 +2371,7 @@ void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, const std::string &fi
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
     embFontList.append("%%+ font ");
-    embFontList.append(psName->c_str());
+    embFontList.append(psName->toStr());
     embFontList.append("\n");
 
     // convert it to a Type 42 font
@@ -2405,7 +2405,7 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, const std::string 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
     embFontList.append("%%+ font ");
-    embFontList.append(psName->c_str());
+    embFontList.append(psName->toStr());
     embFontList.append("\n");
 
     // convert it to a Type 0 font
@@ -2455,7 +2455,7 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, const Ref *id, GooStr
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
     embFontList.append("%%+ font ");
-    embFontList.append(psName->c_str());
+    embFontList.append(psName->toStr());
     embFontList.append("\n");
 
     // convert it to a Type 0 font
@@ -2481,7 +2481,7 @@ void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, GooString *psName,
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
     embFontList.append("%%+ font ");
-    embFontList.append(psName->c_str());
+    embFontList.append(psName->toStr());
     embFontList.append("\n");
 
     // convert it to a Type 0 font
@@ -2519,7 +2519,7 @@ void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, const Ref *id, Goo
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
     embFontList.append("%%+ font ");
-    embFontList.append(psName->c_str());
+    embFontList.append(psName->toStr());
     embFontList.append("\n");
 
     // convert it to a Type 0 font
@@ -2562,7 +2562,7 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName, Dict *parentR
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
     embFontList.append("%%+ font ");
-    embFontList.append(psName->c_str());
+    embFontList.append(psName->toStr());
     embFontList.append("\n");
 
     // font dictionary
