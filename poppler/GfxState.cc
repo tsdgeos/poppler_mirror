@@ -6382,17 +6382,17 @@ void GfxState::ReusablePathIterator::reset()
     numCoords = curSubPath->getNumPoints();
 }
 
-GfxState::GfxState(double hDPIA, double vDPIA, const PDFRectangle *pageBox, int rotateA, bool upsideDown)
+GfxState::GfxState(double hDPIA, double vDPIA, const PDFRectangle &pageBox, int rotateA, bool upsideDown)
 {
     double kx, ky;
 
     hDPI = hDPIA;
     vDPI = vDPIA;
     rotate = rotateA;
-    px1 = pageBox->x1;
-    py1 = pageBox->y1;
-    px2 = pageBox->x2;
-    py2 = pageBox->y2;
+    px1 = pageBox.x1;
+    py1 = pageBox.y1;
+    px2 = pageBox.x2;
+    py2 = pageBox.y2;
     kx = hDPI / 72.0;
     ky = vDPI / 72.0;
     if (rotate == 90) {

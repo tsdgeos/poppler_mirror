@@ -1203,7 +1203,7 @@ const PDFRectangle *_poppler_annot_get_cropbox_and_page(PopplerAnnot *poppler_an
                 *page_out = page;
             }
 
-            return page->getCropBox();
+            return &page->getCropBox();
         }
     }
 

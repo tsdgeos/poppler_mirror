@@ -158,11 +158,11 @@ class POPPLER_PRIVATE_EXPORT Gfx
 {
 public:
     // Constructor for regular output.
-    Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI, double vDPI, const PDFRectangle *box, const PDFRectangle *cropBox, int rotate, bool (*abortCheckCbkA)(void *data) = nullptr, void *abortCheckCbkDataA = nullptr,
+    Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI, double vDPI, const PDFRectangle &box, const PDFRectangle *cropBox, int rotate, bool (*abortCheckCbkA)(void *data) = nullptr, void *abortCheckCbkDataA = nullptr,
         XRef *xrefA = nullptr);
 
     // Constructor for a sub-page object.
-    Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, const PDFRectangle *cropBox, bool (*abortCheckCbkA)(void *data) = nullptr, void *abortCheckCbkDataA = nullptr, Gfx *gfxA = nullptr);
+    Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle &box, const PDFRectangle *cropBox, bool (*abortCheckCbkA)(void *data) = nullptr, void *abortCheckCbkDataA = nullptr, Gfx *gfxA = nullptr);
 #if USE_CMS
     void initDisplayProfile();
 #endif

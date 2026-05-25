@@ -707,20 +707,20 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
     return {};
 }
 
-static std::tuple<double, double> calculateDxDy(int rot, const PDFRectangle *rect)
+static std::tuple<double, double> calculateDxDy(int rot, const PDFRectangle &rect)
 {
     switch (rot) {
     case 90:
-        return { rect->y2 - rect->y1, rect->x2 - rect->x1 };
+        return { rect.y2 - rect.y1, rect.x2 - rect.x1 };
 
     case 180:
-        return { rect->x2 - rect->y2, rect->y2 - rect->y1 };
+        return { rect.x2 - rect.y2, rect.y2 - rect.y1 };
 
     case 270:
-        return { rect->y2 - rect->y1, rect->x2 - rect->x1 };
+        return { rect.y2 - rect.y1, rect.x2 - rect.x1 };
 
     default: // assume rot == 0
-        return { rect->x2 - rect->x1, rect->y2 - rect->y1 };
+        return { rect.x2 - rect.x1, rect.y2 - rect.y1 };
     }
 }
 
@@ -740,7 +740,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
     const PDFRectangle rect(x1, y1, x2, y2);
     std::unique_ptr<AnnotAppearanceCharacs> origAppearCharacs = getWidgetAnnotation()->getAppearCharacs() ? getWidgetAnnotation()->getAppearCharacs()->copy() : nullptr;
     const int rot = origAppearCharacs ? origAppearCharacs->getRotation() : 0;
-    const auto dxdy = calculateDxDy(rot, &rect);
+    const auto dxdy = calculateDxDy(rot, rect);
     const double dx = std::get<0>(dxdy);
     const double dy = std::get<1>(dxdy);
     const double wMax = dx - 2 * borderWidth - 4;

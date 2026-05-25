@@ -566,7 +566,8 @@ void Page::display(OutputDev *out, double hDPI, double vDPI, int rotate, bool us
 
 std::unique_ptr<Gfx> Page::createGfx(OutputDev *out, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, int sliceX, int sliceY, int sliceW, int sliceH, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData, XRef *xrefA)
 {
-    const PDFRectangle *mediaBox, *cropBox;
+    const PDFRectangle &mediaBox = getMediaBox();
+    const PDFRectangle &cropBox = getCropBox();
     PDFRectangle box;
 
     rotate += getRotate();
@@ -577,19 +578,16 @@ std::unique_ptr<Gfx> Page::createGfx(OutputDev *out, double hDPI, double vDPI, i
     }
 
     makeBox(hDPI, vDPI, rotate, useMediaBox, out->upsideDown(), sliceX, sliceY, sliceW, sliceH, &box, &crop);
-    cropBox = getCropBox();
-    mediaBox = getMediaBox();
-
     if (globalParams->getPrintCommands()) {
-        printf("***** MediaBox = ll:%g,%g ur:%g,%g\n", mediaBox->x1, mediaBox->y1, mediaBox->x2, mediaBox->y2);
-        printf("***** CropBox = ll:%g,%g ur:%g,%g\n", cropBox->x1, cropBox->y1, cropBox->x2, cropBox->y2);
+        printf("***** MediaBox = ll:%g,%g ur:%g,%g\n", mediaBox.x1, mediaBox.y1, mediaBox.x2, mediaBox.y2);
+        printf("***** CropBox = ll:%g,%g ur:%g,%g\n", cropBox.x1, cropBox.y1, cropBox.x2, cropBox.y2);
         printf("***** Rotate = %d\n", attrs->getRotate());
     }
 
     if (!crop) {
-        crop = (box == *cropBox) && out->needClipToCropBox();
+        crop = (box == cropBox) && out->needClipToCropBox();
     }
-    return std::make_unique<Gfx>(doc, out, num, attrs->getResourceDict(), hDPI, vDPI, &box, crop ? cropBox : nullptr, rotate, abortCheckCbk, abortCheckCbkData, xrefA);
+    return std::make_unique<Gfx>(doc, out, num, attrs->getResourceDict(), hDPI, vDPI, box, crop ? &cropBox : nullptr, rotate, abortCheckCbk, abortCheckCbkData, xrefA);
 }
 
 void Page::displaySlice(OutputDev *out, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, int sliceX, int sliceY, int sliceW, int sliceH, bool printing, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData,
@@ -695,7 +693,7 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
     // Just initialize some dummy GfxState for GfxColorSpace::parse.
     // This will set a sRGB profile for ICC-based colorspaces.
     auto pdfrectangle = std::make_shared<PDFRectangle>();
-    auto state = std::make_shared<GfxState>(72.0, 72.0, pdfrectangle.get(), 0, false);
+    auto state = std::make_shared<GfxState>(72.0, 72.0, *pdfrectangle, 0, false);
     std::unique_ptr<GfxColorSpace> colorSpace = GfxColorSpace::parse(nullptr, &obj1, nullptr, state.get());
     if (!colorSpace) {
         fprintf(stderr, "Error: Cannot parse color space\n");
@@ -750,13 +748,12 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
 
 void Page::makeBox(double hDPI, double vDPI, int rotate, bool useMediaBox, bool upsideDown, double sliceX, double sliceY, double sliceW, double sliceH, PDFRectangle *box, bool *crop) const
 {
-    const PDFRectangle *mediaBox, *cropBox, *baseBox;
+    const PDFRectangle &mediaBox = getMediaBox();
+    const PDFRectangle &cropBox = getCropBox();
+    const PDFRectangle *baseBox;
     double kx, ky;
-
-    mediaBox = getMediaBox();
-    cropBox = getCropBox();
     if (sliceW >= 0 && sliceH >= 0) {
-        baseBox = useMediaBox ? mediaBox : cropBox;
+        baseBox = useMediaBox ? &mediaBox : &cropBox;
         kx = 72.0 / hDPI;
         ky = 72.0 / vDPI;
         if (rotate == 90) {
@@ -801,9 +798,9 @@ void Page::makeBox(double hDPI, double vDPI, int rotate, bool useMediaBox, bool 
             }
         }
     } else if (useMediaBox) {
-        *box = *mediaBox;
+        *box = mediaBox;
     } else {
-        *box = *cropBox;
+        *box = cropBox;
         *crop = false;
     }
 }

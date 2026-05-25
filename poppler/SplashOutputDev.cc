@@ -4339,7 +4339,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
     box.y1 = bbox[1];
     box.x2 = bbox[2];
     box.y2 = bbox[3];
-    std::unique_ptr<Gfx> gfx = std::make_unique<Gfx>(doc, this, resDict, &box, nullptr, nullptr, nullptr, gfxA);
+    std::unique_ptr<Gfx> gfx = std::make_unique<Gfx>(doc, this, resDict, box, nullptr, nullptr, nullptr, gfxA);
     // set pattern transformation matrix
     gfx->getState()->setCTM(m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
     if (splashAbs(matc[1]) > splashAbs(matc[0])) {

@@ -122,7 +122,7 @@ const QPicture &QPainterOutputDevType3Font::getGlyph(int gid) const
         auto output_dev = std::make_unique<QPainterOutputDev>(&glyphPainter);
 
         auto gfx = std::make_unique<Gfx>(m_doc, output_dev.get(), resDict,
-                                         &box, // pagebox
+                                         box, // pagebox
                                          nullptr // cropBox
         );
 

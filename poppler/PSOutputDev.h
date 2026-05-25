@@ -169,7 +169,7 @@ public:
     //----- header/trailer (used only if manualCtrl is true)
 
     // Write the document-level header.
-    void writeHeader(int nPages, const PDFRectangle *mediaBox, const PDFRectangle *cropBox, int pageRotate, const char *title);
+    void writeHeader(int nPages, const PDFRectangle &mediaBox, const PDFRectangle *cropBox, int pageRotate, const char *title);
 
     // Write the Xpdf procset.
     void writeXpdfProcset();

@@ -1537,7 +1537,7 @@ public:
     // Construct a default GfxState, for a device with resolution <hDPI>
     // x <vDPI>, page box <pageBox>, page rotation <rotateA>, and
     // coordinate system specified by <upsideDown>.
-    GfxState(double hDPIA, double vDPIA, const PDFRectangle *pageBox, int rotateA, bool upsideDown);
+    GfxState(double hDPIA, double vDPIA, const PDFRectangle &pageBox, int rotateA, bool upsideDown);
 
     // Destructor.
     ~GfxState();

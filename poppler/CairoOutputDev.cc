@@ -1442,7 +1442,7 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*c
     adjusted_stroke_width_tmp = adjusted_stroke_width;
     maskTmp = mask;
     mask = nullptr;
-    gfx = new Gfx(doc, this, resDict, &box, nullptr, nullptr, nullptr, gfxA);
+    gfx = new Gfx(doc, this, resDict, box, nullptr, nullptr, nullptr, gfxA);
     if (paintType == 2) {
         inUncoloredPattern = true;
     }

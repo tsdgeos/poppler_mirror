@@ -1445,11 +1445,11 @@ void PSOutputDev::postInit()
         Page *page;
         // this check is needed in case the document has zero pages
         if ((page = doc->getPage(pageList[0]))) {
-            writeHeader(pageList.size(), page->getMediaBox(), page->getCropBox(), page->getRotate(), psTitle);
+            writeHeader(pageList.size(), page->getMediaBox(), &page->getCropBox(), page->getRotate(), psTitle);
         } else {
             error(errSyntaxError, -1, "Invalid page {0:d}", pageList[0]);
             const PDFRectangle box(0, 0, 1, 1);
-            writeHeader(pageList.size(), &box, &box, 0, psTitle);
+            writeHeader(pageList.size(), box, &box, 0, psTitle);
         }
         if (mode != psModeForm) {
             writePS("%%BeginProlog\n");
@@ -1502,7 +1502,7 @@ PSOutputDev::~PSOutputDev()
     delete t3String;
 }
 
-void PSOutputDev::writeHeader(int nPages, const PDFRectangle *mediaBox, const PDFRectangle *cropBox, int pageRotate, const char *title)
+void PSOutputDev::writeHeader(int nPages, const PDFRectangle &mediaBox, const PDFRectangle *cropBox, int pageRotate, const char *title)
 {
     double x1, y1, x2, y2;
 
@@ -1594,7 +1594,7 @@ void PSOutputDev::writeHeader(int nPages, const PDFRectangle *mediaBox, const PD
     case psModeForm:
         writePS("%%EndComments\n");
         writePS("32 dict dup begin\n");
-        writePSFmt("/BBox [{0:d} {1:d} {2:d} {3:d}] def\n", static_cast<int>(floor(mediaBox->x1)), static_cast<int>(floor(mediaBox->y1)), static_cast<int>(ceil(mediaBox->x2)), static_cast<int>(ceil(mediaBox->y2)));
+        writePSFmt("/BBox [{0:d} {1:d} {2:d} {3:d}] def\n", static_cast<int>(floor(mediaBox.x1)), static_cast<int>(floor(mediaBox.y1)), static_cast<int>(ceil(mediaBox.x2)), static_cast<int>(ceil(mediaBox.y2)));
         writePS("/FormType 1 def\n");
         writePS("/Matrix [1 0 0 1 0 0] def\n");
         break;
@@ -2590,7 +2590,7 @@ void PSOutputDev::setupType3Font(GfxFont *font, const std::string &psName, Dict 
         box.y1 = m[1];
         box.x2 = m[2];
         box.y2 = m[3];
-        gfx = new Gfx(doc, this, resDict, &box, nullptr);
+        gfx = new Gfx(doc, this, resDict, box, nullptr);
         inType3Char = true;
         for (i = 0; i < charProcs->getLength(); ++i) {
             t3FillColorOnly = false;
@@ -2965,7 +2965,7 @@ void PSOutputDev::setupForm(Ref id, Object *strObj)
     box.y1 = bbox[1];
     box.x2 = bbox[2];
     box.y2 = bbox[3];
-    gfx = new Gfx(doc, this, resDict, &box, &box);
+    gfx = new Gfx(doc, this, resDict, box, &box);
     gfx->display(strObj);
     delete gfx;
 
@@ -3026,7 +3026,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     } else if (rotateA < 0) {
         rotateA += 360;
     }
-    state = new GfxState(rasterResolution, rasterResolution, &box, rotateA, false);
+    state = new GfxState(rasterResolution, rasterResolution, box, rotateA, false);
     startPage(page->getNum(), state, xref);
     delete state;
 
@@ -3075,9 +3075,9 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     vDPI2 = yScale * rasterResolution;
     if (sliceW < 0 || sliceH < 0) {
         if (useMediaBox) {
-            box = *page->getMediaBox();
+            box = page->getMediaBox();
         } else {
-            box = *page->getCropBox();
+            box = page->getCropBox();
         }
         sliceX = sliceY = 0;
         sliceW = static_cast<int>((box.x2 - box.x1) * hDPI2 / 72.0);
@@ -4197,7 +4197,7 @@ bool PSOutputDev::tilingPatternFillL1(Object *str, int paintType, Dict *resDict,
     box.y1 = bbox[1];
     box.x2 = bbox[2];
     box.y2 = bbox[3];
-    gfx = new Gfx(doc, this, resDict, &box, nullptr);
+    gfx = new Gfx(doc, this, resDict, box, nullptr);
     writePS("/x {\n");
     if (paintType == 2) {
         writePSFmt("{0:.6g} 0 {1:.6g} {2:.6g} {3:.6g} {4:.6g} setcachedevice\n", xStep, bbox[0], bbox[1], bbox[2], bbox[3]);
@@ -4263,7 +4263,7 @@ bool PSOutputDev::tilingPatternFillL2(Object *str, int paintType, int tilingType
     box.y1 = bbox[1];
     box.x2 = bbox[2];
     box.y2 = bbox[3];
-    gfx = new Gfx(doc, this, resDict, &box, nullptr);
+    gfx = new Gfx(doc, this, resDict, box, nullptr);
     inType3Char = true;
     if (paintType == 2) {
         inUncoloredPattern = true;
@@ -4323,7 +4323,7 @@ bool PSOutputDev::tilingPatternFill(GfxState * /*state*/, Gfx *gfxA, Catalog * /
         box.y1 = bbox[1];
         box.x2 = bbox[2];
         box.y2 = bbox[3];
-        gfx = new Gfx(doc, this, resDict, &box, nullptr, nullptr, nullptr, gfxA);
+        gfx = new Gfx(doc, this, resDict, box, nullptr, nullptr, nullptr, gfxA);
         writePSFmt("[{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] cm\n", mat[0], mat[1], mat[2], mat[3], singleStep_tx, singleStep_ty);
         inType3Char = true;
         gfx->display(str);

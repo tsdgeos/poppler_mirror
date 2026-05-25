@@ -174,7 +174,7 @@ public:
 
     static bool cmpYX(const TextWord *word1, const TextWord *word2);
 
-    void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection);
+    void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle &selection);
 
     // Get the TextFontInfo object associated with a character.
     const TextFontInfo *getFontInfo(int idx) const { return chars[idx].font; }
@@ -333,7 +333,7 @@ public:
 
     void coalesce(const UnicodeMap *uMap);
 
-    void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style);
+    void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle &selection, SelectionStyle style);
     PDFRectangle getBBox() const { return { xMin, yMin, xMax, yMax }; }
 
     // Get the head of the linked list of TextWords.
@@ -408,7 +408,7 @@ public:
     // primary rotation.
     bool isBelow(const TextBlock *blk) const;
 
-    void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style);
+    void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle &selection, SelectionStyle style);
 
     // Get the head of the linked list of TextLines.
     const TextLine *getLines() const { return lines; }
@@ -632,15 +632,15 @@ public:
     // physical layout false and raw order false does not go well with a rectangle
     GooString getText(const std::optional<PDFRectangle> &area, EndOfLineKind textEOL, bool physLayout, EndOfLineHyphenMode hyphenMode) const;
 
-    void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style);
+    void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle &selection, SelectionStyle style);
 
-    void drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor &glyph_color, const GfxColor &box_color, double box_opacity, bool draw_glyphs);
+    void drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle &selection, SelectionStyle style, const GfxColor &glyph_color, const GfxColor &box_color, double box_opacity, bool draw_glyphs);
 
-    std::vector<PDFRectangle *> *getSelectionRegion(const PDFRectangle *selection, SelectionStyle style, double scale);
+    std::vector<PDFRectangle *> *getSelectionRegion(const PDFRectangle &selection, SelectionStyle style, double scale);
 
-    GooString getSelectionText(const PDFRectangle *selection, SelectionStyle style);
+    GooString getSelectionText(const PDFRectangle &selection, SelectionStyle style);
 
-    [[nodiscard]] std::vector<std::vector<std::unique_ptr<TextWordSelection>>> getSelectionWords(const PDFRectangle *selection, SelectionStyle style);
+    [[nodiscard]] std::vector<std::vector<std::unique_ptr<TextWordSelection>>> getSelectionWords(const PDFRectangle &selection, SelectionStyle style);
 
     // Find a string by character position and length.  If found, sets
     // the text bounding rectangle and returns true; otherwise returns
@@ -845,11 +845,11 @@ public:
     // false.
     bool findCharRange(int pos, int length, double *xMin, double *yMin, double *xMax, double *yMax) const;
 
-    void drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor &glyph_color, const GfxColor &box_color, double box_opacity, bool draw_glyphs);
+    void drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle &selection, SelectionStyle style, const GfxColor &glyph_color, const GfxColor &box_color, double box_opacity, bool draw_glyphs);
 
-    std::vector<PDFRectangle *> *getSelectionRegion(const PDFRectangle *selection, SelectionStyle style, double scale);
+    std::vector<PDFRectangle *> *getSelectionRegion(const PDFRectangle &selection, SelectionStyle style, double scale);
 
-    GooString getSelectionText(const PDFRectangle *selection, SelectionStyle style);
+    GooString getSelectionText(const PDFRectangle &selection, SelectionStyle style);
 
     // If true, will combine characters when a base and combining
     // character are drawn on eachother.

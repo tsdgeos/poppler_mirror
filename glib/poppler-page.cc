@@ -517,7 +517,7 @@ static void render_selection(PopplerPage *page, cairo_t *cairo, PopplerRectangle
     output_dev->setCairo(cairo);
 
     text = poppler_page_get_text_page(page);
-    text->drawSelection(output_dev, 1.0, 0, &pdf_selection, selection_style, gfx_glyph_color, gfx_background_color, background_opacity, draw_glyphs);
+    text->drawSelection(output_dev, 1.0, 0, pdf_selection, selection_style, gfx_glyph_color, gfx_background_color, background_opacity, draw_glyphs);
 
     output_dev->setCairo(nullptr);
 }
@@ -653,7 +653,7 @@ GList *poppler_page_get_selection_region(PopplerPage *page, gdouble scale, Poppl
     }
 
     text = poppler_page_get_text_page(page);
-    std::vector<PDFRectangle *> *list = text->getSelectionRegion(&poppler_selection, selection_style, scale);
+    std::vector<PDFRectangle *> *list = text->getSelectionRegion(poppler_selection, selection_style, scale);
 
     for (const PDFRectangle *selection_rect : *list) {
         PopplerRectangle *rect;
@@ -731,7 +731,7 @@ cairo_region_t *poppler_page_get_selected_region(PopplerPage *page, gdouble scal
     }
 
     text = poppler_page_get_text_page(page);
-    std::vector<PDFRectangle *> *list = text->getSelectionRegion(&poppler_selection, selection_style, 1.0);
+    std::vector<PDFRectangle *> *list = text->getSelectionRegion(poppler_selection, selection_style, 1.0);
 
     region = cairo_region_create();
 
@@ -793,7 +793,7 @@ char *poppler_page_get_selected_text(PopplerPage *page, PopplerSelectionStyle st
     }
 
     text = poppler_page_get_text_page(page);
-    GooString sel_text = text->getSelectionText(&pdf_selection, selection_style);
+    GooString sel_text = text->getSelectionText(pdf_selection, selection_style);
     result = g_strdup(sel_text.c_str());
 
     return result;
@@ -1004,10 +1004,10 @@ GList *poppler_page_get_image_mapping(PopplerPage *page)
         image->getRect(&(mapping->area.x1), &(mapping->area.y1), &(mapping->area.x2), &(mapping->area.y2));
         mapping->image_id = i;
 
-        mapping->area.x1 -= page->page->getCropBox()->x1;
-        mapping->area.x2 -= page->page->getCropBox()->x1;
-        mapping->area.y1 -= page->page->getCropBox()->y1;
-        mapping->area.y2 -= page->page->getCropBox()->y1;
+        mapping->area.x1 -= page->page->getCropBox().x1;
+        mapping->area.x2 -= page->page->getCropBox().x1;
+        mapping->area.y1 -= page->page->getCropBox().y1;
+        mapping->area.y2 -= page->page->getCropBox().y1;
 
         map_list = g_list_prepend(map_list, mapping);
     }
@@ -1175,10 +1175,10 @@ GList *poppler_page_get_link_mapping(PopplerPage *page)
 
         link->getRect(&rect.x1, &rect.y1, &rect.x2, &rect.y2);
 
-        rect.x1 -= page->page->getCropBox()->x1;
-        rect.x2 -= page->page->getCropBox()->x1;
-        rect.y1 -= page->page->getCropBox()->y1;
-        rect.y2 -= page->page->getCropBox()->y1;
+        rect.x1 -= page->page->getCropBox().x1;
+        rect.x2 -= page->page->getCropBox().x1;
+        rect.y1 -= page->page->getCropBox().y1;
+        rect.y2 -= page->page->getCropBox().y1;
 
         switch (page->page->getRotate()) {
         case 90:
@@ -1270,10 +1270,10 @@ GList *poppler_page_get_form_field_mapping(PopplerPage *page)
         mapping->field = _poppler_form_field_new(page->document, field);
         field->getRect(&(mapping->area.x1), &(mapping->area.y1), &(mapping->area.x2), &(mapping->area.y2));
 
-        mapping->area.x1 -= page->page->getCropBox()->x1;
-        mapping->area.x2 -= page->page->getCropBox()->x1;
-        mapping->area.y1 -= page->page->getCropBox()->y1;
-        mapping->area.y2 -= page->page->getCropBox()->y1;
+        mapping->area.x1 -= page->page->getCropBox().x1;
+        mapping->area.x2 -= page->page->getCropBox().x1;
+        mapping->area.y1 -= page->page->getCropBox().y1;
+        mapping->area.y2 -= page->page->getCropBox().y1;
 
         map_list = g_list_prepend(map_list, mapping);
     }
@@ -1323,7 +1323,7 @@ GList *poppler_page_get_annot_mapping(PopplerPage *page)
     }
 
     poppler_page_get_size(page, &width, &height);
-    crop_box = page->page->getCropBox();
+    crop_box = &page->page->getCropBox();
 
     for (const std::shared_ptr<Annot> &annot : annots->getAnnots()) {
         PopplerAnnotMapping *mapping;
@@ -1627,7 +1627,7 @@ void poppler_page_add_annot(PopplerPage *page, PopplerAnnot *annot)
     g_return_if_fail(POPPLER_IS_ANNOT(annot));
 
     /* Add the page's cropBox to the coordinates of rect field of annot */
-    page_crop_box = page->page->getCropBox();
+    page_crop_box = &page->page->getCropBox();
     annot->annot->getRect(&x1, &y1, &x2, &y2);
 
     page_is_rotated = SUPPORTED_ROTATION(page->page->getRotate());
@@ -2299,12 +2299,12 @@ void poppler_annot_mapping_free(PopplerAnnotMapping *mapping)
  */
 void poppler_page_get_crop_box(PopplerPage *page, PopplerRectangle *rect)
 {
-    const PDFRectangle *cropBox = page->page->getCropBox();
+    const PDFRectangle &cropBox = page->page->getCropBox();
 
-    rect->x1 = cropBox->x1;
-    rect->x2 = cropBox->x2;
-    rect->y1 = cropBox->y1;
-    rect->y2 = cropBox->y2;
+    rect->x1 = cropBox.x1;
+    rect->x2 = cropBox.x2;
+    rect->y1 = cropBox.y1;
+    rect->y2 = cropBox.y2;
 }
 
 /*
@@ -2414,7 +2414,7 @@ gboolean poppler_page_get_text_layout_for_area(PopplerPage *page, PopplerRectang
     selection.y2 = area->y2;
 
     text = poppler_page_get_text_page(page);
-    std::vector<std::vector<std::unique_ptr<TextWordSelection>>> word_list = text->getSelectionWords(&selection, selectionStyleGlyph);
+    std::vector<std::vector<std::unique_ptr<TextWordSelection>>> word_list = text->getSelectionWords(selection, selectionStyleGlyph);
     if (word_list.empty()) {
         return FALSE;
     }
@@ -2579,7 +2579,7 @@ GList *poppler_page_get_text_attributes_for_area(PopplerPage *page, PopplerRecta
     selection.y2 = area->y2;
 
     text = poppler_page_get_text_page(page);
-    std::vector<std::vector<std::unique_ptr<TextWordSelection>>> word_list = text->getSelectionWords(&selection, selectionStyleGlyph);
+    std::vector<std::vector<std::unique_ptr<TextWordSelection>>> word_list = text->getSelectionWords(selection, selectionStyleGlyph);
     if (word_list.empty()) {
         return nullptr;
     }
