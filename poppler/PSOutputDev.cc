@@ -3477,7 +3477,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
         if (gotLabel) {
             // See bug13338 for why we try to avoid parentheses...
             bool needParens;
-            GooString *filteredString = filterPSLabel(&pageLabel, &needParens);
+            GooString *filteredString = filterPSLabel(pageLabel.toStr(), &needParens);
             if (needParens) {
                 writePSFmt("%%Page: ({0:t}) {1:d}\n", filteredString, seqPage);
             } else {
@@ -7128,14 +7128,14 @@ void PSOutputDev::cvtFunction(const Function *func, bool invertPSFunction)
     case Function::Type::PostScript:
         func4 = static_cast<const PostScriptFunction *>(func);
         if (invertPSFunction) {
-            std::unique_ptr<GooString> codeString = func4->getCodeString()->copy();
-            for (i = codeString->size() - 1; i > 0; i--) {
-                if (codeString->getChar(i) == '}') {
-                    codeString->erase(i, 1);
+            std::string codeString = func4->getCodeString()->toStr();
+            for (size_t codeStringPos = codeString.size(); codeStringPos > 0; --codeStringPos) {
+                if (codeString[codeStringPos - 1] == '}') {
+                    codeString.erase(codeStringPos - 1, 1);
                     break;
                 }
             }
-            writePS(codeString->toStr());
+            writePS(codeString);
             writePS("\n");
             n = func4->getOutputSize();
             for (i = 0; i < n; ++i) {
@@ -7256,7 +7256,7 @@ std::string PSOutputDev::filterPSName(const std::string &name)
 // Convert GooString to GooString, with appropriate escaping
 // of things that can't appear in a label
 // This is heavily based on the writePSTextLine() method
-GooString *PSOutputDev::filterPSLabel(GooString *label, bool *needParens)
+GooString *PSOutputDev::filterPSLabel(const std::string &label, bool *needParens)
 {
     int i, step;
     bool isNumeric;
@@ -7270,16 +7270,16 @@ GooString *PSOutputDev::filterPSLabel(GooString *label, bool *needParens)
     //   for the keyword, which was emitted by the caller)
 
     auto *label2 = new GooString();
-    int labelLength = label->size();
+    int labelLength = label.size();
 
     // this gets changed later if we find a non-numeric character
     isNumeric = labelLength != 0;
 
-    if ((labelLength >= 2) && ((label->getChar(0) & 0xff) == 0xfe) && ((label->getChar(1) & 0xff) == 0xff)) {
+    if ((labelLength >= 2) && ((label[0] & 0xff) == 0xfe) && ((label[1] & 0xff) == 0xff)) {
         // UCS2 mode
         i = 3;
         step = 2;
-        if ((label->getChar(labelLength - 1) == 0)) {
+        if (label[labelLength - 1] == 0) {
             // prune the trailing null (0x000 for UCS2)
             labelLength -= 2;
         }
@@ -7288,7 +7288,7 @@ GooString *PSOutputDev::filterPSLabel(GooString *label, bool *needParens)
         step = 1;
     }
     for (int j = 0; i < labelLength && j < 200; i += step) {
-        char c = label->getChar(i);
+        char c = label[i];
         if ((c < '0') || (c > '9')) {
             isNumeric = false;
         }

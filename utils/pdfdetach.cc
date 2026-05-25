@@ -16,7 +16,7 @@
 // Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2013 Yury G. Kudryashov <urkud.urkud@gmail.com>
 // Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2018, 2020, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2020, 2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019, 2021, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 <r.coeffier@bee-buzziness.com>
@@ -74,14 +74,14 @@ static const ArgDesc argDesc[] = { { .arg = "-list", .kind = argFlag, .val = &do
                                    { .arg = "-?", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
                                    {} };
 
-static std::string getFileName(const GooString &s, const UnicodeMap &uMap)
+static std::string getFileName(const std::string &s, const UnicodeMap &uMap)
 {
     size_t j;
     Unicode u;
     bool isUnicode;
     char uBuf[8];
     std::string res;
-    if (hasUnicodeByteOrderMarkAndLengthIsEven(s.toStr())) {
+    if (hasUnicodeByteOrderMarkAndLengthIsEven(s)) {
         isUnicode = true;
         j = 2;
     } else {
@@ -90,10 +90,10 @@ static std::string getFileName(const GooString &s, const UnicodeMap &uMap)
     }
     while (j < s.size()) {
         if (isUnicode) {
-            u = ((s.getChar(j) & 0xff) << 8) | (s.getChar(j + 1) & 0xff);
+            u = ((s[j] & 0xff) << 8) | (s[j + 1] & 0xff);
             j += 2;
         } else {
-            u = pdfDocEncoding[s.getChar(j) & 0xff];
+            u = pdfDocEncoding[s[j] & 0xff];
             ++j;
         }
         const int n = uMap.mapUnicode(u, uBuf, sizeof(uBuf));
@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
             if (!s1) {
                 return 3;
             }
-            printf("%s\n", getFileName(*s1, *uMap).c_str());
+            printf("%s\n", getFileName(s1->toStr(), *uMap).c_str());
         }
 
         // save all embedded files
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
             if (!s1) {
                 return 3;
             }
-            const std::string currentFileName = getFileName(*s1, *uMap);
+            const std::string currentFileName = getFileName(s1->toStr(), *uMap);
             if (currentFileName.empty()) {
                 return 3;
             }
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
                 if (!s1) {
                     continue;
                 }
-                const std::string currentFileName = getFileName(*s1, *uMap);
+                const std::string currentFileName = getFileName(s1->toStr(), *uMap);
                 if (currentFileName == saveFile) {
                     saveNum = i + 1;
                     break;
@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
             if (!s1) {
                 return 3;
             }
-            const std::string targetFileName = getFileName(*s1, *uMap);
+            const std::string targetFileName = getFileName(s1->toStr(), *uMap);
             targetPath.append(targetFileName);
 
             const std::filesystem::path basePath = std::filesystem::current_path().lexically_normal();

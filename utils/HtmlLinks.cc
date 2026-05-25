@@ -18,7 +18,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
-// Copyright (C) 2010, 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2021, 2022, 2024, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
 // Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
@@ -75,12 +75,12 @@ bool HtmlLink::inLink(double xmin, double ymin, double xmax, double ymax) const
 }
 
 // returns nullptr if same as input string (to avoid copying)
-static std::unique_ptr<GooString> EscapeSpecialChars(GooString *s)
+static std::unique_ptr<GooString> EscapeSpecialChars(const std::string &s)
 {
     std::unique_ptr<GooString> tmp;
-    for (size_t i = 0, j = 0; i < s->size(); i++, j++) {
+    for (size_t i = 0, j = 0; i < s.size(); i++, j++) {
         const char *replace = nullptr;
-        switch (s->getChar(i)) {
+        switch (s[i]) {
         case '"':
             replace = "&quot;";
             break;
@@ -98,7 +98,7 @@ static std::unique_ptr<GooString> EscapeSpecialChars(GooString *s)
         }
         if (replace) {
             if (!tmp) {
-                tmp = s->copy();
+                tmp = std::make_unique<GooString>(s);
             }
             if (tmp) {
                 tmp->erase(j, 1);
@@ -114,7 +114,7 @@ static std::unique_ptr<GooString> EscapeSpecialChars(GooString *s)
 std::unique_ptr<GooString> HtmlLink::getLinkStart() const
 {
     std::unique_ptr<GooString> res = std::make_unique<GooString>("<a href=\"");
-    std::unique_ptr<GooString> d = xml ? EscapeSpecialChars(dest.get()) : nullptr;
+    std::unique_ptr<GooString> d = xml ? EscapeSpecialChars(dest->toStr()) : nullptr;
     res->append(d ? d->toStr() : dest->toStr());
     res->append("\">");
     return res;
