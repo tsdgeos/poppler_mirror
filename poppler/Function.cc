@@ -129,6 +129,10 @@ bool Function::init(Dict *dict)
         error(errSyntaxError, -1, "Functions with more than {0:d} inputs are unsupported", funcMaxInputs);
         return false;
     }
+    if (m == 0) {
+        error(errSyntaxError, -1, "Functions with 0 inputs are malformed");
+        return false;
+    }
     for (i = 0; i < m; ++i) {
         Object obj2 = obj1.arrayGet(2 * i);
         if (!obj2.isNum()) {
