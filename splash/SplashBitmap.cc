@@ -457,7 +457,7 @@ void SplashBitmap::getRGBLine(int yl, SplashColorPtr line)
                     GfxColor input;
                     input.c[0] = byteToCol(col[i + 4]);
                     const std::unique_ptr<GfxSeparationColorSpace> &sepCS = (*separationList)[i];
-                    sepCS->getCMYK(&input, &cmyk);
+                    sepCS->getCMYK(input, &cmyk);
                     col[0] = colToByte(cmyk.c);
                     col[1] = colToByte(cmyk.m);
                     col[2] = colToByte(cmyk.y);
@@ -510,7 +510,7 @@ void SplashBitmap::getXBGRLine(int yl, SplashColorPtr line, ConversionMode conve
                     GfxColor input;
                     input.c[0] = byteToCol(col[i + 4]);
                     const std::unique_ptr<GfxSeparationColorSpace> &sepCS = (*separationList)[i];
-                    sepCS->getCMYK(&input, &cmyk);
+                    sepCS->getCMYK(input, &cmyk);
                     col[0] = colToByte(cmyk.c);
                     col[1] = colToByte(cmyk.m);
                     col[2] = colToByte(cmyk.y);
@@ -633,7 +633,7 @@ void SplashBitmap::getCMYKLine(int yl, SplashColorPtr line)
                     GfxColor input;
                     input.c[0] = byteToCol(col[i + 4]);
                     const std::unique_ptr<GfxSeparationColorSpace> &sepCS = (*separationList)[i];
-                    sepCS->getCMYK(&input, &cmyk);
+                    sepCS->getCMYK(input, &cmyk);
                     col[0] = colToByte(cmyk.c);
                     col[1] = colToByte(cmyk.m);
                     col[2] = colToByte(cmyk.y);

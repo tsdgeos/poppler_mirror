@@ -4438,7 +4438,7 @@ void TextSelectionSizer::visitLine(TextLine *line, TextWord * /*begin*/, TextWor
 class TextSelectionPainter : public TextSelectionVisitor
 {
 public:
-    TextSelectionPainter(TextPage *page, double scale, int rotation, OutputDev *out, const GfxColor *box_color, const GfxColor *glyph_color, double box_opacity, bool draw_glyphs);
+    TextSelectionPainter(TextPage *page, double scale, int rotation, OutputDev *out, const GfxColor &box_color, const GfxColor &glyph_color, double box_opacity, bool draw_glyphs);
     ~TextSelectionPainter() override;
 
     void visitBlock(TextBlock * /*block*/, TextLine * /*begin*/, TextLine * /*end*/, const PDFRectangle * /*selection*/) override { };
@@ -4448,7 +4448,7 @@ public:
 
 private:
     OutputDev *out;
-    const GfxColor *glyph_color;
+    const GfxColor &glyph_color;
     bool draw_glyphs;
     GfxState *state;
     std::vector<TextWordSelection *> *selectionList;
@@ -4456,7 +4456,7 @@ private:
     bool hasGlyphLessFont();
 };
 
-TextSelectionPainter::TextSelectionPainter(TextPage *p, double scale, int rotation, OutputDev *outA, const GfxColor *box_color, const GfxColor *glyph_colorA, double box_opacity, bool draw_glyphsA)
+TextSelectionPainter::TextSelectionPainter(TextPage *p, double scale, int rotation, OutputDev *outA, const GfxColor &box_color, const GfxColor &glyph_colorA, double box_opacity, bool draw_glyphsA)
     : TextSelectionVisitor(p), out(outA), glyph_color(glyph_colorA), draw_glyphs(draw_glyphsA)
 {
     PDFRectangle box(0, 0, p->pageWidth, p->pageHeight);
@@ -4996,7 +4996,7 @@ void TextPage::visitSelection(TextSelectionVisitor *visitor, const PDFRectangle 
     }
 }
 
-void TextPage::drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor *glyph_color, const GfxColor *box_color, double box_opacity, bool draw_glyphs)
+void TextPage::drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor &glyph_color, const GfxColor &box_color, double box_opacity, bool draw_glyphs)
 {
     TextSelectionPainter painter(this, scale, rotation, out, box_color, glyph_color, box_opacity, draw_glyphs);
 
@@ -5812,7 +5812,7 @@ GooString TextOutputDev::getText(const std::optional<PDFRectangle> &area) const
     return text->getText(area, textEOL, physLayout, hyphenMode);
 }
 
-void TextOutputDev::drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor *glyph_color, const GfxColor *box_color, double box_opacity, bool draw_glyphs)
+void TextOutputDev::drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor &glyph_color, const GfxColor &box_color, double box_opacity, bool draw_glyphs)
 {
     text->drawSelection(out, scale, rotation, selection, style, glyph_color, box_color, box_opacity, draw_glyphs);
 }

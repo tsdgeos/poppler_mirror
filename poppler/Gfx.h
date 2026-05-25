@@ -203,8 +203,9 @@ public:
 
     bool checkTransparencyGroup(Dict *resDict);
 
+    // if softMask is true backdropColor must not be null
     void drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matrix, const std::array<double, 4> &bbox, bool transpGroup = false, bool softMask = false, GfxColorSpace *blendingColorSpace = nullptr, bool isolated = false,
-                  bool knockout = false, bool alpha = false, Function *transferFunc = nullptr, GfxColor *backdropColor = nullptr);
+                  bool knockout = false, bool alpha = false, Function *transferFunc = nullptr, const GfxColor *backdropColor = nullptr);
 
     void pushResources(Dict *resDict);
     void popResources();
@@ -268,7 +269,7 @@ private:
     void opSetMiterLimit(Object args[], int numArgs);
     void opSetLineWidth(Object args[], int numArgs);
     void opSetExtGState(Object args[], int numArgs);
-    void doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, Function *transferFunc, GfxColor *backdropColor);
+    void doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, Function *transferFunc, const GfxColor &backdropColor);
     void opSetRenderingIntent(Object args[], int numArgs);
 
     // color operators

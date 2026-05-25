@@ -3857,13 +3857,13 @@ void PSOutputDev::updateFillColor(GfxState *state)
     case psLevel2:
     case psLevel3:
         if (state->getFillColorSpace()->getMode() != csPattern) {
-            const GfxColor *colorPtr = state->getFillColor();
+            const GfxColor &fillColor = state->getFillColor();
             writePS("[");
             for (i = 0; i < state->getFillColorSpace()->getNComps(); ++i) {
                 if (i > 0) {
                     writePS(" ");
                 }
-                writePSFmt("{0:.4g}", colToDbl(colorPtr->c[i]));
+                writePSFmt("{0:.4g}", colToDbl(fillColor.c[i]));
             }
             writePS("] sc\n");
         }
@@ -3874,8 +3874,8 @@ void PSOutputDev::updateFillColor(GfxState *state)
         if (state->getFillColorSpace()->getMode() == csSeparation && (level > psLevel1Sep || getPassLevel1CustomColor())) {
             sepCS = static_cast<GfxSeparationColorSpace *>(state->getFillColorSpace());
             color.c[0] = gfxColorComp1;
-            sepCS->getCMYK(&color, &cmyk);
-            writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} {4:.4g} ({5:t}) ck\n", colToDbl(state->getFillColor()->c[0]), colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName());
+            sepCS->getCMYK(color, &cmyk);
+            writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} {4:.4g} ({5:t}) ck\n", colToDbl(state->getFillColor().c[0]), colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName());
             addCustomColor(*sepCS);
         } else {
             state->getFillCMYK(&cmyk);
@@ -3922,13 +3922,13 @@ void PSOutputDev::updateStrokeColor(GfxState *state)
     case psLevel2:
     case psLevel3:
         if (state->getStrokeColorSpace()->getMode() != csPattern) {
-            const GfxColor *colorPtr = state->getStrokeColor();
+            const GfxColor &strokeColor = state->getStrokeColor();
             writePS("[");
             for (i = 0; i < state->getStrokeColorSpace()->getNComps(); ++i) {
                 if (i > 0) {
                     writePS(" ");
                 }
-                writePSFmt("{0:.4g}", colToDbl(colorPtr->c[i]));
+                writePSFmt("{0:.4g}", colToDbl(strokeColor.c[i]));
             }
             writePS("] SC\n");
         }
@@ -3939,8 +3939,8 @@ void PSOutputDev::updateStrokeColor(GfxState *state)
         if (state->getStrokeColorSpace()->getMode() == csSeparation && (level > psLevel1Sep || getPassLevel1CustomColor())) {
             sepCS = static_cast<GfxSeparationColorSpace *>(state->getStrokeColorSpace());
             color.c[0] = gfxColorComp1;
-            sepCS->getCMYK(&color, &cmyk);
-            writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} {4:.4g} ({5:t}) CK\n", colToDbl(state->getStrokeColor()->c[0]), colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName());
+            sepCS->getCMYK(color, &cmyk);
+            writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} {4:.4g} ({5:t}) CK\n", colToDbl(state->getStrokeColor().c[0]), colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName());
             addCustomColor(*sepCS);
         } else {
             state->getStrokeCMYK(&cmyk);
@@ -4017,7 +4017,7 @@ void PSOutputDev::addCustomColor(const GfxSeparationColorSpace &sepCS)
         }
     }
     color.c[0] = gfxColorComp1;
-    sepCS.getCMYK(&color, &cmyk);
+    sepCS.getCMYK(color, &cmyk);
     cc = new PSOutCustomColor(colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS.getName()->copy());
     cc->next = customColors;
     customColors = cc;
@@ -5927,7 +5927,7 @@ void PSOutputDev::doImageL2(const GfxState *state, const Object *ref, GfxImageCo
         if ((level == psLevel2Sep || level == psLevel3Sep) && colorMap && colorMap->getColorSpace()->getMode() == csSeparation && colorMap->getBits() == 8) {
             color.c[0] = gfxColorComp1;
             sepCS = static_cast<GfxSeparationColorSpace *>(colorMap->getColorSpace());
-            sepCS->getCMYK(&color, &cmyk);
+            sepCS->getCMYK(color, &cmyk);
             writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} ({4:t}) pdfImSep\n", colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName());
         } else {
             writePSFmt("{0:s}\n", colorMap ? "pdfIm" : "pdfImM");
@@ -6281,7 +6281,7 @@ void PSOutputDev::doImageL3(const GfxState *state, const Object *ref, GfxImageCo
         if ((level == psLevel2Sep || level == psLevel3Sep) && colorMap && colorMap->getColorSpace()->getMode() == csSeparation && colorMap->getBits() == 8) {
             color.c[0] = gfxColorComp1;
             sepCS = static_cast<GfxSeparationColorSpace *>(colorMap->getColorSpace());
-            sepCS->getCMYK(&color, &cmyk);
+            sepCS->getCMYK(color, &cmyk);
             writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} ({4:t}) pdfImSep\n", colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName());
         } else {
             writePSFmt("{0:s}\n", colorMap ? "pdfIm" : "pdfImM");
@@ -6545,7 +6545,7 @@ void PSOutputDev::dumpColorSpaceL2(const GfxState *state, GfxColorSpace *colorSp
                     }
                     if (updateColors) {
                         color.c[0] = dblToCol(j);
-                        indexedCS->getCMYK(&color, &cmyk);
+                        indexedCS->getCMYK(color, &cmyk);
                         addProcessColor(colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k));
                     }
                 }
@@ -6560,7 +6560,7 @@ void PSOutputDev::dumpColorSpaceL2(const GfxState *state, GfxColorSpace *colorSp
                     }
                     if (updateColors) {
                         color.c[0] = dblToCol(j);
-                        indexedCS->getCMYK(&color, &cmyk);
+                        indexedCS->getCMYK(color, &cmyk);
                         addProcessColor(colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k));
                     }
                 }

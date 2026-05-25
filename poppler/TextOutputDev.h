@@ -634,7 +634,7 @@ public:
 
     void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style);
 
-    void drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor *glyph_color, const GfxColor *box_color, double box_opacity, bool draw_glyphs);
+    void drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor &glyph_color, const GfxColor &box_color, double box_opacity, bool draw_glyphs);
 
     std::vector<PDFRectangle *> *getSelectionRegion(const PDFRectangle *selection, SelectionStyle style, double scale);
 
@@ -845,7 +845,7 @@ public:
     // false.
     bool findCharRange(int pos, int length, double *xMin, double *yMin, double *xMax, double *yMax) const;
 
-    void drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor *glyph_color, const GfxColor *box_color, double box_opacity, bool draw_glyphs);
+    void drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor &glyph_color, const GfxColor &box_color, double box_opacity, bool draw_glyphs);
 
     std::vector<PDFRectangle *> *getSelectionRegion(const PDFRectangle *selection, SelectionStyle style, double scale);
 

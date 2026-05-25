@@ -1569,19 +1569,19 @@ bool CairoOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sha
             cairo_mesh_pattern_line_to(fill_pattern, x1, y2);
 
             shading->getColor(x1, y1, &color);
-            shading->getColorSpace()->getRGB(&color, &rgb);
+            shading->getColorSpace()->getRGB(color, &rgb);
             cairo_mesh_pattern_set_corner_color_rgb(fill_pattern, 0, colToDbl(rgb.r), colToDbl(rgb.g), colToDbl(rgb.b));
 
             shading->getColor(x2, y1, &color);
-            shading->getColorSpace()->getRGB(&color, &rgb);
+            shading->getColorSpace()->getRGB(color, &rgb);
             cairo_mesh_pattern_set_corner_color_rgb(fill_pattern, 1, colToDbl(rgb.r), colToDbl(rgb.g), colToDbl(rgb.b));
 
             shading->getColor(x2, y2, &color);
-            shading->getColorSpace()->getRGB(&color, &rgb);
+            shading->getColorSpace()->getRGB(color, &rgb);
             cairo_mesh_pattern_set_corner_color_rgb(fill_pattern, 2, colToDbl(rgb.r), colToDbl(rgb.g), colToDbl(rgb.b));
 
             shading->getColor(x1, y2, &color);
-            shading->getColorSpace()->getRGB(&color, &rgb);
+            shading->getColorSpace()->getRGB(color, &rgb);
             cairo_mesh_pattern_set_corner_color_rgb(fill_pattern, 3, colToDbl(rgb.r), colToDbl(rgb.g), colToDbl(rgb.b));
 
             cairo_mesh_pattern_end_patch(fill_pattern);
@@ -1699,7 +1699,7 @@ bool CairoOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTriang
         cairo_mesh_pattern_line_to(fill_pattern, x2, y2);
 
         for (j = 0; j < 3; j++) {
-            shading->getColorSpace()->getRGB(&color[j], &rgb);
+            shading->getColorSpace()->getRGB(color[j], &rgb);
             cairo_mesh_pattern_set_corner_color_rgb(fill_pattern, j, colToDbl(rgb.r), colToDbl(rgb.g), colToDbl(rgb.b));
         }
 
@@ -1779,7 +1779,7 @@ bool CairoOutputDev::patchMeshShadedFill(GfxState *state, GfxPatchMeshShading *s
                 }
             }
 
-            shading->getColorSpace()->getRGB(&color, &rgb);
+            shading->getColorSpace()->getRGB(color, &rgb);
             cairo_mesh_pattern_set_corner_color_rgb(fill_pattern, j, colToDbl(rgb.r), colToDbl(rgb.g), colToDbl(rgb.b));
         }
         cairo_mesh_pattern_end_patch(fill_pattern);
@@ -2259,7 +2259,7 @@ static int luminocity(uint32_t x)
 }
 
 /* XXX: do we need to deal with shape here? */
-void CairoOutputDev::setSoftMask(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, bool alpha, Function *transferFunc, GfxColor *backdropColor)
+void CairoOutputDev::setSoftMask(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, bool alpha, Function *transferFunc, const GfxColor &backdropColor)
 {
     cairo_pattern_destroy(mask);
 
@@ -2877,7 +2877,7 @@ cleanup:
     imgStr.close();
 }
 
-static inline void getMatteColorRgb(GfxImageColorMap *colorMap, const GfxColor *matteColorIn, GfxRGB *matteColorRgb)
+static inline void getMatteColorRgb(GfxImageColorMap *colorMap, const GfxColor &matteColorIn, GfxRGB *matteColorRgb)
 {
     colorMap->getColorSpace()->getRGB(matteColorIn, matteColorRgb);
     matteColorRgb->r = colToByte(matteColorRgb->r);
@@ -2930,7 +2930,7 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
 
     const GfxColor *matteColor = maskColorMap->getMatteColor();
     if (matteColor != nullptr) {
-        getMatteColorRgb(colorMap, matteColor, &matteColorRgb);
+        getMatteColorRgb(colorMap, *matteColor, &matteColorRgb);
     }
 
     ImageStream maskImgStr(maskStr, maskWidth, maskColorMap->getNumPixelComps(), maskColorMap->getBits());

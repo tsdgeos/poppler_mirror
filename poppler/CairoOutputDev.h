@@ -231,7 +231,7 @@ public:
     void endTransparencyGroup(GfxState * /*state*/) override;
     void popTransparencyGroup();
     void paintTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/) override;
-    void setSoftMask(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, bool /*alpha*/, Function * /*transferFunc*/, GfxColor * /*backdropColor*/) override;
+    void setSoftMask(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, bool /*alpha*/, Function * /*transferFunc*/, const GfxColor & /*backdropColor*/) override;
     void clearSoftMask(GfxState * /*state*/) override;
 
     //----- Type 3 font operators
@@ -499,7 +499,7 @@ public:
     void beginTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, GfxColorSpace * /*blendingColorSpace*/, bool /*isolated*/, bool /*knockout*/, bool /*forSoftMask*/) override { }
     void endTransparencyGroup(GfxState * /*state*/) override { }
     void paintTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/) override { }
-    void setSoftMask(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, bool /*alpha*/, Function * /*transferFunc*/, GfxColor * /*backdropColor*/) override { }
+    void setSoftMask(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, bool /*alpha*/, Function * /*transferFunc*/, const GfxColor & /*backdropColor*/) override { }
     void clearSoftMask(GfxState * /*state*/) override { }
 
     //----- Image list

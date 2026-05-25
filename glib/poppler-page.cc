@@ -517,7 +517,7 @@ static void render_selection(PopplerPage *page, cairo_t *cairo, PopplerRectangle
     output_dev->setCairo(cairo);
 
     text = poppler_page_get_text_page(page);
-    text->drawSelection(output_dev, 1.0, 0, &pdf_selection, selection_style, &gfx_glyph_color, &gfx_background_color, background_opacity, draw_glyphs);
+    text->drawSelection(output_dev, 1.0, 0, &pdf_selection, selection_style, gfx_glyph_color, gfx_background_color, background_opacity, draw_glyphs);
 
     output_dev->setCairo(nullptr);
 }

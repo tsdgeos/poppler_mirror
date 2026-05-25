@@ -732,7 +732,7 @@ bool QPainterOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shadin
     QLinearGradient gradient(QPointF(x0 + tMin * (x1 - x0), y0 + tMin * (y1 - y0)), QPointF(x0 + tMax * (x1 - x0), y0 + tMax * (y1 - y0)));
 
     GfxRGB rgb;
-    shading->getColorSpace()->getRGB(&color0, &rgb);
+    shading->getColorSpace()->getRGB(color0, &rgb);
     QColor qColor(colToByte(rgb.r), colToByte(rgb.g), colToByte(rgb.b), dblToByte(opacity));
     gradient.setColorAt(0, qColor);
 
@@ -774,7 +774,7 @@ bool QPainterOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shadin
         }
 
         // set the color
-        shading->getColorSpace()->getRGB(&color1, &rgb);
+        shading->getColorSpace()->getRGB(color1, &rgb);
         qColor.setRgb(colToByte(rgb.r), colToByte(rgb.g), colToByte(rgb.b), dblToByte(opacity));
         gradient.setColorAt((ta[j] - tMin) / (tMax - tMin), qColor);
 
