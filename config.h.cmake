@@ -5,7 +5,7 @@
 /* Build against libcurl. */
 #cmakedefine01 ENABLE_LIBCURL
 
-/* Use libopenjpeg instead of builtin jpeg2000 decoder. */
+/* Build with libopenjpeg support. */
 #cmakedefine01 ENABLE_LIBOPENJPEG
 
 /* Do not hardcode the library location */
@@ -25,12 +25,6 @@
 
 /* Default signature backend */
 #cmakedefine DEFAULT_SIGNATURE_BACKEND "${DEFAULT_SIGNATURE_BACKEND}"
-
-/* Do we have any DCT decoder?. */
-#cmakedefine01 HAVE_DCT_DECODER
-
-/* Do we have any JPX decoder?. */
-#cmakedefine01 HAVE_JPX_DECODER
 
 /* Define to 1 if you have the `fseek64' function. */
 #cmakedefine01 HAVE_FSEEK64
