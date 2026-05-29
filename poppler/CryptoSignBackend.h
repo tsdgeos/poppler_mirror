@@ -68,7 +68,7 @@ class VerificationInterface
 public:
     virtual void addData(unsigned char *data_block, int data_len) = 0;
     virtual SignatureValidationStatus validateSignature() = 0;
-    virtual std::chrono::system_clock::time_point getSigningTime() const = 0;
+    virtual Certificate::timePointSeconds getSigningTime() const = 0;
     virtual std::string getSignerName() const = 0;
     virtual std::string getSignerSubjectDN() const = 0;
     virtual HashAlgorithm getHashAlgorithm() const = 0;

@@ -57,6 +57,13 @@ static std::string fromCharPtr(const char *data)
     return {};
 }
 
+// gpgme treats time_t as unsigned - for dates before the epochalypse (y2038) it doesn't matter.
+// for dates after the epochalypse this makes a difference if time_t is 32bit.
+static Certificate::timePointSeconds fromGpgMETime(time_t time)
+{
+    return Certificate::timePointSeconds { std::chrono::seconds { static_cast<std::make_unsigned_t<time_t>>(time) } };
+}
+
 static bool isSuccess(const GpgME::Error &err)
 {
     if (err) {
@@ -103,11 +110,11 @@ static std::optional<GpgME::Signature> getSignature(const GpgME::VerificationRes
 static X509CertificateInfo::Validity getValidityFromSubkey(const GpgME::Subkey &key)
 {
     X509CertificateInfo::Validity validity;
-    validity.notBefore = key.creationTime();
+    validity.notBefore = fromGpgMETime(key.creationTime());
     if (key.neverExpires()) {
-        validity.notAfter = std::numeric_limits<time_t>::max();
+        validity.notAfter = Certificate::timePointSeconds { std::numeric_limits<std::chrono::seconds>::max() };
     } else {
-        validity.notAfter = key.expirationTime();
+        validity.notAfter = fromGpgMETime(key.expirationTime());
     }
     return validity;
 }
@@ -461,7 +468,7 @@ std::string GpgSignatureVerification::getSignerSubjectDN() const
     return fromCharPtr(signature->key(true, false).userID(0).id());
 }
 
-std::chrono::system_clock::time_point GpgSignatureVerification::getSigningTime() const
+Certificate::timePointSeconds GpgSignatureVerification::getSigningTime() const
 {
     if (!hasValidResult(gpgResult)) {
         return {};
@@ -470,7 +477,7 @@ std::chrono::system_clock::time_point GpgSignatureVerification::getSigningTime()
     if (!signature) {
         return {};
     }
-    return std::chrono::system_clock::from_time_t(signature->creationTime());
+    return fromGpgMETime(signature->creationTime());
 }
 
 void GpgSignatureVerification::validateCertificateAsync(std::chrono::system_clock::time_point /*validation_time*/, bool ocspRevocationCheck, bool useAIACertFetch, const std::function<void()> &doneFunction)

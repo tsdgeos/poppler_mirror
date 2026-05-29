@@ -76,7 +76,7 @@ public:
     explicit NSSSignatureVerification(std::vector<unsigned char> &&p7data, CryptoSign::SignatureType subfilter);
     ~NSSSignatureVerification() final;
     SignatureValidationStatus validateSignature() final;
-    std::chrono::system_clock::time_point getSigningTime() const final;
+    Certificate::timePointSeconds getSigningTime() const final;
     std::string getSignerName() const final;
     std::string getSignerSubjectDN() const final;
     // Use -1 as validation_time for now

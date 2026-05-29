@@ -15,7 +15,7 @@
 #ifndef CERTIFICATEINFO_H
 #define CERTIFICATEINFO_H
 
-#include <ctime>
+#include <chrono>
 #include "goo/GooString.h"
 #include "poppler_private_export.h"
 
@@ -62,6 +62,10 @@ enum class CertificateType
     PGP
 };
 
+namespace Certificate {
+using timePointSeconds = std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>;
+}
+
 class POPPLER_PRIVATE_EXPORT X509CertificateInfo // TODO consider rename to just CertificateInfo
 {
 public:
@@ -105,8 +109,8 @@ public:
 
     struct Validity
     {
-        time_t notBefore = 0;
-        time_t notAfter = 0;
+        Certificate::timePointSeconds notBefore;
+        Certificate::timePointSeconds notAfter;
     };
 
     /* GETTERS */

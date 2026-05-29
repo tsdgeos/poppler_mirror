@@ -24,6 +24,7 @@
 //
 //========================================================================
 
+#include <chrono>
 #include <config.h>
 
 #include "CryptoSignBackend.h"
@@ -233,6 +234,11 @@ const SEC_ASN1Template TimeStampReq_Template[] = { { SEC_ASN1_SEQUENCE, 0, nullp
 static NSSCMSMessage *CMS_MessageCreate(SECItem *cms_item);
 static NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg);
 static NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData *cms_sig_data);
+
+static Certificate::timePointSeconds fromPRTime(PRTime time)
+{
+    return Certificate::timePointSeconds { std::chrono::duration_cast<std::chrono::seconds>(std::chrono::microseconds { time }) };
+}
 
 // a dummy, actually
 static char *passwordCallback(PK11SlotInfo * /*slot*/, PRBool /*retry*/, void *arg)
@@ -516,7 +522,7 @@ std::string NSSSignatureVerification::getSignerSubjectDN() const
     return std::string { signing_cert->subjectName };
 }
 
-std::chrono::system_clock::time_point NSSSignatureVerification::getSigningTime() const
+Certificate::timePointSeconds NSSSignatureVerification::getSigningTime() const
 {
     if (!CMSSignerInfo) {
         return {};
@@ -527,7 +533,7 @@ std::chrono::system_clock::time_point NSSSignatureVerification::getSigningTime()
         return {};
     }
 
-    return std::chrono::system_clock::from_time_t(static_cast<time_t>(sTime / 1000000));
+    return fromPRTime(sTime);
 }
 
 static X509CertificateInfo::EntityInfo getEntityInfo(CERTName *entityName)
@@ -589,8 +595,8 @@ static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromCERT(CERTCerti
     PRTime notBefore, notAfter;
     CERT_GetCertTimes(cert, &notBefore, &notAfter);
     X509CertificateInfo::Validity certValidity;
-    certValidity.notBefore = static_cast<time_t>(notBefore / 1000000);
-    certValidity.notAfter = static_cast<time_t>(notAfter / 1000000);
+    certValidity.notBefore = fromPRTime(notBefore);
+    certValidity.notAfter = fromPRTime(notAfter);
     certInfo->setValidity(certValidity);
 
     // subject info
