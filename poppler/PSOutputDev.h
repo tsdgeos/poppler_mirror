@@ -169,7 +169,7 @@ public:
     //----- header/trailer (used only if manualCtrl is true)
 
     // Write the document-level header.
-    void writeHeader(int nPages, const PDFRectangle *mediaBox, const PDFRectangle *cropBox, int pageRotate, const char *title);
+    void writeHeader(int nPages, const PDFRectangle &mediaBox, const PDFRectangle *cropBox, int pageRotate, const char *title);
 
     // Write the Xpdf procset.
     void writeXpdfProcset();
@@ -408,7 +408,7 @@ private:
     void writePSFmt(const char *fmt, ...) GOOSTRING_FORMAT;
     void writePSString(const std::string &s);
     void writePSName(const char *s);
-    static GooString *filterPSLabel(GooString *label, bool *needParens = nullptr);
+    static GooString *filterPSLabel(const std::string &label, bool *needParens = nullptr);
     void writePSTextLine(const std::string &s);
 
     PSLevel level; // PostScript level (1, 2, separation)

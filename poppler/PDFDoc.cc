@@ -843,7 +843,7 @@ int PDFDoc::savePageAs(const std::string &name, int pageNo)
     }
     const PDFRectangle *cropBox = nullptr;
     if (getCatalog()->getPage(pageNo)->isCropped()) {
-        cropBox = getCatalog()->getPage(pageNo)->getCropBox();
+        cropBox = &getCatalog()->getPage(pageNo)->getCropBox();
     }
     replacePageDict(pageNo, getCatalog()->getPage(pageNo)->getRotate(), getCatalog()->getPage(pageNo)->getMediaBox(), cropBox);
     Ref *refPage = getCatalog()->getPageRef(pageNo);
@@ -1777,7 +1777,7 @@ bool PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int nu
     return true;
 }
 
-bool PDFDoc::replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBox, const PDFRectangle *cropBox) const
+bool PDFDoc::replacePageDict(int pageNo, int rotate, const PDFRectangle &mediaBox, const PDFRectangle *cropBox) const
 {
     Ref *refPage = getCatalog()->getPageRef(pageNo);
     Object page = getXRef()->fetch(*refPage);
@@ -1793,10 +1793,10 @@ bool PDFDoc::replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBo
     pageDict->remove("TrimBox");
     pageDict->remove("Rotate");
     auto mediaBoxArray = std::make_unique<Array>(getXRef());
-    mediaBoxArray->add(Object(mediaBox->x1));
-    mediaBoxArray->add(Object(mediaBox->y1));
-    mediaBoxArray->add(Object(mediaBox->x2));
-    mediaBoxArray->add(Object(mediaBox->y2));
+    mediaBoxArray->add(Object(mediaBox.x1));
+    mediaBoxArray->add(Object(mediaBox.y1));
+    mediaBoxArray->add(Object(mediaBox.x2));
+    mediaBoxArray->add(Object(mediaBox.y2));
     Object mediaBoxObject(std::move(mediaBoxArray));
     Object trimBoxObject = mediaBoxObject.copy();
     pageDict->add("MediaBox", std::move(mediaBoxObject));

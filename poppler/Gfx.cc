@@ -453,7 +453,7 @@ Object GfxResources::lookupGStateNF(std::string_view name)
 // Gfx
 //------------------------------------------------------------------------
 
-Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI, double vDPI, const PDFRectangle *box, const PDFRectangle *cropBox, int rotate, bool (*abortCheckCbkA)(void *data), void *abortCheckCbkDataA, XRef *xrefA)
+Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI, double vDPI, const PDFRectangle &box, const PDFRectangle *cropBox, int rotate, bool (*abortCheckCbkA)(void *data), void *abortCheckCbkDataA, XRef *xrefA)
     : printCommands(globalParams->getPrintCommands()), profileCommands(globalParams->getProfileCommands())
 {
     doc = docA;
@@ -501,7 +501,7 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI,
 #endif
 }
 
-Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, const PDFRectangle *cropBox, bool (*abortCheckCbkA)(void *data), void *abortCheckCbkDataA, Gfx *gfxA)
+Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle &box, const PDFRectangle *cropBox, bool (*abortCheckCbkA)(void *data), void *abortCheckCbkDataA, Gfx *gfxA)
     : printCommands(globalParams->getPrintCommands()), profileCommands(globalParams->getProfileCommands())
 {
     doc = docA;
@@ -948,7 +948,6 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
     Object obj1, obj2;
     GfxBlendMode mode;
     bool haveFillOP;
-    GfxColor backdropColor;
     bool haveBackdropColor;
     bool alpha;
     double opac;
@@ -1133,6 +1132,7 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
                     }
                 }
             }
+            GfxColor backdropColor;
             obj3 = obj2.dictLookup("BC");
             if ((haveBackdropColor = obj3.isArray())) {
                 for (int &c : backdropColor.c) {
@@ -1166,7 +1166,7 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
                             }
                         }
                     }
-                    doSoftMask(&obj3, alpha, blendingColorSpace.get(), isolated, knockout, softMaskTransferFunc.get(), &backdropColor);
+                    doSoftMask(&obj3, alpha, blendingColorSpace.get(), isolated, knockout, softMaskTransferFunc.get(), backdropColor);
                 } else {
                     error(errSyntaxError, getPos(), "Invalid soft mask in ExtGState - missing group");
                 }
@@ -1235,7 +1235,7 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
     }
 }
 
-void Gfx::doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, Function *transferFunc, GfxColor *backdropColor)
+void Gfx::doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, Function *transferFunc, const GfxColor &backdropColor)
 {
     Dict *dict, *resDict;
     std::array<double, 6> m;
@@ -1293,7 +1293,7 @@ void Gfx::doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace,
     resDict = obj1.isDict() ? obj1.getDict() : nullptr;
 
     // draw it
-    drawForm(str, resDict, m, bbox, true, true, blendingColorSpace, isolated, knockout, alpha, transferFunc, backdropColor);
+    drawForm(str, resDict, m, bbox, true, true, blendingColorSpace, isolated, knockout, alpha, transferFunc, &backdropColor);
 }
 
 void Gfx::opSetRenderingIntent(Object args[], int /*numArgs*/)
@@ -1325,7 +1325,7 @@ void Gfx::opSetFillGray(Object args[], int /*numArgs*/)
     state->setFillColorSpace(std::move(colorSpace));
     out->updateFillColorSpace(state);
     color.c[0] = dblToCol(args[0].getNum());
-    state->setFillColor(&color);
+    state->setFillColor(color);
     out->updateFillColor(state);
 }
 
@@ -1349,7 +1349,7 @@ void Gfx::opSetStrokeGray(Object args[], int /*numArgs*/)
     state->setStrokeColorSpace(std::move(colorSpace));
     out->updateStrokeColorSpace(state);
     color.c[0] = dblToCol(args[0].getNum());
-    state->setStrokeColor(&color);
+    state->setStrokeColor(color);
     out->updateStrokeColor(state);
 }
 
@@ -1376,7 +1376,7 @@ void Gfx::opSetFillCMYKColor(Object args[], int /*numArgs*/)
     for (i = 0; i < 4; ++i) {
         color.c[i] = dblToCol(args[i].getNum());
     }
-    state->setFillColor(&color);
+    state->setFillColor(color);
     out->updateFillColor(state);
 }
 
@@ -1403,7 +1403,7 @@ void Gfx::opSetStrokeCMYKColor(Object args[], int /*numArgs*/)
     for (i = 0; i < 4; ++i) {
         color.c[i] = dblToCol(args[i].getNum());
     }
-    state->setStrokeColor(&color);
+    state->setStrokeColor(color);
     out->updateStrokeColor(state);
 }
 
@@ -1430,7 +1430,7 @@ void Gfx::opSetFillRGBColor(Object args[], int /*numArgs*/)
     for (i = 0; i < 3; ++i) {
         color.c[i] = dblToCol(args[i].getNum());
     }
-    state->setFillColor(&color);
+    state->setFillColor(color);
     out->updateFillColor(state);
 }
 
@@ -1457,7 +1457,7 @@ void Gfx::opSetStrokeRGBColor(Object args[], int /*numArgs*/)
     for (i = 0; i < 3; ++i) {
         color.c[i] = dblToCol(args[i].getNum());
     }
-    state->setStrokeColor(&color);
+    state->setStrokeColor(color);
     out->updateStrokeColor(state);
 }
 
@@ -1481,7 +1481,7 @@ void Gfx::opSetFillColorSpace(Object args[], int /*numArgs*/)
         state->setFillColorSpace(std::move(colorSpace));
         out->updateFillColorSpace(state);
         state->getFillColorSpace()->getDefaultColor(&color);
-        state->setFillColor(&color);
+        state->setFillColor(color);
         out->updateFillColor(state);
     } else {
         error(errSyntaxError, getPos(), "Bad color space (fill)");
@@ -1508,7 +1508,7 @@ void Gfx::opSetStrokeColorSpace(Object args[], int /*numArgs*/)
         state->setStrokeColorSpace(std::move(colorSpace));
         out->updateStrokeColorSpace(state);
         state->getStrokeColorSpace()->getDefaultColor(&color);
-        state->setStrokeColor(&color);
+        state->setStrokeColor(color);
         out->updateStrokeColor(state);
     } else {
         error(errSyntaxError, getPos(), "Bad color space (stroke)");
@@ -1532,7 +1532,7 @@ void Gfx::opSetFillColor(Object args[], int numArgs)
     for (i = 0; i < numArgs; ++i) {
         color.c[i] = dblToCol(args[i].getNum());
     }
-    state->setFillColor(&color);
+    state->setFillColor(color);
     out->updateFillColor(state);
 }
 
@@ -1553,7 +1553,7 @@ void Gfx::opSetStrokeColor(Object args[], int numArgs)
     for (i = 0; i < numArgs; ++i) {
         color.c[i] = dblToCol(args[i].getNum());
     }
-    state->setStrokeColor(&color);
+    state->setStrokeColor(color);
     out->updateStrokeColor(state);
 }
 
@@ -1579,7 +1579,7 @@ void Gfx::opSetFillColorN(Object args[], int numArgs)
                     color.c[i] = 0; // TODO Investigate if this is what Adobe does
                 }
             }
-            state->setFillColor(&color);
+            state->setFillColor(color);
             out->updateFillColor(state);
         }
         if (numArgs > 0) {
@@ -1602,7 +1602,7 @@ void Gfx::opSetFillColorN(Object args[], int numArgs)
                 color.c[i] = 0; // TODO Investigate if this is what Adobe does
             }
         }
-        state->setFillColor(&color);
+        state->setFillColor(color);
         out->updateFillColor(state);
     }
 }
@@ -1629,7 +1629,7 @@ void Gfx::opSetStrokeColorN(Object args[], int numArgs)
                     color.c[i] = 0; // TODO Investigate if this is what Adobe does
                 }
             }
-            state->setStrokeColor(&color);
+            state->setStrokeColor(color);
             out->updateStrokeColor(state);
         }
         if (unlikely(numArgs <= 0)) {
@@ -1654,7 +1654,7 @@ void Gfx::opSetStrokeColorN(Object args[], int numArgs)
                 color.c[i] = 0; // TODO Investigate if this is what Adobe does
             }
         }
-        state->setStrokeColor(&color);
+        state->setStrokeColor(color);
         out->updateStrokeColor(state);
     }
 }
@@ -2117,10 +2117,10 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
     } else {
         state->setFillColorSpace(std::make_unique<GfxDeviceGrayColorSpace>());
         state->getFillColorSpace()->getDefaultColor(&color);
-        state->setFillColor(&color);
+        state->setFillColor(color);
         out->updateFillColorSpace(state);
         state->setStrokeColorSpace(std::make_unique<GfxDeviceGrayColorSpace>());
-        state->setStrokeColor(&color);
+        state->setStrokeColor(color);
         out->updateStrokeColorSpace(state);
     }
     if (!stroke) {
@@ -2510,7 +2510,7 @@ void Gfx::doFunctionShFill1(GfxFunctionShading *shading, double x0, double y0, d
 
         // use the center color
         shading->getColor(xM, yM, &fillColor);
-        state->setFillColor(&fillColor);
+        state->setFillColor(fillColor);
         out->updateFillColor(state);
 
         // fill the rectangle
@@ -2681,7 +2681,7 @@ void Gfx::doAxialShFill(GfxAxialShading *shading)
 
     if (out->useFillColorStop()) {
         // make sure we add stop color when t = tMin
-        state->setFillColor(&color0);
+        state->setFillColor(color0);
         out->updateFillColorStop(state, 0);
     }
 
@@ -2864,7 +2864,7 @@ void Gfx::doAxialShFill(GfxAxialShading *shading)
         vy1 = ty + sMax * dx;
 
         // set the color
-        state->setFillColor(&color0);
+        state->setFillColor(color0);
         if (out->useFillColorStop()) {
             out->updateFillColorStop(state, (ta[j] - tMin) / (tMax - tMin));
         } else {
@@ -3140,7 +3140,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
         for (k = 0; k < nComps; ++k) {
             colorA.c[k] = safeAverage(colorA.c[k], colorB.c[k]);
         }
-        state->setFillColor(&colorA);
+        state->setFillColor(colorA);
         if (out->useFillColorStop()) {
             out->updateFillColorStop(state, (sa - sMin) / (sMax - sMin));
         } else {
@@ -3209,7 +3209,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
 
     if (out->useFillColorStop()) {
         // make sure we add stop color when sb = sMax
-        state->setFillColor(&colorA);
+        state->setFillColor(colorA);
         out->updateFillColorStop(state, (sb - sMin) / (sMax - sMin));
 
         // fill the path
@@ -3242,7 +3242,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
                 ya = y1;
             }
             shading->getColor(ta, &colorA);
-            state->setFillColor(&colorA);
+            state->setFillColor(colorA);
             out->updateFillColor(state);
             state->moveTo(xa + ra, ya);
             for (k = 1; k < n; ++k) {
@@ -3268,7 +3268,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
                 ya = y1;
             }
             shading->getColor(ta, &colorA);
-            state->setFillColor(&colorA);
+            state->setFillColor(colorA);
             out->updateFillColor(state);
             state->moveTo(xMin, yMin);
             state->lineTo(xMin, yMax);
@@ -3355,7 +3355,7 @@ void Gfx::gouraudFillTriangle(double x0, double y0, GfxColor *color0, double x1,
         }
     }
     if (i == nComps || depth == gouraudMaxDepth) {
-        state->setFillColor(color0);
+        state->setFillColor(*color0);
         out->updateFillColor(state);
 
         path->reset();
@@ -3403,7 +3403,7 @@ void Gfx::gouraudFillTriangle(double x0, double y0, double color0, double x1, do
         GfxColor color;
 
         shading->getParameterizedColor(meanColor, &color);
-        state->setFillColor(&color);
+        state->setFillColor(color);
         out->updateFillColor(state);
 
         path->reset();
@@ -3512,7 +3512,7 @@ void Gfx::fillPatch(const GfxPatch *patch, int colorComps, int patchColorComps, 
                 flatColor.c[i] = static_cast<GfxColorComp>(patch->color[0][0].c[i]);
             }
         }
-        state->setFillColor(&flatColor);
+        state->setFillColor(flatColor);
         out->updateFillColor(state);
         state->moveTo(patch->x[0][0], patch->y[0][0]);
         state->curveTo(patch->x[0][1], patch->y[0][1], patch->x[0][2], patch->y[0][2], patch->x[0][3], patch->y[0][3]);
@@ -4571,7 +4571,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                         matteColor.c[i] = dblToCol(obj2.getNum());
                     }
                     if (i == colorMap.getColorSpace()->getNComps()) {
-                        maskColorMap->setMatteColor(&matteColor);
+                        maskColorMap->setMatteColor(matteColor);
                     }
                 }
             }
@@ -4859,7 +4859,7 @@ void Gfx::doForm(Object *str)
 }
 
 void Gfx::drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matrix, const std::array<double, 4> &bbox, bool transpGroup, bool softMask, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool alpha,
-                   Function *transferFunc, GfxColor *backdropColor)
+                   Function *transferFunc, const GfxColor *backdropColor)
 {
     Parser *oldParser;
     GfxState *savedState;
@@ -4946,7 +4946,7 @@ void Gfx::drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matr
     popResources();
 
     if (softMask) {
-        out->setSoftMask(state, bbox, alpha, transferFunc, backdropColor);
+        out->setSoftMask(state, bbox, alpha, transferFunc, *backdropColor);
     } else if (transpGroup) {
         out->paintTransparencyGroup(state, bbox);
     }
@@ -5395,7 +5395,7 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
         color.c[0] = dblToCol(r);
         color.c[1] = dblToCol(g);
         color.c[2] = dblToCol(b);
-        state->setStrokeColor(&color);
+        state->setStrokeColor(color);
         out->updateStrokeColor(state);
         state->setLineWidth(border->getWidth());
         out->updateLineWidth(state);

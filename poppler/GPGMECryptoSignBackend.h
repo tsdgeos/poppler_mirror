@@ -52,7 +52,7 @@ public:
     explicit GpgSignatureVerification(const std::vector<unsigned char> &p7data, GpgME::Protocol protocol);
     SignatureValidationStatus validateSignature() final;
     void addData(unsigned char *dataBlock, int dataLen) final;
-    std::chrono::system_clock::time_point getSigningTime() const final;
+    Certificate::timePointSeconds getSigningTime() const final;
     std::string getSignerName() const final;
     std::string getSignerSubjectDN() const final;
     HashAlgorithm getHashAlgorithm() const final;

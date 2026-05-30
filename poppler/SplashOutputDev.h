@@ -300,7 +300,7 @@ public:
     void beginTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool forSoftMask) override;
     void endTransparencyGroup(GfxState *state) override;
     void paintTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox) override;
-    void setSoftMask(GfxState *state, const std::array<double, 4> &bbox, bool alpha, Function *transferFunc, GfxColor *backdropColor) override;
+    void setSoftMask(GfxState *state, const std::array<double, 4> &bbox, bool alpha, Function *transferFunc, const GfxColor &backdropColor) override;
     void clearSoftMask(GfxState *state) override;
 
     //----- special access
@@ -354,7 +354,7 @@ private:
     SplashPattern *getColor(GfxRGB *rgb);
     static SplashPattern *getColor(GfxCMYK *cmyk);
     static SplashPattern *getColor(GfxColor *deviceN);
-    static void getMatteColor(SplashColorMode colorMode, GfxImageColorMap *colorMap, const GfxColor *matteColor, SplashColor splashMatteColor);
+    static void getMatteColor(SplashColorMode colorMode, GfxImageColorMap *colorMap, const GfxColor &matteColor, SplashColor splashMatteColor);
     void setOverprintMask(GfxColorSpace *colorSpace, bool overprintFlag, int overprintMode, const GfxColor *singleColor, bool grayIndexed = false);
     static SplashPath convertPath(const GfxPath *path, bool dropEmptySubpaths);
     void drawType3Glyph(GfxState *state, T3FontCache *t3Font, T3FontCacheTag *tag, unsigned char *data);

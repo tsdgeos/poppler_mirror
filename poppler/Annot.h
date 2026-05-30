@@ -767,8 +767,8 @@ public:
     void setNewAppearance(Object &&newAppearance, bool keepAppearState);
     AnnotAppearance *getAppearStreams() const { return appearStreams.get(); }
     const GooString *getAppearState() const { return appearState.get(); }
-    AnnotBorder *getBorder() const { return border.get(); }
-    AnnotColor *getColor() const { return color.get(); }
+    const AnnotBorder *getBorder() const { return border.get(); }
+    const AnnotColor *getColor() const { return color.get(); }
     int getTreeKey() const { return treeKey; }
 
     int getId() const { return ref.num; }
@@ -974,7 +974,7 @@ public:
     void draw(Gfx *gfx, bool printing) override;
 
     const GooString *getTitle() const { return title.get(); }
-    Movie *getMovie() { return movie.get(); }
+    const Movie *getMovie() const { return movie.get(); }
 
 private:
     void initialize(Dict *dict);
@@ -996,8 +996,8 @@ public:
 
     const GooString *getTitle() const { return title.get(); }
 
-    AnnotAppearanceCharacs *getAppearCharacs() { return appearCharacs.get(); }
-    LinkAction *getAction() { return action.get(); } // The caller should not delete the result
+    const AnnotAppearanceCharacs *getAppearCharacs() const { return appearCharacs.get(); }
+    const LinkAction *getAction() const { return action.get(); } // The caller should not delete the result
     std::unique_ptr<LinkAction> getAdditionalAction(AdditionalActionsType type);
 
 private:
@@ -1035,7 +1035,7 @@ public:
     // getters
     LinkAction *getAction() const { return action.get(); }
     AnnotLinkEffect getLinkEffect() const { return linkEffect; }
-    AnnotQuadrilaterals *getQuadrilaterals() const { return quadrilaterals.get(); }
+    const AnnotQuadrilaterals *getQuadrilaterals() const { return quadrilaterals.get(); }
 
 protected:
     void initialize(Dict *dict);
@@ -1082,10 +1082,10 @@ public:
     VariableTextQuadding getQuadding() const { return quadding; }
     // return rc
     const GooString *getStyleString() const { return styleString.get(); }
-    AnnotCalloutLine *getCalloutLine() const { return calloutLine.get(); }
+    const AnnotCalloutLine *getCalloutLine() const { return calloutLine.get(); }
     AnnotFreeTextIntent getIntent() const { return intent; }
-    AnnotBorderEffect *getBorderEffect() const { return borderEffect.get(); }
-    PDFRectangle *getRectangle() const { return rectangle.get(); }
+    const AnnotBorderEffect *getBorderEffect() const { return borderEffect.get(); }
+    const PDFRectangle *getRectangle() const { return rectangle.get(); }
     AnnotLineEndingStyle getEndStyle() const { return endStyle; }
 
 protected:
@@ -1146,7 +1146,7 @@ public:
     // getters
     AnnotLineEndingStyle getStartStyle() const { return startStyle; }
     AnnotLineEndingStyle getEndStyle() const { return endStyle; }
-    AnnotColor *getInteriorColor() const { return interiorColor.get(); }
+    const AnnotColor *getInteriorColor() const { return interiorColor.get(); }
     double getLeaderLineLength() const { return leaderLineLength; }
     double getLeaderLineExtension() const { return leaderLineExtension; }
     bool getCaption() const { return caption; }
@@ -1204,7 +1204,7 @@ public:
 
     void setQuadrilaterals(const AnnotQuadrilaterals &quadPoints);
 
-    AnnotQuadrilaterals *getQuadrilaterals() const { return quadrilaterals.get(); }
+    const AnnotQuadrilaterals *getQuadrilaterals() const { return quadrilaterals.get(); }
 
 protected:
     void initialize(Dict *dict);
@@ -1264,9 +1264,9 @@ public:
     void setInteriorColor(std::unique_ptr<AnnotColor> &&new_color);
 
     // getters
-    AnnotColor *getInteriorColor() const { return interiorColor.get(); }
-    AnnotBorderEffect *getBorderEffect() const { return borderEffect.get(); }
-    PDFRectangle *getGeometryRect() const { return geometryRect.get(); }
+    const AnnotColor *getInteriorColor() const { return interiorColor.get(); }
+    const AnnotBorderEffect *getBorderEffect() const { return borderEffect.get(); }
+    const PDFRectangle *getGeometryRect() const { return geometryRect.get(); }
 
 private:
     void initialize(Dict *dict);
@@ -1303,11 +1303,11 @@ public:
     void setIntent(AnnotPolygonIntent new_intent);
 
     // getters
-    AnnotPath *getVertices() const { return vertices.get(); }
+    const AnnotPath *getVertices() const { return vertices.get(); }
     AnnotLineEndingStyle getStartStyle() const { return startStyle; }
     AnnotLineEndingStyle getEndStyle() const { return endStyle; }
-    AnnotColor *getInteriorColor() const { return interiorColor.get(); }
-    AnnotBorderEffect *getBorderEffect() const { return borderEffect.get(); }
+    const AnnotColor *getInteriorColor() const { return interiorColor.get(); }
+    const AnnotBorderEffect *getBorderEffect() const { return borderEffect.get(); }
     AnnotPolygonIntent getIntent() const { return intent; }
 
 private:
@@ -1348,7 +1348,7 @@ public:
 
     // getters
     AnnotCaretSymbol getSymbol() const { return symbol; }
-    PDFRectangle *getCaretRect() const { return caretRect.get(); }
+    const PDFRectangle *getCaretRect() const { return caretRect.get(); }
 
 private:
     void initialize(Dict *dict);
@@ -1406,7 +1406,7 @@ public:
     void draw(Gfx *gfx, bool printing) override;
 
     // getters
-    Object *getFile() { return &file; }
+    const Object *getFile() const { return &file; }
     const GooString *getIconName() const { return iconName.get(); }
 
 private:
@@ -1433,7 +1433,7 @@ public:
     void draw(Gfx *gfx, bool printing) override;
 
     // getters
-    Sound *getSound() { return sound.get(); }
+    const Sound *getSound() const { return sound.get(); }
     const GooString *getIconName() const { return iconName.get(); }
 
 private:
@@ -1471,9 +1471,9 @@ public:
     void updateAppearanceStream();
 
     AnnotWidgetHighlightMode getMode() { return mode; }
-    AnnotAppearanceCharacs *getAppearCharacs() { return appearCharacs.get(); }
+    const AnnotAppearanceCharacs *getAppearCharacs() const { return appearCharacs.get(); }
     void setAppearCharacs(std::unique_ptr<AnnotAppearanceCharacs> &&appearCharacsA) { appearCharacs = std::move(appearCharacsA); }
-    LinkAction *getAction() { return action.get(); } // The caller should not delete the result
+    const LinkAction *getAction() const { return action.get(); } // The caller should not delete the result
     std::unique_ptr<LinkAction> getAdditionalAction(AdditionalActionsType type);
     std::unique_ptr<LinkAction> getFormAdditionalAction(FormAdditionalActionsType type);
     Dict *getParent() { return parent; }
@@ -1601,7 +1601,7 @@ public:
         Instance &operator=(const Instance &) = delete;
 
         Type getType() const;
-        Params *getParams() const;
+        const Params *getParams() const;
 
     private:
         // optional
@@ -1649,7 +1649,7 @@ public:
         Asset &operator=(const Asset &) = delete;
 
         const GooString *getName() const;
-        Object *getFileSpec() const;
+        const Object *getFileSpec() const;
 
     private:
         friend class AnnotRichMedia::Content;
@@ -1725,8 +1725,8 @@ public:
         Settings(const Settings &) = delete;
         Settings &operator=(const Settings &) = delete;
 
-        Activation *getActivation() const;
-        Deactivation *getDeactivation() const;
+        const Activation *getActivation() const;
+        const Deactivation *getDeactivation() const;
 
     private:
         // optional
@@ -1738,9 +1738,9 @@ public:
     AnnotRichMedia(PDFDoc *docA, Object &&dictObject, const Object &obj);
     ~AnnotRichMedia() override;
 
-    Content *getContent() const;
+    const Content *getContent() const;
 
-    Settings *getSettings() const;
+    const Settings *getSettings() const;
 
 private:
     void initialize(Dict *dict);

@@ -1,6 +1,6 @@
 /* poppler-sound.cc: qt interface to poppler
  * Copyright (C) 2006-2007, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2018, 2020, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2018, 2020, 2026, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2025, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025, Arnav V <arnav0872@gmail.com>
  *
@@ -41,7 +41,7 @@ public:
     Sound *m_soundObj = nullptr;
 };
 
-SoundObject::SoundObject(Sound *popplersound)
+SoundObject::SoundObject(const Sound *popplersound)
 {
     m_soundData = new SoundData();
     switch (popplersound->getSoundKind()) {

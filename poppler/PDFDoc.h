@@ -316,7 +316,7 @@ public:
     int saveWithoutChangesAs(OutStream *outStr);
 
     // rewrite pageDict with MediaBox, CropBox and new page CTM
-    bool replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBox, const PDFRectangle *cropBox) const;
+    bool replacePageDict(int pageNo, int rotate, const PDFRectangle &mediaBox, const PDFRectangle *cropBox) const;
     bool markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts = nullptr);
     bool markAnnotations(Object *annots, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldPageNum, int newPageNum, std::set<Dict *> *alreadyMarkedDicts = nullptr);
     void markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum);

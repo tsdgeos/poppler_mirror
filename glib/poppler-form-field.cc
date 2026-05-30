@@ -8,7 +8,7 @@
  * Copyright (C) 2023-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Jan-Michael Brummer <jan-michael.brummer1@volkswagen.de>
  * Copyright (C) 2025 lbaudin <lbaudin@gnome.org>
- * Copyright (C) 2025 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2025, 2026 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -182,7 +182,7 @@ gboolean poppler_form_field_is_read_only(PopplerFormField *field)
  */
 PopplerAction *poppler_form_field_get_action(PopplerFormField *field)
 {
-    LinkAction *action;
+    const LinkAction *action;
 
     if (field->action) {
         return field->action;
@@ -522,8 +522,8 @@ static PopplerSignatureInfo *_poppler_form_field_signature_validate(PopplerFormF
         poppler_sig_info->certificate_info->issuer_common_name = g_strdup(issuer_info.commonName.c_str());
         poppler_sig_info->certificate_info->issuer_email = g_strdup(issuer_info.email.c_str());
         poppler_sig_info->certificate_info->issuer_organization = g_strdup(issuer_info.organization.c_str());
-        poppler_sig_info->certificate_info->issued = g_date_time_new_from_unix_utc(validity.notBefore);
-        poppler_sig_info->certificate_info->expires = g_date_time_new_from_unix_utc(validity.notAfter);
+        poppler_sig_info->certificate_info->issued = g_date_time_new_from_unix_utc(std::chrono::duration_cast<std::chrono::seconds>(validity.notBefore.time_since_epoch()).count());
+        poppler_sig_info->certificate_info->expires = g_date_time_new_from_unix_utc(std::chrono::duration_cast<std::chrono::seconds>(validity.notAfter.time_since_epoch()).count());
     }
 
     return poppler_sig_info;
@@ -2148,8 +2148,8 @@ static PopplerCertificateInfo *create_certificate_info(const X509CertificateInfo
     certificate_info->issuer_common_name = g_strdup(issuer_info.commonName.c_str());
     certificate_info->issuer_organization = g_strdup(issuer_info.organization.c_str());
     certificate_info->issuer_email = g_strdup(issuer_info.email.c_str());
-    certificate_info->issued = g_date_time_new_from_unix_utc(validity.notBefore);
-    certificate_info->expires = g_date_time_new_from_unix_utc(validity.notAfter);
+    certificate_info->issued = g_date_time_new_from_unix_utc(std::chrono::duration_cast<std::chrono::seconds>(validity.notBefore.time_since_epoch()).count());
+    certificate_info->expires = g_date_time_new_from_unix_utc(std::chrono::duration_cast<std::chrono::seconds>(validity.notAfter.time_since_epoch()).count());
 
     return certificate_info;
 }

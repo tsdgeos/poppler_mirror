@@ -540,9 +540,9 @@ std::unique_ptr<GfxColorSpace> GfxDeviceGrayColorSpace::copy() const
     return std::make_unique<GfxDeviceGrayColorSpace>();
 }
 
-void GfxDeviceGrayColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
+void GfxDeviceGrayColorSpace::getGray(const GfxColor &color, GfxGray *gray) const
 {
-    *gray = clip01(color->c[0]);
+    *gray = clip01(color.c[0]);
 }
 
 void GfxDeviceGrayColorSpace::getGrayLine(unsigned char *in, unsigned char *out, int length)
@@ -550,9 +550,9 @@ void GfxDeviceGrayColorSpace::getGrayLine(unsigned char *in, unsigned char *out,
     memcpy(out, in, length);
 }
 
-void GfxDeviceGrayColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
+void GfxDeviceGrayColorSpace::getRGB(const GfxColor &color, GfxRGB *rgb) const
 {
-    rgb->r = rgb->g = rgb->b = clip01(color->c[0]);
+    rgb->r = rgb->g = rgb->b = clip01(color.c[0]);
 }
 
 void GfxDeviceGrayColorSpace::getRGBLine(unsigned char *in, unsigned int *out, int length)
@@ -604,16 +604,16 @@ void GfxDeviceGrayColorSpace::getDeviceNLine(unsigned char *in, unsigned char *o
     }
 }
 
-void GfxDeviceGrayColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
+void GfxDeviceGrayColorSpace::getCMYK(const GfxColor &color, GfxCMYK *cmyk) const
 {
     cmyk->c = cmyk->m = cmyk->y = 0;
-    cmyk->k = clip01(gfxColorComp1 - color->c[0]);
+    cmyk->k = clip01(gfxColorComp1 - color.c[0]);
 }
 
-void GfxDeviceGrayColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const
+void GfxDeviceGrayColorSpace::getDeviceN(const GfxColor &color, GfxColor *deviceN) const
 {
     clearGfxColor(deviceN);
-    deviceN->c[3] = clip01(gfxColorComp1 - color->c[0]);
+    deviceN->c[3] = clip01(gfxColorComp1 - color.c[0]);
 }
 
 void GfxDeviceGrayColorSpace::getDefaultColor(GfxColor *color) const
@@ -758,16 +758,16 @@ std::unique_ptr<GfxColorSpace> GfxCalGrayColorSpace::parse(const Array &arr, Gfx
 }
 
 // convert CalGray to media XYZ color space
-void GfxCalGrayColorSpace::getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const
+void GfxCalGrayColorSpace::getXYZ(const GfxColor &color, double *pX, double *pY, double *pZ) const
 {
-    const double A = colToDbl(color->c[0]);
+    const double A = colToDbl(color.c[0]);
     const double xyzColor = pow(A, gamma);
     *pX = whiteX * xyzColor;
     *pY = whiteY * xyzColor;
     *pZ = whiteZ * xyzColor;
 }
 
-void GfxCalGrayColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
+void GfxCalGrayColorSpace::getGray(const GfxColor &color, GfxGray *gray) const
 {
     GfxRGB rgb;
 
@@ -791,7 +791,7 @@ void GfxCalGrayColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
     *gray = clip01(static_cast<GfxColorComp>(0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b + 0.5));
 }
 
-void GfxCalGrayColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
+void GfxCalGrayColorSpace::getRGB(const GfxColor &color, GfxRGB *rgb) const
 {
     double X, Y, Z;
     double r, g, b;
@@ -823,7 +823,7 @@ void GfxCalGrayColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
     rgb->b = dblToCol(srgb_gamma_function(clip01(b)));
 }
 
-void GfxCalGrayColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
+void GfxCalGrayColorSpace::getCMYK(const GfxColor &color, GfxCMYK *cmyk) const
 {
     GfxRGB rgb;
     GfxColorComp c, m, y, k;
@@ -864,7 +864,7 @@ void GfxCalGrayColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
     cmyk->k = k;
 }
 
-void GfxCalGrayColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const
+void GfxCalGrayColorSpace::getDeviceN(const GfxColor &color, GfxColor *deviceN) const
 {
     GfxCMYK cmyk;
     clearGfxColor(deviceN);
@@ -893,9 +893,9 @@ std::unique_ptr<GfxColorSpace> GfxDeviceRGBColorSpace::copy() const
     return std::make_unique<GfxDeviceRGBColorSpace>();
 }
 
-void GfxDeviceRGBColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
+void GfxDeviceRGBColorSpace::getGray(const GfxColor &color, GfxGray *gray) const
 {
-    *gray = clip01(static_cast<GfxColorComp>(0.3 * color->c[0] + 0.59 * color->c[1] + 0.11 * color->c[2] + 0.5));
+    *gray = clip01(static_cast<GfxColorComp>(0.3 * color.c[0] + 0.59 * color.c[1] + 0.11 * color.c[2] + 0.5));
 }
 
 void GfxDeviceRGBColorSpace::getGrayLine(unsigned char *in, unsigned char *out, int length)
@@ -907,11 +907,11 @@ void GfxDeviceRGBColorSpace::getGrayLine(unsigned char *in, unsigned char *out, 
     }
 }
 
-void GfxDeviceRGBColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
+void GfxDeviceRGBColorSpace::getRGB(const GfxColor &color, GfxRGB *rgb) const
 {
-    rgb->r = clip01(color->c[0]);
-    rgb->g = clip01(color->c[1]);
-    rgb->b = clip01(color->c[2]);
+    rgb->r = clip01(color.c[0]);
+    rgb->g = clip01(color.c[1]);
+    rgb->b = clip01(color.c[2]);
 }
 
 void GfxDeviceRGBColorSpace::getRGBLine(unsigned char *in, unsigned int *out, int length)
@@ -991,13 +991,13 @@ void GfxDeviceRGBColorSpace::getDeviceNLine(unsigned char *in, unsigned char *ou
     }
 }
 
-void GfxDeviceRGBColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
+void GfxDeviceRGBColorSpace::getCMYK(const GfxColor &color, GfxCMYK *cmyk) const
 {
     GfxColorComp c, m, y, k;
 
-    c = clip01(gfxColorComp1 - color->c[0]);
-    m = clip01(gfxColorComp1 - color->c[1]);
-    y = clip01(gfxColorComp1 - color->c[2]);
+    c = clip01(gfxColorComp1 - color.c[0]);
+    m = clip01(gfxColorComp1 - color.c[1]);
+    y = clip01(gfxColorComp1 - color.c[2]);
     k = c;
     if (m < k) {
         k = m;
@@ -1011,7 +1011,7 @@ void GfxDeviceRGBColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
     cmyk->k = k;
 }
 
-void GfxDeviceRGBColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const
+void GfxDeviceRGBColorSpace::getDeviceN(const GfxColor &color, GfxColor *deviceN) const
 {
     GfxCMYK cmyk;
     clearGfxColor(deviceN);
@@ -1144,19 +1144,19 @@ std::unique_ptr<GfxColorSpace> GfxCalRGBColorSpace::parse(const Array &arr, GfxS
 }
 
 // convert CalRGB to XYZ color space
-void GfxCalRGBColorSpace::getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const
+void GfxCalRGBColorSpace::getXYZ(const GfxColor &color, double *pX, double *pY, double *pZ) const
 {
     double A, B, C;
 
-    A = pow(colToDbl(color->c[0]), gammaR);
-    B = pow(colToDbl(color->c[1]), gammaG);
-    C = pow(colToDbl(color->c[2]), gammaB);
+    A = pow(colToDbl(color.c[0]), gammaR);
+    B = pow(colToDbl(color.c[1]), gammaG);
+    C = pow(colToDbl(color.c[2]), gammaB);
     *pX = mat[0] * A + mat[3] * B + mat[6] * C;
     *pY = mat[1] * A + mat[4] * B + mat[7] * C;
     *pZ = mat[2] * A + mat[5] * B + mat[8] * C;
 }
 
-void GfxCalRGBColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
+void GfxCalRGBColorSpace::getGray(const GfxColor &color, GfxGray *gray) const
 {
     GfxRGB rgb;
 
@@ -1180,7 +1180,7 @@ void GfxCalRGBColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
     *gray = clip01(static_cast<GfxColorComp>(0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b + 0.5));
 }
 
-void GfxCalRGBColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
+void GfxCalRGBColorSpace::getRGB(const GfxColor &color, GfxRGB *rgb) const
 {
     double X, Y, Z;
     double r, g, b;
@@ -1213,7 +1213,7 @@ void GfxCalRGBColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
     rgb->b = dblToCol(srgb_gamma_function(clip01(b)));
 }
 
-void GfxCalRGBColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
+void GfxCalRGBColorSpace::getCMYK(const GfxColor &color, GfxCMYK *cmyk) const
 {
     GfxRGB rgb;
     GfxColorComp c, m, y, k;
@@ -1254,7 +1254,7 @@ void GfxCalRGBColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
     cmyk->k = k;
 }
 
-void GfxCalRGBColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const
+void GfxCalRGBColorSpace::getDeviceN(const GfxColor &color, GfxColor *deviceN) const
 {
     GfxCMYK cmyk;
     clearGfxColor(deviceN);
@@ -1285,19 +1285,19 @@ std::unique_ptr<GfxColorSpace> GfxDeviceCMYKColorSpace::copy() const
     return std::make_unique<GfxDeviceCMYKColorSpace>();
 }
 
-void GfxDeviceCMYKColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
+void GfxDeviceCMYKColorSpace::getGray(const GfxColor &color, GfxGray *gray) const
 {
-    *gray = clip01(static_cast<GfxColorComp>(gfxColorComp1 - color->c[3] - 0.3 * color->c[0] - 0.59 * color->c[1] - 0.11 * color->c[2] + 0.5));
+    *gray = clip01(static_cast<GfxColorComp>(gfxColorComp1 - color.c[3] - 0.3 * color.c[0] - 0.59 * color.c[1] - 0.11 * color.c[2] + 0.5));
 }
 
-void GfxDeviceCMYKColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
+void GfxDeviceCMYKColorSpace::getRGB(const GfxColor &color, GfxRGB *rgb) const
 {
     double c, m, y, k, c1, m1, y1, k1, r, g, b;
 
-    c = colToDbl(color->c[0]);
-    m = colToDbl(color->c[1]);
-    y = colToDbl(color->c[2]);
-    k = colToDbl(color->c[3]);
+    c = colToDbl(color.c[0]);
+    m = colToDbl(color.c[1]);
+    y = colToDbl(color.c[2]);
+    k = colToDbl(color.c[3]);
     c1 = 1 - c;
     m1 = 1 - m;
     y1 = 1 - y;
@@ -1381,21 +1381,21 @@ void GfxDeviceCMYKColorSpace::getDeviceNLine(unsigned char *in, unsigned char *o
     }
 }
 
-void GfxDeviceCMYKColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
+void GfxDeviceCMYKColorSpace::getCMYK(const GfxColor &color, GfxCMYK *cmyk) const
 {
-    cmyk->c = clip01(color->c[0]);
-    cmyk->m = clip01(color->c[1]);
-    cmyk->y = clip01(color->c[2]);
-    cmyk->k = clip01(color->c[3]);
+    cmyk->c = clip01(color.c[0]);
+    cmyk->m = clip01(color.c[1]);
+    cmyk->y = clip01(color.c[2]);
+    cmyk->k = clip01(color.c[3]);
 }
 
-void GfxDeviceCMYKColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const
+void GfxDeviceCMYKColorSpace::getDeviceN(const GfxColor &color, GfxColor *deviceN) const
 {
     clearGfxColor(deviceN);
-    deviceN->c[0] = clip01(color->c[0]);
-    deviceN->c[1] = clip01(color->c[1]);
-    deviceN->c[2] = clip01(color->c[2]);
-    deviceN->c[3] = clip01(color->c[3]);
+    deviceN->c[0] = clip01(color.c[0]);
+    deviceN->c[1] = clip01(color.c[1]);
+    deviceN->c[2] = clip01(color.c[2]);
+    deviceN->c[3] = clip01(color.c[3]);
 }
 
 void GfxDeviceCMYKColorSpace::getDefaultColor(GfxColor *color) const
@@ -1486,7 +1486,7 @@ std::unique_ptr<GfxColorSpace> GfxLabColorSpace::parse(const Array &arr, GfxStat
     return cs;
 }
 
-void GfxLabColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
+void GfxLabColorSpace::getGray(const GfxColor &color, GfxGray *gray) const
 {
     GfxRGB rgb;
 
@@ -1508,13 +1508,13 @@ void GfxLabColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
 
 // convert L*a*b* to media XYZ color space
 // (not multiply by the white point)
-void GfxLabColorSpace::getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ)
+void GfxLabColorSpace::getXYZ(const GfxColor &color, double *pX, double *pY, double *pZ)
 {
     double X, Y, Z;
     double t1, t2;
 
-    t1 = (colToDbl(color->c[0]) + 16) / 116;
-    t2 = t1 + colToDbl(color->c[1]) / 500;
+    t1 = (colToDbl(color.c[0]) + 16) / 116;
+    t2 = t1 + colToDbl(color.c[1]) / 500;
     if (t2 >= (6.0 / 29.0)) {
         X = t2 * t2 * t2;
     } else {
@@ -1525,7 +1525,7 @@ void GfxLabColorSpace::getXYZ(const GfxColor *color, double *pX, double *pY, dou
     } else {
         Y = (108.0 / 841.0) * (t1 - (4.0 / 29.0));
     }
-    t2 = t1 - colToDbl(color->c[2]) / 200;
+    t2 = t1 - colToDbl(color.c[2]) / 200;
     if (t2 >= (6.0 / 29.0)) {
         Z = t2 * t2 * t2;
     } else {
@@ -1536,7 +1536,7 @@ void GfxLabColorSpace::getXYZ(const GfxColor *color, double *pX, double *pY, dou
     *pZ = Z;
 }
 
-void GfxLabColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
+void GfxLabColorSpace::getRGB(const GfxColor &color, GfxRGB *rgb) const
 {
     double X, Y, Z;
 
@@ -1594,7 +1594,7 @@ void GfxLabColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
     rgb->b = dblToCol(srgb_gamma_function(clip01(b)));
 }
 
-void GfxLabColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
+void GfxLabColorSpace::getCMYK(const GfxColor &color, GfxCMYK *cmyk) const
 {
     GfxRGB rgb;
     GfxColorComp c, m, y, k;
@@ -1631,7 +1631,7 @@ void GfxLabColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
     cmyk->k = k;
 }
 
-void GfxLabColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const
+void GfxLabColorSpace::getDeviceN(const GfxColor &color, GfxColor *deviceN) const
 {
     GfxCMYK cmyk;
     clearGfxColor(deviceN);
@@ -1853,7 +1853,7 @@ void GfxICCBasedColorSpace::buildTransforms(GfxState *state)
 }
 #endif
 
-void GfxICCBasedColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
+void GfxICCBasedColorSpace::getGray(const GfxColor &color, GfxGray *gray) const
 {
 #if USE_CMS
     if (transform != nullptr && transform->getTransformPixelType() == PT_GRAY) {
@@ -1861,12 +1861,12 @@ void GfxICCBasedColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
         unsigned char out[gfxColorMaxComps];
 
         if (nComps == 3 && transform->getInputPixelType() == PT_Lab) {
-            in[0] = colToByte(dblToCol(colToDbl(color->c[0]) / 100.0));
-            in[1] = colToByte(dblToCol((colToDbl(color->c[1]) + 128.0) / 255.0));
-            in[2] = colToByte(dblToCol((colToDbl(color->c[2]) + 128.0) / 255.0));
+            in[0] = colToByte(dblToCol(colToDbl(color.c[0]) / 100.0));
+            in[1] = colToByte(dblToCol((colToDbl(color.c[1]) + 128.0) / 255.0));
+            in[2] = colToByte(dblToCol((colToDbl(color.c[2]) + 128.0) / 255.0));
         } else {
             for (int i = 0; i < nComps; i++) {
-                in[i] = colToByte(color->c[i]);
+                in[i] = colToByte(color.c[i]);
             }
         }
         if (nComps <= 4) {
@@ -1901,7 +1901,7 @@ void GfxICCBasedColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
 #endif
 }
 
-void GfxICCBasedColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
+void GfxICCBasedColorSpace::getRGB(const GfxColor &color, GfxRGB *rgb) const
 {
 #if USE_CMS
     if (transform != nullptr && transform->getTransformPixelType() == PT_RGB) {
@@ -1909,12 +1909,12 @@ void GfxICCBasedColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
         unsigned char out[gfxColorMaxComps];
 
         if (nComps == 3 && transform->getInputPixelType() == PT_Lab) {
-            in[0] = colToByte(dblToCol(colToDbl(color->c[0]) / 100.0));
-            in[1] = colToByte(dblToCol((colToDbl(color->c[1]) + 128.0) / 255.0));
-            in[2] = colToByte(dblToCol((colToDbl(color->c[2]) + 128.0) / 255.0));
+            in[0] = colToByte(dblToCol(colToDbl(color.c[0]) / 100.0));
+            in[1] = colToByte(dblToCol((colToDbl(color.c[1]) + 128.0) / 255.0));
+            in[2] = colToByte(dblToCol((colToDbl(color.c[2]) + 128.0) / 255.0));
         } else {
             for (int i = 0; i < nComps; i++) {
-                in[i] = colToByte(color->c[i]);
+                in[i] = colToByte(color.c[i]);
             }
         }
         if (nComps <= 4) {
@@ -1949,12 +1949,12 @@ void GfxICCBasedColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
         double c, m, y, k, c1, m1, y1, k1, r, g, b;
 
         if (nComps == 3 && transform->getInputPixelType() == PT_Lab) {
-            in[0] = colToByte(dblToCol(colToDbl(color->c[0]) / 100.0));
-            in[1] = colToByte(dblToCol((colToDbl(color->c[1]) + 128.0) / 255.0));
-            in[2] = colToByte(dblToCol((colToDbl(color->c[2]) + 128.0) / 255.0));
+            in[0] = colToByte(dblToCol(colToDbl(color.c[0]) / 100.0));
+            in[1] = colToByte(dblToCol((colToDbl(color.c[1]) + 128.0) / 255.0));
+            in[2] = colToByte(dblToCol((colToDbl(color.c[2]) + 128.0) / 255.0));
         } else {
             for (int i = 0; i < nComps; i++) {
-                in[i] = colToByte(color->c[i]);
+                in[i] = colToByte(color.c[i]);
             }
         }
         if (nComps <= 4) {
@@ -2167,7 +2167,7 @@ void GfxICCBasedColorSpace::getDeviceNLine(unsigned char *in, unsigned char *out
 #endif
 }
 
-void GfxICCBasedColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
+void GfxICCBasedColorSpace::getCMYK(const GfxColor &color, GfxCMYK *cmyk) const
 {
 #if USE_CMS
     if (transform != nullptr && transform->getTransformPixelType() == PT_CMYK) {
@@ -2175,12 +2175,12 @@ void GfxICCBasedColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
         unsigned char out[gfxColorMaxComps];
 
         if (nComps == 3 && transform->getInputPixelType() == PT_Lab) {
-            in[0] = colToByte(dblToCol(colToDbl(color->c[0]) / 100.0));
-            in[1] = colToByte(dblToCol((colToDbl(color->c[1]) + 128.0) / 255.0));
-            in[2] = colToByte(dblToCol((colToDbl(color->c[2]) + 128.0) / 255.0));
+            in[0] = colToByte(dblToCol(colToDbl(color.c[0]) / 100.0));
+            in[1] = colToByte(dblToCol((colToDbl(color.c[1]) + 128.0) / 255.0));
+            in[2] = colToByte(dblToCol((colToDbl(color.c[2]) + 128.0) / 255.0));
         } else {
             for (int i = 0; i < nComps; i++) {
-                in[i] = colToByte(color->c[i]);
+                in[i] = colToByte(color.c[i]);
             }
         }
         if (nComps <= 4) {
@@ -2265,7 +2265,7 @@ bool GfxICCBasedColorSpace::useGetDeviceNLine() const
 #endif
 }
 
-void GfxICCBasedColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const
+void GfxICCBasedColorSpace::getDeviceN(const GfxColor &color, GfxColor *deviceN) const
 {
     GfxCMYK cmyk;
     clearGfxColor(deviceN);
@@ -2428,7 +2428,7 @@ err3:
     return {};
 }
 
-GfxColor *GfxIndexedColorSpace::mapColorToBase(const GfxColor *color, GfxColor *baseColor) const
+GfxColor *GfxIndexedColorSpace::mapColorToBase(const GfxColor &color, GfxColor *baseColor) const
 {
     unsigned char *p;
     double low[gfxColorMaxComps], range[gfxColorMaxComps];
@@ -2436,7 +2436,7 @@ GfxColor *GfxIndexedColorSpace::mapColorToBase(const GfxColor *color, GfxColor *
 
     n = base->getNComps();
     base->getDefaultRanges(low, range, indexHigh);
-    const int idx = static_cast<int>(colToDbl(color->c[0]) + 0.5) * n;
+    const int idx = static_cast<int>(colToDbl(color.c[0]) + 0.5) * n;
     if (likely((idx + n - 1 < (indexHigh + 1) * base->getNComps()) && idx >= 0)) {
         p = &lookup[idx];
         for (i = 0; i < n; ++i) {
@@ -2450,18 +2450,18 @@ GfxColor *GfxIndexedColorSpace::mapColorToBase(const GfxColor *color, GfxColor *
     return baseColor;
 }
 
-void GfxIndexedColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
+void GfxIndexedColorSpace::getGray(const GfxColor &color, GfxGray *gray) const
 {
     GfxColor color2;
 
-    base->getGray(mapColorToBase(color, &color2), gray);
+    base->getGray(*mapColorToBase(color, &color2), gray);
 }
 
-void GfxIndexedColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
+void GfxIndexedColorSpace::getRGB(const GfxColor &color, GfxRGB *rgb) const
 {
     GfxColor color2;
 
-    base->getRGB(mapColorToBase(color, &color2), rgb);
+    base->getRGB(*mapColorToBase(color, &color2), rgb);
 }
 
 void GfxIndexedColorSpace::getRGBLine(unsigned char *in, unsigned int *out, int length)
@@ -2554,18 +2554,18 @@ void GfxIndexedColorSpace::getDeviceNLine(unsigned char *in, unsigned char *out,
     gfree(line);
 }
 
-void GfxIndexedColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
+void GfxIndexedColorSpace::getCMYK(const GfxColor &color, GfxCMYK *cmyk) const
 {
     GfxColor color2;
 
-    base->getCMYK(mapColorToBase(color, &color2), cmyk);
+    base->getCMYK(*mapColorToBase(color, &color2), cmyk);
 }
 
-void GfxIndexedColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const
+void GfxIndexedColorSpace::getDeviceN(const GfxColor &color, GfxColor *deviceN) const
 {
     GfxColor color2;
 
-    base->getDeviceN(mapColorToBase(color, &color2), deviceN);
+    base->getDeviceN(*mapColorToBase(color, &color2), deviceN);
 }
 
 void GfxIndexedColorSpace::getDefaultColor(GfxColor *color) const
@@ -2660,7 +2660,7 @@ err5:
     return {};
 }
 
-void GfxSeparationColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
+void GfxSeparationColorSpace::getGray(const GfxColor &color, GfxGray *gray) const
 {
     double x;
     double c[gfxColorMaxComps];
@@ -2668,18 +2668,18 @@ void GfxSeparationColorSpace::getGray(const GfxColor *color, GfxGray *gray) cons
     int i;
 
     if (alt->getMode() == csDeviceGray && name->compare("Black") == 0) {
-        *gray = clip01(gfxColorComp1 - color->c[0]);
+        *gray = clip01(gfxColorComp1 - color.c[0]);
     } else {
-        x = colToDbl(color->c[0]);
+        x = colToDbl(color.c[0]);
         func->transform(&x, c);
         for (i = 0; i < alt->getNComps(); ++i) {
             color2.c[i] = dblToCol(c[i]);
         }
-        alt->getGray(&color2, gray);
+        alt->getGray(color2, gray);
     }
 }
 
-void GfxSeparationColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
+void GfxSeparationColorSpace::getRGB(const GfxColor &color, GfxRGB *rgb) const
 {
     double x;
     double c[gfxColorMaxComps];
@@ -2687,21 +2687,21 @@ void GfxSeparationColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
     int i;
 
     if (alt->getMode() == csDeviceGray && name->compare("Black") == 0) {
-        rgb->r = clip01(gfxColorComp1 - color->c[0]);
-        rgb->g = clip01(gfxColorComp1 - color->c[0]);
-        rgb->b = clip01(gfxColorComp1 - color->c[0]);
+        rgb->r = clip01(gfxColorComp1 - color.c[0]);
+        rgb->g = clip01(gfxColorComp1 - color.c[0]);
+        rgb->b = clip01(gfxColorComp1 - color.c[0]);
     } else {
-        x = colToDbl(color->c[0]);
+        x = colToDbl(color.c[0]);
         func->transform(&x, c);
         const int altNComps = alt->getNComps();
         for (i = 0; i < altNComps; ++i) {
             color2.c[i] = dblToCol(c[i]);
         }
-        alt->getRGB(&color2, rgb);
+        alt->getRGB(color2, rgb);
     }
 }
 
-void GfxSeparationColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
+void GfxSeparationColorSpace::getCMYK(const GfxColor &color, GfxCMYK *cmyk) const
 {
     double x;
     double c[gfxColorMaxComps];
@@ -2712,33 +2712,33 @@ void GfxSeparationColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) cons
         cmyk->c = 0;
         cmyk->m = 0;
         cmyk->y = 0;
-        cmyk->k = color->c[0];
+        cmyk->k = color.c[0];
     } else if (name->compare("Cyan") == 0) {
-        cmyk->c = color->c[0];
+        cmyk->c = color.c[0];
         cmyk->m = 0;
         cmyk->y = 0;
         cmyk->k = 0;
     } else if (name->compare("Magenta") == 0) {
         cmyk->c = 0;
-        cmyk->m = color->c[0];
+        cmyk->m = color.c[0];
         cmyk->y = 0;
         cmyk->k = 0;
     } else if (name->compare("Yellow") == 0) {
         cmyk->c = 0;
         cmyk->m = 0;
-        cmyk->y = color->c[0];
+        cmyk->y = color.c[0];
         cmyk->k = 0;
     } else {
-        x = colToDbl(color->c[0]);
+        x = colToDbl(color.c[0]);
         func->transform(&x, c);
         for (i = 0; i < alt->getNComps(); ++i) {
             color2.c[i] = dblToCol(c[i]);
         }
-        alt->getCMYK(&color2, cmyk);
+        alt->getCMYK(color2, cmyk);
     }
 }
 
-void GfxSeparationColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const
+void GfxSeparationColorSpace::getDeviceN(const GfxColor &color, GfxColor *deviceN) const
 {
     clearGfxColor(deviceN);
     if (mapping.empty() || mapping[0] == -1) {
@@ -2750,7 +2750,7 @@ void GfxSeparationColorSpace::getDeviceN(const GfxColor *color, GfxColor *device
         deviceN->c[2] = cmyk.y;
         deviceN->c[3] = cmyk.k;
     } else {
-        deviceN->c[mapping[0]] = color->c[0];
+        deviceN->c[mapping[0]] = color.c[0];
     }
 }
 
@@ -2935,55 +2935,55 @@ std::unique_ptr<GfxColorSpace> GfxDeviceNColorSpace::parse(GfxResources *res, co
     return nullptr;
 }
 
-void GfxDeviceNColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
+void GfxDeviceNColorSpace::getGray(const GfxColor &color, GfxGray *gray) const
 {
     double x[gfxColorMaxComps], c[gfxColorMaxComps];
     GfxColor color2;
     int i;
 
     for (i = 0; i < nComps; ++i) {
-        x[i] = colToDbl(color->c[i]);
+        x[i] = colToDbl(color.c[i]);
     }
     func->transform(x, c);
     for (i = 0; i < alt->getNComps(); ++i) {
         color2.c[i] = dblToCol(c[i]);
     }
-    alt->getGray(&color2, gray);
+    alt->getGray(color2, gray);
 }
 
-void GfxDeviceNColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
+void GfxDeviceNColorSpace::getRGB(const GfxColor &color, GfxRGB *rgb) const
 {
     double x[gfxColorMaxComps], c[gfxColorMaxComps];
     GfxColor color2;
     int i;
 
     for (i = 0; i < nComps; ++i) {
-        x[i] = colToDbl(color->c[i]);
+        x[i] = colToDbl(color.c[i]);
     }
     func->transform(x, c);
     for (i = 0; i < alt->getNComps(); ++i) {
         color2.c[i] = dblToCol(c[i]);
     }
-    alt->getRGB(&color2, rgb);
+    alt->getRGB(color2, rgb);
 }
 
-void GfxDeviceNColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
+void GfxDeviceNColorSpace::getCMYK(const GfxColor &color, GfxCMYK *cmyk) const
 {
     double x[gfxColorMaxComps], c[gfxColorMaxComps];
     GfxColor color2;
     int i;
 
     for (i = 0; i < nComps; ++i) {
-        x[i] = colToDbl(color->c[i]);
+        x[i] = colToDbl(color.c[i]);
     }
     func->transform(x, c);
     for (i = 0; i < alt->getNComps(); ++i) {
         color2.c[i] = dblToCol(c[i]);
     }
-    alt->getCMYK(&color2, cmyk);
+    alt->getCMYK(color2, cmyk);
 }
 
-void GfxDeviceNColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const
+void GfxDeviceNColorSpace::getDeviceN(const GfxColor &color, GfxColor *deviceN) const
 {
     clearGfxColor(deviceN);
     if (mapping.empty()) {
@@ -2997,7 +2997,7 @@ void GfxDeviceNColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) 
     } else {
         for (int j = 0; j < nComps; j++) {
             if (mapping[j] != -1) {
-                deviceN->c[mapping[j]] = color->c[j];
+                deviceN->c[mapping[j]] = color.c[j];
             }
         }
     }
@@ -3129,23 +3129,23 @@ std::unique_ptr<GfxColorSpace> GfxPatternColorSpace::parse(GfxResources *res, co
     return std::make_unique<GfxPatternColorSpace>(std::move(underA));
 }
 
-void GfxPatternColorSpace::getGray(const GfxColor * /*color*/, GfxGray *gray) const
+void GfxPatternColorSpace::getGray(const GfxColor & /*color*/, GfxGray *gray) const
 {
     *gray = 0;
 }
 
-void GfxPatternColorSpace::getRGB(const GfxColor * /*color*/, GfxRGB *rgb) const
+void GfxPatternColorSpace::getRGB(const GfxColor & /*color*/, GfxRGB *rgb) const
 {
     rgb->r = rgb->g = rgb->b = 0;
 }
 
-void GfxPatternColorSpace::getCMYK(const GfxColor * /*color*/, GfxCMYK *cmyk) const
+void GfxPatternColorSpace::getCMYK(const GfxColor & /*color*/, GfxCMYK *cmyk) const
 {
     cmyk->c = cmyk->m = cmyk->y = 0;
     cmyk->k = 1;
 }
 
-void GfxPatternColorSpace::getDeviceN(const GfxColor * /*color*/, GfxColor *deviceN) const
+void GfxPatternColorSpace::getDeviceN(const GfxColor & /*color*/, GfxColor *deviceN) const
 {
     clearGfxColor(deviceN);
     deviceN->c[3] = 1;
@@ -5698,12 +5698,12 @@ void GfxImageColorMap::getGray(const unsigned char *x, GfxGray *gray) const
         for (i = 0; i < nComps2; ++i) {
             color.c[i] = lookup2[i][x[0]];
         }
-        colorSpace2->getGray(&color, gray);
+        colorSpace2->getGray(color, gray);
     } else {
         for (i = 0; i < nComps; ++i) {
             color.c[i] = lookup2[i][x[i]];
         }
-        colorSpace->getGray(&color, gray);
+        colorSpace->getGray(color, gray);
     }
 }
 
@@ -5716,12 +5716,12 @@ void GfxImageColorMap::getRGB(const unsigned char *x, GfxRGB *rgb)
         for (i = 0; i < nComps2; ++i) {
             color.c[i] = lookup2[i][x[0]];
         }
-        colorSpace2->getRGB(&color, rgb);
+        colorSpace2->getRGB(color, rgb);
     } else {
         for (i = 0; i < nComps; ++i) {
             color.c[i] = lookup2[i][x[i]];
         }
-        colorSpace->getRGB(&color, rgb);
+        colorSpace->getRGB(color, rgb);
     }
 }
 
@@ -6037,12 +6037,12 @@ void GfxImageColorMap::getCMYK(const unsigned char *x, GfxCMYK *cmyk) const
         for (i = 0; i < nComps2; ++i) {
             color.c[i] = lookup2[i][x[0]];
         }
-        colorSpace2->getCMYK(&color, cmyk);
+        colorSpace2->getCMYK(color, cmyk);
     } else {
         for (i = 0; i < nComps; ++i) {
             color.c[i] = lookup[i][x[i]];
         }
-        colorSpace->getCMYK(&color, cmyk);
+        colorSpace->getCMYK(color, cmyk);
     }
 }
 
@@ -6055,12 +6055,12 @@ void GfxImageColorMap::getDeviceN(const unsigned char *x, GfxColor *deviceN)
         for (i = 0; i < nComps2; ++i) {
             color.c[i] = lookup2[i][x[0]];
         }
-        colorSpace2->getDeviceN(&color, deviceN);
+        colorSpace2->getDeviceN(color, deviceN);
     } else {
         for (i = 0; i < nComps; ++i) {
             color.c[i] = lookup[i][x[i]];
         }
-        colorSpace->getDeviceN(&color, deviceN);
+        colorSpace->getDeviceN(color, deviceN);
     }
 }
 
@@ -6382,17 +6382,17 @@ void GfxState::ReusablePathIterator::reset()
     numCoords = curSubPath->getNumPoints();
 }
 
-GfxState::GfxState(double hDPIA, double vDPIA, const PDFRectangle *pageBox, int rotateA, bool upsideDown)
+GfxState::GfxState(double hDPIA, double vDPIA, const PDFRectangle &pageBox, int rotateA, bool upsideDown)
 {
     double kx, ky;
 
     hDPI = hDPIA;
     vDPI = vDPIA;
     rotate = rotateA;
-    px1 = pageBox->x1;
-    py1 = pageBox->y1;
-    px2 = pageBox->x2;
-    py2 = pageBox->y2;
+    px1 = pageBox.x1;
+    py1 = pageBox.y1;
+    px2 = pageBox.x2;
+    py2 = pageBox.y2;
     kx = hDPI / 72.0;
     ky = vDPI / 72.0;
     if (rotate == 90) {

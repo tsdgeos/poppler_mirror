@@ -158,11 +158,11 @@ class POPPLER_PRIVATE_EXPORT Gfx
 {
 public:
     // Constructor for regular output.
-    Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI, double vDPI, const PDFRectangle *box, const PDFRectangle *cropBox, int rotate, bool (*abortCheckCbkA)(void *data) = nullptr, void *abortCheckCbkDataA = nullptr,
+    Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI, double vDPI, const PDFRectangle &box, const PDFRectangle *cropBox, int rotate, bool (*abortCheckCbkA)(void *data) = nullptr, void *abortCheckCbkDataA = nullptr,
         XRef *xrefA = nullptr);
 
     // Constructor for a sub-page object.
-    Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, const PDFRectangle *cropBox, bool (*abortCheckCbkA)(void *data) = nullptr, void *abortCheckCbkDataA = nullptr, Gfx *gfxA = nullptr);
+    Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle &box, const PDFRectangle *cropBox, bool (*abortCheckCbkA)(void *data) = nullptr, void *abortCheckCbkDataA = nullptr, Gfx *gfxA = nullptr);
 #if USE_CMS
     void initDisplayProfile();
 #endif
@@ -203,8 +203,9 @@ public:
 
     bool checkTransparencyGroup(Dict *resDict);
 
+    // if softMask is true backdropColor must not be null
     void drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matrix, const std::array<double, 4> &bbox, bool transpGroup = false, bool softMask = false, GfxColorSpace *blendingColorSpace = nullptr, bool isolated = false,
-                  bool knockout = false, bool alpha = false, Function *transferFunc = nullptr, GfxColor *backdropColor = nullptr);
+                  bool knockout = false, bool alpha = false, Function *transferFunc = nullptr, const GfxColor *backdropColor = nullptr);
 
     void pushResources(Dict *resDict);
     void popResources();
@@ -268,7 +269,7 @@ private:
     void opSetMiterLimit(Object args[], int numArgs);
     void opSetLineWidth(Object args[], int numArgs);
     void opSetExtGState(Object args[], int numArgs);
-    void doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, Function *transferFunc, GfxColor *backdropColor);
+    void doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, Function *transferFunc, const GfxColor &backdropColor);
     void opSetRenderingIntent(Object args[], int numArgs);
 
     // color operators

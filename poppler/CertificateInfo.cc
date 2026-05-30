@@ -61,7 +61,7 @@ unsigned int X509CertificateInfo::getKeyUsageExtensions() const
     return ku_extensions;
 }
 
-const GooString &X509CertificateInfo::getCertificateDER() const
+const std::vector<unsigned char> &X509CertificateInfo::getCertificateDER() const
 {
     return cert_der;
 }
@@ -111,9 +111,9 @@ void X509CertificateInfo::setKeyUsageExtensions(unsigned int keyUsages)
     ku_extensions = keyUsages;
 }
 
-void X509CertificateInfo::setCertificateDER(const GooString &certDer)
+void X509CertificateInfo::setCertificateDER(std::vector<unsigned char> &&certDer)
 {
-    cert_der.assign(certDer.toStr());
+    cert_der = std::move(certDer);
 }
 
 void X509CertificateInfo::setIsSelfSigned(bool isSelfSigned)

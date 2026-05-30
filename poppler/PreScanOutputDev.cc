@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2010, 2011, 2018-2021, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2011, 2018-2021, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011, 2014 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
@@ -282,12 +282,12 @@ void PreScanOutputDev::paintTransparencyGroup(GfxState *state, const std::array<
     check(state->getFillColorSpace(), state->getFillColor(), state->getFillOpacity(), state->getBlendMode());
 }
 
-void PreScanOutputDev::setSoftMask(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, bool /*alpha*/, Function * /*transferFunc*/, GfxColor * /*backdropColor*/)
+void PreScanOutputDev::setSoftMask(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, bool /*alpha*/, Function * /*transferFunc*/, const GfxColor & /*backdropColor*/)
 {
     transparency = true;
 }
 
-void PreScanOutputDev::check(GfxColorSpace *colorSpace, const GfxColor *color, double opacity, GfxBlendMode blendMode)
+void PreScanOutputDev::check(GfxColorSpace *colorSpace, const GfxColor &color, double opacity, GfxBlendMode blendMode)
 {
     GfxRGB rgb;
 

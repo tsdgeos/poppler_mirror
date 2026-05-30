@@ -133,7 +133,7 @@ public:
     bool isReadOnly() const;
     void setReadOnly(bool value);
 
-    LinkAction *getActivationAction(); // The caller should not delete the result
+    const LinkAction *getActivationAction(); // The caller should not delete the result
     std::unique_ptr<LinkAction> getAdditionalAction(Annot::FormAdditionalActionsType type);
     bool setAdditionalAction(Annot::FormAdditionalActionsType t, const std::string &js);
 

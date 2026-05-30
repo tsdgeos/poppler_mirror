@@ -199,12 +199,12 @@ private:
 
 QImageDumpingQPainterOutputDev::~QImageDumpingQPainterOutputDev() = default;
 
-Link *PageData::convertLinkActionToLink(::LinkAction *a, const QRectF &linkArea) const
+Link *PageData::convertLinkActionToLink(const ::LinkAction *a, const QRectF &linkArea) const
 {
     return convertLinkActionToLink(a, parentDoc, linkArea);
 }
 
-Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc, const QRectF &linkArea)
+Link *PageData::convertLinkActionToLink(const ::LinkAction *a, DocumentData *parentDoc, const QRectF &linkArea)
 {
     if (!a) {
         return nullptr;
@@ -213,14 +213,14 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     Link *popplerLink = nullptr;
     switch (a->getKind()) {
     case actionGoTo: {
-        auto *g = static_cast<LinkGoTo *>(a);
+        const auto *g = static_cast<const LinkGoTo *>(a);
         const LinkDestinationData ldd(g->getDest(), g->getNamedDest(), parentDoc, false);
         // create link: no ext file, namedDest, object pointer
         popplerLink = new LinkGoto(linkArea, QString(), LinkDestination(ldd));
     } break;
 
     case actionGoToR: {
-        auto *g = static_cast<LinkGoToR *>(a);
+        const auto *g = static_cast<const LinkGoToR *>(a);
         // copy link file
         const QString fileName = UnicodeParsedString(g->getFileName());
         const LinkDestinationData ldd(g->getDest(), g->getNamedDest(), parentDoc, !fileName.isEmpty());
@@ -229,13 +229,13 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     } break;
 
     case actionLaunch: {
-        auto *e = static_cast<LinkLaunch *>(a);
+        const auto *e = static_cast<const LinkLaunch *>(a);
         const GooString *p = e->getParams();
         popplerLink = new LinkExecute(linkArea, UnicodeParsedString(e->getFileName()), p ? QString::fromStdString(p->toStr()) : QString {});
     } break;
 
     case actionNamed: {
-        const std::string &name = (static_cast<LinkNamed *>(a))->getName();
+        const std::string &name = (static_cast<const LinkNamed *>(a))->getName();
         if (name == "NextPage") {
             popplerLink = new LinkAction(linkArea, LinkAction::PageNext);
         } else if (name == "PrevPage") {
@@ -271,21 +271,21 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     } break;
 
     case actionURI: {
-        popplerLink = new LinkBrowse(linkArea, QString::fromStdString((static_cast<LinkURI *>(a))->getURI()));
+        popplerLink = new LinkBrowse(linkArea, QString::fromStdString((static_cast<const LinkURI *>(a))->getURI()));
     } break;
 
     case actionSound: {
-        auto *ls = static_cast<::LinkSound *>(a);
+        const auto *ls = static_cast<const ::LinkSound *>(a);
         popplerLink = new LinkSound(linkArea, ls->getVolume(), ls->getSynchronous(), ls->getRepeat(), ls->getMix(), new SoundObject(ls->getSound()));
     } break;
 
     case actionJavaScript: {
-        auto *ljs = static_cast<::LinkJavaScript *>(a);
+        const auto *ljs = static_cast<const ::LinkJavaScript *>(a);
         popplerLink = new LinkJavaScript(linkArea, UnicodeParsedString(ljs->getScript()));
     } break;
 
     case actionMovie: {
-        auto *lm = static_cast<::LinkMovie *>(a);
+        const auto *lm = static_cast<const ::LinkMovie *>(a);
 
         const QString title = (lm->hasAnnotTitle() ? UnicodeParsedString(lm->getAnnotTitle()) : QString());
 
@@ -314,7 +314,7 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     } break;
 
     case actionRendition: {
-        auto *lrn = static_cast<::LinkRendition *>(a);
+        const auto *lrn = static_cast<const ::LinkRendition *>(a);
 
         Ref reference = Ref::INVALID();
         if (lrn->hasScreenAnnot()) {
@@ -325,21 +325,21 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     } break;
 
     case actionOCGState: {
-        auto *plocg = static_cast<::LinkOCGState *>(a);
+        const auto *plocg = static_cast<const ::LinkOCGState *>(a);
 
         auto *locgp = new LinkOCGStatePrivate(linkArea, plocg->getStateList(), plocg->getPreserveRB());
         popplerLink = new LinkOCGState(locgp);
     } break;
 
     case actionHide: {
-        auto *lh = static_cast<::LinkHide *>(a);
+        const auto *lh = static_cast<const ::LinkHide *>(a);
 
         auto *lhp = new LinkHidePrivate(linkArea, lh->hasTargetName() ? UnicodeParsedString(lh->getTargetName()) : QString(), lh->isShowAction());
         popplerLink = new LinkHide(lhp);
     } break;
 
     case actionResetForm: {
-        auto *lrf = static_cast<::LinkResetForm *>(a);
+        const auto *lrf = static_cast<const ::LinkResetForm *>(a);
         std::vector<std::string> stdStringFields = lrf->getFields();
         QStringList qStringFields;
         for (const std::string &str : stdStringFields) {
@@ -349,7 +349,7 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
         popplerLink = new LinkResetForm(lrfp);
     } break;
     case actionSubmitForm: {
-        auto *lsf = static_cast<::LinkSubmitForm *>(a);
+        const auto *lsf = static_cast<const ::LinkSubmitForm *>(a);
         const std::vector<std::string> &stdStringFields = lsf->getFields();
         QVector<int> fieldIds;
         fieldIds.reserve(stdStringFields.size());

@@ -20,7 +20,7 @@
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2012, 2017, 2018, 2020, 2021, 2023, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2017, 2018, 2020, 2021, 2023, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013, 2017, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -75,12 +75,12 @@ public:
     ~PageAttrs();
 
     // Accessors.
-    const PDFRectangle *getMediaBox() const { return &mediaBox; }
-    const PDFRectangle *getCropBox() const { return &cropBox; }
+    const PDFRectangle &getMediaBox() const { return mediaBox; }
+    const PDFRectangle &getCropBox() const { return cropBox; }
     bool isCropped() const { return haveCropBox; }
-    const PDFRectangle *getBleedBox() const { return &bleedBox; }
-    const PDFRectangle *getTrimBox() const { return &trimBox; }
-    const PDFRectangle *getArtBox() const { return &artBox; }
+    const PDFRectangle &getBleedBox() const { return bleedBox; }
+    const PDFRectangle &getTrimBox() const { return trimBox; }
+    const PDFRectangle &getArtBox() const { return artBox; }
     int getRotate() const { return rotate; }
     Dict *getBoxColorInfo() { return boxColorInfo.isDict() ? boxColorInfo.getDict() : nullptr; }
     Dict *getGroup() { return group.isDict() ? group.getDict() : nullptr; }
@@ -134,16 +134,16 @@ public:
 
     // Get page parameters.
     int getNum() const { return num; }
-    const PDFRectangle *getMediaBox() const { return attrs->getMediaBox(); }
-    const PDFRectangle *getCropBox() const { return attrs->getCropBox(); }
+    const PDFRectangle &getMediaBox() const { return attrs->getMediaBox(); }
+    const PDFRectangle &getCropBox() const { return attrs->getCropBox(); }
     bool isCropped() const { return attrs->isCropped(); }
-    double getMediaWidth() const { return attrs->getMediaBox()->x2 - attrs->getMediaBox()->x1; }
-    double getMediaHeight() const { return attrs->getMediaBox()->y2 - attrs->getMediaBox()->y1; }
-    double getCropWidth() const { return attrs->getCropBox()->x2 - attrs->getCropBox()->x1; }
-    double getCropHeight() const { return attrs->getCropBox()->y2 - attrs->getCropBox()->y1; }
-    const PDFRectangle *getBleedBox() const { return attrs->getBleedBox(); }
-    const PDFRectangle *getTrimBox() const { return attrs->getTrimBox(); }
-    const PDFRectangle *getArtBox() const { return attrs->getArtBox(); }
+    double getMediaWidth() const { return attrs->getMediaBox().x2 - attrs->getMediaBox().x1; }
+    double getMediaHeight() const { return attrs->getMediaBox().y2 - attrs->getMediaBox().y1; }
+    double getCropWidth() const { return attrs->getCropBox().x2 - attrs->getCropBox().x1; }
+    double getCropHeight() const { return attrs->getCropBox().y2 - attrs->getCropBox().y1; }
+    const PDFRectangle &getBleedBox() const { return attrs->getBleedBox(); }
+    const PDFRectangle &getTrimBox() const { return attrs->getTrimBox(); }
+    const PDFRectangle &getArtBox() const { return attrs->getArtBox(); }
     int getRotate() const { return attrs->getRotate(); }
     Dict *getBoxColorInfo() { return attrs->getBoxColorInfo(); }
     Dict *getGroup() { return attrs->getGroup(); }

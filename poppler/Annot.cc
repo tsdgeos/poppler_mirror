@@ -7223,12 +7223,12 @@ void AnnotRichMedia::initialize(Dict *dict)
     }
 }
 
-AnnotRichMedia::Content *AnnotRichMedia::getContent() const
+const AnnotRichMedia::Content *AnnotRichMedia::getContent() const
 {
     return content.get();
 }
 
-AnnotRichMedia::Settings *AnnotRichMedia::getSettings() const
+const AnnotRichMedia::Settings *AnnotRichMedia::getSettings() const
 {
     return settings.get();
 }
@@ -7248,12 +7248,12 @@ AnnotRichMedia::Settings::Settings(Dict *dict)
 
 AnnotRichMedia::Settings::~Settings() = default;
 
-AnnotRichMedia::Activation *AnnotRichMedia::Settings::getActivation() const
+const AnnotRichMedia::Activation *AnnotRichMedia::Settings::getActivation() const
 {
     return activation.get();
 }
 
-AnnotRichMedia::Deactivation *AnnotRichMedia::Settings::getDeactivation() const
+const AnnotRichMedia::Deactivation *AnnotRichMedia::Settings::getDeactivation() const
 {
     return deactivation.get();
 }
@@ -7363,9 +7363,9 @@ const GooString *AnnotRichMedia::Asset::getName() const
     return name.get();
 }
 
-Object *AnnotRichMedia::Asset::getFileSpec() const
+const Object *AnnotRichMedia::Asset::getFileSpec() const
 {
-    return const_cast<Object *>(&fileSpec);
+    return &fileSpec;
 }
 
 AnnotRichMedia::Configuration::Configuration(Dict *dict)
@@ -7471,7 +7471,7 @@ AnnotRichMedia::Instance::Type AnnotRichMedia::Instance::getType() const
     return type;
 }
 
-AnnotRichMedia::Params *AnnotRichMedia::Instance::getParams() const
+const AnnotRichMedia::Params *AnnotRichMedia::Instance::getParams() const
 {
     return params.get();
 }

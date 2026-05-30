@@ -279,41 +279,39 @@ SysFontList::~SysFontList()
 
 const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, bool exact, const std::vector<std::string> &filesToIgnore)
 {
-    GooString *name2;
+    std::string name2 = name;
     bool bold, italic, oblique;
     size_t n;
-
-    name2 = new GooString(name);
 
     // remove space, comma, dash chars
     {
         size_t i = 0;
-        while (i < name2->size()) {
-            const char c = name2->getChar(i);
+        while (i < name2.size()) {
+            const char c = name2[i];
             if (c == ' ' || c == ',' || c == '-') {
-                name2->erase(i, 1);
+                name2.erase(i, 1);
             } else {
                 ++i;
             }
         }
-        n = name2->size();
+        n = name2.size();
     }
 
     // remove trailing "MT" (Foo-MT, Foo-BoldMT, etc.)
-    if (n > 2 && !strcmp(name2->c_str() + n - 2, "MT")) {
-        name2->erase(n - 2, 2);
+    if (n > 2 && name2.substr(n - 2, 2) == "MT") {
+        name2.erase(n - 2, 2);
         n -= 2;
     }
 
     // look for "Regular"
-    if (n > 7 && !strcmp(name2->c_str() + n - 7, "Regular")) {
-        name2->erase(n - 7, 7);
+    if (n > 7 && name2.substr(n - 7, 7) == "Regular") {
+        name2.erase(n - 7, 7);
         n -= 7;
     }
 
     // look for "Italic"
-    if (n > 6 && !strcmp(name2->c_str() + n - 6, "Italic")) {
-        name2->erase(n - 6, 6);
+    if (n > 6 && name2.substr(n - 6, 6) == "Italic") {
+        name2.erase(n - 6, 6);
         italic = true;
         n -= 6;
     } else {
@@ -321,8 +319,8 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
     }
 
     // look for "Oblique"
-    if (n > 6 && !strcmp(name2->c_str() + n - 7, "Oblique")) {
-        name2->erase(n - 7, 7);
+    if (n > 6 && name2.substr(n - 7, 7) == "Oblique") {
+        name2.erase(n - 7, 7);
         oblique = true;
         n -= 6;
     } else {
@@ -330,8 +328,8 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
     }
 
     // look for "Bold"
-    if (n > 4 && !strcmp(name2->c_str() + n - 4, "Bold")) {
-        name2->erase(n - 4, 4);
+    if (n > 4 && name2.substr(n - 4, 4) == "Bold") {
+        name2.erase(n - 4, 4);
         bold = true;
         n -= 4;
     } else {
@@ -339,20 +337,20 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
     }
 
     // remove trailing "MT" (FooMT-Bold, etc.)
-    if (n > 2 && !strcmp(name2->c_str() + n - 2, "MT")) {
-        name2->erase(n - 2, 2);
+    if (n > 2 && name2.substr(n - 2, 2) == "MT") {
+        name2.erase(n - 2, 2);
         n -= 2;
     }
 
     // remove trailing "PS"
-    if (n > 2 && !strcmp(name2->c_str() + n - 2, "PS")) {
-        name2->erase(n - 2, 2);
+    if (n > 2 && name2.substr(n - 2, 2) == "PS") {
+        name2.erase(n - 2, 2);
         n -= 2;
     }
 
     // remove trailing "IdentityH"
-    if (n > 9 && !strcmp(name2->c_str() + n - 9, "IdentityH")) {
-        name2->erase(n - 9, 9);
+    if (n > 9 && name2.substr(n - 9, 9) == "IdentityH") {
+        name2.erase(n - 9, 9);
         n -= 9;
     }
 
@@ -360,7 +358,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
     const SysFontInfo *fi = nullptr;
     for (const SysFontInfo *f : fonts) {
         fi = f;
-        if (fi->match(name2->toStr(), bold, italic, oblique, fixedWidth)) {
+        if (fi->match(name2, bold, italic, oblique, fixedWidth)) {
             if (std::ranges::find(filesToIgnore, fi->path->toStr()) == filesToIgnore.end()) {
                 break;
             }
@@ -371,7 +369,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
         // try ignoring the bold flag
         for (const SysFontInfo *f : fonts) {
             fi = f;
-            if (fi->match(name2->toStr(), false, italic)) {
+            if (fi->match(name2, false, italic)) {
                 if (std::ranges::find(filesToIgnore, fi->path->toStr()) == filesToIgnore.end()) {
                     break;
                 }
@@ -383,7 +381,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
         // try ignoring the bold and italic flags
         for (const SysFontInfo *f : fonts) {
             fi = f;
-            if (fi->match(name2->toStr(), false, false)) {
+            if (fi->match(name2, false, false)) {
                 if (std::ranges::find(filesToIgnore, fi->path->toStr()) == filesToIgnore.end()) {
                     break;
                 }
@@ -392,7 +390,6 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
         }
     }
 
-    delete name2;
     return fi;
 }
 

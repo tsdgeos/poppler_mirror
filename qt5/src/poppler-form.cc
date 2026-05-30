@@ -236,7 +236,7 @@ void FormField::setPrintable(bool value)
 Link *FormField::activationAction() const
 {
     Link *action = nullptr;
-    if (::LinkAction *act = m_formData->fm->getActivationAction()) {
+    if (const ::LinkAction *act = m_formData->fm->getActivationAction()) {
         action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
     }
     return action;
@@ -1051,17 +1051,16 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
 
         certPriv->nick_name = QString::fromStdString(ci->getNickName().toStr());
 
-        X509CertificateInfo::Validity certValidity = ci->getValidity();
-        certPriv->validity_start = QDateTime::fromSecsSinceEpoch(certValidity.notBefore, QTimeZone::utc());
-        certPriv->validity_end = QDateTime::fromSecsSinceEpoch(certValidity.notAfter, QTimeZone::utc());
+        certPriv->validity_start = QDateTime::fromSecsSinceEpoch(std::chrono::duration_cast<std::chrono::seconds>(ci->getValidity().notBefore.time_since_epoch()).count(), QTimeZone::utc());
+        certPriv->validity_end = QDateTime::fromSecsSinceEpoch(std::chrono::duration_cast<std::chrono::seconds>(ci->getValidity().notAfter.time_since_epoch()).count(), QTimeZone::utc());
 
         const X509CertificateInfo::PublicKeyInfo &pkInfo = ci->getPublicKeyInfo();
         certPriv->public_key = QByteArray(pkInfo.publicKey.c_str(), pkInfo.publicKey.size());
         certPriv->public_key_type = static_cast<int>(pkInfo.publicKeyType);
         certPriv->public_key_strength = pkInfo.publicKeyStrength;
 
-        const GooString &certDer = ci->getCertificateDER();
-        certPriv->certificate_der = QByteArray(certDer.c_str(), certDer.size());
+        const std::vector<unsigned char> &certDer = ci->getCertificateDER();
+        certPriv->certificate_der = QByteArray(reinterpret_cast<const char *>(certDer.data()), certDer.size());
 
         certPriv->is_null = false;
     }

@@ -299,7 +299,7 @@ int main(int argc, char *argv[])
 
             const PDFRectangle *cropBox = nullptr;
             if (docs[i]->getCatalog()->getPage(j)->isCropped()) {
-                cropBox = docs[i]->getCatalog()->getPage(j)->getCropBox();
+                cropBox = &docs[i]->getCatalog()->getPage(j)->getCropBox();
             }
             if (!docs[i]->replacePageDict(j, docs[i]->getCatalog()->getPage(j)->getRotate(), docs[i]->getCatalog()->getPage(j)->getMediaBox(), cropBox)) {
                 fclose(f);

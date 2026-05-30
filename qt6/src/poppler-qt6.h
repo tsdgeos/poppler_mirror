@@ -1827,7 +1827,7 @@ public:
     /** \cond PRIVATE
       The caller keeps the ownership of the popplersound argument
     */
-    explicit SoundObject(Sound *popplersound);
+    explicit SoundObject(const Sound *popplersound);
     /// \endcond
 
     ~SoundObject();

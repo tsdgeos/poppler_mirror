@@ -15,7 +15,8 @@
 #ifndef CERTIFICATEINFO_H
 #define CERTIFICATEINFO_H
 
-#include <ctime>
+#include <chrono>
+#include <vector>
 #include "goo/GooString.h"
 #include "poppler_private_export.h"
 
@@ -62,6 +63,10 @@ enum class CertificateType
     PGP
 };
 
+namespace Certificate {
+using timePointSeconds = std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>;
+}
+
 class POPPLER_PRIVATE_EXPORT X509CertificateInfo // TODO consider rename to just CertificateInfo
 {
 public:
@@ -105,8 +110,8 @@ public:
 
     struct Validity
     {
-        time_t notBefore = 0;
-        time_t notAfter = 0;
+        Certificate::timePointSeconds notBefore;
+        Certificate::timePointSeconds notAfter;
     };
 
     /* GETTERS */
@@ -118,7 +123,7 @@ public:
     const EntityInfo &getSubjectInfo() const;
     const PublicKeyInfo &getPublicKeyInfo() const;
     unsigned int getKeyUsageExtensions() const;
-    const GooString &getCertificateDER() const;
+    const std::vector<unsigned char> &getCertificateDER() const;
     bool getIsSelfSigned() const;
     bool isQualified() const;
     void setQualified(bool qualified);
@@ -134,7 +139,7 @@ public:
     void setSubjectInfo(EntityInfo &&subjectInfo);
     void setPublicKeyInfo(PublicKeyInfo &&pkInfo);
     void setKeyUsageExtensions(unsigned int keyUsages);
-    void setCertificateDER(const GooString &certDer);
+    void setCertificateDER(std::vector<unsigned char> &&certDer);
     void setIsSelfSigned(bool isSelfSigned);
     void setKeyLocation(KeyLocation location);
     void setCertificateType(CertificateType type);
@@ -145,7 +150,7 @@ private:
     PublicKeyInfo public_key_info;
     Validity cert_validity;
     GooString cert_serial;
-    GooString cert_der;
+    std::vector<unsigned char> cert_der;
     GooString cert_nick;
     unsigned int ku_extensions = KU_NONE;
     int cert_version = -1;

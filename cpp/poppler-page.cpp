@@ -142,7 +142,7 @@ double page::duration() const
  */
 rectf page::page_rect(page_box_enum box) const
 {
-    const PDFRectangle *r = nullptr;
+    std::optional<PDFRectangle> r;
     switch (box) {
     case media_box:
         r = d->page->getMediaBox();

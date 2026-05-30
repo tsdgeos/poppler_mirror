@@ -198,12 +198,12 @@ private:
 
 QImageDumpingQPainterOutputDev::~QImageDumpingQPainterOutputDev() = default;
 
-std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, const QRectF &linkArea) const
+std::unique_ptr<Link> PageData::convertLinkActionToLink(const ::LinkAction *a, const QRectF &linkArea) const
 {
     return convertLinkActionToLink(a, parentDoc, linkArea);
 }
 
-std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc, const QRectF &linkArea)
+std::unique_ptr<Link> PageData::convertLinkActionToLink(const ::LinkAction *a, DocumentData *parentDoc, const QRectF &linkArea)
 {
     if (!a) {
         return nullptr;
@@ -212,14 +212,14 @@ std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, Documen
     std::unique_ptr<Link> popplerLink;
     switch (a->getKind()) {
     case actionGoTo: {
-        auto *g = static_cast<LinkGoTo *>(a);
+        const auto *g = static_cast<const LinkGoTo *>(a);
         const LinkDestinationData ldd(g->getDest(), g->getNamedDest(), parentDoc, false);
         // create link: no ext file, namedDest, object pointer
         popplerLink = std::make_unique<LinkGoto>(linkArea, QString(), LinkDestination(ldd));
     } break;
 
     case actionGoToR: {
-        auto *g = static_cast<LinkGoToR *>(a);
+        const auto *g = static_cast<const LinkGoToR *>(a);
         // copy link file
         const QString fileName = UnicodeParsedString(g->getFileName());
         const LinkDestinationData ldd(g->getDest(), g->getNamedDest(), parentDoc, !fileName.isEmpty());
@@ -228,13 +228,13 @@ std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, Documen
     } break;
 
     case actionLaunch: {
-        auto *e = static_cast<LinkLaunch *>(a);
+        const auto *e = static_cast<const LinkLaunch *>(a);
         const GooString *p = e->getParams();
         popplerLink = std::make_unique<LinkExecute>(linkArea, UnicodeParsedString(e->getFileName()), p ? QString::fromStdString(p->toStr()) : QString {});
     } break;
 
     case actionNamed: {
-        const std::string &name = (static_cast<LinkNamed *>(a))->getName();
+        const std::string &name = (static_cast<const LinkNamed *>(a))->getName();
         if (name == "NextPage") {
             popplerLink = std::make_unique<LinkAction>(linkArea, LinkAction::PageNext);
         } else if (name == "PrevPage") {
@@ -270,21 +270,21 @@ std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, Documen
     } break;
 
     case actionURI: {
-        popplerLink = std::make_unique<LinkBrowse>(linkArea, QString::fromStdString((static_cast<LinkURI *>(a))->getURI()));
+        popplerLink = std::make_unique<LinkBrowse>(linkArea, QString::fromStdString((static_cast<const LinkURI *>(a))->getURI()));
     } break;
 
     case actionSound: {
-        auto *ls = static_cast<::LinkSound *>(a);
+        const auto *ls = static_cast<const ::LinkSound *>(a);
         popplerLink = std::make_unique<LinkSound>(linkArea, ls->getVolume(), ls->getSynchronous(), ls->getRepeat(), ls->getMix(), new SoundObject(ls->getSound()));
     } break;
 
     case actionJavaScript: {
-        auto *ljs = static_cast<::LinkJavaScript *>(a);
+        const auto *ljs = static_cast<const ::LinkJavaScript *>(a);
         popplerLink = std::make_unique<LinkJavaScript>(linkArea, UnicodeParsedString(ljs->getScript()));
     } break;
 
     case actionMovie: {
-        auto *lm = static_cast<::LinkMovie *>(a);
+        const auto *lm = static_cast<const ::LinkMovie *>(a);
 
         const QString title = (lm->hasAnnotTitle() ? UnicodeParsedString(lm->getAnnotTitle()) : QString());
 
@@ -313,7 +313,7 @@ std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, Documen
     } break;
 
     case actionRendition: {
-        auto *lrn = static_cast<::LinkRendition *>(a);
+        const auto *lrn = static_cast<const ::LinkRendition *>(a);
 
         Ref reference = Ref::INVALID();
         if (lrn->hasScreenAnnot()) {
@@ -324,21 +324,21 @@ std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, Documen
     } break;
 
     case actionOCGState: {
-        auto *plocg = static_cast<::LinkOCGState *>(a);
+        const auto *plocg = static_cast<const ::LinkOCGState *>(a);
 
         auto *locgp = new LinkOCGStatePrivate(linkArea, plocg->getStateList(), plocg->getPreserveRB());
         popplerLink = std::make_unique<LinkOCGState>(locgp);
     } break;
 
     case actionHide: {
-        auto *lh = static_cast<::LinkHide *>(a);
+        const auto *lh = static_cast<const ::LinkHide *>(a);
 
         auto *lhp = new LinkHidePrivate(linkArea, lh->hasTargetName() ? UnicodeParsedString(lh->getTargetName()) : QString(), lh->isShowAction());
         popplerLink = std::make_unique<LinkHide>(lhp);
     } break;
 
     case actionResetForm: {
-        auto *lrf = static_cast<::LinkResetForm *>(a);
+        const auto *lrf = static_cast<const ::LinkResetForm *>(a);
         std::vector<std::string> stdStringFields = lrf->getFields();
         QStringList qStringFields;
         for (const std::string &str : stdStringFields) {
@@ -349,7 +349,7 @@ std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, Documen
     } break;
 
     case actionSubmitForm: {
-        auto *lsf = static_cast<::LinkSubmitForm *>(a);
+        const auto *lsf = static_cast<const ::LinkSubmitForm *>(a);
         const std::vector<std::string> &stdStringFields = lsf->getFields();
         QVector<int> fieldIds;
         fieldIds.reserve(stdStringFields.size());

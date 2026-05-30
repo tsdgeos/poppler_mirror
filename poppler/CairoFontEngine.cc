@@ -516,7 +516,7 @@ CairoType3Font *CairoType3Font::create(const std::shared_ptr<GfxFont> &gfxFont, 
     box.y1 = mat[1];
     box.x2 = mat[2];
     box.y2 = mat[3];
-    Gfx *gfx = new Gfx(doc, output_dev, resDict, &box, nullptr);
+    Gfx *gfx = new Gfx(doc, output_dev, resDict, box, nullptr);
 
     auto *info = new type3_font_info_t(gfxFont, doc, fontEngine, output_dev, gfx);
     cairo_font_face_set_user_data(font_face, &type3_font_key, reinterpret_cast<void *>(info), _free_type3_font_info);

@@ -1445,11 +1445,11 @@ void PSOutputDev::postInit()
         Page *page;
         // this check is needed in case the document has zero pages
         if ((page = doc->getPage(pageList[0]))) {
-            writeHeader(pageList.size(), page->getMediaBox(), page->getCropBox(), page->getRotate(), psTitle);
+            writeHeader(pageList.size(), page->getMediaBox(), &page->getCropBox(), page->getRotate(), psTitle);
         } else {
             error(errSyntaxError, -1, "Invalid page {0:d}", pageList[0]);
             const PDFRectangle box(0, 0, 1, 1);
-            writeHeader(pageList.size(), &box, &box, 0, psTitle);
+            writeHeader(pageList.size(), box, &box, 0, psTitle);
         }
         if (mode != psModeForm) {
             writePS("%%BeginProlog\n");
@@ -1502,7 +1502,7 @@ PSOutputDev::~PSOutputDev()
     delete t3String;
 }
 
-void PSOutputDev::writeHeader(int nPages, const PDFRectangle *mediaBox, const PDFRectangle *cropBox, int pageRotate, const char *title)
+void PSOutputDev::writeHeader(int nPages, const PDFRectangle &mediaBox, const PDFRectangle *cropBox, int pageRotate, const char *title)
 {
     double x1, y1, x2, y2;
 
@@ -1594,7 +1594,7 @@ void PSOutputDev::writeHeader(int nPages, const PDFRectangle *mediaBox, const PD
     case psModeForm:
         writePS("%%EndComments\n");
         writePS("32 dict dup begin\n");
-        writePSFmt("/BBox [{0:d} {1:d} {2:d} {3:d}] def\n", static_cast<int>(floor(mediaBox->x1)), static_cast<int>(floor(mediaBox->y1)), static_cast<int>(ceil(mediaBox->x2)), static_cast<int>(ceil(mediaBox->y2)));
+        writePSFmt("/BBox [{0:d} {1:d} {2:d} {3:d}] def\n", static_cast<int>(floor(mediaBox.x1)), static_cast<int>(floor(mediaBox.y1)), static_cast<int>(ceil(mediaBox.x2)), static_cast<int>(ceil(mediaBox.y2)));
         writePS("/FormType 1 def\n");
         writePS("/Matrix [1 0 0 1 0 0] def\n");
         break;
@@ -2590,7 +2590,7 @@ void PSOutputDev::setupType3Font(GfxFont *font, const std::string &psName, Dict 
         box.y1 = m[1];
         box.x2 = m[2];
         box.y2 = m[3];
-        gfx = new Gfx(doc, this, resDict, &box, nullptr);
+        gfx = new Gfx(doc, this, resDict, box, nullptr);
         inType3Char = true;
         for (i = 0; i < charProcs->getLength(); ++i) {
             t3FillColorOnly = false;
@@ -2965,7 +2965,7 @@ void PSOutputDev::setupForm(Ref id, Object *strObj)
     box.y1 = bbox[1];
     box.x2 = bbox[2];
     box.y2 = bbox[3];
-    gfx = new Gfx(doc, this, resDict, &box, &box);
+    gfx = new Gfx(doc, this, resDict, box, &box);
     gfx->display(strObj);
     delete gfx;
 
@@ -3026,7 +3026,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     } else if (rotateA < 0) {
         rotateA += 360;
     }
-    state = new GfxState(rasterResolution, rasterResolution, &box, rotateA, false);
+    state = new GfxState(rasterResolution, rasterResolution, box, rotateA, false);
     startPage(page->getNum(), state, xref);
     delete state;
 
@@ -3075,9 +3075,9 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     vDPI2 = yScale * rasterResolution;
     if (sliceW < 0 || sliceH < 0) {
         if (useMediaBox) {
-            box = *page->getMediaBox();
+            box = page->getMediaBox();
         } else {
-            box = *page->getCropBox();
+            box = page->getCropBox();
         }
         sliceX = sliceY = 0;
         sliceW = static_cast<int>((box.x2 - box.x1) * hDPI2 / 72.0);
@@ -3477,7 +3477,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
         if (gotLabel) {
             // See bug13338 for why we try to avoid parentheses...
             bool needParens;
-            GooString *filteredString = filterPSLabel(&pageLabel, &needParens);
+            GooString *filteredString = filterPSLabel(pageLabel.toStr(), &needParens);
             if (needParens) {
                 writePSFmt("%%Page: ({0:t}) {1:d}\n", filteredString, seqPage);
             } else {
@@ -3857,13 +3857,13 @@ void PSOutputDev::updateFillColor(GfxState *state)
     case psLevel2:
     case psLevel3:
         if (state->getFillColorSpace()->getMode() != csPattern) {
-            const GfxColor *colorPtr = state->getFillColor();
+            const GfxColor &fillColor = state->getFillColor();
             writePS("[");
             for (i = 0; i < state->getFillColorSpace()->getNComps(); ++i) {
                 if (i > 0) {
                     writePS(" ");
                 }
-                writePSFmt("{0:.4g}", colToDbl(colorPtr->c[i]));
+                writePSFmt("{0:.4g}", colToDbl(fillColor.c[i]));
             }
             writePS("] sc\n");
         }
@@ -3874,8 +3874,8 @@ void PSOutputDev::updateFillColor(GfxState *state)
         if (state->getFillColorSpace()->getMode() == csSeparation && (level > psLevel1Sep || getPassLevel1CustomColor())) {
             sepCS = static_cast<GfxSeparationColorSpace *>(state->getFillColorSpace());
             color.c[0] = gfxColorComp1;
-            sepCS->getCMYK(&color, &cmyk);
-            writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} {4:.4g} ({5:t}) ck\n", colToDbl(state->getFillColor()->c[0]), colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName());
+            sepCS->getCMYK(color, &cmyk);
+            writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} {4:.4g} ({5:t}) ck\n", colToDbl(state->getFillColor().c[0]), colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName());
             addCustomColor(*sepCS);
         } else {
             state->getFillCMYK(&cmyk);
@@ -3922,13 +3922,13 @@ void PSOutputDev::updateStrokeColor(GfxState *state)
     case psLevel2:
     case psLevel3:
         if (state->getStrokeColorSpace()->getMode() != csPattern) {
-            const GfxColor *colorPtr = state->getStrokeColor();
+            const GfxColor &strokeColor = state->getStrokeColor();
             writePS("[");
             for (i = 0; i < state->getStrokeColorSpace()->getNComps(); ++i) {
                 if (i > 0) {
                     writePS(" ");
                 }
-                writePSFmt("{0:.4g}", colToDbl(colorPtr->c[i]));
+                writePSFmt("{0:.4g}", colToDbl(strokeColor.c[i]));
             }
             writePS("] SC\n");
         }
@@ -3939,8 +3939,8 @@ void PSOutputDev::updateStrokeColor(GfxState *state)
         if (state->getStrokeColorSpace()->getMode() == csSeparation && (level > psLevel1Sep || getPassLevel1CustomColor())) {
             sepCS = static_cast<GfxSeparationColorSpace *>(state->getStrokeColorSpace());
             color.c[0] = gfxColorComp1;
-            sepCS->getCMYK(&color, &cmyk);
-            writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} {4:.4g} ({5:t}) CK\n", colToDbl(state->getStrokeColor()->c[0]), colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName());
+            sepCS->getCMYK(color, &cmyk);
+            writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} {4:.4g} ({5:t}) CK\n", colToDbl(state->getStrokeColor().c[0]), colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName());
             addCustomColor(*sepCS);
         } else {
             state->getStrokeCMYK(&cmyk);
@@ -4017,7 +4017,7 @@ void PSOutputDev::addCustomColor(const GfxSeparationColorSpace &sepCS)
         }
     }
     color.c[0] = gfxColorComp1;
-    sepCS.getCMYK(&color, &cmyk);
+    sepCS.getCMYK(color, &cmyk);
     cc = new PSOutCustomColor(colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS.getName()->copy());
     cc->next = customColors;
     customColors = cc;
@@ -4197,7 +4197,7 @@ bool PSOutputDev::tilingPatternFillL1(Object *str, int paintType, Dict *resDict,
     box.y1 = bbox[1];
     box.x2 = bbox[2];
     box.y2 = bbox[3];
-    gfx = new Gfx(doc, this, resDict, &box, nullptr);
+    gfx = new Gfx(doc, this, resDict, box, nullptr);
     writePS("/x {\n");
     if (paintType == 2) {
         writePSFmt("{0:.6g} 0 {1:.6g} {2:.6g} {3:.6g} {4:.6g} setcachedevice\n", xStep, bbox[0], bbox[1], bbox[2], bbox[3]);
@@ -4263,7 +4263,7 @@ bool PSOutputDev::tilingPatternFillL2(Object *str, int paintType, int tilingType
     box.y1 = bbox[1];
     box.x2 = bbox[2];
     box.y2 = bbox[3];
-    gfx = new Gfx(doc, this, resDict, &box, nullptr);
+    gfx = new Gfx(doc, this, resDict, box, nullptr);
     inType3Char = true;
     if (paintType == 2) {
         inUncoloredPattern = true;
@@ -4323,7 +4323,7 @@ bool PSOutputDev::tilingPatternFill(GfxState * /*state*/, Gfx *gfxA, Catalog * /
         box.y1 = bbox[1];
         box.x2 = bbox[2];
         box.y2 = bbox[3];
-        gfx = new Gfx(doc, this, resDict, &box, nullptr, nullptr, nullptr, gfxA);
+        gfx = new Gfx(doc, this, resDict, box, nullptr, nullptr, nullptr, gfxA);
         writePSFmt("[{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] cm\n", mat[0], mat[1], mat[2], mat[3], singleStep_tx, singleStep_ty);
         inType3Char = true;
         gfx->display(str);
@@ -5927,7 +5927,7 @@ void PSOutputDev::doImageL2(const GfxState *state, const Object *ref, GfxImageCo
         if ((level == psLevel2Sep || level == psLevel3Sep) && colorMap && colorMap->getColorSpace()->getMode() == csSeparation && colorMap->getBits() == 8) {
             color.c[0] = gfxColorComp1;
             sepCS = static_cast<GfxSeparationColorSpace *>(colorMap->getColorSpace());
-            sepCS->getCMYK(&color, &cmyk);
+            sepCS->getCMYK(color, &cmyk);
             writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} ({4:t}) pdfImSep\n", colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName());
         } else {
             writePSFmt("{0:s}\n", colorMap ? "pdfIm" : "pdfImM");
@@ -6281,7 +6281,7 @@ void PSOutputDev::doImageL3(const GfxState *state, const Object *ref, GfxImageCo
         if ((level == psLevel2Sep || level == psLevel3Sep) && colorMap && colorMap->getColorSpace()->getMode() == csSeparation && colorMap->getBits() == 8) {
             color.c[0] = gfxColorComp1;
             sepCS = static_cast<GfxSeparationColorSpace *>(colorMap->getColorSpace());
-            sepCS->getCMYK(&color, &cmyk);
+            sepCS->getCMYK(color, &cmyk);
             writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} ({4:t}) pdfImSep\n", colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName());
         } else {
             writePSFmt("{0:s}\n", colorMap ? "pdfIm" : "pdfImM");
@@ -6545,7 +6545,7 @@ void PSOutputDev::dumpColorSpaceL2(const GfxState *state, GfxColorSpace *colorSp
                     }
                     if (updateColors) {
                         color.c[0] = dblToCol(j);
-                        indexedCS->getCMYK(&color, &cmyk);
+                        indexedCS->getCMYK(color, &cmyk);
                         addProcessColor(colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k));
                     }
                 }
@@ -6560,7 +6560,7 @@ void PSOutputDev::dumpColorSpaceL2(const GfxState *state, GfxColorSpace *colorSp
                     }
                     if (updateColors) {
                         color.c[0] = dblToCol(j);
-                        indexedCS->getCMYK(&color, &cmyk);
+                        indexedCS->getCMYK(color, &cmyk);
                         addProcessColor(colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k));
                     }
                 }
@@ -7128,14 +7128,14 @@ void PSOutputDev::cvtFunction(const Function *func, bool invertPSFunction)
     case Function::Type::PostScript:
         func4 = static_cast<const PostScriptFunction *>(func);
         if (invertPSFunction) {
-            std::unique_ptr<GooString> codeString = func4->getCodeString()->copy();
-            for (i = codeString->size() - 1; i > 0; i--) {
-                if (codeString->getChar(i) == '}') {
-                    codeString->erase(i, 1);
+            std::string codeString = func4->getCodeString()->toStr();
+            for (size_t codeStringPos = codeString.size(); codeStringPos > 0; --codeStringPos) {
+                if (codeString[codeStringPos - 1] == '}') {
+                    codeString.erase(codeStringPos - 1, 1);
                     break;
                 }
             }
-            writePS(codeString->toStr());
+            writePS(codeString);
             writePS("\n");
             n = func4->getOutputSize();
             for (i = 0; i < n; ++i) {
@@ -7256,7 +7256,7 @@ std::string PSOutputDev::filterPSName(const std::string &name)
 // Convert GooString to GooString, with appropriate escaping
 // of things that can't appear in a label
 // This is heavily based on the writePSTextLine() method
-GooString *PSOutputDev::filterPSLabel(GooString *label, bool *needParens)
+GooString *PSOutputDev::filterPSLabel(const std::string &label, bool *needParens)
 {
     int i, step;
     bool isNumeric;
@@ -7270,16 +7270,16 @@ GooString *PSOutputDev::filterPSLabel(GooString *label, bool *needParens)
     //   for the keyword, which was emitted by the caller)
 
     auto *label2 = new GooString();
-    int labelLength = label->size();
+    int labelLength = label.size();
 
     // this gets changed later if we find a non-numeric character
     isNumeric = labelLength != 0;
 
-    if ((labelLength >= 2) && ((label->getChar(0) & 0xff) == 0xfe) && ((label->getChar(1) & 0xff) == 0xff)) {
+    if ((labelLength >= 2) && ((label[0] & 0xff) == 0xfe) && ((label[1] & 0xff) == 0xff)) {
         // UCS2 mode
         i = 3;
         step = 2;
-        if ((label->getChar(labelLength - 1) == 0)) {
+        if (label[labelLength - 1] == 0) {
             // prune the trailing null (0x000 for UCS2)
             labelLength -= 2;
         }
@@ -7288,7 +7288,7 @@ GooString *PSOutputDev::filterPSLabel(GooString *label, bool *needParens)
         step = 1;
     }
     for (int j = 0; i < labelLength && j < 200; i += step) {
-        char c = label->getChar(i);
+        char c = label[i];
         if ((c < '0') || (c > '9')) {
             isNumeric = false;
         }

@@ -1,7 +1,7 @@
 /* poppler-action.cc: glib wrapper for poppler	      -*- c-basic-offset: 8 -*-
  * Copyright (C) 2005, Red Hat, Inc.
  * Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
- * Copyright (C) 2026 Albert astals Cid <aacid@kde.org>
+ * Copyright (C) 2026 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -325,10 +325,10 @@ static PopplerDest *dest_new_goto(PopplerDocument *document, const LinkDest *lin
         page = poppler_document_get_page(document, dest->page_num - 1);
 
         if (page) {
-            dest->left -= page->page->getCropBox()->x1;
-            dest->bottom -= page->page->getCropBox()->x1;
-            dest->right -= page->page->getCropBox()->y1;
-            dest->top -= page->page->getCropBox()->y1;
+            dest->left -= page->page->getCropBox().x1;
+            dest->bottom -= page->page->getCropBox().x1;
+            dest->right -= page->page->getCropBox().y1;
+            dest->top -= page->page->getCropBox().y1;
 
             g_object_unref(page);
         } else {

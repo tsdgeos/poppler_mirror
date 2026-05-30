@@ -1325,7 +1325,7 @@ Annotation::Style Annotation::style() const
         s.setDashArray(QVector<double>(dashArray.begin(), dashArray.end()));
     }
 
-    AnnotBorderEffect *border_effect;
+    const AnnotBorderEffect *border_effect;
     switch (d->pdfAnnot->getType()) {
     case Annot::typeFreeText:
         border_effect = static_cast<AnnotFreeText *>(d->pdfAnnot.get())->getBorderEffect();
@@ -2195,7 +2195,7 @@ QColor LineAnnotation::lineInnerColor() const
         return d->lineInnerColor;
     }
 
-    AnnotColor *c;
+    const AnnotColor *c;
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const auto *lineann = static_cast<const AnnotLine *>(d->pdfAnnot.get());
@@ -2501,7 +2501,7 @@ public:
 
     // helpers
     static Annot::AnnotSubtype toAnnotSubType(HighlightAnnotation::HighlightType type);
-    QList<HighlightAnnotation::Quad> fromQuadrilaterals(AnnotQuadrilaterals *quads) const;
+    QList<HighlightAnnotation::Quad> fromQuadrilaterals(const AnnotQuadrilaterals *quads) const;
     AnnotQuadrilaterals *toQuadrilaterals(const QList<HighlightAnnotation::Quad> &quads) const;
 };
 
@@ -2526,7 +2526,7 @@ Annot::AnnotSubtype HighlightAnnotationPrivate::toAnnotSubType(HighlightAnnotati
     }
 }
 
-QList<HighlightAnnotation::Quad> HighlightAnnotationPrivate::fromQuadrilaterals(AnnotQuadrilaterals *hlquads) const
+QList<HighlightAnnotation::Quad> HighlightAnnotationPrivate::fromQuadrilaterals(const AnnotQuadrilaterals *hlquads) const
 {
     QList<HighlightAnnotation::Quad> quads;
 

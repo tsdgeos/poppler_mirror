@@ -46,6 +46,7 @@
 // Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 // Copyright (C) 2026 Taufeeque Sifat <entity069@protonmail.com>
+// Copyright (C) 2026 Marek Kasik <mkasik@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -87,7 +88,7 @@
 
 static const double s_minLineWidth = 0.0;
 
-static inline void convertGfxColor(SplashColorPtr dest, const SplashColorMode colorMode, const GfxColorSpace *colorSpace, const GfxColor *src)
+static inline void convertGfxColor(SplashColorPtr dest, const SplashColorMode colorMode, const GfxColorSpace *colorSpace, const GfxColor &src)
 {
     switch (colorMode) {
     case splashModeMono1:
@@ -138,7 +139,7 @@ static inline void convertGfxColor(SplashColorPtr dest, const SplashColorMode co
 // Use convertGfxColor() above when the destination is an array of SPOT_NCOMPS+4 bytes,
 // to ensure that everything is initialized.
 
-static inline void convertGfxShortColor(SplashColorPtr dest, const SplashColorMode colorMode, const GfxColorSpace *colorSpace, const GfxColor *src)
+static inline void convertGfxShortColor(SplashColorPtr dest, const SplashColorMode colorMode, const GfxColorSpace *colorSpace, const GfxColor &src)
 {
     switch (colorMode) {
     case splashModeMono1:
@@ -194,9 +195,9 @@ void SplashGouraudPattern::getNonParametrizedTriangle(int i, SplashColorMode mod
     shading->getTriangle(i, x0, y0, &c0, x1, y1, &c1, x2, y2, &c2);
 
     const GfxColorSpace *srcColorSpace = shading->getColorSpace();
-    convertGfxColor(color0, mode, srcColorSpace, &c0);
-    convertGfxColor(color1, mode, srcColorSpace, &c1);
-    convertGfxColor(color2, mode, srcColorSpace, &c2);
+    convertGfxColor(color0, mode, srcColorSpace, c0);
+    convertGfxColor(color1, mode, srcColorSpace, c1);
+    convertGfxColor(color2, mode, srcColorSpace, c2);
 }
 
 void SplashGouraudPattern::getParameterizedColor(double colorinterp, SplashColorMode mode, SplashColorPtr dest)
@@ -211,7 +212,7 @@ void SplashGouraudPattern::getParameterizedColor(double colorinterp, SplashColor
         }
     } else {
         GfxColorSpace *srcColorSpace = shading->getColorSpace();
-        convertGfxShortColor(dest, mode, srcColorSpace, &src);
+        convertGfxShortColor(dest, mode, srcColorSpace, src);
     }
 }
 
@@ -248,7 +249,7 @@ SplashFunctionPattern::SplashFunctionPattern(SplashColorMode colorModeA, GfxStat
     gfxMode = shadingA->getColorSpace()->getMode();
     shadingA->getColorSpace()->getDefaultColor(&srcColor);
     shadingA->getDomain(&xMin, &yMin, &xMax, &yMax);
-    convertGfxColor(defaultColor, colorModeA, shadingA->getColorSpace(), &srcColor);
+    convertGfxColor(defaultColor, colorModeA, shadingA->getColorSpace(), srcColor);
 }
 
 SplashFunctionPattern::~SplashFunctionPattern() = default;
@@ -263,7 +264,7 @@ bool SplashFunctionPattern::getColor(int x, int y, SplashColorPtr c) const
         return false;
     }
     shading->getColor(xc, yc, &gfxColor);
-    convertGfxColor(c, colorMode, shading->getColorSpace(), &gfxColor);
+    convertGfxColor(c, colorMode, shading->getColorSpace(), gfxColor);
     return true;
 }
 
@@ -311,7 +312,7 @@ bool SplashUnivariatePattern::getColor(int x, int y, SplashColorPtr c) const
             gfxColor.c[i] = 0;
         }
     }
-    convertGfxColor(c, colorMode, shading->getColorSpace(), &gfxColor);
+    convertGfxColor(c, colorMode, shading->getColorSpace(), gfxColor);
     return true;
 }
 
@@ -345,7 +346,7 @@ SplashRadialPattern::SplashRadialPattern(SplashColorMode colorModeA, GfxState *s
         inva = 1.0 / a;
     }
     shadingA->getColorSpace()->getDefaultColor(&srcColor);
-    convertGfxColor(defaultColor, colorModeA, shadingA->getColorSpace(), &srcColor);
+    convertGfxColor(defaultColor, colorModeA, shadingA->getColorSpace(), srcColor);
 }
 
 SplashRadialPattern::~SplashRadialPattern() = default;
@@ -461,7 +462,7 @@ SplashAxialPattern::SplashAxialPattern(SplashColorMode colorModeA, GfxState *sta
         mul = 1 / mul_denominator;
     }
     shadingA->getColorSpace()->getDefaultColor(&srcColor);
-    convertGfxColor(defaultColor, colorModeA, shadingA->getColorSpace(), &srcColor);
+    convertGfxColor(defaultColor, colorModeA, shadingA->getColorSpace(), srcColor);
 }
 
 SplashAxialPattern::~SplashAxialPattern() = default;
@@ -1610,7 +1611,7 @@ SplashPattern *SplashOutputDev::getColor(GfxColor *deviceN)
     return new SplashSolidColor(color);
 }
 
-void SplashOutputDev::getMatteColor(SplashColorMode colorMode, GfxImageColorMap *colorMap, const GfxColor *matteColorIn, SplashColor matteColor)
+void SplashOutputDev::getMatteColor(SplashColorMode colorMode, GfxImageColorMap *colorMap, const GfxColor &matteColorIn, SplashColor matteColor)
 {
     GfxGray gray;
     GfxRGB rgb;
@@ -1667,7 +1668,7 @@ void SplashOutputDev::setOverprintMask(GfxColorSpace *colorSpace, bool overprint
     if (overprintFlag && overprintPreview) {
         mask = colorSpace->getOverprintMask();
         if (singleColor && overprintMode && colorSpace->getMode() == csDeviceCMYK) {
-            colorSpace->getCMYK(singleColor, &cmyk);
+            colorSpace->getCMYK(*singleColor, &cmyk);
             if (cmyk.c == 0) {
                 mask &= ~1;
             }
@@ -2036,7 +2037,7 @@ void SplashOutputDev::stroke(GfxState *state)
     if (state->getStrokeColorSpace()->isNonMarking()) {
         return;
     }
-    setOverprintMask(state->getStrokeColorSpace(), state->getStrokeOverprint(), state->getOverprintMode(), state->getStrokeColor());
+    setOverprintMask(state->getStrokeColorSpace(), state->getStrokeOverprint(), state->getOverprintMode(), &state->getStrokeColor());
     const SplashPath path = convertPath(state->getPath(), false);
     splash->stroke(path);
 }
@@ -2046,7 +2047,7 @@ void SplashOutputDev::fill(GfxState *state)
     if (state->getFillColorSpace()->isNonMarking()) {
         return;
     }
-    setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), state->getFillColor());
+    setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), &state->getFillColor());
     SplashPath path = convertPath(state->getPath(), true);
     splash->fill(&path, false);
 }
@@ -2056,7 +2057,7 @@ void SplashOutputDev::eoFill(GfxState *state)
     if (state->getFillColorSpace()->isNonMarking()) {
         return;
     }
-    setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), state->getFillColor());
+    setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), &state->getFillColor());
     SplashPath path = convertPath(state->getPath(), true);
     splash->fill(&path, true);
 }
@@ -2168,21 +2169,21 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y, double /*dx*
     // fill and stroke
     if (doFill && doStroke) {
         if (path) {
-            setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), state->getFillColor());
+            setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), &state->getFillColor());
             splash->fill(path, false);
-            setOverprintMask(state->getStrokeColorSpace(), state->getStrokeOverprint(), state->getOverprintMode(), state->getStrokeColor());
+            setOverprintMask(state->getStrokeColorSpace(), state->getStrokeOverprint(), state->getOverprintMode(), &state->getStrokeColor());
             splash->stroke(*path);
         }
 
         // fill
     } else if (doFill) {
-        setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), state->getFillColor());
+        setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), &state->getFillColor());
         splash->fillChar(x, y, code, font);
 
         // stroke
     } else if (doStroke) {
         if (path) {
-            setOverprintMask(state->getStrokeColorSpace(), state->getStrokeOverprint(), state->getOverprintMode(), state->getStrokeColor());
+            setOverprintMask(state->getStrokeColorSpace(), state->getStrokeOverprint(), state->getOverprintMode(), &state->getStrokeColor());
             splash->stroke(*path);
         }
     }
@@ -2511,7 +2512,7 @@ void SplashOutputDev::drawType3Glyph(GfxState *state, T3FontCache *t3Font, T3Fon
 {
     SplashGlyphBitmap glyph;
 
-    setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), state->getFillColor());
+    setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), &state->getFillColor());
     glyph.x = -t3Font->glyphX;
     glyph.y = -t3Font->glyphY;
     glyph.w = t3Font->glyphW;
@@ -2568,7 +2569,7 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *s
     if (state->getFillColorSpace()->isNonMarking()) {
         return;
     }
-    setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), state->getFillColor());
+    setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), &state->getFillColor());
 
     const std::array<double, 6> &ctm = state->getCTM();
     for (int i = 0; i < 6; ++i) {
@@ -3704,7 +3705,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, S
     imgData.maskStr = nullptr;
     imgData.maskColorMap = nullptr;
     if (maskColorMap->getMatteColor() != nullptr) {
-        getMatteColor(colorMode, colorMap, maskColorMap->getMatteColor(), imgData.matteColor);
+        getMatteColor(colorMode, colorMap, *maskColorMap->getMatteColor(), imgData.matteColor);
         imgData.maskColorMap = maskColorMap;
         imgData.maskStr = std::make_unique<ImageStream>(maskStr, maskWidth, maskColorMap->getNumPixelComps(), maskColorMap->getBits());
         if (!imgData.maskStr->rewind()) {
@@ -4012,7 +4013,7 @@ void SplashOutputDev::paintTransparencyGroup(GfxState * /*state*/, const std::ar
     delete tBitmap;
 }
 
-void SplashOutputDev::setSoftMask(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, bool alpha, Function *transferFunc, GfxColor *backdropColor)
+void SplashOutputDev::setSoftMask(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, bool alpha, Function *transferFunc, const GfxColor &backdropColor)
 {
     SplashBitmap *tBitmap;
     Splash *tSplash;
@@ -4327,7 +4328,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
     matc[2] = ctm[2];
     matc[3] = ctm[3];
 
-    if (surface_width == 0 || surface_height == 0 || repeatX * repeatY <= 4) {
+    if (surface_width == 0 || surface_height == 0 || repeatX * repeatY <= 4 || checkedMultiply(surface_width, repeatX, &result_width) || checkedMultiply(surface_height, repeatY, &result_height)) {
         state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
         return false;
     }
@@ -4339,7 +4340,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
     box.y1 = bbox[1];
     box.x2 = bbox[2];
     box.y2 = bbox[3];
-    std::unique_ptr<Gfx> gfx = std::make_unique<Gfx>(doc, this, resDict, &box, nullptr, nullptr, nullptr, gfxA);
+    std::unique_ptr<Gfx> gfx = std::make_unique<Gfx>(doc, this, resDict, box, nullptr, nullptr, nullptr, gfxA);
     // set pattern transformation matrix
     gfx->getState()->setCTM(m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
     if (splashAbs(matc[1]) > splashAbs(matc[0])) {
@@ -4349,8 +4350,6 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
         kx = matc[0];
         ky = matc[3] - (matc[1] * matc[2]) / matc[0];
     }
-    result_width = surface_width * repeatX;
-    result_height = surface_height * repeatY;
     kx = result_width / (fabs(kx) + 1);
     ky = result_height / (fabs(ky) + 1);
     state->concatCTM(kx, 0, 0, ky, 0, 0);

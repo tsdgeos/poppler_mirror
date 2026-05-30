@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2010, 2018-2021, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2018-2021, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011, 2014 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
@@ -105,7 +105,7 @@ public:
     //----- transparency groups and soft masks
     void beginTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool forSoftMask) override;
     void paintTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox) override;
-    void setSoftMask(GfxState *state, const std::array<double, 4> &bbox, bool alpha, Function *transferFunc, GfxColor *backdropColor) override;
+    void setSoftMask(GfxState *state, const std::array<double, 4> &bbox, bool alpha, Function *transferFunc, const GfxColor &backdropColor) override;
 
     //----- special access
 
@@ -134,7 +134,7 @@ public:
     void clearStats();
 
 private:
-    void check(GfxColorSpace *colorSpace, const GfxColor *color, double opacity, GfxBlendMode blendMode);
+    void check(GfxColorSpace *colorSpace, const GfxColor &color, double opacity, GfxBlendMode blendMode);
 
     bool mono;
     bool gray;
