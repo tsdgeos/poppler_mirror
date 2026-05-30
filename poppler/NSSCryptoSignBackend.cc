@@ -18,7 +18,7 @@
 // Copyright 2021, 2025, 2026 Marek Kasik <mkasik@redhat.com>
 // Copyright 2022 Erich E. Hoover <erich.e.hoover@gmail.com>
 // Copyright 2023 Tobias Deiminger <tobias.deiminger@posteo.de>
-// Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2023 Ingo Klöcker <kloecker@kde.org>
 // Copyright 2025, 2026 Juraj Šarinay <juraj@sarinay.com>
 //
