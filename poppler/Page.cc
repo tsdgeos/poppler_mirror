@@ -433,15 +433,17 @@ void Page::loadStandaloneFields(Form *form)
     }
 }
 
-Annots *Page::getAnnots(XRef *xrefA)
+void Page::initializeAnnots()
 {
-    pageLocker();
-    if (!annots) {
-        Object obj = getAnnotsObject(xrefA);
-        annots = std::make_unique<Annots>(doc, num, &obj);
-        // Load standalone fields once for the page
-        loadStandaloneFields(doc->getCatalog()->getForm());
-    }
+    Object obj = getAnnotsObject();
+    annots = std::make_unique<Annots>(doc, num, &obj);
+    // Load standalone fields once for the page
+    loadStandaloneFields(doc->getCatalog()->getForm());
+}
+
+Annots *Page::getAnnots()
+{
+    std::call_once(annotsInitializationFlag, std::mem_fn(&Page::initializeAnnots), this);
 
     return annots.get();
 }
