@@ -172,7 +172,7 @@ public:
     std::unique_ptr<Links> getLinks();
 
     // Return a list of annots. It will be valid until the page is destroyed
-    Annots *getAnnots(XRef *xrefA = nullptr);
+    Annots *getAnnots();
 
     // Get contents.
     Object getContents() { return contents.fetch(xref); }
