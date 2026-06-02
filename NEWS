@@ -1,3 +1,10 @@
+Release 26.06.0:
+        core:
+         * Improve annotations initialization thread-safety
+         * CairoFontEngine: Properly honor font face index
+         * Internal code improvements
+         * Fix crashes in malformed documents
+
 Release 26.05.0:
         core:
          * Improve reconstruction of damaged files. Issue #1693
