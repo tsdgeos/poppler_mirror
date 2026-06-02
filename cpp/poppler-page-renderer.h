@@ -37,7 +37,8 @@ public:
     {
         antialiasing = 0x00000001,
         text_antialiasing = 0x00000002,
-        text_hinting = 0x00000004
+        text_hinting = 0x00000004,
+        ignore_paper_color = 0x00000008 ///< \since 26.07
     };
 
     enum line_mode_enum
