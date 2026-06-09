@@ -1137,7 +1137,7 @@ static SignatureValidationInfo fromInternal(SignatureInfo *si, FormWidgetSignatu
     std::optional<std::vector<unsigned char>> checkedSignature;
     std::tie(checkedSignature, priv->docLength) = fws->getCheckedSignature();
     if (priv->range_bounds.size() == 4 && checkedSignature) {
-        priv->signature = QByteArray::fromRawData(reinterpret_cast<const char *>(checkedSignature->data()), checkedSignature->size());
+        priv->signature = QByteArray { reinterpret_cast<const char *>(checkedSignature->data()), static_cast<int>(checkedSignature->size()) };
     }
 
     return SignatureValidationInfo(priv);
