@@ -4275,7 +4275,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         goto err1;
     }
 
-    if (width < 1 || height < 1 || width > INT_MAX / height) {
+    if (width < 1 || height < 1 || width >= (INT_MAX - 7) / height) {
         goto err1;
     }
 
@@ -4657,6 +4657,9 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         // if drawing is disabled, skip over inline image data
         if (!ocState || !out->needNonText() || singular_matrix) {
             if (!str->rewind()) {
+                goto err1;
+            }
+            if ((static_cast<int64_t>(width) * colorMap.getNumPixelComps() * colorMap.getBits() + 7) >= INT_MAX) {
                 goto err1;
             }
             n = height * ((width * colorMap.getNumPixelComps() * colorMap.getBits() + 7) / 8);
