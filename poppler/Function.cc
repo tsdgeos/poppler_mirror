@@ -1094,8 +1094,6 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict)
     double in[funcMaxInputs];
     int i;
 
-    code = nullptr;
-    codeSize = 0;
     ok = false;
     int recursionCounter = 0;
 
@@ -1120,7 +1118,10 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict)
     }
 
     //----- parse the function
-    codeString = std::make_unique<GooString>();
+    if (Object length = dict->lookup("Length"); length.isInt()) {
+        codeString.reserve(length.getInt());
+        code.reserve(length.getInt() / 2); // worst case estimate ignoring comments
+    }
     if (getToken(str) != "{") {
         error(errSyntaxError, -1, "Expected '{{' at start of PostScript function");
         goto err1;
@@ -1136,7 +1137,7 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict)
         in[i] = domain[i][0];
         cacheIn[i] = in[i] - 1;
     }
-    transform(in, cacheOut);
+    transform(in, cacheOut.data());
 
     ok = true;
 
@@ -1148,23 +1149,17 @@ err1:
 
 PostScriptFunction::PostScriptFunction(const PostScriptFunction *func, PrivateTag /*unused*/) : Function(func)
 {
-    codeSize = func->codeSize;
+    code = func->code;
 
-    code = static_cast<PSObject *>(gmallocn(codeSize, sizeof(PSObject)));
-    memcpy(code, func->code, codeSize * sizeof(PSObject));
+    codeString = func->codeString;
 
-    codeString = func->codeString->copy();
-
-    memcpy(cacheIn, func->cacheIn, funcMaxInputs * sizeof(double));
-    memcpy(cacheOut, func->cacheOut, funcMaxOutputs * sizeof(double));
+    cacheIn = func->cacheIn;
+    cacheOut = func->cacheOut;
 
     ok = func->ok;
 }
 
-PostScriptFunction::~PostScriptFunction()
-{
-    gfree(code);
-}
+PostScriptFunction::~PostScriptFunction() = default;
 
 void PostScriptFunction::transform(const double *in, double *out) const
 {
@@ -1333,7 +1328,7 @@ std::string PostScriptFunction::getToken(Stream *str)
         if ((c = str->getChar()) == EOF) {
             break;
         }
-        codeString->push_back(c);
+        codeString.push_back(c);
         if (comment) {
             if (c == '\x0a' || c == '\x0d') {
                 comment = false;
@@ -1354,7 +1349,7 @@ std::string PostScriptFunction::getToken(Stream *str)
                 break;
             }
             str->getChar();
-            codeString->push_back(c);
+            codeString.push_back(c);
         }
     } else {
         while (true) {
@@ -1364,7 +1359,7 @@ std::string PostScriptFunction::getToken(Stream *str)
                 break;
             }
             str->getChar();
-            codeString->push_back(c);
+            codeString.push_back(c);
         }
     }
     return s;
@@ -1372,9 +1367,8 @@ std::string PostScriptFunction::getToken(Stream *str)
 
 void PostScriptFunction::resizeCode(int newSize)
 {
-    if (newSize >= codeSize) {
-        codeSize += 64;
-        code = static_cast<PSObject *>(greallocn(code, codeSize, sizeof(PSObject)));
+    if (static_cast<size_t>(newSize) >= code.size()) {
+        code.resize(newSize + 1);
     }
 }
 
