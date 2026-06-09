@@ -50,6 +50,7 @@
 
 #include <config.h>
 
+#include <array>
 #include <cstdlib>
 #include <cstddef>
 #include <cstring>
