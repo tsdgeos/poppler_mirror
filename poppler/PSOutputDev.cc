@@ -2234,7 +2234,8 @@ void PSOutputDev::setupExternalType1Font(const std::string &fileName, const std:
         // PFB file
         ungetc(c, fontFile);
         while (!feof(fontFile)) {
-            fgetc(fontFile); // skip start of segment byte (0x80)
+            const int dummy = fgetc(fontFile); // skip start of segment byte (0x80)
+            (void)dummy;
             int segType = fgetc(fontFile);
             long segLen = fgetc(fontFile) | (fgetc(fontFile) << 8) | (fgetc(fontFile) << 16) | (fgetc(fontFile) << 24);
             if (feof(fontFile)) {

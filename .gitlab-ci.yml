@@ -135,9 +135,9 @@ build_clazy_fedora44_clang22:
     - CC=clang-22 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations -Wno-error=c2y-extensions" cmake -G Ninja ..
     - CLAZY_CHECKS="level0,level1,level2,isempty-vs-count,qhash-with-char-pointer-key,tr-non-literal,no-non-pod-global-static" ninja -j ${FDO_CI_CONCURRENT}
 
-build_qt69_android:
+build_qt611_android:
   stage: build
-  image: invent-registry.kde.org/sysadmin/ci-images/android-qt69-ci
+  image: invent-registry.kde.org/sysadmin/ci-images/android-qt611-ci
   before_script:
     - echo "workaround for ECM Android toolchain wanting all binaries to be shared libraries"
     - sed -i -e 's/<LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS>/<LINK_FLAGS>/g' /opt/nativetooling/share/ECM/toolchain/Android.cmake
@@ -151,7 +151,7 @@ build_qt69_android:
                          -DCMAKE_ANDROID_API=29
                          -DCMAKE_BUILD_TYPE=debug
                          -DCMAKE_POSITION_INDEPENDENT_CODE=OFF
-                         -DCMAKE_TOOLCHAIN_FILE=/home/user/android-arm-clang/lib/cmake/Qt6/qt.toolchain.cmake
+                         -DCMAKE_TOOLCHAIN_FILE=/home/user/android-arm64-clang/lib/cmake/Qt6/qt.toolchain.cmake
                          -DQT_CHAINLOAD_TOOLCHAIN_FILE=/opt/nativetooling/share/ECM/toolchain/Android.cmake
                          -DCMAKE_INSTALL_PREFIX=/home/user/android-arm-clang
                          -DBUILD_SHARED_LIBS=ON'
@@ -173,7 +173,7 @@ build_qt69_android:
                          -DENABLE_NSS3=OFF
                          -DENABLE_GPGME=OFF
                          -DCMAKE_CXX_FLAGS="-Werror -Wno-deprecated-declarations"
-                         -DCMAKE_TOOLCHAIN_FILE=/home/user/android-arm-clang/lib/cmake/Qt6/qt.toolchain.cmake
+                         -DCMAKE_TOOLCHAIN_FILE=/home/user/android-arm64-clang/lib/cmake/Qt6/qt.toolchain.cmake
                          -DQT_CHAINLOAD_TOOLCHAIN_FILE=/opt/nativetooling/share/ECM/toolchain/Android.cmake'
     - ninja -j ${FDO_CI_CONCURRENT}
 
