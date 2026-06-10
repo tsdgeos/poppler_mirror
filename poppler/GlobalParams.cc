@@ -252,30 +252,25 @@ public:
     SysFontList &operator=(const SysFontList &) = delete;
     const SysFontInfo *find(const std::string &name, bool isFixedWidth, bool exact, const std::vector<std::string> &filesToIgnore = {});
 
-    const std::vector<SysFontInfo *> &getFonts() const { return fonts; }
+    const std::vector<std::unique_ptr<SysFontInfo>> &getFonts() const { return fonts; }
+
+#if WITH_FONTCONFIGURATION_FONTCONFIG
+    void addFcFont(std::unique_ptr<SysFontInfo> &&font) { fonts.push_back(std::move(font)); }
+#endif
 
 #ifdef _WIN32
     void scanWindowsFonts(const std::string &winFontDir);
-#endif
-#if WITH_FONTCONFIGURATION_FONTCONFIG
-    void addFcFont(SysFontInfo *si) { fonts.push_back(si); }
-#endif
+
 private:
-#ifdef _WIN32
-    SysFontInfo *makeWindowsFont(const char *name, int fontNum, const char *path);
+    std::unique_ptr<SysFontInfo> makeWindowsFont(const char *name, int fontNum, const char *path);
 #endif
 
-    std::vector<SysFontInfo *> fonts;
+    std::vector<std::unique_ptr<SysFontInfo>> fonts;
 };
 
 SysFontList::SysFontList() = default;
 
-SysFontList::~SysFontList()
-{
-    for (auto *entry : fonts) {
-        delete entry;
-    }
-}
+SysFontList::~SysFontList() = default;
 
 const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, bool exact, const std::vector<std::string> &filesToIgnore)
 {
@@ -356,8 +351,8 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
 
     // search for the font
     const SysFontInfo *fi = nullptr;
-    for (const SysFontInfo *f : fonts) {
-        fi = f;
+    for (const std::unique_ptr<SysFontInfo> &f : fonts) {
+        fi = f.get();
         if (fi->match(name2, bold, italic, oblique, fixedWidth)) {
             if (std::ranges::find(filesToIgnore, fi->path->toStr()) == filesToIgnore.end()) {
                 break;
@@ -367,8 +362,8 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
     }
     if (!fi && !exact && bold) {
         // try ignoring the bold flag
-        for (const SysFontInfo *f : fonts) {
-            fi = f;
+        for (const std::unique_ptr<SysFontInfo> &f : fonts) {
+            fi = f.get();
             if (fi->match(name2, false, italic)) {
                 if (std::ranges::find(filesToIgnore, fi->path->toStr()) == filesToIgnore.end()) {
                     break;
@@ -379,8 +374,8 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
     }
     if (!fi && !exact && (bold || italic)) {
         // try ignoring the bold and italic flags
-        for (const SysFontInfo *f : fonts) {
-            fi = f;
+        for (const std::unique_ptr<SysFontInfo> &f : fonts) {
+            fi = f.get();
             if (fi->match(name2, false, false)) {
                 if (std::ranges::find(filesToIgnore, fi->path->toStr()) == filesToIgnore.end()) {
                     break;
@@ -1023,9 +1018,10 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
                     *fontNum = 0;
                     *type = (!strncasecmp(ext, ".ttc", 4)) ? sysFontTTC : sysFontTTF;
                     FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
-                    auto *sfi = new SysFontInfo(std::make_unique<GooString>(*fontName), bold, italic, oblique, font.isFixedWidth(), std::make_unique<GooString>(reinterpret_cast<char *>(s)), *type, *fontNum, substituteName.copy());
-                    sysFonts->addFcFont(sfi);
-                    fi = sfi;
+                    auto sfi =
+                            std::make_unique<SysFontInfo>(std::make_unique<GooString>(*fontName), bold, italic, oblique, font.isFixedWidth(), std::make_unique<GooString>(reinterpret_cast<char *>(s)), *type, *fontNum, substituteName.copy());
+                    fi = sfi.get();
+                    sysFonts->addFcFont(std::move(sfi));
                     path = std::string(reinterpret_cast<char *>(s));
                 } else if (!strncasecmp(ext, ".pfa", 4) || !strncasecmp(ext, ".pfb", 4)) {
                     int weight, slant;
@@ -1046,9 +1042,10 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
                     *fontNum = 0;
                     *type = (!strncasecmp(ext, ".pfa", 4)) ? sysFontPFA : sysFontPFB;
                     FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
-                    auto *sfi = new SysFontInfo(std::make_unique<GooString>(*fontName), bold, italic, oblique, font.isFixedWidth(), std::make_unique<GooString>(reinterpret_cast<char *>(s)), *type, *fontNum, substituteName.copy());
-                    sysFonts->addFcFont(sfi);
-                    fi = sfi;
+                    auto sfi =
+                            std::make_unique<SysFontInfo>(std::make_unique<GooString>(*fontName), bold, italic, oblique, font.isFixedWidth(), std::make_unique<GooString>(reinterpret_cast<char *>(s)), *type, *fontNum, substituteName.copy());
+                    fi = sfi.get();
+                    sysFonts->addFcFont(std::move(sfi));
                     path = std::string(reinterpret_cast<char *>(s));
                 } else {
                     continue;

@@ -237,7 +237,7 @@ void SysFontList::scanWindowsFonts(const std::string &winFontDir)
     }
 }
 
-SysFontInfo *SysFontList::makeWindowsFont(const char *name, int fontNum, const char *path)
+std::unique_ptr<SysFontInfo> SysFontList::makeWindowsFont(const char *name, int fontNum, const char *path)
 {
     int n;
     bool bold, italic, oblique, fixedWidth;
@@ -306,7 +306,7 @@ SysFontInfo *SysFontList::makeWindowsFont(const char *name, int fontNum, const c
         type = sysFontTTF;
     }
 
-    return new SysFontInfo(std::move(s), bold, italic, oblique, fixedWidth, std::make_unique<GooString>(path), type, fontNum, substituteName.copy());
+    return std::make_unique<SysFontInfo>(std::move(s), bold, italic, oblique, fixedWidth, std::make_unique<GooString>(path), type, fontNum, substituteName.copy());
 }
 
 static GooString *replaceSuffix(GooString *path, const char *suffixA, const char *suffixB)
@@ -531,8 +531,8 @@ UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, co
     const std::scoped_lock locker(mutex);
     setupBaseFonts(POPPLER_FONTSDIR);
 
-    const std::vector<SysFontInfo *> &fonts = sysFonts->getFonts();
-    for (SysFontInfo *f : fonts) {
+    const std::vector<std::unique_ptr<SysFontInfo>> &fonts = sysFonts->getFonts();
+    for (const std::unique_ptr<SysFontInfo> &f : fonts) {
         // This is not super great given that it ignores fontToEmulate, but will do for now
         if (supportedFontForEmbedding(uChar, f->path->c_str(), f->fontNum)) {
             std::string style;
