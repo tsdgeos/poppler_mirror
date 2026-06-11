@@ -492,8 +492,11 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
             *fontNum = 0;
         }
     }
-
-    return path;
+    if (!path.empty()) {
+        return path;
+    } else {
+        return {};
+    }
 }
 
 FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle, const std::vector<std::string> &filesToIgnore)
