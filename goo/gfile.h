@@ -65,10 +65,6 @@ using Goffset = long long;
 
 //------------------------------------------------------------------------
 
-// Append a file name to a path string.  <path> may be an empty
-// string, denoting the current directory).  Returns <path>.
-extern GooString POPPLER_PRIVATE_EXPORT *appendToPath(GooString *path, const char *fileName);
-
 #ifndef _WIN32
 // Open a file descriptor
 // Could be implemented on WIN32 too, but the only external caller of

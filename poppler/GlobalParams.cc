@@ -392,6 +392,30 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
 #define unicodeMapCacheLocker() const std::scoped_lock locker(unicodeMapCacheMutex)
 #define cMapCacheLocker() const std::scoped_lock locker(cMapCacheMutex)
 
+std::string GlobalParams::appendToPath(const std::string &path, const std::string &fileName)
+{
+    std::filesystem::path basePath = std::filesystem::path(path).lexically_normal();
+    std::filesystem::path filePath = (basePath / fileName).lexically_normal();
+
+    auto basePathIt = basePath.begin();
+    auto filePathIt = filePath.begin();
+
+    while (basePathIt != basePath.end()) {
+        if (filePathIt == filePath.end()) {
+            // file path is shorter -> bad
+            return {};
+        }
+        if (*filePathIt != *basePathIt) {
+            // folders different -> bad
+            return {};
+        }
+        ++basePathIt;
+        ++filePathIt;
+    }
+
+    return filePath.generic_string();
+}
+
 //------------------------------------------------------------------------
 // parsing
 //------------------------------------------------------------------------
@@ -602,10 +626,8 @@ FILE *GlobalParams::findCMapFile(const std::string &collection, const std::strin
     globalParamsLocker();
     const auto collectionCMapDirs = cMapDirs.equal_range(collection);
     for (auto cMapDir = collectionCMapDirs.first; cMapDir != collectionCMapDirs.second; ++cMapDir) {
-        auto *const path = new GooString(cMapDir->second);
-        appendToPath(path, cMapName.c_str());
-        file = openFile(path->c_str(), "r");
-        delete path;
+        const std::string path = appendToPath(cMapDir->second, cMapName);
+        file = openFile(path.c_str(), "r");
         if (file) {
             break;
         }
@@ -616,14 +638,10 @@ FILE *GlobalParams::findCMapFile(const std::string &collection, const std::strin
 
 FILE *GlobalParams::findToUnicodeFile(const std::string &name)
 {
-    GooString *fileName;
-    FILE *f;
-
     globalParamsLocker();
     for (const std::string &dir : toUnicodeDirs) {
-        fileName = appendToPath(new GooString(dir), name.c_str());
-        f = openFile(fileName->c_str(), "r");
-        delete fileName;
+        const std::string fileName = appendToPath(dir, name);
+        FILE *f = openFile(fileName.c_str(), "r");
         if (f) {
             return f;
         }
@@ -1263,28 +1281,28 @@ void GlobalParams::setupBaseFonts(const char *dir)
         }
 
         std::unique_ptr<GooString> fontName = std::make_unique<GooString>(displayFontTab[i].name);
-        std::unique_ptr<GooString> fileName;
+        std::string fileName;
         if (dir) {
-            fileName.reset(appendToPath(new GooString(dir), displayFontTab[i].otFileName));
-            if ((f = openFile(fileName->c_str(), "rb"))) {
+            fileName = appendToPath(dir, displayFontTab[i].otFileName);
+            if ((f = openFile(fileName.c_str(), "rb"))) {
                 fclose(f);
             } else {
-                fileName.reset();
+                fileName.clear();
             }
         }
         if (!displayFontDir.empty()) {
-            fileName.reset(appendToPath(new GooString(displayFontDir), displayFontTab[i].otFileName));
-            if ((f = openFile(fileName->c_str(), "rb"))) {
+            fileName = appendToPath(displayFontDir, displayFontTab[i].otFileName);
+            if ((f = openFile(fileName.c_str(), "rb"))) {
                 fclose(f);
             } else {
-                fileName.reset();
+                fileName.clear();
             }
         }
-        if (!fileName) {
+        if (fileName.empty()) {
             error(errConfig, -1, "No display font for '{0:s}'", displayFontTab[i].name);
             continue;
         }
-        addFontFile(fontName->toStr(), fileName->toStr());
+        addFontFile(fontName->toStr(), fileName);
     }
 }
 
@@ -1362,22 +1380,22 @@ void GlobalParams::setupBaseFonts(const char *dir)
         std::unique_ptr<GooString> fontName = std::make_unique<GooString>(displayFontTab[i].name);
         std::unique_ptr<GooString> fileName;
         if (dir) {
-            fileName.reset(appendToPath(new GooString(dir), displayFontTab[i].t1FileName));
+            fileName = appendToPath(dir, displayFontTab[i].t1FileName));
             if ((f = openFile(fileName->c_str(), "rb"))) {
                 fclose(f);
             } else {
-                fileName.reset();
+                fileName.clear();
             }
         }
         for (j = 0; !fileName && displayFontDirs[j]; ++j) {
-            fileName.reset(appendToPath(new GooString(displayFontDirs[j]), displayFontTab[i].t1FileName));
+            fileName = appendToPath(displayFontDirs[j], displayFontTab[i].t1FileName));
             if ((f = openFile(fileName->c_str(), "rb"))) {
                 fclose(f);
             } else {
-                fileName.reset();
+                fileName.clear();
             }
         }
-        if (!fileName) {
+        if (fileName.empty()) {
             error(errConfig, -1, "No display font for '{0:s}'", displayFontTab[i].name);
             continue;
         }

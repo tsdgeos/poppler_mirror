@@ -309,7 +309,7 @@ std::unique_ptr<SysFontInfo> SysFontList::makeWindowsFont(const char *name, int 
     return std::make_unique<SysFontInfo>(std::move(s), bold, italic, oblique, fixedWidth, std::make_unique<GooString>(path), type, fontNum, substituteName.copy());
 }
 
-static GooString *replaceSuffix(GooString *path, const char *suffixA, const char *suffixB)
+static std::string *replaceSuffix(std::string *path, const char *suffixA, const char *suffixB)
 {
     int suffLenA = strlen(suffixA);
     int suffLenB = strlen(suffixB);
@@ -352,9 +352,9 @@ void GlobalParams::setupBaseFonts(const char *dir)
         bool fontFound = false;
         for (const std::string &fontDir : fontDirs) {
             for (const std::string &fileName : displayFontTab[i].fileNames) {
-                const std::unique_ptr<GooString> fontPath(appendToPath(new GooString(fontDir), fileName.c_str()));
-                if (FileExists(fontPath->c_str()) || FileExists(replaceSuffix(fontPath.get(), ".pfb", ".pfa")->c_str()) || FileExists(replaceSuffix(fontPath.get(), ".ttc", ".ttf")->c_str())) {
-                    addFontFile(fontName.toStr(), fontPath->toStr());
+                std::string fontPath = appendToPath(fontDir, fileName);
+                if (FileExists(fontPath.c_str()) || FileExists(replaceSuffix(&fontPath, ".pfb", ".pfa")->c_str()) || FileExists(replaceSuffix(&fontPath, ".ttc", ".ttf")->c_str())) {
+                    addFontFile(fontName.toStr(), fontPath);
                     fontFound = true;
                     break;
                 }
