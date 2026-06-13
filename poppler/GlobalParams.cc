@@ -1377,19 +1377,18 @@ void GlobalParams::setupBaseFonts(const char *dir)
         if (fontFiles.count(displayFontTab[i].name) > 0) {
             continue;
         }
-        std::unique_ptr<GooString> fontName = std::make_unique<GooString>(displayFontTab[i].name);
-        std::unique_ptr<GooString> fileName;
+        std::string fileName;
         if (dir) {
-            fileName = appendToPath(dir, displayFontTab[i].t1FileName));
-            if ((f = openFile(fileName->c_str(), "rb"))) {
+            fileName = appendToPath(dir, displayFontTab[i].t1FileName);
+            if ((f = openFile(fileName.c_str(), "rb"))) {
                 fclose(f);
             } else {
                 fileName.clear();
             }
         }
-        for (j = 0; !fileName && displayFontDirs[j]; ++j) {
-            fileName = appendToPath(displayFontDirs[j], displayFontTab[i].t1FileName));
-            if ((f = openFile(fileName->c_str(), "rb"))) {
+        for (j = 0; fileName.empty() && displayFontDirs[j]; ++j) {
+            fileName = appendToPath(displayFontDirs[j], displayFontTab[i].t1FileName);
+            if ((f = openFile(fileName.c_str(), "rb"))) {
                 fclose(f);
             } else {
                 fileName.clear();
@@ -1399,7 +1398,7 @@ void GlobalParams::setupBaseFonts(const char *dir)
             error(errConfig, -1, "No display font for '{0:s}'", displayFontTab[i].name);
             continue;
         }
-        addFontFile(fontName->toStr(), fileName->toStr());
+        addFontFile(displayFontTab[i].name, fileName);
     }
 }
 
