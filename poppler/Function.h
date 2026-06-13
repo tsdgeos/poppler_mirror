@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009, 2010, 2018, 2019, 2021, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2010, 2018, 2019, 2021, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -30,6 +30,8 @@
 #define FUNCTION_H
 
 #include "Object.h"
+
+#include <array>
 
 class Dict;
 class Stream;
