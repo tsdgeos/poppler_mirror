@@ -82,6 +82,18 @@ struct JBIG2HuffmanTable
     unsigned int prefix;
 };
 
+static inline bool validateRangeLen(unsigned int rangeLen)
+{
+    switch (rangeLen) {
+    case jbig2HuffmanEOT:
+    case jbig2HuffmanOOB:
+    case jbig2HuffmanLOW:
+        return true;
+    default:
+        return rangeLen <= 32;
+    }
+}
+
 static const JBIG2HuffmanTable huffTableA[] = { { .val = 0, .prefixLen = 1, .rangeLen = 4, .prefix = 0x000 },
                                                 { .val = 16, .prefixLen = 2, .rangeLen = 8, .prefix = 0x002 },
                                                 { .val = 272, .prefixLen = 3, .rangeLen = 16, .prefix = 0x006 },
@@ -1621,6 +1633,9 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
     }
 
     const unsigned int symCodeLen = calculateSymCodeLen(numInputSyms, numNewSyms, huff);
+    if (symCodeLen >= 31) {
+        return false;
+    }
 
     // get the input symbol bitmaps
     if (sizeIsBiggerThanVectorMaxSize(numInputSyms + numNewSyms, bitmaps)) {
@@ -2279,6 +2294,13 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
     int t = 0, dt = 0, tt, s, ds = 0, sFirst, j = 0;
     int rdw, rdh, rdx, rdy, ri = 0, refDX, refDY, bmSize;
     unsigned int symID, inst, bw, bh;
+
+    if (symCodeLen >= 32) {
+        return nullptr;
+    }
+    if (logStrips >= 32) {
+        return nullptr;
+    }
 
     strips = 1 << logStrips;
 
@@ -4069,7 +4091,13 @@ bool JBIG2Stream::readCodeTableSeg(unsigned int segNum)
         }
         huffTab[i].val = val;
         huffTab[i].prefixLen = huffDecoder->readBits(prefixBits, &eof);
-        huffTab[i].rangeLen = huffDecoder->readBits(rangeBits, &eof);
+        unsigned int rangeLen = huffDecoder->readBits(rangeBits, &eof);
+        if (!validateRangeLen(rangeLen)) {
+            error(errInternal, curStr->getPos(), "Unexpected data in JBIG2 stream");
+            free(huffTab);
+            return false;
+        }
+        huffTab[i].rangeLen = rangeLen;
 
         const int shiftBits = huffTab[i].rangeLen % intNBits;
 

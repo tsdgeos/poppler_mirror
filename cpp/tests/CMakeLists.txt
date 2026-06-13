@@ -16,6 +16,7 @@ endmacro(CPP_ADD_SIMPLETEST)
 
 cpp_add_simpletest(poppler-dump poppler-dump.cpp ${CMAKE_SOURCE_DIR}/utils/parseargs.cc)
 cpp_add_simpletest(poppler-render poppler-render.cpp ${CMAKE_SOURCE_DIR}/utils/parseargs.cc)
+cpp_add_simpletest(poppler-alpha-bg-test poppler-alpha-bg-test.cpp)
 
 if(ENABLE_FUZZER)
   cpp_add_simpletest(doc_fuzzer ./fuzzing/doc_fuzzer.cc)

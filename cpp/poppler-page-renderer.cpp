@@ -6,6 +6,7 @@
  * Copyright (C) 2020, 2026, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2021, Hubert Figuiere <hub@figuiere.net>
  * Copyright (C) 2026, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2026, Trevor L Davis <trevor.l.davis@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -273,7 +274,8 @@ image page_renderer::render_page(const page *p, double xres, double yres, int x,
     bgColor[0] = d->paper_color & 0xff;
     bgColor[1] = (d->paper_color >> 8) & 0xff;
     bgColor[2] = (d->paper_color >> 16) & 0xff;
-    SplashOutputDev splashOutputDev(colorMode, 4, bgColor, true, lineMode);
+    const bool ignorePaperColor = (d->hints & ignore_paper_color);
+    SplashOutputDev splashOutputDev(colorMode, 4, ignorePaperColor ? nullptr : bgColor, true, lineMode);
     splashOutputDev.setFontAntialias((d->hints & text_antialiasing) != 0);
     splashOutputDev.setVectorAntialias((d->hints & antialiasing) != 0);
     splashOutputDev.setFreeTypeHinting((d->hints & text_hinting) != 0, false);
@@ -285,6 +287,10 @@ image page_renderer::render_page(const page *p, double xres, double yres, int x,
     const int bh = bitmap->getHeight();
 
     SplashColorPtr data_ptr = bitmap->getDataPtr();
+
+    if (ignorePaperColor && colorMode == splashModeXBGR8) {
+        bitmap->convertToXBGR(SplashBitmap::conversionAlpha);
+    }
 
     const image img(reinterpret_cast<char *>(data_ptr), bw, bh, d->image_format);
     return img.copy();

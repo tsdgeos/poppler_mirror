@@ -454,12 +454,19 @@ void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<
             ok = true;
             getIndexVal(charStringsIdx, gid, &val, &ok);
             if (ok) {
-                getIndex(privateDicts[fdSelect ? fdSelect[gid] : 0].subrsOffset, &subrIdx, &ok);
+
+                const unsigned char fd = fdSelect ? fdSelect[gid] : 0;
+
+                if (fd >= nFDs) {
+                    continue;
+                }
+
+                getIndex(privateDicts[fd].subrsOffset, &subrIdx, &ok);
                 if (!ok) {
                     subrIdx.pos = -1;
                 }
                 std::set<int> offsetBeingParsed;
-                cvtGlyph(val.pos, val.len, charStrings, &subrIdx, &privateDicts[fdSelect ? fdSelect[gid] : 0], true, offsetBeingParsed);
+                cvtGlyph(val.pos, val.len, charStrings, &subrIdx, &privateDicts[fd], true, offsetBeingParsed);
             }
         }
     }

@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
+ * Copyright (C) 2026, Trevor L Davis <trevor.l.davis@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +38,8 @@ public:
     {
         antialiasing = 0x00000001,
         text_antialiasing = 0x00000002,
-        text_hinting = 0x00000004
+        text_hinting = 0x00000004,
+        ignore_paper_color = 0x00000008 ///< \since 26.07
     };
 
     enum line_mode_enum

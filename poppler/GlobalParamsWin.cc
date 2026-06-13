@@ -237,7 +237,7 @@ void SysFontList::scanWindowsFonts(const std::string &winFontDir)
     }
 }
 
-SysFontInfo *SysFontList::makeWindowsFont(const char *name, int fontNum, const char *path)
+std::unique_ptr<SysFontInfo> SysFontList::makeWindowsFont(const char *name, int fontNum, const char *path)
 {
     int n;
     bool bold, italic, oblique, fixedWidth;
@@ -306,10 +306,10 @@ SysFontInfo *SysFontList::makeWindowsFont(const char *name, int fontNum, const c
         type = sysFontTTF;
     }
 
-    return new SysFontInfo(std::move(s), bold, italic, oblique, fixedWidth, std::make_unique<GooString>(path), type, fontNum, substituteName.copy());
+    return std::make_unique<SysFontInfo>(std::move(s), bold, italic, oblique, fixedWidth, std::make_unique<GooString>(path), type, fontNum, substituteName.copy());
 }
 
-static GooString *replaceSuffix(GooString *path, const char *suffixA, const char *suffixB)
+static std::string *replaceSuffix(std::string *path, const char *suffixA, const char *suffixB)
 {
     int suffLenA = strlen(suffixA);
     int suffLenB = strlen(suffixB);
@@ -352,9 +352,9 @@ void GlobalParams::setupBaseFonts(const char *dir)
         bool fontFound = false;
         for (const std::string &fontDir : fontDirs) {
             for (const std::string &fileName : displayFontTab[i].fileNames) {
-                const std::unique_ptr<GooString> fontPath(appendToPath(new GooString(fontDir), fileName.c_str()));
-                if (FileExists(fontPath->c_str()) || FileExists(replaceSuffix(fontPath.get(), ".pfb", ".pfa")->c_str()) || FileExists(replaceSuffix(fontPath.get(), ".ttc", ".ttf")->c_str())) {
-                    addFontFile(fontName.toStr(), fontPath->toStr());
+                std::string fontPath = appendToPath(fontDir, fileName);
+                if (FileExists(fontPath.c_str()) || FileExists(replaceSuffix(&fontPath, ".pfb", ".pfa")->c_str()) || FileExists(replaceSuffix(&fontPath, ".ttc", ".ttf")->c_str())) {
+                    addFontFile(fontName.toStr(), fontPath);
                     fontFound = true;
                     break;
                 }
@@ -492,8 +492,11 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
             *fontNum = 0;
         }
     }
-
-    return path;
+    if (!path.empty()) {
+        return path;
+    } else {
+        return {};
+    }
 }
 
 FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle, const std::vector<std::string> &filesToIgnore)
@@ -531,8 +534,8 @@ UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, co
     const std::scoped_lock locker(mutex);
     setupBaseFonts(POPPLER_FONTSDIR);
 
-    const std::vector<SysFontInfo *> &fonts = sysFonts->getFonts();
-    for (SysFontInfo *f : fonts) {
+    const std::vector<std::unique_ptr<SysFontInfo>> &fonts = sysFonts->getFonts();
+    for (const std::unique_ptr<SysFontInfo> &f : fonts) {
         // This is not super great given that it ignores fontToEmulate, but will do for now
         if (supportedFontForEmbedding(uChar, f->path->c_str(), f->fontNum)) {
             std::string style;

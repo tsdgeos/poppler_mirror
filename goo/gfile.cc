@@ -87,59 +87,6 @@ const struct timespec &mtim(const Stat &stbuf)
 
 //------------------------------------------------------------------------
 
-GooString *appendToPath(GooString *path, const char *fileName)
-{
-#ifdef _WIN32
-    //---------- Win32 ----------
-    char buf[256];
-    char *fp;
-
-    auto tmp = path->copy();
-    tmp->push_back('/');
-    tmp->append(fileName);
-    GetFullPathNameA(tmp->c_str(), sizeof(buf), buf, &fp);
-    path->clear();
-    path->append(buf);
-    return path;
-
-#else
-    //---------- Unix ----------
-    int i;
-
-    // appending "." does nothing
-    if (!strcmp(fileName, ".")) {
-        return path;
-    }
-
-    // appending ".." goes up one directory
-    if (!strcmp(fileName, "..")) {
-        for (i = path->size() - 2; i >= 0; --i) {
-            if (path->getChar(i) == '/') {
-                break;
-            }
-        }
-        if (i <= 0) {
-            if (path->getChar(0) == '/') {
-                path->erase(1, path->size() - 1);
-            } else {
-                path->clear();
-                path->append("..");
-            }
-        } else {
-            path->erase(i, path->size() - i);
-        }
-        return path;
-    }
-
-    // otherwise, append "/" and new path component
-    if (!path->empty() && path->getChar(path->size() - 1) != '/') {
-        path->push_back('/');
-    }
-    path->append(fileName);
-    return path;
-#endif
-}
-
 #ifndef _WIN32
 
 static bool makeFileDescriptorCloexec(int fd)

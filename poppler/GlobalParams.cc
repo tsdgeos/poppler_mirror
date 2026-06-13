@@ -252,30 +252,25 @@ public:
     SysFontList &operator=(const SysFontList &) = delete;
     const SysFontInfo *find(const std::string &name, bool isFixedWidth, bool exact, const std::vector<std::string> &filesToIgnore = {});
 
-    const std::vector<SysFontInfo *> &getFonts() const { return fonts; }
+    const std::vector<std::unique_ptr<SysFontInfo>> &getFonts() const { return fonts; }
+
+#if WITH_FONTCONFIGURATION_FONTCONFIG
+    void addFcFont(std::unique_ptr<SysFontInfo> &&font) { fonts.push_back(std::move(font)); }
+#endif
 
 #ifdef _WIN32
     void scanWindowsFonts(const std::string &winFontDir);
-#endif
-#if WITH_FONTCONFIGURATION_FONTCONFIG
-    void addFcFont(SysFontInfo *si) { fonts.push_back(si); }
-#endif
+
 private:
-#ifdef _WIN32
-    SysFontInfo *makeWindowsFont(const char *name, int fontNum, const char *path);
+    std::unique_ptr<SysFontInfo> makeWindowsFont(const char *name, int fontNum, const char *path);
 #endif
 
-    std::vector<SysFontInfo *> fonts;
+    std::vector<std::unique_ptr<SysFontInfo>> fonts;
 };
 
 SysFontList::SysFontList() = default;
 
-SysFontList::~SysFontList()
-{
-    for (auto *entry : fonts) {
-        delete entry;
-    }
-}
+SysFontList::~SysFontList() = default;
 
 const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, bool exact, const std::vector<std::string> &filesToIgnore)
 {
@@ -356,8 +351,8 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
 
     // search for the font
     const SysFontInfo *fi = nullptr;
-    for (const SysFontInfo *f : fonts) {
-        fi = f;
+    for (const std::unique_ptr<SysFontInfo> &f : fonts) {
+        fi = f.get();
         if (fi->match(name2, bold, italic, oblique, fixedWidth)) {
             if (std::ranges::find(filesToIgnore, fi->path->toStr()) == filesToIgnore.end()) {
                 break;
@@ -367,8 +362,8 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
     }
     if (!fi && !exact && bold) {
         // try ignoring the bold flag
-        for (const SysFontInfo *f : fonts) {
-            fi = f;
+        for (const std::unique_ptr<SysFontInfo> &f : fonts) {
+            fi = f.get();
             if (fi->match(name2, false, italic)) {
                 if (std::ranges::find(filesToIgnore, fi->path->toStr()) == filesToIgnore.end()) {
                     break;
@@ -379,8 +374,8 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
     }
     if (!fi && !exact && (bold || italic)) {
         // try ignoring the bold and italic flags
-        for (const SysFontInfo *f : fonts) {
-            fi = f;
+        for (const std::unique_ptr<SysFontInfo> &f : fonts) {
+            fi = f.get();
             if (fi->match(name2, false, false)) {
                 if (std::ranges::find(filesToIgnore, fi->path->toStr()) == filesToIgnore.end()) {
                     break;
@@ -396,6 +391,30 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
 #define globalParamsLocker() const std::scoped_lock locker(mutex)
 #define unicodeMapCacheLocker() const std::scoped_lock locker(unicodeMapCacheMutex)
 #define cMapCacheLocker() const std::scoped_lock locker(cMapCacheMutex)
+
+std::string GlobalParams::appendToPath(const std::string &path, const std::string &fileName)
+{
+    std::filesystem::path basePath = std::filesystem::path(path).lexically_normal();
+    std::filesystem::path filePath = (basePath / fileName).lexically_normal();
+
+    auto basePathIt = basePath.begin();
+    auto filePathIt = filePath.begin();
+
+    while (basePathIt != basePath.end()) {
+        if (filePathIt == filePath.end()) {
+            // file path is shorter -> bad
+            return {};
+        }
+        if (*filePathIt != *basePathIt) {
+            // folders different -> bad
+            return {};
+        }
+        ++basePathIt;
+        ++filePathIt;
+    }
+
+    return filePath.generic_string();
+}
 
 //------------------------------------------------------------------------
 // parsing
@@ -607,10 +626,8 @@ FILE *GlobalParams::findCMapFile(const std::string &collection, const std::strin
     globalParamsLocker();
     const auto collectionCMapDirs = cMapDirs.equal_range(collection);
     for (auto cMapDir = collectionCMapDirs.first; cMapDir != collectionCMapDirs.second; ++cMapDir) {
-        auto *const path = new GooString(cMapDir->second);
-        appendToPath(path, cMapName.c_str());
-        file = openFile(path->c_str(), "r");
-        delete path;
+        const std::string path = appendToPath(cMapDir->second, cMapName);
+        file = openFile(path.c_str(), "r");
         if (file) {
             break;
         }
@@ -621,14 +638,10 @@ FILE *GlobalParams::findCMapFile(const std::string &collection, const std::strin
 
 FILE *GlobalParams::findToUnicodeFile(const std::string &name)
 {
-    GooString *fileName;
-    FILE *f;
-
     globalParamsLocker();
     for (const std::string &dir : toUnicodeDirs) {
-        fileName = appendToPath(new GooString(dir), name.c_str());
-        f = openFile(fileName->c_str(), "r");
-        delete fileName;
+        const std::string fileName = appendToPath(dir, name);
+        FILE *f = openFile(fileName.c_str(), "r");
         if (f) {
             return f;
         }
@@ -1023,9 +1036,10 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
                     *fontNum = 0;
                     *type = (!strncasecmp(ext, ".ttc", 4)) ? sysFontTTC : sysFontTTF;
                     FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
-                    auto *sfi = new SysFontInfo(std::make_unique<GooString>(*fontName), bold, italic, oblique, font.isFixedWidth(), std::make_unique<GooString>(reinterpret_cast<char *>(s)), *type, *fontNum, substituteName.copy());
-                    sysFonts->addFcFont(sfi);
-                    fi = sfi;
+                    auto sfi =
+                            std::make_unique<SysFontInfo>(std::make_unique<GooString>(*fontName), bold, italic, oblique, font.isFixedWidth(), std::make_unique<GooString>(reinterpret_cast<char *>(s)), *type, *fontNum, substituteName.copy());
+                    fi = sfi.get();
+                    sysFonts->addFcFont(std::move(sfi));
                     path = std::string(reinterpret_cast<char *>(s));
                 } else if (!strncasecmp(ext, ".pfa", 4) || !strncasecmp(ext, ".pfb", 4)) {
                     int weight, slant;
@@ -1046,9 +1060,10 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
                     *fontNum = 0;
                     *type = (!strncasecmp(ext, ".pfa", 4)) ? sysFontPFA : sysFontPFB;
                     FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
-                    auto *sfi = new SysFontInfo(std::make_unique<GooString>(*fontName), bold, italic, oblique, font.isFixedWidth(), std::make_unique<GooString>(reinterpret_cast<char *>(s)), *type, *fontNum, substituteName.copy());
-                    sysFonts->addFcFont(sfi);
-                    fi = sfi;
+                    auto sfi =
+                            std::make_unique<SysFontInfo>(std::make_unique<GooString>(*fontName), bold, italic, oblique, font.isFixedWidth(), std::make_unique<GooString>(reinterpret_cast<char *>(s)), *type, *fontNum, substituteName.copy());
+                    fi = sfi.get();
+                    sysFonts->addFcFont(std::move(sfi));
                     path = std::string(reinterpret_cast<char *>(s));
                 } else {
                     continue;
@@ -1266,28 +1281,28 @@ void GlobalParams::setupBaseFonts(const char *dir)
         }
 
         std::unique_ptr<GooString> fontName = std::make_unique<GooString>(displayFontTab[i].name);
-        std::unique_ptr<GooString> fileName;
+        std::string fileName;
         if (dir) {
-            fileName.reset(appendToPath(new GooString(dir), displayFontTab[i].otFileName));
-            if ((f = openFile(fileName->c_str(), "rb"))) {
+            fileName = appendToPath(dir, displayFontTab[i].otFileName);
+            if ((f = openFile(fileName.c_str(), "rb"))) {
                 fclose(f);
             } else {
-                fileName.reset();
+                fileName.clear();
             }
         }
         if (!displayFontDir.empty()) {
-            fileName.reset(appendToPath(new GooString(displayFontDir), displayFontTab[i].otFileName));
-            if ((f = openFile(fileName->c_str(), "rb"))) {
+            fileName = appendToPath(displayFontDir, displayFontTab[i].otFileName);
+            if ((f = openFile(fileName.c_str(), "rb"))) {
                 fclose(f);
             } else {
-                fileName.reset();
+                fileName.clear();
             }
         }
-        if (!fileName) {
+        if (fileName.empty()) {
             error(errConfig, -1, "No display font for '{0:s}'", displayFontTab[i].name);
             continue;
         }
-        addFontFile(fontName->toStr(), fileName->toStr());
+        addFontFile(fontName->toStr(), fileName);
     }
 }
 
@@ -1365,22 +1380,22 @@ void GlobalParams::setupBaseFonts(const char *dir)
         std::unique_ptr<GooString> fontName = std::make_unique<GooString>(displayFontTab[i].name);
         std::unique_ptr<GooString> fileName;
         if (dir) {
-            fileName.reset(appendToPath(new GooString(dir), displayFontTab[i].t1FileName));
+            fileName = appendToPath(dir, displayFontTab[i].t1FileName));
             if ((f = openFile(fileName->c_str(), "rb"))) {
                 fclose(f);
             } else {
-                fileName.reset();
+                fileName.clear();
             }
         }
         for (j = 0; !fileName && displayFontDirs[j]; ++j) {
-            fileName.reset(appendToPath(new GooString(displayFontDirs[j]), displayFontTab[i].t1FileName));
+            fileName = appendToPath(displayFontDirs[j], displayFontTab[i].t1FileName));
             if ((f = openFile(fileName->c_str(), "rb"))) {
                 fclose(f);
             } else {
-                fileName.reset();
+                fileName.clear();
             }
         }
-        if (!fileName) {
+        if (fileName.empty()) {
             error(errConfig, -1, "No display font for '{0:s}'", displayFontTab[i].name);
             continue;
         }

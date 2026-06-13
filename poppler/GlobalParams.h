@@ -170,6 +170,7 @@ public:
     static bool parseYesNo2(const char *token, bool *flag);
 
 private:
+    static std::string appendToPath(const std::string &path, const std::string &fileName);
     void parseNameToUnicode(const std::filesystem::path &name);
 
     void scanEncodingDirs();

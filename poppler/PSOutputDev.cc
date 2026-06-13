@@ -2234,7 +2234,8 @@ void PSOutputDev::setupExternalType1Font(const std::string &fileName, const std:
         // PFB file
         ungetc(c, fontFile);
         while (!feof(fontFile)) {
-            fgetc(fontFile); // skip start of segment byte (0x80)
+            const int dummy = fgetc(fontFile); // skip start of segment byte (0x80)
+            (void)dummy;
             int segType = fgetc(fontFile);
             long segLen = fgetc(fontFile) | (fgetc(fontFile) << 8) | (fgetc(fontFile) << 16) | (fgetc(fontFile) << 24);
             if (feof(fontFile)) {
@@ -7128,14 +7129,9 @@ void PSOutputDev::cvtFunction(const Function *func, bool invertPSFunction)
     case Function::Type::PostScript:
         func4 = static_cast<const PostScriptFunction *>(func);
         if (invertPSFunction) {
-            std::string codeString = func4->getCodeString()->toStr();
-            for (size_t codeStringPos = codeString.size(); codeStringPos > 0; --codeStringPos) {
-                if (codeString[codeStringPos - 1] == '}') {
-                    codeString.erase(codeStringPos - 1, 1);
-                    break;
-                }
-            }
-            writePS(codeString);
+            const std::string &codeString = func4->getCodeString();
+            size_t endpos = codeString.rfind('}');
+            writePS(std::string_view { codeString }.substr(0, endpos));
             writePS("\n");
             n = func4->getOutputSize();
             for (i = 0; i < n; ++i) {
@@ -7144,7 +7140,7 @@ void PSOutputDev::cvtFunction(const Function *func, bool invertPSFunction)
             }
             writePS("}\n");
         } else {
-            writePS(func4->getCodeString()->toStr());
+            writePS(func4->getCodeString());
             writePS("\n");
         }
         break;

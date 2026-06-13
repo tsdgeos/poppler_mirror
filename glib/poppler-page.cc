@@ -83,6 +83,7 @@ static void poppler_page_finalize(GObject *object)
     g_object_unref(page->document);
     page->document = nullptr;
     page->text.reset();
+    page->mutex.~mutex();
 
     /* page->page is owned by the document */
 
@@ -1134,7 +1135,11 @@ static void poppler_page_class_init(PopplerPageClass *klass)
     g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_LABEL, g_param_spec_string("label", "Page Label", "The label of the page", nullptr, G_PARAM_READABLE));
 }
 
-static void poppler_page_init(PopplerPage * /*page*/) { }
+static void poppler_page_init(PopplerPage *page)
+{
+    // GObject zero-initializes instance memory; construct the C++ mutex member explicitly.
+    new (&page->mutex) std::mutex();
+}
 
 /**
  * poppler_page_get_link_mapping:

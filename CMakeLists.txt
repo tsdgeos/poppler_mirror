@@ -40,7 +40,7 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "26")
-set(POPPLER_MINOR_VERSION_STRING "05")
+set(POPPLER_MINOR_VERSION_STRING "06")
 # We want the string version to have 08 but the integer version can't have a leading 0 since otherwise it's considered octal
 # So strip a leading 0 if found in POPPLER_MINOR_VERSION_STRING and store the result in POPPLER_MINOR_VERSION
 string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VERSION_STRING}")
@@ -74,8 +74,8 @@ option(ENABLE_GOBJECT_INTROSPECTION "Whether to generate GObject introspection."
 option(ENABLE_GTK_DOC "Whether to generate glib API documentation." OFF)
 option(ENABLE_QT5 "Compile poppler qt5 wrapper." ON)
 option(ENABLE_QT6 "Compile poppler qt6 wrapper." ON)
-set(ENABLE_LIBOPENJPEG "openjpeg2" CACHE STRING "Use libopenjpeg for JPX streams. Possible values: openjpeg2, UnmaintainedWillBeRemovedInJuly2026, none. 'UnmaintainedWillBeRemovedInJuly2026' gives you the internal unmaintained decoder. Use at your own risk. The internal unmaintained decoder will be removed in july 2026. 'none' compiles no JPX decoder at all. Default: openjpeg2")
-set(ENABLE_DCTDECODER "libjpeg" CACHE STRING "Use libjpeg for DCT streams. Possible values: libjpeg, UnmaintainedWillBeRemovedInJuly2026, none. will use libjpeg if available or fail if not. 'UnmaintainedWillBeRemovedInJuly2026' gives you the internal unmaintained decoder. The internal unmaintained decoder will be removed in july 2026. Use at your own risk. 'none' compiles no DCT decoder at all. Default: libjpeg")
+option(ENABLE_LIBOPENJPEG "Use libopenjpeg for JPX streams." ON)
+option(ENABLE_LIBJPEG "Use libjpeg for DCT streams." ON)
 option(ENABLE_LCMS "Use LCMS for color management." ON)
 option(ENABLE_LIBCURL "Build libcurl based HTTP support." ON)
 option(ENABLE_LIBTIFF "Build code to write images as TIFF (pdfimages/pdftocairo/etc)." ON)
@@ -175,9 +175,9 @@ find_soft_mandatory_package(ENABLE_NSS3 NSS3 ${NSS3_VERSION})
 find_soft_mandatory_package(ENABLE_GPGME Gpgmepp ${GPGME_VERSION})
 find_soft_mandatory_package(ENABLE_LIBTIFF TIFF ${TIFF_VERSION})
 
-macro_optional_find_package(JPEG)
 macro_optional_find_package(PNG)
-if(ENABLE_DCTDECODER STREQUAL "libjpeg")
+if(ENABLE_LIBJPEG)
+  find_package(JPEG)
   if(JPEG_FOUND)
     include(CheckCSourceCompiles)
     set(_save_CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}")
@@ -190,29 +190,12 @@ if(ENABLE_DCTDECODER STREQUAL "libjpeg")
     set(CMAKE_REQUIRED_LIBRARIES "${_save_CMAKE_REQUIRED_LIBRARIES}")
 
     if(NOT HAVE_JPEG_MEM_SRC)
-      message(FATAL_ERROR "Your libjpeg is too old. Poppler needs one that provides jpeg_mem_src. That is provided in libjpeg >= 8 or libjpeg-turbo >= 1.1.0. You can \
-also decide to use the internal unmaintained DCT decoder or none at all. The internal unmaintained decoder will be removed in july 2026\n\
-Possible options are: -DENABLE_DCTDECODER=libjpeg, -DENABLE_DCTDECODER=none, \
--DENABLE_DCTDECODER=UnmaintainedWillBeRemovedInJuly2026")
+      message(FATAL_ERROR "Your libjpeg is too old. Poppler needs one that provides jpeg_mem_src. That is provided in libjpeg >= 8 or libjpeg-turbo >= 1.1.0. You can disable it with -DENABLE_LIBJPEG=OFF.")
     endif()
-
-    set(ENABLE_LIBJPEG ${JPEG_FOUND})
   else()
     message(STATUS "Could NOT find libjpeg.")
-    message(FATAL_ERROR "Install libjpeg before trying to build poppler. You can \
-also decide to use the internal unmaintained DCT decoder or none at all. The internal unmaintained decoder will be removed in july 2026\n\
-Possible options are: -DENABLE_DCTDECODER=libjpeg, -DENABLE_DCTDECODER=none, \
--DENABLE_DCTDECODER=UnmaintainedWillBeRemovedInJuly2026")
+    message(FATAL_ERROR "Install libjpeg before trying to build poppler or disable it with -DENABLE_LIBJPEG=OFF.")
   endif()
-  set(HAVE_DCT_DECODER ON)
-elseif(ENABLE_DCTDECODER STREQUAL "UnmaintainedWillBeRemovedInJuly2026")
-  set(ENABLE_LIBJPEG OFF)
-  set(HAVE_DCT_DECODER ON)
-elseif(ENABLE_DCTDECODER STREQUAL "none")
-  set(ENABLE_LIBJPEG OFF)
-  set(HAVE_DCT_DECODER OFF)
-else()
-  message(FATAL_ERROR "Invalid ENABLE_DCTDECODER value.")
 endif()
 
 find_soft_mandatory_package(ENABLE_QT5 Qt5Core ${QT5_VERSION})
@@ -307,28 +290,13 @@ if(ENABLE_CPP)
 endif()
 find_package(ZLIB REQUIRED)
 
-set(WITH_OPENJPEG FALSE)
-if(ENABLE_LIBOPENJPEG STREQUAL "openjpeg2")
+if(ENABLE_LIBOPENJPEG)
   find_package(OpenJPEG)
-  set(WITH_OPENJPEG ${OpenJPEG_FOUND})
   if(NOT OpenJPEG_FOUND OR OPENJPEG_MAJOR_VERSION VERSION_LESS 2)
     message(STATUS "Could NOT find openjpeg2.")
-    message(FATAL_ERROR "Install libopenjpeg2 before trying to build poppler. You \
-can also decide to use the internal unmaintained JPX decoder or none at all. The internal decoder will be removed in july 2026.\n\
-Possible options are: -DENABLE_LIBOPENJPEG=openjpeg2, -DENABLE_LIBOPENJPEG=none, \
--DENABLE_LIBOPENJPEG=UnmaintainedWillBeRemovedInJuly2026,")
+    message(FATAL_ERROR "Install libopenjpeg2 before trying to build poppler or disable it with -DENABLE_LIBOPENJPEG=OFF.")
   endif()
-  set(HAVE_JPX_DECODER ON)
-elseif(ENABLE_LIBOPENJPEG STREQUAL "UnmaintainedWillBeRemovedInJuly2026")
-  set(WITH_OPENJPEG OFF)
-  set(HAVE_JPX_DECODER ON)
-elseif(ENABLE_LIBOPENJPEG STREQUAL "none")
-  set(WITH_OPENJPEG OFF)
-  set(HAVE_JPX_DECODER OFF)
-else()
-  message(FATAL_ERROR "Invalid ENABLE_LIBOPENJPEG value: ${ENABLE_LIBOPENJPEG}")
 endif()
-set(ENABLE_LIBOPENJPEG "${WITH_OPENJPEG}")
 
 find_soft_mandatory_package(ENABLE_LCMS LCMS2 ${LCMS2_REQUIRED_VERSION})
 set(USE_CMS ${ENABLE_LCMS})
@@ -560,16 +528,12 @@ if (ENABLE_GPGME)
     set(PC_REQUIRES_PRIVATE "${PC_REQUIRES_PRIVATE} gpgmepp >= ${GPGME_VERSION}")
   endif()
 endif()
-if (OpenJPEG_FOUND)
+if(ENABLE_LIBOPENJPEG)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/JPEG2000Stream.cc
   )
   set(poppler_LIBS ${poppler_LIBS} openjp2)
   set(PC_REQUIRES_PRIVATE "${PC_REQUIRES_PRIVATE} libopenjp2")
-else ()
-  set(poppler_SRCS ${poppler_SRCS}
-    poppler/JPXStream.cc
-  )
 endif()
 if(USE_CMS)
   set(poppler_LIBS ${poppler_LIBS} ${LCMS2_LIBRARIES})
@@ -631,7 +595,7 @@ ADD_GPERF_FILE(TimesItalicWidths)
 ADD_GPERF_FILE(TimesRomanWidths)
 ADD_GPERF_FILE(ZapfDingbatsWidths)
 
-set(POPPLER_SOVERSION_NUMBER "160")
+set(POPPLER_SOVERSION_NUMBER "161")
 
 set(LINKER_SCRIPT "${CMAKE_BINARY_DIR}/libpoppler.map")
 configure_file(
@@ -790,10 +754,8 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
           poppler/CurlCachedFile.h
           poppler/CurlPDFDocBuilder.h)
   endif()
-  if(OpenJPEG_FOUND)
+  if(ENABLE_LIBOPENJPEG)
     set(poppler_poppler_installed_headers ${poppler_poppler_installed_headers} poppler/JPEG2000Stream.h)
-  else()
-    set(poppler_poppler_installed_headers ${poppler_poppler_installed_headers} poppler/JPXStream.h)
   endif()
   if(PNG_FOUND)
     set(poppler_goo_installed_headers ${poppler_goo_installed_headers} goo/PNGWriter.h)
@@ -928,17 +890,13 @@ show_end_message_yesno("use gpg" ENABLE_GPGME)
 show_end_message("  default signature backend" ${DEFAULT_SIGNATURE_BACKEND})
 show_end_message_yesno("  enable pgp signatures in gpg backend by default" ENABLE_PGP_SIGNATURES)
 show_end_message_yesno("use curl" ENABLE_LIBCURL)
-show_end_message_yesno("use libopenjpeg2" WITH_OPENJPEG)
+show_end_message_yesno("use libopenjpeg2" ENABLE_LIBOPENJPEG)
 show_end_message_yesno("use lcms2" USE_CMS)
 show_end_message_yesno("command line utils" ENABLE_UTILS)
 show_end_message_yesno("fuzz target" ENABLE_FUZZER)
 show_end_message("test data dir" ${TESTDATADIR})
 
-if(NOT ENABLE_LIBJPEG AND HAVE_DCT_DECODER)
-  message("Warning: Using libjpeg is recommended. The internal DCT decoder is unmaintained and will be removed in july 2026.")
-endif()
-
-if(NOT HAVE_DCT_DECODER)
+if(NOT ENABLE_LIBJPEG)
   message("Warning: You're not compiling any DCT decoder. Some files will fail to display properly.")
 endif()
 
@@ -946,11 +904,7 @@ if(ENABLE_ZLIB_UNCOMPRESS)
   message("Warning: Using zlib is not totally safe")
 endif()
 
-if(NOT WITH_OPENJPEG AND HAVE_JPX_DECODER)
-  message("Warning: Using libopenjpeg2 is recommended. The internal JPX decoder is unmaintained and will be removed in july 2026.")
-endif()
-
-if(NOT HAVE_JPX_DECODER)
+if(NOT ENABLE_LIBOPENJPEG)
   message("Warning: You're not compiling any JPX decoder. Some files will fail to display properly.")
 endif()
 

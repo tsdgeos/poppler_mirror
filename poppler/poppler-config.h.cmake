@@ -35,7 +35,7 @@
 /* Support for curl is compiled in. */
 #cmakedefine01 POPPLER_HAS_CURL_SUPPORT
 
-/* Use libjpeg instead of builtin jpeg decoder. */
+/* Build with libjpeg support. */
 #cmakedefine01 ENABLE_LIBJPEG
 
 /* Build against libtiff. */
