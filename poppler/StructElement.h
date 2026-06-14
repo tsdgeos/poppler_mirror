@@ -22,7 +22,6 @@
 #include "poppler_private_export.h"
 #include <vector>
 
-class GooString;
 class Dict;
 class StructElement;
 class StructTreeRoot;

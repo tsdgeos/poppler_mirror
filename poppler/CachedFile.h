@@ -8,7 +8,7 @@
 //
 // Copyright 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2018-2020, 2022, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2018-2020, 2022, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
@@ -26,7 +26,6 @@
 
 #define CachedFileChunkSize 8192 // This should be a multiple of cachedStreamBufSize
 
-class GooString;
 class CachedFileLoader;
 
 //------------------------------------------------------------------------

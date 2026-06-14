@@ -17,7 +17,7 @@
 //
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2008, 2011, 2012, 2018, 2019, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2011, 2012, 2018, 2019, 2021, 2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -39,8 +39,6 @@
 #include <deque>
 
 #include "CharTypes.h"
-
-class GooString;
 
 //------------------------------------------------------------------------
 

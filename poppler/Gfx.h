@@ -46,7 +46,6 @@
 #include <stack>
 #include <vector>
 
-class GooString;
 class PDFDoc;
 class XRef;
 class Array;

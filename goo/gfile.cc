@@ -47,7 +47,6 @@
 #endif // _WIN32
 #include <cstdio>
 #include <limits>
-#include "GooString.h"
 #include "gfile.h"
 
 // Some systems don't define this, so just make it something reasonably

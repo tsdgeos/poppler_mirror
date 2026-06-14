@@ -38,7 +38,6 @@
 #include "FoFiBase.h"
 #include "poppler_private_export.h"
 
-class GooString;
 struct TrueTypeTable;
 struct TrueTypeCmap;
 

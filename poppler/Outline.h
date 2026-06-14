@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2016, 2018, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2018, 2021, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 RM <rm+git@arcsin.org>
 // Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -34,7 +34,6 @@
 #include "poppler_private_export.h"
 
 class PDFDoc;
-class GooString;
 class XRef;
 class LinkAction;
 class OutlineItem;
