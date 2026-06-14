@@ -4,6 +4,7 @@
  * Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
  * Copyright (C) 2025, 2026 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2026 Daeho Ro <email@daeho.ro>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
