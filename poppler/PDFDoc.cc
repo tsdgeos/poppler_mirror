@@ -1458,6 +1458,7 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
             }
             if (addEncryptstream) {
                 encStream = std::make_unique<EncryptStream>(*stream, fileKey, encAlgorithm, keyLength, ref);
+                stream = encStream.get();
             }
 
             if (!stream->rewind()) {
