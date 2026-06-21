@@ -554,7 +554,7 @@ void GpgSignatureVerification::validateCertificateAsync(std::chrono::system_cloc
             return CERTIFICATE_REVOKED;
         }
         if (key.isBad()) {
-            return CERTIFICATE_NOT_VERIFIED;
+            return CERTIFICATE_UNTRUSTED_ISSUER;
         }
         std::vector<GpgME::UserID> userIds = key.userIDs();
         if (protocol == GpgME::CMS) {
