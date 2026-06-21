@@ -17,12 +17,12 @@
 #include "Stream.h"
 #include "Dict.h"
 
-AnnotStampImageHelper::AnnotStampImageHelper(PDFDoc *docA, int widthA, int heightA, ColorSpace colorSpace, int bitsPerComponent, char *data, int dataLength)
-    : AnnotStampImageHelper(docA, widthA, heightA, colorSpace, bitsPerComponent, data, dataLength, Ref::INVALID())
+AnnotStampImageHelper::AnnotStampImageHelper(PDFDoc *docA, int widthA, int heightA, ColorSpace colorSpace, int bitsPerComponent, std::vector<char> &&data)
+    : AnnotStampImageHelper(docA, widthA, heightA, colorSpace, bitsPerComponent, std::move(data), Ref::INVALID())
 {
 }
 
-AnnotStampImageHelper::AnnotStampImageHelper(PDFDoc *docA, int widthA, int heightA, ColorSpace colorSpace, int bitsPerComponent, char *data, int dataLength, Ref softMaskRef)
+AnnotStampImageHelper::AnnotStampImageHelper(PDFDoc *docA, int widthA, int heightA, ColorSpace colorSpace, int bitsPerComponent, std::vector<char> &&data, Ref softMaskRef)
 {
     doc = docA;
     width = widthA;
@@ -55,9 +55,7 @@ AnnotStampImageHelper::AnnotStampImageHelper(PDFDoc *docA, int widthA, int heigh
         dict->add("SMask", Object(sMaskRef));
     }
 
-    std::vector<char> dataCopied { data, data + dataLength };
-
-    ref = doc->getXRef()->addStreamObject(std::move(dict), std::move(dataCopied), StreamCompression::Compress);
+    ref = doc->getXRef()->addStreamObject(std::move(dict), std::move(data), StreamCompression::Compress);
 }
 
 void AnnotStampImageHelper::removeAnnotStampImageObject()

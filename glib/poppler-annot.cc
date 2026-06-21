@@ -931,10 +931,11 @@ std::unique_ptr<AnnotStampImageHelper> _poppler_convert_cairo_image_to_stamp_ima
     }
 
     if (sMaskData->len > 0) {
-        AnnotStampImageHelper sMask(doc, width, height, ColorSpace::DeviceGray, 8, reinterpret_cast<char *>(sMaskData->data), static_cast<int>(sMaskData->len));
-        annotImg = std::make_unique<AnnotStampImageHelper>(doc, width, height, colorSpace, bitsPerComponent, reinterpret_cast<char *>(data->data), static_cast<int>(data->len), sMask.getRef());
+        AnnotStampImageHelper sMask(doc, width, height, ColorSpace::DeviceGray, 8, std::vector<char> { reinterpret_cast<char *>(sMaskData->data), reinterpret_cast<char *>(sMaskData->data) + static_cast<int>(sMaskData->len) });
+        annotImg = std::make_unique<AnnotStampImageHelper>(doc, width, height, colorSpace, bitsPerComponent, std::vector<char> { reinterpret_cast<char *>(data->data), reinterpret_cast<char *>(data->data) + static_cast<int>(data->len) },
+                                                           sMask.getRef());
     } else {
-        annotImg = std::make_unique<AnnotStampImageHelper>(doc, width, height, colorSpace, bitsPerComponent, reinterpret_cast<char *>(data->data), static_cast<int>(data->len));
+        annotImg = std::make_unique<AnnotStampImageHelper>(doc, width, height, colorSpace, bitsPerComponent, std::vector<char> { reinterpret_cast<char *>(data->data), reinterpret_cast<char *>(data->data) + static_cast<int>(data->len) });
     }
 
     g_byte_array_unref(data);
