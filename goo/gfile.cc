@@ -49,12 +49,6 @@
 #include <limits>
 #include "gfile.h"
 
-// Some systems don't define this, so just make it something reasonably
-// large.
-#ifndef PATH_MAX
-#    define PATH_MAX 1024
-#endif
-
 #ifndef _WIN32
 
 using namespace std::string_literals;
