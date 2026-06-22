@@ -102,7 +102,7 @@ static bool makeFileDescriptorCloexec(int fd)
 #    endif
 }
 
-int openFileDescriptor(const char *path, int flags)
+static int openFileDescriptor(const char *path, int flags)
 {
 #    ifdef O_CLOEXEC
     return open(path, flags | O_CLOEXEC);
