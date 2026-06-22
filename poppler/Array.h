@@ -30,7 +30,6 @@
 #ifndef ARRAY_H
 #define ARRAY_H
 
-#include <atomic>
 #include <mutex>
 #include <vector>
 

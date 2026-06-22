@@ -56,7 +56,6 @@
 #include <cstddef>
 #include <cmath>
 #include <cstring>
-#include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "Error.h"
 #include "Object.h"
@@ -67,7 +66,6 @@
 #include "GfxState_helpers.h"
 #include "GfxFont.h"
 #include "GlobalParams.h"
-#include "PopplerCache.h"
 #include "OutputDev.h"
 #include "splash/SplashTypes.h"
 

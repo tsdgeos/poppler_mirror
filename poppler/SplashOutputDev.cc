@@ -60,7 +60,6 @@
 #include <cmath>
 #include <vector>
 #include "Stream.h"
-#include "goo/gfile.h"
 #include "GlobalParams.h"
 #include "Error.h"
 #include "Object.h"

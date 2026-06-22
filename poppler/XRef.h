@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008, 2010-2013, 2017-2022, 2024, 2025, Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008, 2010-2013, 2017-2022, 2024-2026, Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
@@ -43,7 +43,6 @@
 #include "poppler_private_export.h"
 #include "Object.h"
 #include "Stream.h"
-#include "PopplerCache.h"
 
 class Dict;
 class Stream;

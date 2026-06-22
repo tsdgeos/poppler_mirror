@@ -60,7 +60,6 @@
 #include <cassert>
 #include <cairo.h>
 
-#include "goo/gfile.h"
 #include "GlobalParams.h"
 #include "Error.h"
 #include "Object.h"
@@ -69,7 +68,6 @@
 #include "GfxFont.h"
 #include "Page.h"
 #include "Link.h"
-#include "PDFDocEncoding.h"
 #include <fofi/FoFiTrueType.h>
 #include <goo/gmem.h>
 #include <splash/SplashBitmap.h>

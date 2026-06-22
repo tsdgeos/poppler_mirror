@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009, 2018-2020, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2018-2020, 2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -30,7 +30,6 @@
 #include <array>
 #include <memory>
 
-#include "Object.h"
 #include "CharTypes.h"
 #include "GfxFont.h"
 
@@ -38,6 +37,7 @@ class GooString;
 class Object;
 struct CMapVectorEntry;
 class CMapCache;
+struct RefRecursionChecker;
 class Stream;
 
 //------------------------------------------------------------------------
