@@ -57,6 +57,22 @@ static std::string fromCharPtr(const char *data)
     return {};
 }
 
+static CertificateValidationStatus convertValidity(GpgME::UserID::Validity validity)
+{
+    switch (validity) {
+    case GpgME::UserID::Validity::Full:
+    case GpgME::UserID::Validity::Ultimate:
+        return CERTIFICATE_TRUSTED;
+    case GpgME::UserID::Validity::Never:
+        return CERTIFICATE_UNTRUSTED_ISSUER;
+    case GpgME::UserID::Validity::Marginal: /*Marginal should not be present for s/mime */
+    case GpgME::UserID::Validity::Unknown:
+    case GpgME::UserID::Validity::Undefined:
+        return CERTIFICATE_NOT_VERIFIED;
+    }
+    return CERTIFICATE_NOT_VERIFIED;
+}
+
 // gpgme treats time_t as unsigned - for dates before the epochalypse (y2038) it doesn't matter.
 // for dates after the epochalypse this makes a difference if time_t is 32bit.
 static Certificate::timePointSeconds fromGpgMETime(time_t time)
@@ -528,6 +544,9 @@ void GpgSignatureVerification::validateCertificateAsync(std::chrono::system_cloc
         if (e) {
             return CERTIFICATE_GENERIC_ERROR;
         }
+        if (key.isNull()) {
+            return CERTIFICATE_GENERIC_ERROR;
+        }
         if (key.isExpired()) {
             return CERTIFICATE_EXPIRED;
         }
@@ -535,9 +554,35 @@ void GpgSignatureVerification::validateCertificateAsync(std::chrono::system_cloc
             return CERTIFICATE_REVOKED;
         }
         if (key.isBad()) {
-            return CERTIFICATE_NOT_VERIFIED;
+            return CERTIFICATE_UNTRUSTED_ISSUER;
         }
-        return CERTIFICATE_TRUSTED;
+        std::vector<GpgME::UserID> userIds = key.userIDs();
+        if (protocol == GpgME::CMS) {
+            if (userIds[0].isRevoked()) {
+                return CERTIFICATE_REVOKED;
+            }
+            return convertValidity(userIds[0].validity());
+        }
+        if (protocol == GpgME::OpenPGP) {
+            std::optional<GpgME::UserID::Validity> validity;
+            // we might have multiple UID's; some might be revoked
+            for (const auto &userId : userIds) {
+                if (userId.isRevoked()) {
+                    continue;
+                }
+                if (!validity) {
+                    validity = userId.validity();
+                } else {
+                    validity = std::min(validity.value(), userId.validity());
+                }
+            }
+            if (!validity) {
+                // We only have revoked UID's
+                return CERTIFICATE_REVOKED;
+            }
+            return convertValidity(validity.value());
+        }
+        return CERTIFICATE_GENERIC_ERROR;
     });
 }
 

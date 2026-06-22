@@ -1064,10 +1064,14 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
         const X509CertificateInfo::Validity &certValidity = ci->getValidity();
 #if __cpp_lib_chrono >= 201907L // gcc-13 fails this (ubuntu 24.04) - gcc-14 succeeds
         certPriv->validity_start = QDateTime::fromStdTimePoint(certValidity.notBefore);
-        certPriv->validity_end = QDateTime::fromStdTimePoint(certValidity.notAfter);
+        if (certValidity.notAfter != Certificate::timePointSeconds {}) {
+            certPriv->validity_end = QDateTime::fromStdTimePoint(certValidity.notAfter);
+        }
 #else
         certPriv->validity_start = QDateTime::fromSecsSinceEpoch(std::chrono::duration_cast<std::chrono::seconds>(certValidity.notBefore.time_since_epoch()).count(), QTimeZone::utc());
-        certPriv->validity_end = QDateTime::fromSecsSinceEpoch(std::chrono::duration_cast<std::chrono::seconds>(certValidity.notAfter.time_since_epoch()).count(), QTimeZone::utc());
+        if (certValidity.notAfter != Certificate::timePointSeconds {}) {
+            certPriv->validity_end = QDateTime::fromSecsSinceEpoch(std::chrono::duration_cast<std::chrono::seconds>(certValidity.notAfter.time_since_epoch()).count(), QTimeZone::utc());
+        }
 #endif
 
         const X509CertificateInfo::PublicKeyInfo &pkInfo = ci->getPublicKeyInfo();

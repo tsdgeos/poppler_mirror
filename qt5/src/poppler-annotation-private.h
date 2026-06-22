@@ -43,7 +43,6 @@ namespace Poppler {
 class DocumentData;
 
 PDFRectangle boundaryToPdfRectangle(::Page *pdfPage, const QRectF &r, int flags);
-void getRawDataFromQImage(const QImage &qimg, int bitsPerPixel, QByteArray *data, QByteArray *sMaskData);
 
 class AnnotationPrivate : public QSharedData
 {

@@ -32,7 +32,6 @@
 
 #include <config.h>
 
-#include "goo/GooString.h"
 #include "PDFDoc.h"
 #include "XRef.h"
 #include "Link.h"

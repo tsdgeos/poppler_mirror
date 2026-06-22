@@ -28,6 +28,7 @@
 #include <gpgme++/importresult.h>
 #include <gpgme++/context.h>
 #include <gpgme++/data.h>
+#include <poppler-form.h>
 
 class TestSignWithGnupgPgp : public QObject
 {
@@ -60,6 +61,7 @@ private Q_SLOTS:
     static void cleanupTestCase();
     static void testPgpSignVerify();
     static void testKeyList();
+    static void testKeyListQt();
 };
 
 std::unique_ptr<QTemporaryDir> TestSignWithGnupgPgp::nssdir;
@@ -113,6 +115,23 @@ void TestSignWithGnupgPgp::testKeyList()
     } else if (activeBackendType == CryptoSign::Backend::Type::GPGME) {
         QCOMPARE(certificateList.size(), 1);
         QCOMPARE(certificateList[0]->getNickName().c_str(), "36E39802E4F49A259091DA69381B80FEF3535BC1");
+    }
+}
+
+void TestSignWithGnupgPgp::testKeyListQt()
+{
+    auto backend = CryptoSign::Factory::createActive();
+    QVERIFY(backend);
+
+    auto certificateList = Poppler::getAvailableSigningCertificates();
+
+    auto activeBackendType = CryptoSign::Factory::getActive();
+    if (activeBackendType == CryptoSign::Backend::Type::NSS3) {
+        QVERIFY(certificateList.empty());
+    } else if (activeBackendType == CryptoSign::Backend::Type::GPGME) {
+        QCOMPARE(certificateList.size(), 1);
+        QCOMPARE(certificateList[0].nickName(), QStringLiteral("36E39802E4F49A259091DA69381B80FEF3535BC1"));
+        QVERIFY(certificateList[0].validityEnd().isNull());
     }
 }
 

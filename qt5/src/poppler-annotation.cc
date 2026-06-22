@@ -163,25 +163,28 @@ AnnotationAppearance::~AnnotationAppearance()
 // BEGIN Annotation implementation
 AnnotationPrivate::AnnotationPrivate() : pdfAnnot(nullptr) { }
 
-void getRawDataFromQImage(const QImage &qimg, int bitsPerPixel, QByteArray *data, QByteArray *sMaskData)
+static void getRawDataFromQImage(const QImage &qimg, int bitsPerPixel, std::vector<char> *data, std::vector<char> *sMaskData)
 {
     const int height = qimg.height();
     const int width = qimg.width();
 
     switch (bitsPerPixel) {
     case 1:
+        data->reserve(height * (width + 7) / 8);
         for (int line = 0; line < height; line++) {
             const char *lineData = reinterpret_cast<const char *>(qimg.scanLine(line));
             for (int offset = 0; offset < (width + 7) / 8; offset++) {
-                data->append(lineData[offset]);
+                data->push_back(lineData[offset]);
             }
         }
         break;
     case 8:
     case 24:
-        data->append(reinterpret_cast<const char *>(qimg.bits()), static_cast<int>(qimg.sizeInBytes()));
+        data->assign(reinterpret_cast<const char *>(qimg.bits()), reinterpret_cast<const char *>(qimg.bits()) + static_cast<int>(qimg.sizeInBytes()));
         break;
     case 32:
+        data->reserve(3 * height * width);
+        sMaskData->reserve(height * width);
         for (int line = 0; line < height; line++) {
             const QRgb *lineData = reinterpret_cast<const QRgb *>(qimg.scanLine(line));
             for (int offset = 0; offset < width; offset++) {
@@ -190,11 +193,11 @@ void getRawDataFromQImage(const QImage &qimg, int bitsPerPixel, QByteArray *data
                 char g = static_cast<char>(qGreen(lineData[offset]));
                 char b = static_cast<char>(qBlue(lineData[offset]));
 
-                data->append(r);
-                data->append(g);
-                data->append(b);
+                data->push_back(r);
+                data->push_back(g);
+                data->push_back(b);
 
-                sMaskData->append(a);
+                sMaskData->push_back(a);
             }
         }
         break;
@@ -3406,8 +3409,8 @@ std::unique_ptr<AnnotStampImageHelper> StampAnnotationPrivate::convertQImageToAn
 {
     QImage convertedQImage = qimg;
 
-    QByteArray data;
-    QByteArray sMaskData;
+    std::vector<char> data;
+    std::vector<char> sMaskData;
     const int width = convertedQImage.width();
     const int height = convertedQImage.height();
     int bitsPerComponent = 1;
@@ -3483,11 +3486,11 @@ std::unique_ptr<AnnotStampImageHelper> StampAnnotationPrivate::convertQImageToAn
 
     std::unique_ptr<AnnotStampImageHelper> annotImg;
 
-    if (sMaskData.count() > 0) {
-        AnnotStampImageHelper sMask(parentDoc->doc.get(), width, height, ColorSpace::DeviceGray, 8, sMaskData.data(), sMaskData.count());
-        annotImg = std::make_unique<AnnotStampImageHelper>(parentDoc->doc.get(), width, height, colorSpace, bitsPerComponent, data.data(), data.count(), sMask.getRef());
+    if (!sMaskData.empty()) {
+        AnnotStampImageHelper sMask(parentDoc->doc.get(), width, height, ColorSpace::DeviceGray, 8, std::move(sMaskData));
+        annotImg = std::make_unique<AnnotStampImageHelper>(parentDoc->doc.get(), width, height, colorSpace, bitsPerComponent, std::move(data), sMask.getRef());
     } else {
-        annotImg = std::make_unique<AnnotStampImageHelper>(parentDoc->doc.get(), width, height, colorSpace, bitsPerComponent, data.data(), data.count());
+        annotImg = std::make_unique<AnnotStampImageHelper>(parentDoc->doc.get(), width, height, colorSpace, bitsPerComponent, std::move(data));
     }
 
     return annotImg;

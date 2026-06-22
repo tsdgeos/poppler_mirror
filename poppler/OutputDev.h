@@ -52,7 +52,6 @@
 
 class Annot;
 class Dict;
-class GooString;
 class Gfx;
 class Stream;
 class Links;
