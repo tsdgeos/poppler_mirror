@@ -31,6 +31,8 @@
 //
 //========================================================================
 
+#include "FontInfo.h"
+
 #include "config.h"
 #include "GlobalParams.h"
 #include "Object.h"
@@ -38,7 +40,6 @@
 #include "GfxFont.h"
 #include "Annot.h"
 #include "PDFDoc.h"
-#include "FontInfo.h"
 
 FontInfoScanner::FontInfoScanner(PDFDoc *docA, int firstPage)
 {
