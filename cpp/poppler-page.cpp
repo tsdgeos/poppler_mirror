@@ -171,11 +171,12 @@ rectf page::page_rect(page_box_enum box) const
  */
 ustring page::label() const
 {
-    GooString goo;
-    if (!d->doc->doc->getCatalog()->indexToLabel(d->index, &goo)) {
+    std::string label;
+    if (!d->doc->doc->getCatalog()->indexToLabel(d->index, &label)) {
         return ustring();
     }
 
+    const GooString goo(std::move(label));
     return detail::unicode_GooString_to_ustring(&goo);
 }
 

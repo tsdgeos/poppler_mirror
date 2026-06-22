@@ -3,7 +3,7 @@
 // This file is under the GPLv2 or later license
 //
 // Copyright (C) 2005-2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2013, 2017, 2018, 2020, 2021, 2023, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2013, 2017, 2018, 2020, 2021, 2023, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Simon Kellner <kellner@kit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -23,6 +23,7 @@
 
 #include <algorithm>
 
+#include "Object.h"
 #include "PageLabelInfo.h"
 #include "PageLabelInfo_p.h"
 
@@ -164,7 +165,7 @@ std::optional<int> PageLabelInfo::labelToIndex(const std::string &label) const
     return {};
 }
 
-bool PageLabelInfo::indexToLabel(int index, GooString *label) const
+bool PageLabelInfo::indexToLabel(int index, std::string *label) const
 {
     char buffer[32];
     int base, number;
@@ -209,7 +210,7 @@ bool PageLabelInfo::indexToLabel(int index, GooString *label) const
 
     label->clear();
     label->append(matching_interval->prefix.c_str(), matching_interval->prefix.size());
-    if (hasUnicodeByteOrderMark(label->toStr())) {
+    if (hasUnicodeByteOrderMark(*label)) {
         int i, len;
         char ucs2_char[2];
 

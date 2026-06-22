@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2017, 2022, 2025, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017, 2022, 2025, 2026, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2019, 2020, Oliver Sander <oliver.sander@tu-dresden.de>
@@ -855,7 +855,7 @@ page *document::create_page(const ustring &label) const
     std::unique_ptr<GooString> goolabel(detail::ustring_to_unicode_GooString(label));
     int index = 0;
 
-    if (!d->doc->getCatalog()->labelToIndex(*goolabel, &index)) {
+    if (!d->doc->getCatalog()->labelToIndex(goolabel->toStr(), &index)) {
         return nullptr;
     }
     return create_page(index);
