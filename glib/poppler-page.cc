@@ -152,12 +152,12 @@ int poppler_page_get_index(PopplerPage *page)
  **/
 gchar *poppler_page_get_label(PopplerPage *page)
 {
-    GooString label;
+    std::string label;
 
     g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
 
     page->document->doc->getCatalog()->indexToLabel(page->index, &label);
-    return _poppler_goo_string_to_utf8(label.toStr());
+    return _poppler_goo_string_to_utf8(label);
 }
 
 /**

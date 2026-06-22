@@ -64,13 +64,6 @@ using Goffset = long long;
 
 //------------------------------------------------------------------------
 
-#ifndef _WIN32
-// Open a file descriptor
-// Could be implemented on WIN32 too, but the only external caller of
-// this function is not used on WIN32
-extern int POPPLER_PRIVATE_EXPORT openFileDescriptor(const char *path, int flags);
-#endif
-
 // Open a file.  On Windows, this converts the path from UTF-8 to
 // UCS-2 and calls _wfopen (if available).  On other OSes, this simply
 // calls fopen.

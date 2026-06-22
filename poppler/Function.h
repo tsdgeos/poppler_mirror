@@ -29,14 +29,18 @@
 #ifndef FUNCTION_H
 #define FUNCTION_H
 
-#include "Object.h"
+#include "poppler_private_export.h"
 
 #include <array>
+#include <memory>
+#include <vector>
 
 class Dict;
+class Object;
 class Stream;
 struct PSObject;
 class PSStack;
+struct RefRecursionChecker;
 
 //------------------------------------------------------------------------
 // Function

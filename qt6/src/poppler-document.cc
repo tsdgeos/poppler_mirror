@@ -570,9 +570,9 @@ std::unique_ptr<Page> Document::page(const QString &label) const
     const GooString label_g(label.toLatin1().data());
     int index;
 
-    if (!m_doc->doc->getCatalog()->labelToIndex(label_g, &index)) {
+    if (!m_doc->doc->getCatalog()->labelToIndex(label_g.toStr(), &index)) {
         const std::unique_ptr<GooString> label_ug(QStringToUnicodeGooString(label));
-        if (!m_doc->doc->getCatalog()->labelToIndex(*label_ug, &index)) {
+        if (!m_doc->doc->getCatalog()->labelToIndex(label_ug->toStr(), &index)) {
             return nullptr;
         }
     }

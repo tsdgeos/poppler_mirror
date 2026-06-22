@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2008, 2009, 2017-2021, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2009, 2017-2021, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -34,7 +34,6 @@
 #include <cstdlib>
 #include <cstring>
 #include "goo/gmem.h"
-#include "goo/gfile.h"
 #include "goo/GooString.h"
 #include "Error.h"
 #include "GlobalParams.h"

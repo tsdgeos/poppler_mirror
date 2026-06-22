@@ -933,12 +933,12 @@ double Page::duration() const
 
 QString Page::label() const
 {
-    GooString goo;
-    if (!m_page->parentDoc->doc->getCatalog()->indexToLabel(m_page->index, &goo)) {
+    std::string label;
+    if (!m_page->parentDoc->doc->getCatalog()->indexToLabel(m_page->index, &label)) {
         return QString();
     }
 
-    return UnicodeParsedString(&goo);
+    return UnicodeParsedString(label);
 }
 
 int Page::index() const

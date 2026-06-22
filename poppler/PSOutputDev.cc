@@ -3473,12 +3473,12 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
     }
     xref = xrefA;
     if (mode == psModePS) {
-        GooString pageLabel;
+        std::string pageLabel;
         const bool gotLabel = doc->getCatalog()->indexToLabel(pageNum - 1, &pageLabel);
         if (gotLabel) {
             // See bug13338 for why we try to avoid parentheses...
             bool needParens;
-            GooString *filteredString = filterPSLabel(pageLabel.toStr(), &needParens);
+            GooString *filteredString = filterPSLabel(pageLabel, &needParens);
             if (needParens) {
                 writePSFmt("%%Page: ({0:t}) {1:d}\n", filteredString, seqPage);
             } else {

@@ -1,6 +1,6 @@
 /* PageTransition.cc
  * Copyright (C) 2005, Net Integration Technologies, Inc.
- * Copyright (C) 2010, 2017, 2020, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2010, 2017, 2020, 2026, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2015, Arseniy Lartsev <arseniy@alumni.chalmers.se>
  * Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
@@ -21,6 +21,8 @@
  */
 
 #include "PageTransition.h"
+
+#include "Object.h"
 
 //------------------------------------------------------------------------
 // PageTransition

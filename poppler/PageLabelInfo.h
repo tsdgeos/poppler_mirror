@@ -3,7 +3,7 @@
 // This file is under the GPLv2 or later license
 //
 // Copyright (C) 2005-2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2018-2020, 2023, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2018-2020, 2023, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
@@ -16,10 +16,12 @@
 #define PAGELABELINFO_H
 
 #include <cassert>
+#include <optional>
 #include <string>
 #include <vector>
 
-#include "Object.h"
+class Dict;
+struct RefRecursionChecker;
 
 class PageLabelInfo
 {
@@ -30,7 +32,7 @@ public:
     PageLabelInfo &operator=(const PageLabelInfo &) = delete;
 
     std::optional<int> labelToIndex(const std::string &label) const;
-    bool indexToLabel(int index, GooString *label) const;
+    bool indexToLabel(int index, std::string *label) const;
 
 private:
     void parse(const Dict &tree, RefRecursionChecker &parsedRefs);

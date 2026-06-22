@@ -795,13 +795,13 @@ const GooString *NameTree::getName(int index) const
     return nullptr;
 }
 
-bool Catalog::labelToIndex(const GooString &label, int *index)
+bool Catalog::labelToIndex(const std::string &label, int *index)
 {
     char *end;
 
     PageLabelInfo *pli = getPageLabelInfo();
     if (pli != nullptr) {
-        std::optional<int> labelIndex = pli->labelToIndex(label.toStr());
+        std::optional<int> labelIndex = pli->labelToIndex(label);
         if (!labelIndex) {
             return false;
         }
@@ -820,7 +820,7 @@ bool Catalog::labelToIndex(const GooString &label, int *index)
     return true;
 }
 
-bool Catalog::indexToLabel(int index, GooString *label)
+bool Catalog::indexToLabel(int index, std::string *label)
 {
     char buffer[32];
 

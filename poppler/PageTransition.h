@@ -1,7 +1,7 @@
 /* PageTransition.cc
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2015, Arseniy Lartsev <arseniy@alumni.chalmers.se>
- * Copyright (C) 2019, 2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2019, 2021, 2026, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,9 @@
 #ifndef PAGE_TRANSITION_H
 #define PAGE_TRANSITION_H
 
-#include "Object.h"
+#include "poppler_private_export.h"
+
+class Object;
 
 //------------------------------------------------------------------------
 // PageTransition

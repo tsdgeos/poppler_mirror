@@ -782,7 +782,7 @@ PopplerPage *poppler_document_get_page_by_label(PopplerDocument *document, const
     int index;
 
     catalog = document->doc->getCatalog();
-    if (!catalog->labelToIndex(label_g, &index)) {
+    if (!catalog->labelToIndex(label_g.toStr(), &index)) {
         return nullptr;
     }
 
