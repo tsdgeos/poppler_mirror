@@ -506,7 +506,6 @@ public:
     Object dictGetVal(int i) const;
 
     // Stream accessors.
-    [[nodiscard]] bool streamRewind();
     int streamGetChar();
     Dict *streamGetDict() const;
 

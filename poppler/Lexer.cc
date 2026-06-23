@@ -78,7 +78,7 @@ Lexer::Lexer(XRef *xrefA, std::unique_ptr<Stream> &&str)
     streams->add(curStr.copy());
     strPtr = 0;
     freeArray = true;
-    (void)curStr.streamRewind();
+    (void)curStr.getStream()->rewind();
 }
 
 Lexer::Lexer(XRef *xrefA, Object *obj)
@@ -98,7 +98,7 @@ Lexer::Lexer(XRef *xrefA, Object *obj)
     if (streams->getLength() > 0) {
         curStr = streams->get(strPtr);
         if (curStr.isStream()) {
-            (void)curStr.streamRewind();
+            (void)curStr.getStream()->rewind();
         }
     }
 }
@@ -134,7 +134,7 @@ int Lexer::getChar(bool comesFromLook)
         if (strPtr < streams->getLength()) {
             curStr = streams->get(strPtr);
             if (curStr.isStream()) {
-                if (!curStr.streamRewind()) {
+                if (!curStr.getStream()->rewind()) {
                     return EOF;
                 }
             }

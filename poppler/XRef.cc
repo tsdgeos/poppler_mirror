@@ -164,7 +164,8 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
         error(errSyntaxError, -1, "Too many objects in an object stream");
         return;
     }
-    if (!objStr.streamRewind()) {
+    Stream *objStrStream = objStr.getStream();
+    if (!objStrStream->rewind()) {
         return;
     }
     objs = new Object[nObjects];
@@ -172,7 +173,7 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
     offsets = static_cast<Goffset *>(gmallocn(nObjects, sizeof(Goffset)));
 
     // parse the header: object numbers and offsets
-    auto embedStr = std::make_unique<EmbedStream>(objStr.getStream(), Object::null(), true, first);
+    auto embedStr = std::make_unique<EmbedStream>(objStrStream, Object::null(), true, first);
     parser = new Parser(xref, std::move(embedStr), false);
     for (i = 0; i < nObjects; ++i) {
         obj1 = parser->getObj();

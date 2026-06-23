@@ -287,7 +287,6 @@ std::string GfxFont::getNameWithoutSubsetTag() const
 GfxFontType GfxFont::getFontType(XRef *xref, const Dict &fontDict, Ref *embID)
 {
     GfxFontType t, expectedType;
-    FoFiIdentifierType fft;
     bool isType0, err;
 
     t = fontUnknownType;
@@ -408,34 +407,36 @@ GfxFontType GfxFont::getFontType(XRef *xref, const Dict &fontDict, Ref *embID)
     if (*embID != Ref::INVALID()) {
         Object obj3(*embID);
         Object obj4 = obj3.fetch(xref);
-        if (obj4.isStream() && obj4.streamRewind()) {
+        if (obj4.isStream()) {
             Stream *obj4Stream = obj4.getStream();
-            fft = FoFiIdentifier::identifyStream(&readFromStream, obj4Stream);
-            obj4Stream->close();
-            switch (fft) {
-            case fofiIdType1PFA:
-            case fofiIdType1PFB:
-                t = fontType1;
-                break;
-            case fofiIdCFF8Bit:
-                t = isType0 ? fontCIDType0C : fontType1C;
-                break;
-            case fofiIdCFFCID:
-                t = fontCIDType0C;
-                break;
-            case fofiIdTrueType:
-            case fofiIdTrueTypeCollection:
-                t = isType0 ? fontCIDType2 : fontTrueType;
-                break;
-            case fofiIdOpenTypeCFF8Bit:
-                t = isType0 ? fontCIDType0COT : fontType1COT;
-                break;
-            case fofiIdOpenTypeCFFCID:
-                t = fontCIDType0COT;
-                break;
-            default:
-                error(errSyntaxError, -1, "Embedded font file may be invalid");
-                break;
+            if (obj4Stream->rewind()) {
+                const FoFiIdentifierType fft = FoFiIdentifier::identifyStream(&readFromStream, obj4Stream);
+                obj4Stream->close();
+                switch (fft) {
+                case fofiIdType1PFA:
+                case fofiIdType1PFB:
+                    t = fontType1;
+                    break;
+                case fofiIdCFF8Bit:
+                    t = isType0 ? fontCIDType0C : fontType1C;
+                    break;
+                case fofiIdCFFCID:
+                    t = fontCIDType0C;
+                    break;
+                case fofiIdTrueType:
+                case fofiIdTrueTypeCollection:
+                    t = isType0 ? fontCIDType2 : fontTrueType;
+                    break;
+                case fofiIdOpenTypeCFF8Bit:
+                    t = isType0 ? fontCIDType0COT : fontType1COT;
+                    break;
+                case fofiIdOpenTypeCFFCID:
+                    t = fontCIDType0COT;
+                    break;
+                default:
+                    error(errSyntaxError, -1, "Embedded font file may be invalid");
+                    break;
+                }
             }
         }
     }
@@ -1795,13 +1796,24 @@ GfxCIDFont::GfxCIDFont(std::string_view tagA, Ref idA, std::optional<std::string
     }
 
     // CIDToGIDMap (for embedded TrueType fonts)
-    obj1 = desFontDict->lookup("CIDToGIDMap");
-    if (obj1.isStream() && obj1.streamRewind()) {
-        while ((c1 = obj1.streamGetChar()) != EOF && (c2 = obj1.streamGetChar()) != EOF) {
-            cidToGID.push_back((c1 << 8) + c2);
+    {
+        bool printInvalidCIDToGIDMap = false;
+        Object cidToGIDMap = desFontDict->lookup("CIDToGIDMap");
+        if (cidToGIDMap.isStream()) {
+            Stream *cidToGIDMapStream = cidToGIDMap.getStream();
+            if (cidToGIDMapStream->rewind()) {
+                while ((c1 = cidToGIDMapStream->getChar()) != EOF && (c2 = cidToGIDMapStream->getChar()) != EOF) {
+                    cidToGID.push_back((c1 << 8) + c2);
+                }
+            } else {
+                printInvalidCIDToGIDMap = true;
+            }
+        } else if (!cidToGIDMap.isName("Identity") && !cidToGIDMap.isNull()) {
+            printInvalidCIDToGIDMap = true;
         }
-    } else if (!obj1.isName("Identity") && !obj1.isNull()) {
-        error(errSyntaxError, -1, "Invalid CIDToGIDMap entry in CID font");
+        if (printInvalidCIDToGIDMap) {
+            error(errSyntaxError, -1, "Invalid CIDToGIDMap entry in CID font");
+        }
     }
 
     //----- character metrics -----

@@ -1432,12 +1432,6 @@ private:
 // Object Stream accessors.
 //------------------------------------------------------------------------
 
-inline bool Object::streamRewind()
-{
-    OBJECT_TYPE_CHECK(objStream);
-    return std::get<std::shared_ptr<Stream>>(data)->rewind();
-}
-
 inline int Object::streamGetChar()
 {
     OBJECT_TYPE_CHECK(objStream);

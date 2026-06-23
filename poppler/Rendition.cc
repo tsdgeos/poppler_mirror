@@ -382,12 +382,13 @@ void MediaRendition::outputToFile(FILE *fp)
         return;
     }
 
-    if (!embeddedStreamObject.streamRewind()) {
+    Stream *embeddedStream = embeddedStreamObject.getStream();
+    if (!embeddedStream->rewind()) {
         return;
     }
 
     while (true) {
-        int c = embeddedStreamObject.streamGetChar();
+        int c = embeddedStream->getChar();
         if (c == EOF) {
             break;
         }

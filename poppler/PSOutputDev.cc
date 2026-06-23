@@ -2075,7 +2075,7 @@ void PSOutputDev::setupEmbeddedType1Font(const Ref *id, const std::string &psNam
     // TODO C++26 replace with std::scope_exit
     const ScopeGuard closeStreamOnReturnOrEndGuard { [stream] { stream->close(); } };
 
-    if (!(dict = strObj.streamGetDict())) {
+    if (!(dict = stream->getDict())) {
         error(errSyntaxError, -1, "Embedded font stream is missing its dictionary");
         return;
     }
@@ -2090,7 +2090,7 @@ void PSOutputDev::setupEmbeddedType1Font(const Ref *id, const std::string &psNam
     length2 = obj2.getInt();
     length3 = obj3.getInt();
 
-    if (!strObj.streamRewind()) {
+    if (!stream->rewind()) {
         return;
     }
 
@@ -2100,24 +2100,24 @@ void PSOutputDev::setupEmbeddedType1Font(const Ref *id, const std::string &psNam
     embFontList.append(psName);
     embFontList.append("\n");
 
-    if (strObj.streamGetChar() == 0x80 && strObj.streamGetChar() == 1) {
+    if (stream->getChar() == 0x80 && stream->getChar() == 1) {
         // PFB format
-        length1 = strObj.streamGetChar() | (strObj.streamGetChar() << 8) | (strObj.streamGetChar() << 16) | (strObj.streamGetChar() << 24);
+        length1 = stream->getChar() | (stream->getChar() << 8) | (stream->getChar() << 16) | (stream->getChar() << 24);
     } else {
-        if (!strObj.streamRewind()) {
+        if (!stream->rewind()) {
             error(errSyntaxError, -1, "Failed rewind stream");
             return;
         }
     }
     // copy ASCII portion of font
-    for (i = 0; i < length1 && (c = strObj.streamGetChar()) != EOF; ++i) {
+    for (i = 0; i < length1 && (c = stream->getChar()) != EOF; ++i) {
         writePSChar(c);
     }
 
     // figure out if encrypted portion is binary or ASCII
     binMode = false;
     for (i = 0; i < 4; ++i) {
-        start[i] = strObj.streamGetChar();
+        start[i] = stream->getChar();
         if (start[i] == EOF) {
             error(errSyntaxError, -1, "Unexpected end of file in embedded font stream");
             return;
@@ -2139,7 +2139,7 @@ void PSOutputDev::setupEmbeddedType1Font(const Ref *id, const std::string &psNam
     // convert binary data to ASCII
     if (binMode) {
         if (start[0] == 0x80 && start[1] == 2) {
-            length2 = start[2] | (start[3] << 8) | (strObj.streamGetChar() << 16) | (strObj.streamGetChar() << 24);
+            length2 = start[2] | (start[3] << 8) | (stream->getChar() << 16) | (stream->getChar() << 24);
             i = 0;
         } else {
             for (i = 0; i < 4; ++i) {
@@ -2153,7 +2153,7 @@ void PSOutputDev::setupEmbeddedType1Font(const Ref *id, const std::string &psNam
     length2 += length3 >= 8 ? 8 : length3;
 #endif
         while (i < length2) {
-            if ((c = strObj.streamGetChar()) == EOF) {
+            if ((c = stream->getChar()) == EOF) {
                 break;
             }
             writePSChar(hexChar[(c >> 4) & 0x0f]);
@@ -2172,7 +2172,7 @@ void PSOutputDev::setupEmbeddedType1Font(const Ref *id, const std::string &psNam
             writePSChar(start[i]);
         }
         for (i = 4; i < length2; ++i) {
-            if ((c = strObj.streamGetChar()) == EOF) {
+            if ((c = stream->getChar()) == EOF) {
                 break;
             }
             writePSChar(c);
@@ -2182,15 +2182,15 @@ void PSOutputDev::setupEmbeddedType1Font(const Ref *id, const std::string &psNam
     if (writePadding) {
         if (length3 > 0) {
             // write fixed-content portion
-            c = strObj.streamGetChar();
+            c = stream->getChar();
             if (c == 0x80) {
-                c = strObj.streamGetChar();
+                c = stream->getChar();
                 if (c == 1) {
-                    length3 = strObj.streamGetChar() | (strObj.streamGetChar() << 8) | (strObj.streamGetChar() << 16) | (strObj.streamGetChar() << 24);
+                    length3 = stream->getChar() | (stream->getChar() << 8) | (stream->getChar() << 16) | (stream->getChar() << 24);
 
                     i = 0;
                     while (i < length3) {
-                        if ((c = strObj.streamGetChar()) == EOF) {
+                        if ((c = stream->getChar()) == EOF) {
                             break;
                         }
                         writePSChar(c);
@@ -2201,7 +2201,7 @@ void PSOutputDev::setupEmbeddedType1Font(const Ref *id, const std::string &psNam
                 if (c != EOF) {
                     writePSChar(c);
 
-                    while ((c = strObj.streamGetChar()) != EOF) {
+                    while ((c = stream->getChar()) != EOF) {
                         writePSChar(c);
                     }
                 }
