@@ -2034,6 +2034,18 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
     }
 }
 
+template<typename Function>
+struct ScopeGuard
+{
+    Function lambda;
+
+    explicit ScopeGuard(Function &&f) : lambda(std::move(f)) { }
+    ~ScopeGuard() { lambda(); }
+
+    ScopeGuard(const ScopeGuard &) = delete;
+    ScopeGuard &operator=(const ScopeGuard &) = delete;
+};
+
 void PSOutputDev::setupEmbeddedType1Font(const Ref *id, const std::string &psName)
 {
     static const char hexChar[17] = "0123456789abcdef";
@@ -2055,18 +2067,24 @@ void PSOutputDev::setupEmbeddedType1Font(const Ref *id, const std::string &psNam
     Object strObj = refObj.fetch(xref);
     if (!strObj.isStream()) {
         error(errSyntaxError, -1, "Embedded font file object is not a stream");
-        goto err1;
+        return;
     }
+
+    Stream *stream = strObj.getStream();
+
+    // TODO C++26 replace with std::scope_exit
+    const ScopeGuard closeStreamOnReturnOrEndGuard { [stream] { stream->close(); } };
+
     if (!(dict = strObj.streamGetDict())) {
         error(errSyntaxError, -1, "Embedded font stream is missing its dictionary");
-        goto err1;
+        return;
     }
     obj1 = dict->lookup("Length1");
     obj2 = dict->lookup("Length2");
     obj3 = dict->lookup("Length3");
     if (!obj1.isInt() || !obj2.isInt() || !obj3.isInt()) {
         error(errSyntaxError, -1, "Missing length fields in embedded font stream dictionary");
-        goto err1;
+        return;
     }
     length1 = obj1.getInt();
     length2 = obj2.getInt();
@@ -2088,7 +2106,7 @@ void PSOutputDev::setupEmbeddedType1Font(const Ref *id, const std::string &psNam
     } else {
         if (!strObj.streamRewind()) {
             error(errSyntaxError, -1, "Failed rewind stream");
-            goto err1;
+            return;
         }
     }
     // copy ASCII portion of font
@@ -2102,7 +2120,7 @@ void PSOutputDev::setupEmbeddedType1Font(const Ref *id, const std::string &psNam
         start[i] = strObj.streamGetChar();
         if (start[i] == EOF) {
             error(errSyntaxError, -1, "Unexpected end of file in embedded font stream");
-            goto err1;
+            return;
         }
         if ((start[i] < '0' || start[i] > '9') && (start[i] < 'A' || start[i] > 'F') && (start[i] < 'a' || start[i] > 'f')) {
             binMode = true;
@@ -2200,11 +2218,6 @@ void PSOutputDev::setupEmbeddedType1Font(const Ref *id, const std::string &psNam
 
     // ending comment
     writePS("%%EndResource\n");
-
-err1:
-    if (strObj.isStream()) {
-        strObj.getStream()->close();
-    }
 }
 
 void PSOutputDev::setupExternalType1Font(const std::string &fileName, const std::string &psName)
