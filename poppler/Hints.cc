@@ -235,7 +235,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
     if ((obj = parser->getObj(), obj.isInt()) && (num = obj.getInt(), obj = parser->getObj(), obj.isInt()) && (gen = obj.getInt(), obj = parser->getObj(), obj.isCmd("obj"))
         && (obj = parser->getObj(false, secHdlr ? secHdlr->getFileKey() : nullptr, secHdlr ? secHdlr->getEncAlgorithm() : cryptRC4, secHdlr ? secHdlr->getFileKeyLength() : 0, num, gen, 0, true), obj.isStream())) {
         Stream *hintsStream = obj.getStream();
-        Dict *hintsDict = obj.streamGetDict();
+        Dict *hintsDict = hintsStream->getDict();
 
         int sharedStreamOffset = 0;
         if (hintsDict->lookupInt("S", {}, &sharedStreamOffset) && sharedStreamOffset > 0) {

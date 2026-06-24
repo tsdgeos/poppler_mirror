@@ -129,7 +129,7 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo
 
                 if (obj2.isStream()) {
                     Ref resourcesRef;
-                    const Object resObj = obj2.streamGetDict()->lookup("Resources", &resourcesRef);
+                    const Object resObj = obj2.getStream()->getDict()->lookup("Resources", &resourcesRef);
                     if (!visitedObjects.insert(resourcesRef)) {
                         continue;
                     }

@@ -665,8 +665,8 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
         return false;
     }
 
-    dict = fetched_thumb.streamGetDict();
     str = fetched_thumb.getStream();
+    dict = str->getDict();
 
     if (!dict->lookupInt("Width", "W", &width)) {
         return false;

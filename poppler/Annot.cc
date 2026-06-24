@@ -1991,7 +1991,7 @@ Object Annot::getAppearanceResDict()
     // Fetch appearance's resource dict (if any)
     obj1 = appearance.fetch(doc->getXRef());
     if (obj1.isStream()) {
-        obj2 = obj1.streamGetDict()->lookup("Resources");
+        obj2 = obj1.getStream()->getDict()->lookup("Resources");
         if (obj2.isDict()) {
             return obj2;
         }
@@ -4004,7 +4004,7 @@ bool AnnotTextMarkup::shouldCreateApperance(Gfx *gfx) const
         XRef *xref = gfx->getXRef();
         const Object fetchedApperance = appearance.fetch(xref);
         if (fetchedApperance.isStream()) {
-            const Object resources = fetchedApperance.streamGetDict()->lookup("Resources");
+            const Object resources = fetchedApperance.getStream()->getDict()->lookup("Resources");
             if (resources.isDict()) {
                 if (resources.dictLookup("ExtGState").isDict()) {
                     return false;

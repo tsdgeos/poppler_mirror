@@ -6,7 +6,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
-// Copyright (C) 2022 by Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2022, 2026 by Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 
     // Check the base image.
     Object baseImageObj = Object(baseImageRef).fetch(doc->getXRef());
-    Dict *baseImageDict = baseImageObj.streamGetDict();
+    Dict *baseImageDict = baseImageObj.getStream()->getDict();
     if (std::string("XObject") != baseImageDict->lookup("Type").getName()) {
         fprintf(stderr, "A problem with Type.\n");
         return 1;

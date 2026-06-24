@@ -120,7 +120,7 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
 {
     Parser *parser;
     Goffset *offsets;
-    Object objStr, obj1;
+    Object obj1;
     Goffset first;
     int i;
 
@@ -130,12 +130,14 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
     objNums = nullptr;
     ok = false;
 
-    objStr = xref->fetch(objStrNum, 0, recursion);
+    const Object objStr = xref->fetch(objStrNum, 0, recursion);
     if (!objStr.isStream()) {
         return;
     }
+    Stream *objStrStream = objStr.getStream();
+    Dict *objStrStreamDict = objStrStream->getDict();
 
-    obj1 = objStr.streamGetDict()->lookup("N", recursion);
+    obj1 = objStrStreamDict->lookup("N", recursion);
     if (!obj1.isInt()) {
         return;
     }
@@ -144,7 +146,7 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
         return;
     }
 
-    obj1 = objStr.streamGetDict()->lookup("First", recursion);
+    obj1 = objStrStreamDict->lookup("First", recursion);
     if (!obj1.isInt() && !obj1.isInt64()) {
         return;
     }
@@ -164,7 +166,6 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
         error(errSyntaxError, -1, "Too many objects in an object stream");
         return;
     }
-    Stream *objStrStream = objStr.getStream();
     if (!objStrStream->rewind()) {
         return;
     }
@@ -1005,7 +1006,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
     for (int i = 0; i < streamObjNumsLen; ++i) {
         Object obj = fetch(streamObjNums[i], entries[streamObjNums[i]].gen);
         if (obj.isStream()) {
-            Dict *dict = obj.streamGetDict();
+            Dict *dict = obj.getStream()->getDict();
             Object type = dict->lookup("Type");
             if (type.isName("XRef")) {
                 saveTrailerDict(dict, true, needCatalogDict);
@@ -1122,7 +1123,7 @@ char *XRef::constructObjectEntry(char *p, Goffset pos, int *objNum)
 // of its objects.
 void XRef::constructObjectStreamEntries(Object *objStr, int objStrObjNum)
 {
-    Object objN = objStr->streamGetDict()->lookup("N");
+    Object objN = objStr->getStream()->getDict()->lookup("N");
 
     // get the object count
     if (!objN.isInt()) {

@@ -50,6 +50,7 @@
 #include "FileSpec.h"
 #include "Rendition.h"
 #include "Annot.h"
+#include "Stream.h"
 
 //------------------------------------------------------------------------
 // LinkAction

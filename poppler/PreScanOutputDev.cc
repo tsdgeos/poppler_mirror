@@ -36,6 +36,7 @@
 #include "Catalog.h"
 #include "Page.h"
 #include "PreScanOutputDev.h"
+#include "Stream.h"
 
 //------------------------------------------------------------------------
 // PreScanOutputDev

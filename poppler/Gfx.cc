@@ -1147,7 +1147,7 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
             }
             obj3 = obj2.dictLookup("G");
             if (obj3.isStream()) {
-                Object obj4 = obj3.streamGetDict()->lookup("Group");
+                Object obj4 = obj3.getStream()->getDict()->lookup("Group");
                 if (obj4.isDict()) {
                     std::unique_ptr<GfxColorSpace> blendingColorSpace;
                     Object obj5 = obj4.dictLookup("CS");
@@ -1244,7 +1244,7 @@ void Gfx::doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace,
     int i;
 
     // get stream dict
-    dict = str->streamGetDict();
+    dict = str->getStream()->getDict();
 
     // check form type
     obj1 = dict->lookup("FormType");
@@ -3973,7 +3973,7 @@ void Gfx::doShowText(const std::string &s)
                     pushResources(resDict);
                 }
                 if (charProc.isStream()) {
-                    Object charProcResourcesObj = charProc.streamGetDict()->lookup("Resources");
+                    Object charProcResourcesObj = charProc.getStream()->getDict()->lookup("Resources");
                     if (charProcResourcesObj.isDict()) {
                         pushResources(charProcResourcesObj.getDict());
                     }
@@ -4158,15 +4158,17 @@ void Gfx::opXObject(Object args[], int /*numArgs*/)
         return;
     }
 
-    Object opiDict = obj1.streamGetDict()->lookup("OPI");
+    Stream *obj1Stream = obj1.getStream();
+    Dict *obj1StreamDict = obj1Stream->getDict();
+    Object opiDict = obj1StreamDict->lookup("OPI");
     if (opiDict.isDict()) {
         out->opiBegin(state, *opiDict.getDict());
     }
-    Object obj2 = obj1.streamGetDict()->lookup("Subtype");
+    Object obj2 = obj1StreamDict->lookup("Subtype");
     if (obj2.isName("Image")) {
         if (out->needNonText()) {
             Object refObj = res->lookupXObjectNF(name);
-            doImage(&refObj, obj1.getStream(), false);
+            doImage(&refObj, obj1Stream, false);
         }
     } else if (obj2.isName("Form")) {
         Object refObj = res->lookupXObjectNF(name);
@@ -4194,8 +4196,8 @@ void Gfx::opXObject(Object args[], int /*numArgs*/)
             formsDrawing.erase(drawingFormIt);
         }
     } else if (obj2.isName("PS")) {
-        Object obj3 = obj1.streamGetDict()->lookup("Level1");
-        out->psXObject(obj1.getStream(), obj3.isStream() ? obj3.getStream() : nullptr);
+        Object obj3 = obj1StreamDict->lookup("Level1");
+        out->psXObject(obj1Stream, obj3.isStream() ? obj3.getStream() : nullptr);
     } else if (obj2.isName()) {
         error(errSyntaxError, getPos(), "Unknown XObject subtype '{0:s}'", obj2.getName());
     } else {
@@ -4463,7 +4465,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
 
         if (maskObj.isStream()) {
             maskStr = maskObj.getStream();
-            maskDict = maskObj.streamGetDict();
+            maskDict = maskStr->getDict();
             // if Type is XObject and Subtype is Image
             // then the way the softmask is drawn will draw
             // correctly, if it falls through to the explicit
@@ -4494,7 +4496,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
             }
             if (!haveMaskImage) {
                 maskStr = smaskObj.getStream();
-                maskDict = smaskObj.streamGetDict();
+                maskDict = maskStr->getDict();
             }
             obj1 = maskDict->lookup("Width");
             if (obj1.isNull()) {
@@ -4599,7 +4601,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
 
             if (maskStr == nullptr) {
                 maskStr = maskObj.getStream();
-                maskDict = maskObj.streamGetDict();
+                maskDict = maskStr->getDict();
             }
             obj1 = maskDict->lookup("Width");
             if (obj1.isNull()) {
@@ -4767,7 +4769,7 @@ void Gfx::doForm(Object *str)
     int i;
 
     // get stream dict
-    dict = str->streamGetDict();
+    dict = str->getStream()->getDict();
 
     // check form type
     obj1 = dict->lookup("FormType");
@@ -5256,7 +5258,7 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
     if (str->isStream()) {
 
         // get stream dict
-        dict = str->streamGetDict();
+        dict = str->getStream()->getDict();
 
         std::array<double, 4> bbox;
         std::array<double, 6> m;

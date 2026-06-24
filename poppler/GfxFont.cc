@@ -76,6 +76,7 @@
 #include <fofi/FoFiTrueType.h>
 #include "GfxFont.h"
 #include "PSOutputDev.h"
+#include "Stream.h"
 
 //------------------------------------------------------------------------
 
@@ -359,7 +360,7 @@ GfxFontType GfxFont::getFontType(XRef *xref, const Dict &fontDict, Ref *embID)
             *embID = obj3.getRef();
             Object obj4 = obj3.fetch(xref);
             if (obj4.isStream()) {
-                subtype = obj4.streamGetDict()->lookup("Subtype");
+                subtype = obj4.getStream()->getDict()->lookup("Subtype");
                 if (subtype.isName("Type1")) {
                     if (expectedType != fontType1) {
                         err = true;

@@ -44,7 +44,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <variant>
-#include <cstring>
 #include "goo/GooString.h"
 #include "goo/GooLikely.h"
 #include "Error.h"
@@ -424,9 +423,6 @@ public:
     const Object &dictLookupNF(std::string_view key) const;
     Object dictGetVal(int i) const;
 
-    // Stream accessors.
-    Dict *streamGetDict() const;
-
     // Output.
     const char *getTypeName() const;
     void print(FILE *f = stdout) const;
@@ -470,11 +466,5 @@ private:
 //------------------------------------------------------------------------
 
 #include "Dict.h"
-
-//------------------------------------------------------------------------
-// Stream accessors.
-//------------------------------------------------------------------------
-
-#include "Stream.h"
 
 #endif

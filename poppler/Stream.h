@@ -48,6 +48,7 @@
 #define STREAM_H
 
 #include <cstdio>
+#include <cstring>
 #include <vector>
 #include <span>
 #include <optional>
@@ -1427,15 +1428,5 @@ private:
 
     bool fillBuf();
 };
-
-//------------------------------------------------------------------------
-// Object Stream accessors.
-//------------------------------------------------------------------------
-
-inline Dict *Object::streamGetDict() const
-{
-    OBJECT_TYPE_CHECK(objStream);
-    return std::get<std::shared_ptr<Stream>>(data)->getDict();
-}
 
 #endif

@@ -444,7 +444,7 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
         error(errSyntaxError, -1, "Type3 character /{0:r} value not a stream", &charProcs->getKey(glyph));
         return CAIRO_STATUS_SUCCESS;
     }
-    Object charProcResObject = charProc.streamGetDict()->lookup("Resources");
+    Object charProcResObject = charProc.getStream()->getDict()->lookup("Resources");
     if (charProcResObject.isDict()) {
         gfx->pushResources(charProcResObject.getDict());
     }
