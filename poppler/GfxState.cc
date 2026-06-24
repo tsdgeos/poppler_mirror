@@ -2359,10 +2359,7 @@ std::unique_ptr<GfxColorSpace> GfxIndexedColorSpace::copy() const
 std::unique_ptr<GfxColorSpace> GfxIndexedColorSpace::parse(GfxResources *res, const Array &arr, OutputDev *out, GfxState *state, int recursion)
 {
     std::unique_ptr<GfxColorSpace> baseA;
-    int indexHighA;
     Object obj1;
-    const char *s;
-    int i, j;
 
     if (arr.getLength() != 4) {
         error(errSyntaxWarning, -1, "Bad Indexed color space");
@@ -2378,7 +2375,7 @@ std::unique_ptr<GfxColorSpace> GfxIndexedColorSpace::parse(GfxResources *res, co
         error(errSyntaxWarning, -1, "Bad Indexed color space (hival)");
         return {};
     }
-    indexHighA = obj1.getInt();
+    int indexHighA = obj1.getInt();
     if (indexHighA < 0 || indexHighA > 255) {
         // the PDF spec requires indexHigh to be in [0,255] -- allowing
         // values larger than 255 creates a security hole: if nComps *
@@ -2395,11 +2392,15 @@ std::unique_ptr<GfxColorSpace> GfxIndexedColorSpace::parse(GfxResources *res, co
     auto cs = std::make_unique<GfxIndexedColorSpace>(std::move(baseA), indexHighA);
     obj1 = arr.get(3);
     const int n = cs->getBase()->getNComps();
-    if (obj1.isStream() && obj1.streamRewind()) {
+    if (obj1.isStream()) {
         Stream *stream = obj1.getStream();
-        for (i = 0; i <= indexHighA; ++i) {
+        if (!stream->rewind()) {
+            error(errSyntaxWarning, -1, "Bad Indexed color space (stream rewind failed)");
+            return {};
+        }
+        for (int i = 0; i <= indexHighA; ++i) {
             const int readChars = stream->doGetChars(n, &cs->lookup[i * n]);
-            for (j = readChars; j < n; ++j) {
+            for (int j = readChars; j < n; ++j) {
                 error(errSyntaxWarning, -1, "Bad Indexed color space (lookup table stream too short) padding with zeroes");
                 cs->lookup[i * n + j] = 0;
             }
@@ -2408,22 +2409,19 @@ std::unique_ptr<GfxColorSpace> GfxIndexedColorSpace::parse(GfxResources *res, co
     } else if (obj1.isString()) {
         if (obj1.getString().size() < static_cast<size_t>(indexHighA + 1) * n) {
             error(errSyntaxWarning, -1, "Bad Indexed color space (lookup table string too short)");
-            goto err3;
+            return {};
         }
-        s = obj1.getString().c_str();
-        for (i = 0; i <= indexHighA; ++i) {
-            for (j = 0; j < n; ++j) {
+        const char *s = obj1.getString().c_str();
+        for (int i = 0; i <= indexHighA; ++i) {
+            for (int j = 0; j < n; ++j) {
                 cs->lookup[i * n + j] = static_cast<unsigned char>(*s++);
             }
         }
     } else {
         error(errSyntaxWarning, -1, "Bad Indexed color space (lookup table)");
-        goto err3;
+        return {};
     }
     return cs;
-
-err3:
-    return {};
 }
 
 GfxColor *GfxIndexedColorSpace::mapColorToBase(const GfxColor &color, GfxColor *baseColor) const
@@ -2648,14 +2646,12 @@ std::unique_ptr<GfxColorSpace> GfxSeparationColorSpace::parse(GfxResources *res,
     }
     if (funcA->getInputSize() != 1) {
         error(errSyntaxWarning, -1, "Bad SeparationColorSpace function");
-        goto err5;
+        return {};
     }
-    if (altA->getNComps() <= funcA->getOutputSize()) {
-        return std::make_unique<GfxSeparationColorSpace>(std::move(nameA), std::move(altA), std::move(funcA));
+    if (altA->getNComps() > funcA->getOutputSize()) {
+        return {};
     }
-
-err5:
-    return {};
+    return std::make_unique<GfxSeparationColorSpace>(std::move(nameA), std::move(altA), std::move(funcA));
 }
 
 void GfxSeparationColorSpace::getGray(const GfxColor &color, GfxGray *gray) const

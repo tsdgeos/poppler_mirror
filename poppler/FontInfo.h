@@ -27,15 +27,17 @@
 #ifndef FONT_INFO_H
 #define FONT_INFO_H
 
-#include "Object.h"
 #include "poppler_private_export.h"
+#include "Ref.h"
 
 #include <optional>
 #include <string>
 #include <unordered_set>
 
+class Dict;
 class GfxFont;
 class PDFDoc;
+class XRef;
 
 class POPPLER_PRIVATE_EXPORT FontInfo
 {

@@ -29,10 +29,12 @@
 
 #include <memory>
 #include <vector>
-#include "Object.h"
 #include "CharTypes.h"
+#include "Ref.h"
 #include "poppler_private_export.h"
 
+class Dict;
+class Object;
 class PDFDoc;
 class XRef;
 class LinkAction;

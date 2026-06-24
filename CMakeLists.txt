@@ -690,6 +690,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/PopplerCache.h
     poppler/ProfileData.h
     poppler/Rendition.h
+    poppler/Ref.h
     poppler/CertificateInfo.h
     poppler/SignatureInfo.h
     poppler/Stream-CCITT.h

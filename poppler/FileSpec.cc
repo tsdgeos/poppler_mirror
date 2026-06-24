@@ -104,10 +104,12 @@ bool EmbFile::save2(FILE *f)
         return false;
     }
 
-    if (!m_objStr.streamRewind()) {
+    Stream *stream = m_objStr.getStream();
+
+    if (!stream->rewind()) {
         return false;
     }
-    while ((c = m_objStr.streamGetChar()) != EOF) {
+    while ((c = stream->getChar()) != EOF) {
         fputc(c, f);
     }
     return true;

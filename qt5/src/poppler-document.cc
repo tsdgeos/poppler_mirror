@@ -251,13 +251,15 @@ QByteArray Document::fontData(const FontInfo &fi) const
 
         Object refObj(fi.m_data->embRef);
         Object strObj = refObj.fetch(xref);
-        if (strObj.isStream() && strObj.streamRewind()) {
+        if (strObj.isStream()) {
             Stream *stream = strObj.getStream();
-            int c;
-            while ((c = stream->getChar()) != EOF) {
-                result.append(static_cast<char>(c));
+            if (stream->rewind()) {
+                int c;
+                while ((c = stream->getChar()) != EOF) {
+                    result.append(static_cast<char>(c));
+                }
+                stream->close();
             }
-            stream->close();
         }
         delete xref;
     }
