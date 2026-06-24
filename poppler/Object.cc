@@ -106,17 +106,19 @@ void Object::print(FILE *f) const
     case objNull:
         fprintf(f, "null");
         break;
-    case objArray:
+    case objArray: {
+        Array *array = getArray();
         fprintf(f, "[");
-        for (int i = 0; i < arrayGetLength(); ++i) {
+        for (int i = 0; i < array->getLength(); ++i) {
             if (i > 0) {
                 fprintf(f, " ");
             }
-            const Object &obj = arrayGetNF(i);
+            const Object &obj = array->getNF(i);
             obj.print(f);
         }
         fprintf(f, "]");
         break;
+    }
     case objDict: {
         Dict *dict = getDict();
         fprintf(f, "<<");

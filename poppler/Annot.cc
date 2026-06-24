@@ -7500,13 +7500,14 @@ Annots::Annots(PDFDoc *docA, int page, Object *annotsObj)
     doc = docA;
 
     if (annotsObj->isArray()) {
-        for (int i = 0; i < annotsObj->arrayGetLength(); ++i) {
+        Array *annotsArray = annotsObj->getArray();
+        for (int i = 0; i < annotsArray->getLength(); ++i) {
             // get the Ref to this annot and pass it to Annot constructor
             // this way, it'll be possible for the annot to retrieve the corresponding
             // form widget
-            Object obj1 = annotsObj->arrayGet(i);
+            Object obj1 = annotsArray->get(i);
             if (obj1.isDict()) {
-                const Object &obj2 = annotsObj->arrayGetNF(i);
+                const Object &obj2 = annotsArray->getNF(i);
                 std::shared_ptr<Annot> annot = createAnnot(std::move(obj1), obj2);
                 if (annot) {
                     if (annot.use_count() > 100000) {

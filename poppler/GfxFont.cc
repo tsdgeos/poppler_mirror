@@ -2366,24 +2366,23 @@ int GfxFontDict::hashFontObject(Object *obj)
 
 void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h)
 {
-    double r;
-    int n, i;
-
     switch (obj->getType()) {
     case objBool:
         h->hash('b');
         h->hash(obj->getBool() ? 1 : 0);
         break;
-    case objInt:
+    case objInt: {
         h->hash('i');
-        n = obj->getInt();
-        h->hash(reinterpret_cast<char *>(&n), sizeof(int));
+        const int n = obj->getInt();
+        h->hash(reinterpret_cast<const char *>(&n), sizeof(int));
         break;
-    case objReal:
+    }
+    case objReal: {
         h->hash('r');
-        r = obj->getReal();
-        h->hash(reinterpret_cast<char *>(&r), sizeof(double));
+        const double r = obj->getReal();
+        h->hash(reinterpret_cast<const char *>(&r), sizeof(double));
         break;
+    }
     case objString: {
         h->hash('s');
         const std::string &s = obj->getString();
@@ -2397,21 +2396,23 @@ void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h)
     case objNull:
         h->hash('z');
         break;
-    case objArray:
+    case objArray: {
         h->hash('a');
-        n = obj->arrayGetLength();
-        h->hash(reinterpret_cast<char *>(&n), sizeof(int));
-        for (i = 0; i < n; ++i) {
-            const Object &obj2 = obj->arrayGetNF(i);
+        Array *array = obj->getArray();
+        const int n = array->getLength();
+        h->hash(reinterpret_cast<const char *>(&n), sizeof(int));
+        for (int i = 0; i < n; ++i) {
+            const Object &obj2 = array->getNF(i);
             hashFontObject1(&obj2, h);
         }
         break;
+    }
     case objDict: {
         Dict *dict = obj->getDict();
         h->hash('d');
-        n = dict->getLength();
-        h->hash(reinterpret_cast<char *>(&n), sizeof(int));
-        for (i = 0; i < n; ++i) {
+        const int n = dict->getLength();
+        h->hash(reinterpret_cast<const char *>(&n), sizeof(int));
+        for (int i = 0; i < n; ++i) {
             const std::string &name = dict->getKey(i);
             h->hash(name.data(), static_cast<int>(name.size()));
             const Object &obj2 = dict->getValNF(i);
@@ -2422,13 +2423,14 @@ void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h)
     case objStream:
         // this should never happen - streams must be indirect refs
         break;
-    case objRef:
+    case objRef: {
         h->hash('f');
-        n = obj->getRefNum();
-        h->hash(reinterpret_cast<char *>(&n), sizeof(int));
-        n = obj->getRefGen();
-        h->hash(reinterpret_cast<char *>(&n), sizeof(int));
+        const int num = obj->getRefNum();
+        h->hash(reinterpret_cast<const char *>(&num), sizeof(int));
+        const int gen = obj->getRefGen();
+        h->hash(reinterpret_cast<const char *>(&gen), sizeof(int));
         break;
+    }
     default:
         h->hash('u');
         break;

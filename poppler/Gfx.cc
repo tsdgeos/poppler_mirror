@@ -1179,9 +1179,10 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
     }
     obj2 = dict->lookup("Font");
     if (obj2.isArray()) {
-        if (obj2.arrayGetLength() == 2) {
-            const Object &fargs0 = obj2.arrayGetNF(0);
-            Object fargs1 = obj2.arrayGet(1);
+        Array *fontArray = obj2.getArray();
+        if (fontArray->getLength() == 2) {
+            const Object &fargs0 = fontArray->getNF(0);
+            Object fargs1 = fontArray->get(1);
             if (fargs0.isRef() && fargs1.isNum()) {
                 Object fobj = fargs0.fetch(xref);
                 if (fobj.isDict()) {
@@ -1213,11 +1214,12 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
     }
     obj2 = dict->lookup("D");
     if (obj2.isArray()) {
-        if (obj2.arrayGetLength() == 2) {
+        Array *dArray = obj2.getArray();
+        if (dArray->getLength() == 2) {
             Object dargs[2];
 
-            dargs[0] = obj2.arrayGetNF(0).copy();
-            dargs[1] = obj2.arrayGet(1);
+            dargs[0] = dArray->getNF(0).copy();
+            dargs[1] = dArray->get(1);
             if (dargs[0].isArray() && dargs[1].isInt()) {
                 opSetDash(dargs, 2);
             }

@@ -62,12 +62,13 @@ void StructTreeRoot::parse(const Dict &root)
         if (marked && kids.arrayGetLength() > 1) {
             error(errSyntaxWarning, -1, "K in StructTreeRoot has more than one children in a tagged PDF");
         }
-        for (int i = 0; i < kids.arrayGetLength(); i++) {
-            const Object &ref = kids.arrayGetNF(i);
+        Array *kidsArray = kids.getArray();
+        for (int i = 0; i < kidsArray->getLength(); i++) {
+            const Object &ref = kidsArray->getNF(i);
             if (ref.isRef()) {
                 seenElements.insert(ref.getRef());
             }
-            Object obj = kids.arrayGet(i);
+            Object obj = kidsArray->get(i);
             if (obj.isDict()) {
                 auto *child = new StructElement(obj.getDict(), this, nullptr, seenElements);
                 if (child->isOk()) {
@@ -131,10 +132,11 @@ void StructTreeRoot::parseNumberTreeNode(const Dict &node, RefRecursionChecker &
 
     Object nums = node.lookup("Nums");
     if (nums.isArray()) {
-        if (nums.arrayGetLength() % 2 == 0) {
+        Array *numsArray = nums.getArray();
+        if (numsArray->getLength() % 2 == 0) {
             // keys in even positions, references in odd ones
-            for (int i = 0; i < nums.arrayGetLength(); i += 2) {
-                Object key = nums.arrayGet(i);
+            for (int i = 0; i < numsArray->getLength(); i += 2) {
+                Object key = numsArray->get(i);
 
                 if (!key.isInt()) {
                     error(errSyntaxError, -1, "Nums item at position {0:d} is wrong type ({1:s})", i, key.getTypeName());
@@ -147,11 +149,12 @@ void StructTreeRoot::parseNumberTreeNode(const Dict &node, RefRecursionChecker &
                     continue;
                 }
 
-                Object valueArray = nums.arrayGet(i + 1);
-                if (valueArray.isArray()) {
-                    vec.resize(valueArray.arrayGetLength());
-                    for (int j = 0; j < valueArray.arrayGetLength(); j++) {
-                        const Object &itemvalue = valueArray.arrayGetNF(j);
+                Object valueArrayObj = numsArray->get(i + 1);
+                if (valueArrayObj.isArray()) {
+                    Array *valueArray = valueArrayObj.getArray();
+                    vec.resize(valueArray->getLength());
+                    for (int j = 0; j < valueArray->getLength(); j++) {
+                        const Object &itemvalue = valueArray->getNF(j);
                         if (itemvalue.isRef()) {
                             Ref ref = itemvalue.getRef();
                             vec[j].ref = ref;
@@ -161,7 +164,7 @@ void StructTreeRoot::parseNumberTreeNode(const Dict &node, RefRecursionChecker &
                         }
                     }
                 } else {
-                    const Object &valueRef = nums.arrayGetNF(i + 1);
+                    const Object &valueRef = numsArray->getNF(i + 1);
                     if (valueRef.isRef()) {
                         Ref ref = valueRef.getRef();
                         vec.resize(1);
@@ -173,7 +176,7 @@ void StructTreeRoot::parseNumberTreeNode(const Dict &node, RefRecursionChecker &
                 }
             }
         } else {
-            error(errSyntaxError, -1, "Nums array length is not a even ({0:d})", nums.arrayGetLength());
+            error(errSyntaxError, -1, "Nums array length is not a even ({0:d})", numsArray->getLength());
         }
     } else {
         error(errSyntaxError, -1, "Nums object is wrong type ({0:s})", nums.getTypeName());

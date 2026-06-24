@@ -412,7 +412,6 @@ public:
     int arrayGetLength() const;
     void arrayAdd(Object &&elem);
     Object arrayGet(int i, int recursion) const;
-    const Object &arrayGetNF(int i) const;
 
     // Dict accessors.
     int dictGetLength() const;

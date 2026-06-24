@@ -114,10 +114,4 @@ inline Object Object::arrayGet(int i, int recursion = 0) const
     return std::get<std::shared_ptr<Array>>(data)->get(i, recursion);
 }
 
-inline const Object &Object::arrayGetNF(int i) const
-{
-    OBJECT_TYPE_CHECK(objArray);
-    return std::get<std::shared_ptr<Array>>(data)->getNF(i);
-}
-
 #endif

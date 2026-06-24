@@ -33,21 +33,22 @@ OCGs::OCGs(const Object &ocgObject, XRef *xref) : m_xref(xref)
     // we need to parse the dictionary here, and build optionalContentGroups
     ok = true;
 
-    Object ocgList = ocgObject.dictLookup("OCGs");
-    if (!ocgList.isArray()) {
+    Object ocgs = ocgObject.dictLookup("OCGs");
+    if (!ocgs.isArray()) {
         error(errSyntaxError, -1, "Expected the optional content group list, but wasn't able to find it, or it isn't an Array");
         ok = false;
         return;
     }
+    Array *ocgsArray = ocgs.getArray();
 
-    // we now enumerate over the ocgList, and build up the optionalContentGroups list.
-    for (int i = 0; i < ocgList.arrayGetLength(); ++i) {
-        Object ocgDict = ocgList.arrayGet(i);
+    // we now enumerate over the ocgs list, and build up the optionalContentGroups list.
+    for (int i = 0; i < ocgsArray->getLength(); ++i) {
+        Object ocgDict = ocgsArray->get(i);
         if (!ocgDict.isDict()) {
             break;
         }
         auto thisOptionalContentGroup = std::make_unique<OptionalContentGroup>(ocgDict.getDict());
-        const Object &ocgRef = ocgList.arrayGetNF(i);
+        const Object &ocgRef = ocgsArray->getNF(i);
         if (!ocgRef.isRef()) {
             break;
         }
@@ -74,8 +75,9 @@ OCGs::OCGs(const Object &ocgObject, XRef *xref) : m_xref(xref)
     Object on = defaultOcgConfig.dictLookup("ON");
     if (on.isArray()) {
         // ON is an optional element
-        for (int i = 0; i < on.arrayGetLength(); ++i) {
-            const Object &reference = on.arrayGetNF(i);
+        Array *onArray = on.getArray();
+        for (int i = 0; i < onArray->getLength(); ++i) {
+            const Object &reference = onArray->getNF(i);
             if (!reference.isRef()) {
                 // there can be null entries
                 break;
@@ -91,9 +93,10 @@ OCGs::OCGs(const Object &ocgObject, XRef *xref) : m_xref(xref)
 
     Object off = defaultOcgConfig.dictLookup("OFF");
     if (off.isArray()) {
+        Array *offArray = off.getArray();
         // OFF is an optional element
-        for (int i = 0; i < off.arrayGetLength(); ++i) {
-            const Object &reference = off.arrayGetNF(i);
+        for (int i = 0; i < offArray->getLength(); ++i) {
+            const Object &reference = offArray->getNF(i);
             if (!reference.isRef()) {
                 // there can be null entries
                 break;
@@ -196,10 +199,11 @@ bool OCGs::evalOCVisibilityExpr(const Object *expr, int recursion) const
         error(errSyntaxError, -1, "Invalid optional content visibility expression");
         return true;
     }
-    Object op = expr2.arrayGet(0);
+    Array *expr2Array = expr2.getArray();
+    Object op = expr2Array->get(0);
     if (op.isName("Not")) {
-        if (expr2.arrayGetLength() == 2) {
-            const Object &obj = expr2.arrayGetNF(1);
+        if (expr2Array->getLength() == 2) {
+            const Object &obj = expr2Array->getNF(1);
             ret = !evalOCVisibilityExpr(&obj, recursion + 1);
         } else {
             error(errSyntaxError, -1, "Invalid optional content visibility expression");
@@ -207,14 +211,14 @@ bool OCGs::evalOCVisibilityExpr(const Object *expr, int recursion) const
         }
     } else if (op.isName("And")) {
         ret = true;
-        for (int i = 1; i < expr2.arrayGetLength() && ret; ++i) {
-            const Object &obj = expr2.arrayGetNF(i);
+        for (int i = 1; i < expr2Array->getLength() && ret; ++i) {
+            const Object &obj = expr2Array->getNF(i);
             ret = evalOCVisibilityExpr(&obj, recursion + 1);
         }
     } else if (op.isName("Or")) {
         ret = false;
-        for (int i = 1; i < expr2.arrayGetLength() && !ret; ++i) {
-            const Object &obj = expr2.arrayGetNF(i);
+        for (int i = 1; i < expr2Array->getLength() && !ret; ++i) {
+            const Object &obj = expr2Array->getNF(i);
             ret = evalOCVisibilityExpr(&obj, recursion + 1);
         }
     } else {
