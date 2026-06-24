@@ -124,7 +124,7 @@ int Lexer::getChar(bool comesFromLook)
     }
 
     c = EOF;
-    while (curStr.isStream() && (c = curStr.streamGetChar()) == EOF) {
+    while (curStr.isStream() && (c = curStr.getStream()->getChar()) == EOF) {
         if (comesFromLook) {
             return EOF;
         }

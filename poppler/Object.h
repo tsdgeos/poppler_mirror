@@ -425,7 +425,6 @@ public:
     Object dictGetVal(int i) const;
 
     // Stream accessors.
-    int streamGetChar();
     Dict *streamGetDict() const;
 
     // Output.
