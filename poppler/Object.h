@@ -410,7 +410,6 @@ public:
 
     // Array accessors.
     int arrayGetLength() const;
-    void arrayAdd(Object &&elem);
     Object arrayGet(int i, int recursion) const;
 
     // Dict accessors.

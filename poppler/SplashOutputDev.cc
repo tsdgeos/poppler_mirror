@@ -3470,9 +3470,10 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str,
     // If the mask is higher resolution than the image, use
     // drawSoftMaskedImage() instead.
     if (maskWidth > width || maskHeight > height) {
-        Object maskDecode(std::make_unique<Array>((xref) ? xref : doc->getXRef()));
-        maskDecode.arrayAdd(Object(maskInvert ? 0 : 1));
-        maskDecode.arrayAdd(Object(maskInvert ? 1 : 0));
+        auto maskDecodeArray = std::make_unique<Array>((xref) ? xref : doc->getXRef());
+        maskDecodeArray->add(Object(maskInvert ? 0 : 1));
+        maskDecodeArray->add(Object(maskInvert ? 1 : 0));
+        Object maskDecode(std::move(maskDecodeArray));
         GfxImageColorMap maskColorMap(1, &maskDecode, std::make_unique<GfxDeviceGrayColorSpace>());
         drawSoftMaskedImage(state, ref, str, width, height, colorMap, interpolate, maskStr, maskWidth, maskHeight, &maskColorMap, maskInterpolate);
 

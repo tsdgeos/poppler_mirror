@@ -479,7 +479,7 @@ bool Page::addAnnot(const std::shared_ptr<Annot> &annot)
     } else {
         Object obj1 = getAnnotsObject();
         if (obj1.isArray()) {
-            obj1.arrayAdd(Object(annotRef));
+            obj1.getArray()->add(Object(annotRef));
             if (annotsObj.isRef()) {
                 xref->setModifiedObject(&obj1, annotsObj.getRef());
             } else {

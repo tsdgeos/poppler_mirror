@@ -102,12 +102,6 @@ inline int Object::arrayGetLength() const
     return std::get<std::shared_ptr<Array>>(data)->getLength();
 }
 
-inline void Object::arrayAdd(Object &&elem)
-{
-    OBJECT_TYPE_CHECK(objArray);
-    std::get<std::shared_ptr<Array>>(data)->add(std::move(elem));
-}
-
 inline Object Object::arrayGet(int i, int recursion = 0) const
 {
     OBJECT_TYPE_CHECK(objArray);

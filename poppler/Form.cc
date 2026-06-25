@@ -942,13 +942,13 @@ bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooStrin
     }
 
     vObj.dictAdd("Contents", Object::hexString(std::string(placeholderLength, '\0')));
-    Object bObj(std::make_unique<Array>(xref));
+    auto byteRangeArray = std::make_unique<Array>(xref);
     // reserve space in byte range for maximum number of bytes
-    bObj.arrayAdd(Object(0LL));
-    bObj.arrayAdd(Object(9999999999LL));
-    bObj.arrayAdd(Object(9999999999LL));
-    bObj.arrayAdd(Object(9999999999LL));
-    vObj.dictAdd("ByteRange", bObj.copy());
+    byteRangeArray->add(Object(0LL));
+    byteRangeArray->add(Object(9999999999LL));
+    byteRangeArray->add(Object(9999999999LL));
+    byteRangeArray->add(Object(9999999999LL));
+    vObj.dictAdd("ByteRange", Object(std::move(byteRangeArray)));
     field->getObj()->dictSet("V", Object(vRef));
     xref->setModifiedObject(field->getObj(), field->getRef());
     return true;
@@ -2012,7 +2012,7 @@ void FormFieldChoice::print(int indent)
 void FormFieldChoice::updateSelection()
 {
     Object objV;
-    Object objI = Object::null();
+    std::unique_ptr<Array> iArray;
 
     if (edit && editedChoice) {
         // This is an editable combo-box with user-entered text
@@ -2022,7 +2022,7 @@ void FormFieldChoice::updateSelection()
 
         // Create /I array only if multiple selection is allowed (as per PDF spec)
         if (multiselect) {
-            objI = Object(std::make_unique<Array>(xref));
+            iArray = std::make_unique<Array>(xref);
         }
 
         if (numSelected == 0) {
@@ -2034,7 +2034,7 @@ void FormFieldChoice::updateSelection()
             for (int i = 0; i < numChoices; i++) {
                 if (choices[i].selected) {
                     if (multiselect) {
-                        objI.arrayAdd(Object(i));
+                        iArray->add(Object(i));
                     }
 
                     if (choices[i].exportVal) {
@@ -2048,26 +2048,31 @@ void FormFieldChoice::updateSelection()
             }
         } else {
             // More than one option is selected
-            objV = Object(std::make_unique<Array>(xref));
+            auto vArray = std::make_unique<Array>(xref);
             const int numChoices = choices.size();
             for (int i = 0; i < numChoices; i++) {
                 if (choices[i].selected) {
                     if (multiselect) {
-                        objI.arrayAdd(Object(i));
+                        iArray->add(Object(i));
                     }
 
                     if (choices[i].exportVal) {
-                        objV.arrayAdd(Object(std::string { choices[i].exportVal->toStr() }));
+                        vArray->add(Object(std::string { choices[i].exportVal->toStr() }));
                     } else if (choices[i].optionName) {
-                        objV.arrayAdd(Object(std::string { choices[i].optionName->toStr() }));
+                        vArray->add(Object(std::string { choices[i].optionName->toStr() }));
                     }
                 }
             }
+            objV = Object(std::move(vArray));
         }
     }
 
     obj.getDict()->set("V", std::move(objV));
-    obj.getDict()->set("I", std::move(objI));
+    if (multiselect) {
+        obj.getDict()->set("I", Object(std::move(iArray)));
+    } else {
+        obj.getDict()->set("I", Object::null());
+    }
     xref->setModifiedObject(&obj, ref);
     updateChildrenAppearance();
 }

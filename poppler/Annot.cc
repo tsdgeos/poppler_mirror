@@ -3022,18 +3022,19 @@ void AnnotFreeText::setCalloutLine(std::unique_ptr<AnnotCalloutLine> &&line)
     } else {
         double x1 = line->getX1(), y1 = line->getY1();
         double x2 = line->getX2(), y2 = line->getY2();
-        obj1 = Object(std::make_unique<Array>(doc->getXRef()));
-        obj1.arrayAdd(Object(x1));
-        obj1.arrayAdd(Object(y1));
-        obj1.arrayAdd(Object(x2));
-        obj1.arrayAdd(Object(y2));
+        auto array = std::make_unique<Array>(doc->getXRef());
+        array->add(Object(x1));
+        array->add(Object(y1));
+        array->add(Object(x2));
+        array->add(Object(y2));
 
         auto *mline = dynamic_cast<AnnotCalloutMultiLine *>(line.get());
         if (mline) {
             double x3 = mline->getX3(), y3 = mline->getY3();
-            obj1.arrayAdd(Object(x3));
-            obj1.arrayAdd(Object(y3));
+            array->add(Object(x3));
+            array->add(Object(y3));
         }
+        obj1 = Object(std::move(array));
         calloutLine = std::move(line);
     }
 

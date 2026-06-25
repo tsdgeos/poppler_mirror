@@ -120,6 +120,7 @@ static bool doMergeFormDict(Dict *srcFormDict, Dict *mergeFormDict, int numOffse
     Object srcFields = srcFormDict->lookup("Fields");
     Object mergeFields = mergeFormDict->lookup("Fields");
     if (srcFields.isArray() && mergeFields.isArray()) {
+        Array *srcFieldsArray = srcFields.getArray();
         Array *mergeFieldsArray = mergeFields.getArray();
         for (int i = 0; i < mergeFieldsArray->getLength(); i++) {
             const Object &value = mergeFieldsArray->getNF(i);
@@ -127,7 +128,7 @@ static bool doMergeFormDict(Dict *srcFormDict, Dict *mergeFormDict, int numOffse
                 error(errSyntaxError, -1, "Fields object is not a Ref.");
                 return false;
             }
-            srcFields.arrayAdd(Object(Ref { .num = value.getRef().num + numOffset, .gen = value.getRef().gen }));
+            srcFieldsArray->add(Object(Ref { .num = value.getRef().num + numOffset, .gen = value.getRef().gen }));
         }
     }
     return true;
