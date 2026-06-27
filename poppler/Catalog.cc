@@ -1126,10 +1126,15 @@ void Catalog::addFormToAcroForm(const Ref formRef)
     if (!acroForm.isDict()) {
         getCreateForm();
     }
+    Dict &acroFormDict = *acroForm.getDict();
 
     // append to field array
     Ref fieldRef;
-    Object fieldArray = acroForm.getDict()->lookup("Fields", &fieldRef);
+    Object fieldArray = acroFormDict.lookup("Fields", &fieldRef);
+    if (!fieldArray.isArray()) {
+        acroFormDict.set("Fields", Object(std::make_unique<Array>(xref)));
+        fieldArray = acroFormDict.lookup("Fields", &fieldRef);
+    }
     fieldArray.getArray()->add(Object(formRef));
 
     setAcroFormModified();
