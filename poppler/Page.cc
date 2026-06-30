@@ -324,8 +324,10 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, std::unique_
             error(errSyntaxError, -1, "Page annotations object (page {0:d}) is likely malformed. Too big: ({1:d})", num, resolvedObj.arrayGetLength());
             goto err2;
         }
-        if (!resolvedObj.isArray() && !resolvedObj.isNull()) {
-            error(errSyntaxError, -1, "Page annotations object (page {0:d}) is wrong type ({1:s})", num, resolvedObj.getTypeName());
+        if (!resolvedObj.isArray()) {
+            if (!resolvedObj.isNull()) {
+                error(errSyntaxError, -1, "Page annotations object (page {0:d}) is wrong type ({1:s})", num, resolvedObj.getTypeName());
+            }
             annotsObj.setToNull();
         }
     }
