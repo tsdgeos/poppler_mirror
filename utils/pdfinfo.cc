@@ -30,6 +30,7 @@
 // Copyright (C) 2019 Thomas Fischer <fischer@unix-ag.uni-kl.de>
 // Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
+// Copyright (C) 2026 evil rabbit <evilrabbit@tutamail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
