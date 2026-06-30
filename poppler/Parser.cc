@@ -88,8 +88,6 @@ static std::string decryptedString(const std::string &s, const unsigned char *fi
 
 Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, int recursion, bool strict, bool decryptString)
 {
-    Object obj;
-
     // refill buffer after inline image data
     if (inlineImg == 2) {
         buf1 = lexer.getObj();
@@ -104,32 +102,35 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
     // array
     if (!simpleOnly && buf1.isCmd("[")) {
         shift();
-        obj = Object(std::make_unique<Array>(lexer.getXRef()));
+        auto array = std::make_unique<Array>(lexer.getXRef());
         while (!buf1.isCmd("]") && !buf1.isEOF() && recursion + 1 < recursionLimit) {
             Object obj2 = getObj(false, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1);
-            obj.arrayAdd(std::move(obj2));
+            array->add(std::move(obj2));
         }
         if (recursion + 1 >= recursionLimit && strict) {
-            goto err;
+            return Object::error();
         }
         if (buf1.isEOF()) {
             error(errSyntaxError, getPos(), "End of file inside array");
             if (strict) {
-                goto err;
+                return Object::error();
             }
         }
         shift();
 
-        // dictionary or stream
-    } else if (!simpleOnly && buf1.isCmd("<<")) {
+        return Object(std::move(array));
+    }
+
+    // dictionary or stream
+    if (!simpleOnly && buf1.isCmd("<<")) {
         shift(objNum);
-        obj = Object(std::make_unique<Dict>(lexer.getXRef()));
+        auto dict = std::make_unique<Dict>(lexer.getXRef());
         bool hasContentsEntry = false;
         while (!buf1.isCmd(">>") && !buf1.isEOF()) {
             if (!buf1.isName()) {
                 error(errSyntaxError, getPos(), "Dictionary key must be a name object");
                 if (strict) {
-                    goto err;
+                    return Object::error();
                 }
                 shift();
             } else {
@@ -138,7 +139,7 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
                 shift();
                 if (buf1.isEOF() || buf1.isError()) {
                     if (strict && buf1.isError()) {
-                        goto err;
+                        return Object::error();
                     }
                     break;
                 }
@@ -151,17 +152,16 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
                 if (unlikely(recursion + 1 >= recursionLimit)) {
                     break;
                 }
-                obj.dictAdd(key.getNameString(), std::move(obj2));
+                dict->add(key.getNameString(), std::move(obj2));
             }
         }
         if (buf1.isEOF()) {
             error(errSyntaxError, getPos(), "End of file inside dictionary");
             if (strict) {
-                goto err;
+                return Object::error();
             }
         }
         if (fileKey && hasContentsEntry) {
-            Dict *dict = obj.getDict();
             const bool isSigDict = dict->is("Sig");
             if (!isSigDict) {
                 const Object &contentsObj = dict->lookupNF("Contents");
@@ -175,7 +175,7 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
         // object streams
         if (buf2.isCmd("stream")) {
             if (allowStreams) {
-                if (auto str = makeStream(std::move(obj), fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1, strict)) {
+                if (auto str = makeStream(Object(std::move(dict)), fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1, strict)) {
                     return Object(std::move(str));
                 }
             }
@@ -183,8 +183,11 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
         }
         shift();
 
-        // indirect reference or integer
-    } else if (buf1.isInt()) {
+        return Object(std::move(dict));
+    }
+
+    // indirect reference or integer
+    if (buf1.isInt()) {
         const int num = buf1.getInt();
         shift();
         if (buf1.isInt() && buf2.isCmd("R")) {
@@ -202,26 +205,25 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
             return Object(r);
         }
         return Object(num);
-
-        // string
-    } else if (decryptString && buf1.isString() && fileKey) {
-        std::string s2 = decryptedString(buf1.getString(), fileKey, encAlgorithm, keyLength, objNum, objGen);
-        obj = Object(std::move(s2));
-        shift();
-
-        // simple object
-    } else {
-        // avoid re-allocating memory for complex objects like strings by
-        // shallow copy of <buf1> to <obj> and nulling <buf1> so that
-        // subsequent buf1.free() won't free this memory
-        obj = std::move(buf1);
-        shift();
     }
 
-    return obj;
+    // string
+    if (decryptString && buf1.isString() && fileKey) {
+        std::string s2 = decryptedString(buf1.getString(), fileKey, encAlgorithm, keyLength, objNum, objGen);
+        Object obj = Object(std::move(s2));
+        shift();
 
-err:
-    return Object::error();
+        return obj;
+    }
+
+    // simple object
+    // avoid re-allocating memory for complex objects like strings by
+    // shallow copy of <buf1> to <obj> and nulling <buf1> so that
+    // subsequent buf1.free() won't free this memory
+    Object obj = std::move(buf1);
+    shift();
+
+    return obj;
 }
 
 std::unique_ptr<Stream> Parser::makeStream(Object &&dict, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, int recursion, bool strict)

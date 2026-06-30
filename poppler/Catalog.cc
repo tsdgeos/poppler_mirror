@@ -341,9 +341,10 @@ bool Catalog::cacheSubTree()
         error(errSyntaxError, -1, "Kids object (page {0:uld}) is wrong type ({1:s})", pages.size() + 1, kids.getTypeName());
         return false;
     }
+    Array *kidsArray = kids.getArray();
 
     int kidsIdx = kidsIdxList->back();
-    if (kidsIdx >= kids.arrayGetLength()) {
+    if (kidsIdx >= kidsArray->getLength()) {
         pagesList->pop_back();
         pagesRefList->pop_back();
         attrsList.pop_back();
@@ -354,7 +355,7 @@ bool Catalog::cacheSubTree()
         return true;
     }
 
-    const Object &kidRef = kids.arrayGetNF(kidsIdx);
+    const Object &kidRef = kidsArray->getNF(kidsIdx);
     if (!kidRef.isRef()) {
         error(errSyntaxError, -1, "Kid object (page {0:uld}) is not an indirect reference ({1:s})", pages.size() + 1, kidRef.getTypeName());
         return false;
@@ -374,7 +375,7 @@ bool Catalog::cacheSubTree()
         return true;
     }
 
-    Object kid = kids.arrayGet(kidsIdx);
+    Object kid = kidsArray->get(kidsIdx);
     if (kid.isDict("Page") || (kid.isDict() && !kid.getDict()->hasKey("Kids"))) {
         auto attrs = std::make_unique<PageAttrs>(attrsList.back().get(), kid.getDict());
         auto p = std::make_unique<Page>(doc, pages.size() + 1, std::move(kid), kidRef.getRef(), std::move(attrs));
@@ -748,8 +749,9 @@ void NameTree::parse(const Object *tree, RefRecursionChecker &seen)
         return;
     }
     if (kids.isArray()) {
-        for (int i = 0; i < kids.arrayGetLength(); ++i) {
-            const Object kid = kids.getArray()->get(i, &ref);
+        Array *kidsArray = kids.getArray();
+        for (int i = 0; i < kidsArray->getLength(); ++i) {
+            const Object kid = kidsArray->get(i, &ref);
             if (!seen.insert(ref)) {
                 error(errSyntaxError, -1, "loop in NameTree (numObj: {0:d})", ref.num);
                 continue;
@@ -1124,10 +1126,15 @@ void Catalog::addFormToAcroForm(const Ref formRef)
     if (!acroForm.isDict()) {
         getCreateForm();
     }
+    Dict &acroFormDict = *acroForm.getDict();
 
     // append to field array
     Ref fieldRef;
-    Object fieldArray = acroForm.getDict()->lookup("Fields", &fieldRef);
+    Object fieldArray = acroFormDict.lookup("Fields", &fieldRef);
+    if (!fieldArray.isArray()) {
+        acroFormDict.set("Fields", Object(std::make_unique<Array>(xref)));
+        fieldArray = acroFormDict.lookup("Fields", &fieldRef);
+    }
     fieldArray.getArray()->add(Object(formRef));
 
     setAcroFormModified();

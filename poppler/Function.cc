@@ -65,7 +65,7 @@ std::unique_ptr<Function> Function::parse(Object *funcObj, RefRecursionChecker &
     Dict *dict;
 
     if (funcObj->isStream()) {
-        dict = funcObj->streamGetDict();
+        dict = funcObj->getStream()->getDict();
     } else if (funcObj->isDict()) {
         dict = funcObj->getDict();
     } else if (funcObj->isName("Identity")) {

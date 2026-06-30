@@ -1991,7 +1991,7 @@ Object Annot::getAppearanceResDict()
     // Fetch appearance's resource dict (if any)
     obj1 = appearance.fetch(doc->getXRef());
     if (obj1.isStream()) {
-        obj2 = obj1.streamGetDict()->lookup("Resources");
+        obj2 = obj1.getStream()->getDict()->lookup("Resources");
         if (obj2.isDict()) {
             return obj2;
         }
@@ -3022,18 +3022,19 @@ void AnnotFreeText::setCalloutLine(std::unique_ptr<AnnotCalloutLine> &&line)
     } else {
         double x1 = line->getX1(), y1 = line->getY1();
         double x2 = line->getX2(), y2 = line->getY2();
-        obj1 = Object(std::make_unique<Array>(doc->getXRef()));
-        obj1.arrayAdd(Object(x1));
-        obj1.arrayAdd(Object(y1));
-        obj1.arrayAdd(Object(x2));
-        obj1.arrayAdd(Object(y2));
+        auto array = std::make_unique<Array>(doc->getXRef());
+        array->add(Object(x1));
+        array->add(Object(y1));
+        array->add(Object(x2));
+        array->add(Object(y2));
 
         auto *mline = dynamic_cast<AnnotCalloutMultiLine *>(line.get());
         if (mline) {
             double x3 = mline->getX3(), y3 = mline->getY3();
-            obj1.arrayAdd(Object(x3));
-            obj1.arrayAdd(Object(y3));
+            array->add(Object(x3));
+            array->add(Object(y3));
         }
+        obj1 = Object(std::move(array));
         calloutLine = std::move(line);
     }
 
@@ -4004,7 +4005,7 @@ bool AnnotTextMarkup::shouldCreateApperance(Gfx *gfx) const
         XRef *xref = gfx->getXRef();
         const Object fetchedApperance = appearance.fetch(xref);
         if (fetchedApperance.isStream()) {
-            const Object resources = fetchedApperance.streamGetDict()->lookup("Resources");
+            const Object resources = fetchedApperance.getStream()->getDict()->lookup("Resources");
             if (resources.isDict()) {
                 if (resources.dictLookup("ExtGState").isDict()) {
                     return false;
@@ -7500,13 +7501,14 @@ Annots::Annots(PDFDoc *docA, int page, Object *annotsObj)
     doc = docA;
 
     if (annotsObj->isArray()) {
-        for (int i = 0; i < annotsObj->arrayGetLength(); ++i) {
+        Array *annotsArray = annotsObj->getArray();
+        for (int i = 0; i < annotsArray->getLength(); ++i) {
             // get the Ref to this annot and pass it to Annot constructor
             // this way, it'll be possible for the annot to retrieve the corresponding
             // form widget
-            Object obj1 = annotsObj->arrayGet(i);
+            Object obj1 = annotsArray->get(i);
             if (obj1.isDict()) {
-                const Object &obj2 = annotsObj->arrayGetNF(i);
+                const Object &obj2 = annotsArray->getNF(i);
                 std::shared_ptr<Annot> annot = createAnnot(std::move(obj1), obj2);
                 if (annot) {
                     if (annot.use_count() > 100000) {

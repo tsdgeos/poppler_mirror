@@ -40,6 +40,7 @@
 #include "PSTokenizer.h"
 #include "CMap.h"
 #include "Object.h"
+#include "Stream.h"
 
 //------------------------------------------------------------------------
 

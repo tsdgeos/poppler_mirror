@@ -31,7 +31,7 @@
 // Copyright (C) 2015 Philipp Reinkemeier <philipp.reinkemeier@offis.de>
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright (C) 2020, 2021, 2025 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2020, 2021, 2025, 2026 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2024 Pablo Correa Gómez <ablocorrea@hotmail.com>
 // Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -324,8 +324,10 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, std::unique_
             error(errSyntaxError, -1, "Page annotations object (page {0:d}) is likely malformed. Too big: ({1:d})", num, resolvedObj.arrayGetLength());
             goto err2;
         }
-        if (!resolvedObj.isArray() && !resolvedObj.isNull()) {
-            error(errSyntaxError, -1, "Page annotations object (page {0:d}) is wrong type ({1:s})", num, resolvedObj.getTypeName());
+        if (!resolvedObj.isArray()) {
+            if (!resolvedObj.isNull()) {
+                error(errSyntaxError, -1, "Page annotations object (page {0:d}) is wrong type ({1:s})", num, resolvedObj.getTypeName());
+            }
             annotsObj.setToNull();
         }
     }
@@ -479,7 +481,7 @@ bool Page::addAnnot(const std::shared_ptr<Annot> &annot)
     } else {
         Object obj1 = getAnnotsObject();
         if (obj1.isArray()) {
-            obj1.arrayAdd(Object(annotRef));
+            obj1.getArray()->add(Object(annotRef));
             if (annotsObj.isRef()) {
                 xref->setModifiedObject(&obj1, annotsObj.getRef());
             } else {
@@ -665,8 +667,8 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
         return false;
     }
 
-    dict = fetched_thumb.streamGetDict();
     str = fetched_thumb.getStream();
+    dict = str->getDict();
 
     if (!dict->lookupInt("Width", "W", &width)) {
         return false;

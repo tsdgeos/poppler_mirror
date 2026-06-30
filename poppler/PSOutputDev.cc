@@ -1791,7 +1791,7 @@ void PSOutputDev::setupResources(Dict *resDict)
                 Object xObj = xObjDict->getVal(i);
                 if (xObj.isStream()) {
                     Ref resObjRef;
-                    Object resObj = xObj.streamGetDict()->lookup("Resources", &resObjRef);
+                    Object resObj = xObj.getStream()->getDict()->lookup("Resources", &resObjRef);
                     if (resObj.isDict()) {
                         if (resObjRef != Ref::INVALID()) {
                             const int numObj = resObjRef.num;
@@ -1831,7 +1831,7 @@ void PSOutputDev::setupResources(Dict *resDict)
                 Object pat = patDict->getVal(i);
                 if (pat.isStream()) {
                     Ref resObjRef;
-                    Object resObj = pat.streamGetDict()->lookup("Resources", &resObjRef);
+                    Object resObj = pat.getStream()->getDict()->lookup("Resources", &resObjRef);
                     if (resObj.isDict()) {
                         if (resObjRef != Ref::INVALID() && !resourceIDs.insert(resObjRef.num).second) {
                             error(errSyntaxWarning, -1, "PSOutputDev::setupResources: Circular resources found.");
@@ -2688,17 +2688,18 @@ void PSOutputDev::setupImages(Dict *resDict)
         const Dict *xObjDict = xObjDictObj.getDict();
         for (int i = 0; i < xObjDict->getLength(); ++i) {
             const Object &xObjRef = xObjDict->getValNF(i);
-            Object xObj = xObjDict->getVal(i);
+            const Object xObj = xObjDict->getVal(i);
             if (xObj.isStream()) {
-                Object subtypeObj = xObj.streamGetDict()->lookup("Subtype");
+                Stream *xObjStream = xObj.getStream();
+                Object subtypeObj = xObjStream->getDict()->lookup("Subtype");
                 if (subtypeObj.isName("Image")) {
                     if (xObjRef.isRef()) {
                         const Ref imgID = xObjRef.getRef();
                         const auto [_, inserted] = imgIDs.insert(imgID);
                         if (inserted) {
-                            setupImage(imgID, xObj.getStream(), false);
+                            setupImage(imgID, xObjStream, false);
                             if (level >= psLevel3) {
-                                Object maskObj = xObj.streamGetDict()->lookup("Mask");
+                                Object maskObj = xObjStream->getDict()->lookup("Mask");
                                 if (maskObj.isStream()) {
                                     setupImage(imgID, maskObj.getStream(), true);
                                 }
@@ -2900,7 +2901,7 @@ void PSOutputDev::setupForms(Dict *resDict)
             const Object &xObjRef = xObjDict->getValNF(i);
             Object xObj = xObjDict->getVal(i);
             if (xObj.isStream()) {
-                Object subtypeObj = xObj.streamGetDict()->lookup("Subtype");
+                Object subtypeObj = xObj.getStream()->getDict()->lookup("Subtype");
                 if (subtypeObj.isName("Form")) {
                     if (xObjRef.isRef()) {
                         setupForm(xObjRef.getRef(), &xObj);
@@ -2938,7 +2939,7 @@ void PSOutputDev::setupForm(Ref id, Object *strObj)
     }
     formIDs[formIDLen++] = id;
 
-    dict = strObj->streamGetDict();
+    dict = strObj->getStream()->getDict();
 
     // get bounding box
     Object bboxObj = dict->lookup("BBox");

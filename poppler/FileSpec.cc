@@ -47,7 +47,7 @@ EmbFile::EmbFile(Object &&efStream)
 
     if (m_objStr.isStream()) {
         // dataDict corresponds to Table 3.41 in the PDF1.6 spec.
-        Dict *dataDict = m_objStr.streamGetDict();
+        Dict *dataDict = m_objStr.getStream()->getDict();
 
         // subtype is normally the mimetype
         Object subtypeName = dataDict->lookup("Subtype");

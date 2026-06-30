@@ -67,6 +67,7 @@
 #include "GfxFont.h"
 #include "GlobalParams.h"
 #include "OutputDev.h"
+#include "Stream.h"
 #include "splash/SplashTypes.h"
 
 //------------------------------------------------------------------------
@@ -1751,7 +1752,7 @@ std::unique_ptr<GfxColorSpace> GfxICCBasedColorSpace::parse(const Array &arr, Ou
         error(errSyntaxWarning, -1, "Bad ICCBased color space (stream)");
         return nullptr;
     }
-    dict = obj1.streamGetDict();
+    dict = obj1.getStream()->getDict();
     obj2 = dict->lookup("N");
     if (!obj2.isInt()) {
         error(errSyntaxWarning, -1, "Bad ICCBased color space (N)");
@@ -3165,7 +3166,7 @@ std::unique_ptr<GfxPattern> GfxPattern::parse(GfxResources *res, Object *obj, Ou
     if (obj->isDict()) {
         obj1 = obj->dictLookup("PatternType");
     } else if (obj->isStream()) {
-        obj1 = obj->streamGetDict()->lookup("PatternType");
+        obj1 = obj->getStream()->getDict()->lookup("PatternType");
     } else {
         return {};
     }
@@ -3194,7 +3195,7 @@ std::unique_ptr<GfxTilingPattern> GfxTilingPattern::parse(Object *patObj, int pa
     if (!patObj->isStream()) {
         return nullptr;
     }
-    dict = patObj->streamGetDict();
+    dict = patObj->getStream()->getDict();
 
     obj1 = dict->lookup("PaintType");
     if (obj1.isInt()) {
@@ -3372,7 +3373,7 @@ std::unique_ptr<GfxShading> GfxShading::parse(GfxResources *res, Object *obj, Ou
     if (obj->isDict()) {
         dict = obj->getDict();
     } else if (obj->isStream()) {
-        dict = obj->streamGetDict();
+        dict = obj->getStream()->getDict();
     } else {
         return {};
     }

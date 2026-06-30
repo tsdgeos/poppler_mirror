@@ -50,6 +50,7 @@
 #include "FileSpec.h"
 #include "Rendition.h"
 #include "Annot.h"
+#include "Stream.h"
 
 //------------------------------------------------------------------------
 // LinkAction
@@ -772,10 +773,11 @@ LinkOCGState::LinkOCGState(const Object *obj)
 {
     Object obj1 = obj->dictLookup("State");
     if (obj1.isArray()) {
+        Array *stateArray = obj1.getArray();
         StateList stList;
 
-        for (int i = 0; i < obj1.arrayGetLength(); ++i) {
-            const Object &obj2 = obj1.arrayGetNF(i);
+        for (int i = 0; i < stateArray->getLength(); ++i) {
+            const Object &obj2 = stateArray->getNF(i);
             if (obj2.isName()) {
                 if (!stList.list.empty()) {
                     stateList.push_back(stList);
@@ -851,9 +853,10 @@ LinkResetForm::LinkResetForm(const Object *obj)
 
     obj1 = obj->dictLookup("Fields");
     if (obj1.isArray()) {
-        fields.resize(obj1.arrayGetLength());
-        for (int i = 0; i < obj1.arrayGetLength(); ++i) {
-            const Object &obj2 = obj1.arrayGetNF(i);
+        Array *fieldsArray = obj1.getArray();
+        fields.resize(fieldsArray->getLength());
+        for (int i = 0; i < fieldsArray->getLength(); ++i) {
+            const Object &obj2 = fieldsArray->getNF(i);
             if (obj2.isName()) {
                 fields[i] = obj2.getNameString();
             } else if (obj2.isString()) {
@@ -893,9 +896,10 @@ LinkSubmitForm::LinkSubmitForm(const Object *obj)
 
     const Object objFields = obj->dictLookup("Fields");
     if (objFields.isArray()) {
-        fields.resize(objFields.arrayGetLength());
-        for (int i = 0; i < objFields.arrayGetLength(); ++i) {
-            const Object &objNF = objFields.arrayGetNF(i);
+        Array *fieldsArray = objFields.getArray();
+        fields.resize(fieldsArray->getLength());
+        for (int i = 0; i < fieldsArray->getLength(); ++i) {
+            const Object &objNF = fieldsArray->getNF(i);
             if (objNF.isName()) {
                 fields[i] = objNF.getNameString();
             } else if (objNF.isString()) {

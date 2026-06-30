@@ -40,18 +40,20 @@ static const ArgDesc argDesc[] = { { .arg = "-v", .kind = argFlag, .val = &print
 
 static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldRefNum, int newRefNum, Dict *srcNameTree, Dict *mergeNameTree, int numOffset)
 {
-    Object mergeNameArray = mergeNameTree->lookup("Names");
-    Object srcNameArray = srcNameTree->lookup("Names");
-    if (mergeNameArray.isArray() && srcNameArray.isArray()) {
+    Object mergeNameArrayObj = mergeNameTree->lookup("Names");
+    Object srcNameArrayObj = srcNameTree->lookup("Names");
+    if (mergeNameArrayObj.isArray() && srcNameArrayObj.isArray()) {
         auto newNameArray = std::make_unique<Array>(srcXRef);
         int j = 0;
-        for (int i = 0; i < srcNameArray.arrayGetLength() - 1; i += 2) {
-            const Object &key = srcNameArray.arrayGetNF(i);
-            const Object &value = srcNameArray.arrayGetNF(i + 1);
+        Array *srcNameArray = srcNameArrayObj.getArray();
+        Array *mergeNameArray = mergeNameArrayObj.getArray();
+        for (int i = 0; i < srcNameArray->getLength() - 1; i += 2) {
+            const Object &key = srcNameArray->getNF(i);
+            const Object &value = srcNameArray->getNF(i + 1);
             if (key.isString() && value.isRef()) {
-                while (j < mergeNameArray.arrayGetLength() - 1) {
-                    const Object &mkey = mergeNameArray.arrayGetNF(j);
-                    const Object &mvalue = mergeNameArray.arrayGetNF(j + 1);
+                while (j < mergeNameArray->getLength() - 1) {
+                    const Object &mkey = mergeNameArray->getNF(j);
+                    const Object &mvalue = mergeNameArray->getNF(j + 1);
                     if (mkey.isString() && mvalue.isRef()) {
                         if (mkey.getString().compare(key.getString()) < 0) {
                             newNameArray->add(Object(std::string { mkey.getString() }));
@@ -70,9 +72,9 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
                 newNameArray->add(Object(value.getRef()));
             }
         }
-        while (j < mergeNameArray.arrayGetLength() - 1) {
-            const Object &mkey = mergeNameArray.arrayGetNF(j);
-            const Object &mvalue = mergeNameArray.arrayGetNF(j + 1);
+        while (j < mergeNameArray->getLength() - 1) {
+            const Object &mkey = mergeNameArray->getNF(j);
+            const Object &mvalue = mergeNameArray->getNF(j + 1);
             if (mkey.isString() && mvalue.isRef()) {
                 newNameArray->add(Object(std::string { mkey.getString() }));
                 newNameArray->add(Object(Ref { .num = mvalue.getRef().num + numOffset, .gen = mvalue.getRef().gen }));
@@ -81,11 +83,12 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
         }
         srcNameTree->set("Names", Object(std::move(newNameArray)));
         doc->markPageObjects(mergeNameTree, srcXRef, countRef, numOffset, oldRefNum, newRefNum);
-    } else if (srcNameArray.isNull() && mergeNameArray.isArray()) {
+    } else if (srcNameArrayObj.isNull() && mergeNameArrayObj.isArray()) {
         auto newNameArray = std::make_unique<Array>(srcXRef);
-        for (int i = 0; i < mergeNameArray.arrayGetLength() - 1; i += 2) {
-            const Object &key = mergeNameArray.arrayGetNF(i);
-            const Object &value = mergeNameArray.arrayGetNF(i + 1);
+        Array *mergeNameArray = mergeNameArrayObj.getArray();
+        for (int i = 0; i < mergeNameArray->getLength() - 1; i += 2) {
+            const Object &key = mergeNameArray->getNF(i);
+            const Object &value = mergeNameArray->getNF(i + 1);
             if (key.isString() && value.isRef()) {
                 newNameArray->add(Object(std::string { key.getString() }));
                 newNameArray->add(Object(Ref { .num = value.getRef().num + numOffset, .gen = value.getRef().gen }));
@@ -117,13 +120,15 @@ static bool doMergeFormDict(Dict *srcFormDict, Dict *mergeFormDict, int numOffse
     Object srcFields = srcFormDict->lookup("Fields");
     Object mergeFields = mergeFormDict->lookup("Fields");
     if (srcFields.isArray() && mergeFields.isArray()) {
-        for (int i = 0; i < mergeFields.arrayGetLength(); i++) {
-            const Object &value = mergeFields.arrayGetNF(i);
+        Array *srcFieldsArray = srcFields.getArray();
+        Array *mergeFieldsArray = mergeFields.getArray();
+        for (int i = 0; i < mergeFieldsArray->getLength(); i++) {
+            const Object &value = mergeFieldsArray->getNF(i);
             if (!value.isRef()) {
                 error(errSyntaxError, -1, "Fields object is not a Ref.");
                 return false;
             }
-            srcFields.arrayAdd(Object(Ref { .num = value.getRef().num + numOffset, .gen = value.getRef().gen }));
+            srcFieldsArray->add(Object(Ref { .num = value.getRef().num + numOffset, .gen = value.getRef().gen }));
         }
     }
     return true;

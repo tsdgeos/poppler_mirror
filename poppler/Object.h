@@ -44,7 +44,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <variant>
-#include <cstring>
 #include "goo/GooString.h"
 #include "goo/GooLikely.h"
 #include "Error.h"
@@ -411,9 +410,7 @@ public:
 
     // Array accessors.
     int arrayGetLength() const;
-    void arrayAdd(Object &&elem);
     Object arrayGet(int i, int recursion) const;
-    const Object &arrayGetNF(int i) const;
 
     // Dict accessors.
     int dictGetLength() const;
@@ -423,9 +420,6 @@ public:
     Object dictLookup(std::string_view key, int recursion = 0) const;
     const Object &dictLookupNF(std::string_view key) const;
     Object dictGetVal(int i) const;
-
-    // Stream accessors.
-    Dict *streamGetDict() const;
 
     // Output.
     const char *getTypeName() const;
@@ -470,11 +464,5 @@ private:
 //------------------------------------------------------------------------
 
 #include "Dict.h"
-
-//------------------------------------------------------------------------
-// Stream accessors.
-//------------------------------------------------------------------------
-
-#include "Stream.h"
 
 #endif

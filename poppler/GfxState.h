@@ -47,6 +47,7 @@
 
 #include <array>
 #include <cassert>
+#include <cstring>
 #include <map>
 #include <memory>
 #include <vector>

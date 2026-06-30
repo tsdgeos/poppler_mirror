@@ -403,7 +403,7 @@ void CairoOutputDev::beginForm(Object *obj, Ref /*id*/)
     if (logicalStruct && isPDF()) {
         structParentsStack.push_back(currentStructParents);
 
-        const Object tmp = obj->streamGetDict()->lookup("StructParents");
+        const Object tmp = obj->getStream()->getDict()->lookup("StructParents");
         if (!(tmp.isInt() || tmp.isNull())) {
             error(errSyntaxError, -1, "XObject StructParents object is wrong type ({0:s})", tmp.getTypeName());
         } else if (tmp.isInt()) {
@@ -607,7 +607,7 @@ int CairoOutputDev::getContentElementStructParents(const StructElement *element)
     if (element->hasStmRef()) {
         element->getStmRef(ref);
         Object xobjectObj = xref->fetch(ref);
-        const Object &spObj = xobjectObj.streamGetDict()->lookup("StructParents");
+        const Object &spObj = xobjectObj.getStream()->getDict()->lookup("StructParents");
         if (spObj.isInt()) {
             structParents = spObj.getInt();
         }

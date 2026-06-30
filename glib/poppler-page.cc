@@ -603,7 +603,7 @@ gboolean poppler_page_get_thumbnail_size(PopplerPage *page, int *width, int *hei
         return FALSE;
     }
 
-    dict = thumb.streamGetDict();
+    dict = thumb.getStream()->getDict();
 
     /* Theoretically, this could succeed and you would still fail when
      * loading the thumb */

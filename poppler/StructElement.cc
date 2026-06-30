@@ -1123,9 +1123,10 @@ void StructElement::parseChildren(Dict *element, RefRecursionChecker &seen)
 {
     Object kids = element->lookup("K");
     if (kids.isArray()) {
-        for (int i = 0; i < kids.arrayGetLength(); i++) {
-            Object obj = kids.arrayGet(i);
-            const Object &ref = kids.arrayGetNF(i);
+        Array *kidsArray = kids.getArray();
+        for (int i = 0; i < kidsArray->getLength(); i++) {
+            Object obj = kidsArray->get(i);
+            const Object &ref = kidsArray->getNF(i);
             parseChild(&ref, &obj, seen);
         }
     } else if (kids.isDict() || kids.isInt()) {
