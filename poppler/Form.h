@@ -455,7 +455,7 @@ public:
 
     // returns true if the state modification is accepted
     bool setState(const char *state, bool ignoreToggleOff = false);
-    bool getState(const char *state) const;
+    bool getState(std::string_view state) const;
 
     const char *getAppearanceState() const { return appearanceState.isName() ? appearanceState.getName() : nullptr; }
     const char *getDefaultAppearanceState() const { return defaultAppearanceState.isName() ? defaultAppearanceState.getName() : nullptr; }

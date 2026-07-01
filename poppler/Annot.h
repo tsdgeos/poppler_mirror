@@ -467,10 +467,10 @@ public:
     ~AnnotAppearance();
 
     // State is ignored if no subdictionary is present
-    Object getAppearanceStream(AnnotAppearanceType type, const char *state) const;
+    Object getAppearanceStream(AnnotAppearanceType type, std::string_view state) const;
 
     // Access keys in normal appearance subdictionary (N)
-    std::unique_ptr<GooString> getStateKey(int i) const;
+    std::optional<std::string> getStateKey(int i) const;
     int getNumStates() const;
 
     // Removes all associated streams in the xref table. Caller is required to
@@ -596,7 +596,7 @@ public:
     void drawLineEndSlash(double x, double y, double size, const Matrix &m);
     void drawFieldBorder(const FormField &field, const AnnotBorder &border, const AnnotAppearanceCharacs &appearCharacs, const PDFRectangle &rect);
     bool drawFormField(const FormField &field, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle &rect,
-                       const GooString *appearState, XRef &xref, Dict &resourcesDict);
+                       const std::optional<std::string> &appearState, XRef &xref, Dict &resourcesDict);
     static double lineEndingXShorten(AnnotLineEndingStyle endingStyle, double size);
     static double lineEndingXExtendBBox(AnnotLineEndingStyle endingStyle, double size);
     void writeString(const std::string &str);
@@ -619,7 +619,7 @@ private:
 
     bool drawListBox(const FormFieldChoice &fieldChoice, const AnnotBorder *border, const PDFRectangle &rect, const std::string &da, const GfxResources *resources, VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict);
     bool drawFormFieldButton(const FormFieldButton &field, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle &rect,
-                             const GooString *appearState, XRef &xref, Dict &resourcesDict);
+                             const std::optional<std::string> &appearState, XRef &xref, Dict &resourcesDict);
     bool drawFormFieldText(const FormFieldText &fieldText, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle &rect, XRef &xref,
                            Dict &resourcesDict);
     bool drawFormFieldChoice(const FormFieldChoice &fieldChoice, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle &rect,
@@ -766,7 +766,6 @@ public:
     void setNewAppearance(Object &&newAppearance);
     void setNewAppearance(Object &&newAppearance, bool keepAppearState);
     AnnotAppearance *getAppearStreams() const { return appearStreams.get(); }
-    const GooString *getAppearState() const { return appearState.get(); }
     const AnnotBorder *getBorder() const { return border.get(); }
     const AnnotColor *getColor() const { return color.get(); }
     int getTreeKey() const { return treeKey; }
@@ -818,7 +817,7 @@ protected:
     Object appearance; // a reference to the Form XObject stream
                        //   for the normal appearance
     std::unique_ptr<AnnotAppearanceBBox> appearBBox; // BBox of generated appearance
-    std::unique_ptr<GooString> appearState; // AS
+    std::optional<std::string> appearState; // AS
     int treeKey; // Struct Parent;
     Object oc; // OC
 
