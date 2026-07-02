@@ -176,8 +176,7 @@ ustring page::label() const
         return ustring();
     }
 
-    const GooString goo(std::move(label));
-    return detail::unicode_GooString_to_ustring(&goo);
+    return detail::unicode_string_to_ustring(label);
 }
 
 /**

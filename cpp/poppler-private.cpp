@@ -61,13 +61,13 @@ rectf detail::pdfrectangle_to_rectf(const PDFRectangle &pdfrect)
     return rectf(pdfrect.x1, pdfrect.y1, pdfrect.x2 - pdfrect.x1, pdfrect.y2 - pdfrect.y1);
 }
 
-ustring detail::unicode_GooString_to_ustring(const GooString *str)
+ustring detail::unicode_string_to_ustring(const std::string &str)
 {
-    const char *data = str->c_str();
-    const int len = str->size();
+    const char *data = str.c_str();
+    const int len = str.size();
 
-    const bool is_unicodeLE = hasUnicodeByteOrderMarkLE(str->toStr());
-    const bool is_unicode = hasUnicodeByteOrderMark(str->toStr()) || is_unicodeLE;
+    const bool is_unicodeLE = hasUnicodeByteOrderMarkLE(str);
+    const bool is_unicode = hasUnicodeByteOrderMark(str) || is_unicodeLE;
     int i = is_unicode ? 2 : 0;
     ustring::size_type ret_len = len - i;
     if (is_unicode) {

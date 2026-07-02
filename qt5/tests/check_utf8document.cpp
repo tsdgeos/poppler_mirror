@@ -35,7 +35,7 @@ void TestUtf8Document::checkStrings()
 
     QVERIFY(doc->getOptContentConfig() && doc->getOptContentConfig()->hasOCGs());
 
-    QCOMPARE(Poppler::UnicodeParsedString(doc->getDocInfoTitle().get()), QString::fromUtf8("表ポあA鷗ŒéＢ逍Üßªąñ丂㐀𠀀")); // clazy:exclude=qstring-allocations
+    QCOMPARE(Poppler::UnicodeParsedString(doc->getDocInfoTitle().value_or("WRONG")), QString::fromUtf8("表ポあA鷗ŒéＢ逍Üßªąñ丂㐀𠀀")); // clazy:exclude=qstring-allocations
 
     QSet<QString> expectedNames { QString::fromUtf8("گچپژ"), QString::fromUtf8("Layer 1") }; // clazy:exclude=qstring-allocations
     QSet<QString> foundNames;

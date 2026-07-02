@@ -271,16 +271,16 @@ public:
 
     // Get document's properties from document's Info dictionary.
     // Returns nullptr on fail.
-    std::unique_ptr<GooString> getDocInfoStringEntry(const char *key);
+    std::optional<std::string> getDocInfoStringEntry(std::string_view key);
 
-    std::unique_ptr<GooString> getDocInfoTitle() { return getDocInfoStringEntry("Title"); }
-    std::unique_ptr<GooString> getDocInfoAuthor() { return getDocInfoStringEntry("Author"); }
-    std::unique_ptr<GooString> getDocInfoSubject() { return getDocInfoStringEntry("Subject"); }
-    std::unique_ptr<GooString> getDocInfoKeywords() { return getDocInfoStringEntry("Keywords"); }
-    std::unique_ptr<GooString> getDocInfoCreator() { return getDocInfoStringEntry("Creator"); }
-    std::unique_ptr<GooString> getDocInfoProducer() { return getDocInfoStringEntry("Producer"); }
-    std::unique_ptr<GooString> getDocInfoCreatDate() { return getDocInfoStringEntry("CreationDate"); }
-    std::unique_ptr<GooString> getDocInfoModDate() { return getDocInfoStringEntry("ModDate"); }
+    std::optional<std::string> getDocInfoTitle() { return getDocInfoStringEntry("Title"); }
+    std::optional<std::string> getDocInfoAuthor() { return getDocInfoStringEntry("Author"); }
+    std::optional<std::string> getDocInfoSubject() { return getDocInfoStringEntry("Subject"); }
+    std::optional<std::string> getDocInfoKeywords() { return getDocInfoStringEntry("Keywords"); }
+    std::optional<std::string> getDocInfoCreator() { return getDocInfoStringEntry("Creator"); }
+    std::optional<std::string> getDocInfoProducer() { return getDocInfoStringEntry("Producer"); }
+    std::optional<std::string> getDocInfoCreatDate() { return getDocInfoStringEntry("CreationDate"); }
+    std::optional<std::string> getDocInfoModDate() { return getDocInfoStringEntry("ModDate"); }
 
     // Return the PDF subtype, part, and conformance
     PDFSubtype getPDFSubtype() const { return pdfSubtype; }
