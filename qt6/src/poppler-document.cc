@@ -272,8 +272,8 @@ QString Document::info(const QString &type) const
         return QString();
     }
 
-    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoStringEntry(type.toLatin1().constData()));
-    return UnicodeParsedString(goo.get());
+    std::optional<std::string> goo(m_doc->doc->getDocInfoStringEntry(type.toStdString()));
+    return goo ? UnicodeParsedString(goo.value()) : QString {};
 }
 
 bool Document::setInfo(const QString &key, const QString &val)
@@ -293,8 +293,8 @@ QString Document::title() const
         return QString();
     }
 
-    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoTitle());
-    return UnicodeParsedString(goo.get());
+    std::optional<std::string> goo(m_doc->doc->getDocInfoTitle());
+    return goo ? UnicodeParsedString(goo.value()) : QString {};
 }
 
 bool Document::setTitle(const QString &val)
@@ -313,8 +313,8 @@ QString Document::author() const
         return QString();
     }
 
-    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoAuthor());
-    return UnicodeParsedString(goo.get());
+    std::optional<std::string> goo(m_doc->doc->getDocInfoAuthor());
+    return goo ? UnicodeParsedString(goo.value()) : QString {};
 }
 
 bool Document::setAuthor(const QString &val)
@@ -333,8 +333,8 @@ QString Document::subject() const
         return QString();
     }
 
-    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoSubject());
-    return UnicodeParsedString(goo.get());
+    std::optional<std::string> goo(m_doc->doc->getDocInfoSubject());
+    return goo ? UnicodeParsedString(goo.value()) : QString {};
 }
 
 bool Document::setSubject(const QString &val)
@@ -353,8 +353,8 @@ QString Document::keywords() const
         return QString();
     }
 
-    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoKeywords());
-    return UnicodeParsedString(goo.get());
+    std::optional<std::string> goo(m_doc->doc->getDocInfoKeywords());
+    return goo ? UnicodeParsedString(goo.value()) : QString {};
 }
 
 bool Document::setKeywords(const QString &val)
@@ -373,8 +373,8 @@ QString Document::creator() const
         return QString();
     }
 
-    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoCreator());
-    return UnicodeParsedString(goo.get());
+    std::optional<std::string> goo(m_doc->doc->getDocInfoCreator());
+    return goo ? UnicodeParsedString(goo.value()) : QString {};
 }
 
 bool Document::setCreator(const QString &val)
@@ -393,8 +393,8 @@ QString Document::producer() const
         return QString();
     }
 
-    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoProducer());
-    return UnicodeParsedString(goo.get());
+    std::optional<std::string> goo(m_doc->doc->getDocInfoProducer());
+    return goo ? UnicodeParsedString(goo.value()) : QString {};
 }
 
 bool Document::setProducer(const QString &val)
@@ -450,8 +450,8 @@ QDateTime Document::date(const QString &type) const
         return QDateTime();
     }
 
-    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoStringEntry(type.toLatin1().constData()));
-    QString str = UnicodeParsedString(goo.get());
+    std::optional<std::string> goo(m_doc->doc->getDocInfoStringEntry(type.toStdString()));
+    QString str = goo ? UnicodeParsedString(goo.value()) : QString();
     return Poppler::convertDate(str.toLatin1().constData());
 }
 
@@ -471,8 +471,8 @@ QDateTime Document::creationDate() const
         return QDateTime();
     }
 
-    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoCreatDate());
-    QString str = UnicodeParsedString(goo.get());
+    std::optional<std::string> goo(m_doc->doc->getDocInfoCreatDate());
+    QString str = goo ? UnicodeParsedString(goo.value()) : QString {};
     return Poppler::convertDate(str.toLatin1().constData());
 }
 
@@ -492,8 +492,8 @@ QDateTime Document::modificationDate() const
         return QDateTime();
     }
 
-    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoModDate());
-    QString str = UnicodeParsedString(goo.get());
+    std::optional<std::string> goo(m_doc->doc->getDocInfoModDate());
+    QString str = goo.has_value() ? UnicodeParsedString(goo.value()) : QString {};
     return Poppler::convertDate(str.toLatin1().constData());
 }
 

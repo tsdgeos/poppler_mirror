@@ -51,7 +51,7 @@ void error_function(ErrorCategory category, Goffset pos, const char *msg);
 
 rectf pdfrectangle_to_rectf(const PDFRectangle &pdfrect);
 
-ustring unicode_GooString_to_ustring(const GooString *str);
+ustring unicode_string_to_ustring(const std::string &str);
 ustring unicode_to_ustring(const Unicode *u, int length);
 std::unique_ptr<GooString> ustring_to_unicode_GooString(const ustring &str);
 

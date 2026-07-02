@@ -1557,7 +1557,7 @@ bool FormFieldButton::setState(const char *state, bool ignoreToggleOff)
     return true;
 }
 
-bool FormFieldButton::getState(const char *state) const
+bool FormFieldButton::getState(std::string_view state) const
 {
     if (appearanceState.isName(state)) {
         return true;

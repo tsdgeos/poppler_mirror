@@ -429,7 +429,6 @@ private:
     static int mapCodeToGID(FoFiTrueType *ff, int cmapi, Unicode unicode, GfxFont::WritingMode wmode);
     double getWidth(CID cid) const; // Get width of a character.
 
-    std::unique_ptr<GooString> collection; // collection name
     std::shared_ptr<CMap> cMap; // char code --> CID
     std::shared_ptr<CharCodeToUnicode> ctu; // CID --> Unicode
     bool ctuUsesCharCode; // true: ctu maps char code to Unicode;

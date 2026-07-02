@@ -5,12 +5,15 @@ set(common_srcs
   parseargs.cc
   Win32Console.cc
 )
+add_library(utils_common_lib STATIC ${common_srcs})
+target_link_libraries(utils_common_lib PUBLIC poppler)
+
 set(common_libs
-  poppler
+  utils_common_lib
 )
 
 # pdftoppm
-set(pdftoppm_SOURCES ${common_srcs}
+set(pdftoppm_SOURCES
   pdftoppm.cc
   sanitychecks.cc
 )
@@ -25,7 +28,7 @@ install(FILES pdftoppm.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 if (HAVE_CAIRO)
   # pdftocairo
-  set(pdftocairo_SOURCES ${common_srcs}
+  set(pdftocairo_SOURCES
     pdftocairo.cc
     pdftocairo-win32.cc
     ${CMAKE_SOURCE_DIR}/poppler/CairoFontEngine.cc
@@ -49,7 +52,7 @@ if (HAVE_CAIRO)
 endif ()
 
 # pdfdetach
-set(pdfdetach_SOURCES ${common_srcs}
+set(pdfdetach_SOURCES
   pdfdetach.cc
 )
 add_executable(pdfdetach ${pdfdetach_SOURCES})
@@ -58,7 +61,7 @@ install(TARGETS pdfdetach DESTINATION bin)
 install(FILES pdfdetach.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 # pdfdetach
-set(pdfattach_SOURCES ${common_srcs}
+set(pdfattach_SOURCES
   pdfattach.cc
 )
 add_executable(pdfattach ${pdfattach_SOURCES})
@@ -67,7 +70,7 @@ install(TARGETS pdfattach DESTINATION bin)
 install(FILES pdfattach.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 # pdffonts
-set(pdffonts_SOURCES ${common_srcs}
+set(pdffonts_SOURCES
   pdffonts.cc
 )
 add_executable(pdffonts ${pdffonts_SOURCES})
@@ -76,7 +79,7 @@ install(TARGETS pdffonts DESTINATION bin)
 install(FILES pdffonts.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 # pdfimages
-set(pdfimages_SOURCES ${common_srcs}
+set(pdfimages_SOURCES
   pdfimages.cc
   ImageOutputDev.cc
   ImageOutputDev.h
@@ -87,7 +90,7 @@ install(TARGETS pdfimages DESTINATION bin)
 install(FILES pdfimages.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 # pdfinfo
-set(pdfinfo_SOURCES ${common_srcs}
+set(pdfinfo_SOURCES
   pdfinfo.cc printencodings.cc
 )
 add_executable(pdfinfo ${pdfinfo_SOURCES})
@@ -103,7 +106,7 @@ endif ()
 
 if (ENABLE_SIGNATURES)
   # pdfsig
-  set(pdfsig_SOURCES ${common_srcs}
+  set(pdfsig_SOURCES
     pdfsig.cc
   )
   add_executable(pdfsig ${pdfsig_SOURCES})
@@ -119,7 +122,7 @@ if (ENABLE_SIGNATURES)
 endif ()
 
 # pdftops
-set(pdftops_SOURCES ${common_srcs}
+set(pdftops_SOURCES
   pdftops.cc
   sanitychecks.cc
 )
@@ -133,7 +136,7 @@ install(TARGETS pdftops DESTINATION bin)
 install(FILES pdftops.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 # pdftotext
-set(pdftotext_SOURCES ${common_srcs}
+set(pdftotext_SOURCES
   pdftotext.cc printencodings.cc
 )
 add_executable(pdftotext ${pdftotext_SOURCES})
@@ -142,7 +145,7 @@ install(TARGETS pdftotext DESTINATION bin)
 install(FILES pdftotext.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 # pdftohtml
-set(pdftohtml_SOURCES ${common_srcs}
+set(pdftohtml_SOURCES
   InMemoryFile.cc
   pdftohtml.cc
   HtmlFonts.cc
@@ -155,7 +158,7 @@ install(TARGETS pdftohtml DESTINATION bin)
 install(FILES pdftohtml.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 # pdfseparate
-set(pdfseparate_SOURCES ${common_srcs}
+set(pdfseparate_SOURCES
   pdfseparate.cc
 )
 add_executable(pdfseparate ${pdfseparate_SOURCES})
@@ -164,7 +167,7 @@ install(TARGETS pdfseparate DESTINATION bin)
 install(FILES pdfseparate.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 # pdfunite
-set(pdfunite_SOURCES ${common_srcs}
+set(pdfunite_SOURCES
   pdfunite.cc
 )
 add_executable(pdfunite ${pdfunite_SOURCES})

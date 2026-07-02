@@ -294,12 +294,12 @@ ustring document::info_key(const std::string &key) const
         return ustring();
     }
 
-    std::unique_ptr<GooString> goo_value(d->doc->getDocInfoStringEntry(key.c_str()));
+    std::optional<std::string> goo_value(d->doc->getDocInfoStringEntry(key));
     if (!goo_value) {
         return ustring();
     }
 
-    return detail::unicode_GooString_to_ustring(goo_value.get());
+    return detail::unicode_string_to_ustring(goo_value.value());
 }
 
 /**
@@ -337,12 +337,12 @@ time_t document::info_date_t(const std::string &key) const
         return static_cast<time_t>(-1);
     }
 
-    std::unique_ptr<GooString> goo_date(d->doc->getDocInfoStringEntry(key.c_str()));
+    std::optional<std::string> goo_date(d->doc->getDocInfoStringEntry(key));
     if (!goo_date) {
         return static_cast<time_t>(-1);
     }
 
-    return dateStringToTime(goo_date->toStr());
+    return dateStringToTime(goo_date.value());
 }
 
 /**
@@ -380,12 +380,12 @@ ustring document::get_title() const
         return ustring();
     }
 
-    std::unique_ptr<GooString> goo_title(d->doc->getDocInfoTitle());
+    std::optional<std::string> goo_title(d->doc->getDocInfoTitle());
     if (!goo_title) {
         return ustring();
     }
 
-    return detail::unicode_GooString_to_ustring(goo_title.get());
+    return detail::unicode_string_to_ustring(goo_title.value());
 }
 
 /**
@@ -422,12 +422,12 @@ ustring document::get_author() const
         return ustring();
     }
 
-    std::unique_ptr<GooString> goo_author(d->doc->getDocInfoAuthor());
+    std::optional<std::string> goo_author(d->doc->getDocInfoAuthor());
     if (!goo_author) {
         return ustring();
     }
 
-    return detail::unicode_GooString_to_ustring(goo_author.get());
+    return detail::unicode_string_to_ustring(goo_author.value());
 }
 
 /**
@@ -464,12 +464,12 @@ ustring document::get_subject() const
         return ustring();
     }
 
-    std::unique_ptr<GooString> goo_subject(d->doc->getDocInfoSubject());
+    std::optional<std::string> goo_subject(d->doc->getDocInfoSubject());
     if (!goo_subject) {
         return ustring();
     }
 
-    return detail::unicode_GooString_to_ustring(goo_subject.get());
+    return detail::unicode_string_to_ustring(goo_subject.value());
 }
 
 /**
@@ -506,12 +506,12 @@ ustring document::get_keywords() const
         return ustring();
     }
 
-    std::unique_ptr<GooString> goo_keywords(d->doc->getDocInfoKeywords());
+    std::optional<std::string> goo_keywords(d->doc->getDocInfoKeywords());
     if (!goo_keywords) {
         return ustring();
     }
 
-    return detail::unicode_GooString_to_ustring(goo_keywords.get());
+    return detail::unicode_string_to_ustring(goo_keywords.value());
 }
 
 /**
@@ -548,12 +548,12 @@ ustring document::get_creator() const
         return ustring();
     }
 
-    std::unique_ptr<GooString> goo_creator(d->doc->getDocInfoCreator());
+    std::optional<std::string> goo_creator(d->doc->getDocInfoCreator());
     if (!goo_creator) {
         return ustring();
     }
 
-    return detail::unicode_GooString_to_ustring(goo_creator.get());
+    return detail::unicode_string_to_ustring(goo_creator.value());
 }
 
 /**
@@ -590,12 +590,12 @@ ustring document::get_producer() const
         return ustring();
     }
 
-    std::unique_ptr<GooString> goo_producer(d->doc->getDocInfoProducer());
+    std::optional<std::string> goo_producer(d->doc->getDocInfoProducer());
     if (!goo_producer) {
         return ustring();
     }
 
-    return detail::unicode_GooString_to_ustring(goo_producer.get());
+    return detail::unicode_string_to_ustring(goo_producer.value());
 }
 
 /**
@@ -632,12 +632,12 @@ time_t document::get_creation_date_t() const
         return static_cast<time_t>(-1);
     }
 
-    std::unique_ptr<GooString> goo_creation_date(d->doc->getDocInfoCreatDate());
+    std::optional<std::string> goo_creation_date(d->doc->getDocInfoCreatDate());
     if (!goo_creation_date) {
         return static_cast<time_t>(-1);
     }
 
-    return dateStringToTime(goo_creation_date->toStr());
+    return dateStringToTime(goo_creation_date.value());
 }
 
 /**
@@ -674,12 +674,12 @@ time_t document::get_modification_date_t() const
         return static_cast<time_t>(-1);
     }
 
-    std::unique_ptr<GooString> goo_modification_date(d->doc->getDocInfoModDate());
+    std::optional<std::string> goo_modification_date(d->doc->getDocInfoModDate());
     if (!goo_modification_date) {
         return static_cast<time_t>(-1);
     }
 
-    return dateStringToTime(goo_modification_date->toStr());
+    return dateStringToTime(goo_modification_date.value());
 }
 
 /**
@@ -798,7 +798,7 @@ ustring document::metadata() const
 {
     std::unique_ptr<GooString> md(d->doc->getCatalog()->readMetadata());
     if (md) {
-        return detail::unicode_GooString_to_ustring(md.get());
+        return detail::unicode_string_to_ustring(md->toStr());
     }
     return ustring();
 }

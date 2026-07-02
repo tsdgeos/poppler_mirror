@@ -83,7 +83,7 @@ std::string embedded_file::name() const
 ustring embedded_file::unicodeName() const
 {
     const GooString *goo = d->file_spec->getFileName();
-    return goo ? detail::unicode_GooString_to_ustring(goo) : ustring();
+    return goo ? detail::unicode_string_to_ustring(goo->toStr()) : ustring();
 }
 
 /**
@@ -92,7 +92,7 @@ ustring embedded_file::unicodeName() const
 ustring embedded_file::description() const
 {
     const GooString *goo = d->file_spec->getDescription();
-    return goo ? detail::unicode_GooString_to_ustring(goo) : ustring();
+    return goo ? detail::unicode_string_to_ustring(goo->toStr()) : ustring();
 }
 
 /**

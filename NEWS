@@ -1,3 +1,27 @@
+Release 26.07.0:
+        core:
+         * Remove deprecated DCT and JPX decoders
+         * Fix signature regression in some cases. KDE bug #520496
+         * Fix added annotations getting lost in some cases. Issue #1732
+         * GPG based signature improvements
+         * Internal code improvements
+         * Fix crashes in malformed documents
+
+        utils:
+         * pdfinfo: sanitize output
+
+        cpp:
+         * Add render_hint::ignore_paper_color to allow transparent paper
+
+        glib:
+         * construct PopplerPage::mutex (fixes crash on macOS). Issue #1743
+
+        qt5:
+         * Fix crash in some signature operations. Issue #1737
+
+        qt6:
+         * Fix crash in some signature operations. Issue #1737
+
 Release 26.06.0:
         core:
          * Improve annotations initialization thread-safety

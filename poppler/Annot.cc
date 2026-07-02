@@ -946,7 +946,7 @@ AnnotAppearance::AnnotAppearance(PDFDoc *docA, Object *dict)
 
 AnnotAppearance::~AnnotAppearance() = default;
 
-Object AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char *state) const
+Object AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, std::string_view state) const
 {
     Object apData;
 
@@ -969,13 +969,13 @@ Object AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char
         break;
     }
 
-    if (apData.isDict() && state) {
+    if (apData.isDict()) {
         return apData.dictLookupNF(state).copy();
     }
     if (apData.isRef()) {
         // Ref can point to 1)Stream or 2)dictionary with named streams - Issue #1558
         Object obj = apData.fetch(doc->getXRef());
-        if (obj.isDict() && state) {
+        if (obj.isDict()) {
             return obj.dictLookupNF(state).copy();
         }
         return apData;
@@ -984,13 +984,13 @@ Object AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char
     return Object();
 }
 
-std::unique_ptr<GooString> AnnotAppearance::getStateKey(int i) const
+std::optional<std::string> AnnotAppearance::getStateKey(int i) const
 {
     const Object &obj1 = appearDict.dictLookupNF("N");
     if (obj1.isDict()) {
-        return std::make_unique<GooString>(obj1.getDict()->getKey(i));
+        return obj1.getDict()->getKey(i);
     }
-    return nullptr;
+    return std::nullopt;
 }
 
 int AnnotAppearance::getNumStates() const
@@ -1380,7 +1380,7 @@ void Annot::initialize(PDFDoc *docA, Dict *dict)
     //----- get the appearance state
     asObj = dict->lookup("AS");
     if (asObj.isName()) {
-        appearState = std::make_unique<GooString>(asObj.getNameString());
+        appearState = asObj.getNameString();
     } else if (appearStreams && appearStreams->getNumStates() != 0) {
         error(errSyntaxError, -1, "Invalid or missing AS value in annotation containing one or more appearance subdictionaries");
         // AS value is required in this case, but if the
@@ -1391,12 +1391,12 @@ void Annot::initialize(PDFDoc *docA, Dict *dict)
         }
     }
     if (!appearState) {
-        appearState = std::make_unique<GooString>("Off");
+        appearState = "Off";
     }
 
     //----- get the annotation appearance
     if (appearStreams) {
-        appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState->c_str());
+        appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState.value());
         Object obj = appearance.fetch(doc->getXRef());
         if (obj.isStream() && !obj.getStream()->rewind()) {
             // appearance stream is invalid as reset() returned false - Issue #1557
@@ -1596,14 +1596,15 @@ void Annot::setAppearanceState(const char *state)
         return;
     }
 
-    appearState = std::make_unique<GooString>(state);
+    appearState = state;
     appearBBox = nullptr;
 
     update("AS", Object::name(state));
 
     // The appearance state determines the current appearance stream
     if (appearStreams) {
-        appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState->c_str());
+        assert(appearState.has_value());
+        appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState.value());
     } else {
         appearance.setToNull();
     }
@@ -1617,7 +1618,7 @@ void Annot::invalidateAppearance()
         appearStreams->removeAllStreams();
     }
     appearStreams = nullptr;
-    appearState = nullptr;
+    appearState = std::nullopt;
     appearBBox = nullptr;
     appearance.setToNull();
 
@@ -2067,7 +2068,7 @@ void Annot::setNewAppearance(Object &&newAppearance, bool keepAppearState)
         appearStreams = std::make_unique<AnnotAppearance>(doc, &updatedAP);
 
         if (keepAppearState && !oldAS.isNull()) {
-            appearState = std::make_unique<GooString>(oldAS.getNameString());
+            appearState = oldAS.getNameString();
             update("AS", std::move(oldAS));
         } else {
             update("AS", Object::name("N"));
@@ -2076,8 +2077,8 @@ void Annot::setNewAppearance(Object &&newAppearance, bool keepAppearState)
         appearStreams = std::make_unique<AnnotAppearance>(doc, &newAppearance);
         update("AP", std::move(newAppearance));
 
-        if (appearStreams) {
-            appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState->c_str());
+        if (appearStreams && appearState) {
+            appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState.value());
         }
     }
 }
@@ -5143,7 +5144,7 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField &field, const Annot
 }
 
 bool AnnotAppearanceBuilder::drawFormField(const FormField &field, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle &rect,
-                                           const GooString *appearState, XRef &xref, Dict &resourcesDict)
+                                           const std::optional<std::string> &appearState, XRef &xref, Dict &resourcesDict)
 {
     // draw the field contents
     switch (field.getType()) {
@@ -5167,7 +5168,7 @@ bool AnnotAppearanceBuilder::drawFormField(const FormField &field, const Form *f
 }
 
 bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton &field, const Form *form, const GfxResources *resources, const std::string &da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
-                                                 const PDFRectangle &rect, const GooString *appearState, XRef &xref, Dict &resourcesDict)
+                                                 const PDFRectangle &rect, const std::optional<std::string> &appearState, XRef &xref, Dict &resourcesDict)
 {
     const GooString *caption = nullptr;
     if (appearCharacs) {
@@ -5177,7 +5178,7 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton &field, c
     switch (field.getButtonType()) {
     case formButtonRadio: {
         //~ Acrobat doesn't draw a caption if there is no AP dict (?)
-        if (appearState && appearState->compare("Off") != 0 && field.getState(appearState->c_str())) {
+        if (appearState && appearState != "Off" && field.getState(appearState.value())) {
             if (caption) {
                 return drawText(caption->toStr(), form, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             }
@@ -5201,8 +5202,8 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton &field, c
     case formButtonCheck:
         if (appearState && appearState->compare("Off") != 0) {
             if (!caption) {
-                GooString checkMark("3");
-                return drawText(checkMark.toStr(), form, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
+                std::string checkMark("3");
+                return drawText(checkMark, form, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             }
             return drawText(caption->toStr(), form, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
         }
@@ -5469,9 +5470,9 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
     auto appearDict = std::make_unique<Dict>(doc->getXRef());
     {
         const std::string &daToUse = fieldDA.empty() && form ? form->getDefaultAppearance() : fieldDA;
-        const bool success = appearBuilder.drawFormField(*field, form, resources, daToUse, border.get(), appearCharacs.get(), *rect, appearState.get(), *doc->getXRef(), *resourcesDictObj.getDict());
+        const bool success = appearBuilder.drawFormField(*field, form, resources, daToUse, border.get(), appearCharacs.get(), *rect, appearState, *doc->getXRef(), *resourcesDictObj.getDict());
         if (!success && form && daToUse != form->getDefaultAppearance()) {
-            appearBuilder.drawFormField(*field, form, resources, form->getDefaultAppearance(), border.get(), appearCharacs.get(), *rect, appearState.get(), *doc->getXRef(), *resourcesDictObj.getDict());
+            appearBuilder.drawFormField(*field, form, resources, form->getDefaultAppearance(), border.get(), appearCharacs.get(), *rect, appearState, *doc->getXRef(), *resourcesDictObj.getDict());
         }
     }
 
