@@ -1705,7 +1705,7 @@ GfxCIDFont::GfxCIDFont(std::string_view tagA, Ref idA, std::optional<std::string
     ascent = 0.95;
     descent = -0.35;
     fontBBox[0] = fontBBox[1] = fontBBox[2] = fontBBox[3] = 0;
-    collection = nullptr;
+    std::unique_ptr<GooString> collection;
     ctuUsesCharCode = true;
     widths.defWidth = 1.0;
     widths.defHeight = -1.0;
