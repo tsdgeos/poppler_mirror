@@ -159,7 +159,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set(DEFAULT_COMPILE_WARNINGS "${_warn}")
   set(DEFAULT_COMPILE_WARNINGS_EXTRA "${_warn} ${_warnx}")
 
-  set(CMAKE_CXX_FLAGS                "-fno-exceptions -fno-check-new -fno-common -D_DEFAULT_SOURCE")
+  add_compile_options("-fno-check-new")
+  set(CMAKE_CXX_FLAGS                "-fno-exceptions -fno-common -D_DEFAULT_SOURCE")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
   set(CMAKE_CXX_FLAGS_RELEASE        "-O2 -DNDEBUG")
   # clang does not support -fno-reorder-blocks -fno-schedule-insns, so do not use -O2
