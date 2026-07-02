@@ -27,6 +27,7 @@ CHECK_FILE_OFFSET_BITS()
 include(GenerateExportHeader)
 include(GNUInstallDirs)
 include(CMakePushCheckState)
+include(CheckLinkerFlag)
 
 set(ENABLE_FUZZER FALSE)
 
@@ -623,18 +624,7 @@ set_target_properties(poppler PROPERTIES
 if(UNIX AND (NOT APPLE))
     file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/linkerscript_test.map "VERS_1 {\nglobal:\n *;};\n")
 
-    # once we require cmake 3.18,
-    # the next set of lines can be changed
-    # to the check_linker_flags function instead
-    include(CheckCXXSourceCompiles)
-    set(OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
-    set(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} -Wl,--version-script=${CMAKE_CURRENT_BINARY_DIR}/linkerscript_test.map)
-    check_cxx_source_compiles("
-      int main(int, char**) {
-        return 0;
-      }
-    " SUPPORT_VERSION_SCRIPT)
-    set(CMAKE_REQUIRED_FLAGS ${OLD_CMAKE_REQUIRED_FLAGS})
+    check_linker_flag(CXX "LINKER:--version-script=${CMAKE_CURRENT_BINARY_DIR}/linkerscript_test.map" SUPPORT_VERSION_SCRIPT)
 
     file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/linkerscript_test.map)
     if (SUPPORT_VERSION_SCRIPT)
