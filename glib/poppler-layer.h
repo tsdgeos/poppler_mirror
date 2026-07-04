@@ -39,7 +39,7 @@ G_BEGIN_DECLS
  */
 
 POPPLER_PUBLIC
-GType poppler_layer_get_type(void) G_GNUC_CONST;
+GType poppler_layer_get_type(void);
 
 POPPLER_PUBLIC
 const gchar *poppler_layer_get_title(PopplerLayer *layer);

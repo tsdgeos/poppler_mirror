@@ -54,7 +54,7 @@ G_BEGIN_DECLS
 typedef gboolean (*PopplerMediaSaveFunc)(const gchar *buf, gsize count, gpointer data, GError **error);
 
 POPPLER_PUBLIC
-GType poppler_media_get_type(void) G_GNUC_CONST;
+GType poppler_media_get_type(void);
 POPPLER_PUBLIC
 gboolean poppler_media_is_embedded(PopplerMedia *poppler_media);
 POPPLER_PUBLIC

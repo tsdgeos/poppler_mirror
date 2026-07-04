@@ -61,7 +61,7 @@ typedef enum
  */
 
 POPPLER_PUBLIC
-GType poppler_movie_get_type(void) G_GNUC_CONST;
+GType poppler_movie_get_type(void);
 POPPLER_PUBLIC
 const gchar *poppler_movie_get_filename(PopplerMovie *poppler_movie);
 POPPLER_PUBLIC

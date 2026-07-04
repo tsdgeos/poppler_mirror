@@ -274,7 +274,7 @@ typedef enum
  */
 
 POPPLER_PUBLIC
-GType poppler_structure_element_get_type(void) G_GNUC_CONST;
+GType poppler_structure_element_get_type(void);
 POPPLER_PUBLIC
 PopplerStructureElementKind poppler_structure_element_get_kind(PopplerStructureElement *poppler_structure_element);
 POPPLER_PUBLIC
@@ -395,7 +395,7 @@ gchar *poppler_structure_element_get_table_summary(PopplerStructureElement *popp
 
 #define POPPLER_TYPE_STRUCTURE_ELEMENT_ITER (poppler_structure_element_iter_get_type())
 POPPLER_PUBLIC
-GType poppler_structure_element_iter_get_type(void) G_GNUC_CONST;
+GType poppler_structure_element_iter_get_type(void);
 POPPLER_PUBLIC
 PopplerStructureElementIter *poppler_structure_element_iter_new(PopplerDocument *poppler_document);
 POPPLER_PUBLIC
@@ -411,7 +411,7 @@ void poppler_structure_element_iter_free(PopplerStructureElementIter *iter);
 
 #define POPPLER_TYPE_TEXT_SPAN (poppler_text_span_get_type())
 POPPLER_PUBLIC
-GType poppler_text_span_get_type(void) G_GNUC_CONST;
+GType poppler_text_span_get_type(void);
 POPPLER_PUBLIC
 PopplerTextSpan *poppler_text_span_copy(PopplerTextSpan *poppler_text_span);
 POPPLER_PUBLIC

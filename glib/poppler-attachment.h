@@ -99,7 +99,7 @@ typedef struct _PopplerAttachmentClass
 } PopplerAttachmentClass;
 
 POPPLER_PUBLIC
-GType poppler_attachment_get_type(void) G_GNUC_CONST;
+GType poppler_attachment_get_type(void);
 POPPLER_PUBLIC
 const GString *poppler_attachment_get_checksum(PopplerAttachment *attachment);
 POPPLER_PUBLIC
