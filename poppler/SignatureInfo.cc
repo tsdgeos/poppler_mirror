@@ -34,22 +34,22 @@ SignatureValidationStatus SignatureInfo::getSignatureValStatus() const
     return sig_status;
 }
 
-std::string SignatureInfo::getSignerName() const
+const std::string &SignatureInfo::getSignerName() const
 {
     return signer_name;
 }
 
-std::string SignatureInfo::getSubjectDN() const
+const std::string &SignatureInfo::getSubjectDN() const
 {
     return subject_dn;
 }
 
-const GooString &SignatureInfo::getLocation() const
+const std::string &SignatureInfo::getLocation() const
 {
     return location;
 }
 
-const GooString &SignatureInfo::getReason() const
+const std::string &SignatureInfo::getReason() const
 {
     return reason;
 }
@@ -86,14 +86,14 @@ void SignatureInfo::setSubjectDN(const std::string &subjectDN)
     subject_dn = subjectDN;
 }
 
-void SignatureInfo::setLocation(std::unique_ptr<GooString> &&loc)
+void SignatureInfo::setLocation(const std::string &loc)
 {
-    location = std::move(*loc);
+    location = loc;
 }
 
-void SignatureInfo::setReason(std::unique_ptr<GooString> &&signingReason)
+void SignatureInfo::setReason(const std::string &signingReason)
 {
-    reason = std::move(*signingReason);
+    reason = signingReason;
 }
 
 void SignatureInfo::setHashAlgorithm(HashAlgorithm type)

@@ -2292,12 +2292,12 @@ void FormFieldSignature::parseInfo()
 
     Object location_obj = sig_dict.dictLookup("Location");
     if (location_obj.isString()) {
-        signature_info->setLocation(location_obj.takeString());
+        signature_info->setLocation(location_obj.getString());
     }
 
     Object reason_obj = sig_dict.dictLookup("Reason");
     if (reason_obj.isString()) {
-        signature_info->setReason(reason_obj.takeString());
+        signature_info->setReason(reason_obj.getString());
     }
 
     // retrieve SigningTime

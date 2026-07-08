@@ -22,9 +22,9 @@
 
 #include <memory>
 #include <ctime>
+#include <string>
 
 #include "poppler_private_export.h"
-#include "goo/GooString.h"
 #include "HashAlgorithm.h"
 
 enum SignatureValidationStatus
@@ -62,10 +62,10 @@ public:
 
     /* GETTERS */
     SignatureValidationStatus getSignatureValStatus() const;
-    std::string getSignerName() const;
-    std::string getSubjectDN() const;
-    const GooString &getLocation() const;
-    const GooString &getReason() const;
+    const std::string &getSignerName() const;
+    const std::string &getSubjectDN() const;
+    const std::string &getLocation() const;
+    const std::string &getReason() const;
     HashAlgorithm getHashAlgorithm() const; // Returns the used HashAlgorithm, and unknown if compiled without signature support
     time_t getSigningTime() const;
     bool isSubfilterSupported() const { return sig_subfilter_supported; }
@@ -75,8 +75,8 @@ public:
     void setSignatureValStatus(enum SignatureValidationStatus sig_val_status);
     void setSignerName(const std::string &signerName);
     void setSubjectDN(const std::string &subjectDN);
-    void setLocation(std::unique_ptr<GooString> &&loc);
-    void setReason(std::unique_ptr<GooString> &&signingReason);
+    void setLocation(const std::string &loc);
+    void setReason(const std::string &signingReason);
     void setHashAlgorithm(HashAlgorithm type);
     void setSigningTime(time_t signingTime);
     void setSubFilterSupport(bool isSupported) { sig_subfilter_supported = isSupported; }
@@ -87,8 +87,8 @@ private:
     std::unique_ptr<X509CertificateInfo> cert_info;
     std::string signer_name;
     std::string subject_dn;
-    GooString location;
-    GooString reason;
+    std::string location;
+    std::string reason;
     HashAlgorithm hash_type = HashAlgorithm::Unknown;
     time_t signing_time = 0;
     bool sig_subfilter_supported = false;
