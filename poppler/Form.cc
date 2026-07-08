@@ -1080,7 +1080,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
     // Variable Text
     obj1 = Form::fieldLookup(dict, "DA");
     if (obj1.isString()) {
-        defaultAppearance = std::move(obj1.takeString()->toNonConstStr());
+        defaultAppearance = obj1.getString();
     }
 
     obj1 = Form::fieldLookup(dict, "Q");
