@@ -729,9 +729,9 @@ QString Document::metadata() const
     QString result;
     Catalog *catalog = m_doc->doc->getCatalog();
     if (catalog && catalog->isOk()) {
-        std::unique_ptr<GooString> s = catalog->readMetadata();
+        std::optional<std::string> s = catalog->readMetadata();
         if (s) {
-            result = UnicodeParsedString(s.get());
+            result = UnicodeParsedString(s.value());
         }
     }
     return result;

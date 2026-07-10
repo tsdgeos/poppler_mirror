@@ -790,7 +790,7 @@ static void printInfo(PDFDoc *doc, const UnicodeMap *uMap, long long filesize, b
     }
 
     bool hasMetadata = false;
-    std::unique_ptr<GooString> metadata = doc->readMetadata();
+    std::optional<std::string> metadata = doc->readMetadata();
     if (metadata) {
         hasMetadata = true;
     }
@@ -1040,7 +1040,7 @@ int main(int argc, char *argv[])
 
     if (printMetadata) {
         // print the metadata
-        const std::unique_ptr<GooString> metadata = doc->readMetadata();
+        const std::optional<std::string> metadata = doc->readMetadata();
         if (metadata) {
             // sanitize but keep newlines for XML structure
             for (const char *p = metadata->c_str(); *p; p++) {

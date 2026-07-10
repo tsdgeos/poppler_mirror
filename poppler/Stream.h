@@ -164,8 +164,6 @@ public:
         }
     }
 
-    void fillGooString(GooString *s) { fillString(s->toNonConstStr()); }
-
     std::vector<unsigned char> toUnsignedChars(int initialSize = 4096, int sizeIncrement = 4096)
     {
         std::vector<unsigned char> buf(initialSize);

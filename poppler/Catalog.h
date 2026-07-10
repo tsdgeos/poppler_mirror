@@ -134,9 +134,9 @@ public:
     // Return base URI, or NULL if none.
     const std::optional<std::string> &getBaseURI() const { return baseURI; }
 
-    // Return the contents of the metadata stream, or NULL if there is
+    // Return the contents of the metadata stream, or nullopt if there is
     // no metadata.
-    std::unique_ptr<GooString> readMetadata();
+    std::optional<std::string> readMetadata();
 
     // Return the structure tree root object.
     StructTreeRoot *getStructTreeRoot();
