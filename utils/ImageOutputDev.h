@@ -22,6 +22,7 @@
 // Copyright (C) 2018, 2019, 2021, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2024 Fernando Herrera <fherrera@onirica.com>
 // Copyright (C) 2024 Sebastian J. Bronner <waschtl@sbronner.com>
+// Copyright (C) 2026 Michael <ttmigueltt@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -91,6 +92,9 @@ public:
     // Print filenames to stdout after writing
     void enablePrintFilenames(bool filenames) { printFilenames = filenames; }
 
+    void setMinHeight(int height) { minHeight = height; }
+    void setMinWidth(int width) { minWidth = width; }
+
     // Get the error code
     // 0 = No error, 1 = Error opening a PDF file, 2 = Error opening an output file, 3 = Error related to PDF permissions, 99 = Other error.
     int getErrorCode() const { return errorCode; }
@@ -140,6 +144,7 @@ private:
     void writeRawImage(Stream *str, const char *ext);
     void writeImageFile(ImgWriter *writer, ImageFormat format, const char *ext, Stream *str, int width, int height, GfxImageColorMap *colorMap);
     static long getInlineImageLength(Stream *str, int width, int height, GfxImageColorMap *colorMap);
+    bool passesSizeFilter(int width, int height) const;
 
     char *fileRoot; // root of output file names
     char *fileName; // buffer for output file names
@@ -155,6 +160,8 @@ private:
     int pageNum; // current page number
     int imgNum; // current image number
     int errorCode; // code for any error creating the output files
+    int minWidth; // smallest width that will be output
+    int minHeight; // smallest height that will be output
 };
 
 #endif

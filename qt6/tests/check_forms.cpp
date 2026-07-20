@@ -235,7 +235,7 @@ void TestForms::testSetAppearanceText()
         QVERIFY(strObject.isStream());
 
         GooString s;
-        strObject.getStream()->fillGooString(&s);
+        strObject.getStream()->fillString(s.toNonConstStr());
 
         const QString textToFind = QStringLiteral("\n(%1) Tj\n").arg(textToSet);
         QVERIFY(s.toStr().contains(textToFind.toStdString()));

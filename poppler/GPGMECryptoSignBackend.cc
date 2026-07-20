@@ -229,7 +229,7 @@ static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromKey(const GpgM
     {
         auto ctx = GpgME::Context::create(protocol);
         GpgME::Data pubkeydata;
-        const auto err = ctx->exportPublicKeys(key.primaryFingerprint(), pubkeydata);
+        const auto err = ctx->exportPublicKeys(key.primaryFingerprint(), pubkeydata, GpgME::Context::ExportMode::ExportMinimal);
         if (isSuccess(err)) {
             std::string derData = pubkeydata.toString();
             certificateInfo->setCertificateDER(std::vector<unsigned char>(std::begin(derData), std::end(derData)));

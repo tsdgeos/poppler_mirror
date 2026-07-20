@@ -191,7 +191,7 @@ public:
 
     // Return the contents of the metadata stream, or nullptr if there is
     // no metadata.
-    std::unique_ptr<GooString> readMetadata() const { return catalog->readMetadata(); }
+    std::optional<std::string> readMetadata() const { return catalog->readMetadata(); }
 
     // Return the structure tree root object.
     const StructTreeRoot *getStructTreeRoot() const { return catalog->getStructTreeRoot(); }

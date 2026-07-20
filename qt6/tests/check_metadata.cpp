@@ -1,5 +1,6 @@
 #include <QtTest/QTest>
 #include <QtCore/QTimeZone>
+#include <QtCore/QXmlStreamReader>
 
 #include <poppler-qt6.h>
 
@@ -25,6 +26,7 @@ private Q_SLOTS:
     static void checkVersion();
     static void checkPdfId();
     static void checkNoPdfId();
+    static void checkXml();
 };
 
 void TestMetaData::checkStrings_data()
@@ -44,6 +46,17 @@ void TestMetaData::checkStrings_data()
                              << "iText: cgpdftops CUPS filter";
     QTest::newRow("Producer") << "Producer"
                               << "Acrobat Distiller 7.0 for Macintosh";
+}
+
+void TestMetaData::checkXml()
+{
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/doublepage.pdf"));
+    QVERIFY(doc);
+    QXmlStreamReader xml(doc->metadata());
+    while (!xml.atEnd()) {
+        xml.readNext();
+    }
+    QCOMPARE(xml.hasError(), false);
 }
 
 void TestMetaData::checkStrings()

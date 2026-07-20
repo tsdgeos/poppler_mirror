@@ -1,6 +1,7 @@
 /* poppler-attachment.h: glib interface to poppler
  * Copyright (C) 2004, Red Hat, Inc.
  * Copyright (C) 2025 Marco Trevisan <mail@3v1n0.net>
+ * Copyright (C) 2026 Maximiliano Sandoval <msandova@protonmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,7 +100,7 @@ typedef struct _PopplerAttachmentClass
 } PopplerAttachmentClass;
 
 POPPLER_PUBLIC
-GType poppler_attachment_get_type(void) G_GNUC_CONST;
+GType poppler_attachment_get_type(void);
 POPPLER_PUBLIC
 const GString *poppler_attachment_get_checksum(PopplerAttachment *attachment);
 POPPLER_PUBLIC

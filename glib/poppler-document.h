@@ -6,6 +6,7 @@
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  * Copyright (C) 2025 Marco Trevisan <mail@3v1n0.net>
+ * Copyright (C) 2026 Maximiliano Sandoval <msandova@protonmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -299,7 +300,7 @@ typedef enum
  */
 
 POPPLER_PUBLIC
-GType poppler_document_get_type(void) G_GNUC_CONST;
+GType poppler_document_get_type(void);
 
 POPPLER_PUBLIC
 PopplerDocument *poppler_document_new_from_file(const char *uri, const char *password, GError **error);
@@ -434,7 +435,7 @@ gint poppler_document_get_n_signatures(const PopplerDocument *document);
 
 #define POPPLER_TYPE_INDEX_ITER (poppler_index_iter_get_type())
 POPPLER_PUBLIC
-GType poppler_index_iter_get_type(void) G_GNUC_CONST;
+GType poppler_index_iter_get_type(void);
 POPPLER_PUBLIC
 PopplerIndexIter *poppler_index_iter_new(PopplerDocument *document);
 POPPLER_PUBLIC
@@ -455,7 +456,7 @@ gboolean poppler_index_iter_next(PopplerIndexIter *iter);
 #define POPPLER_FONT_INFO(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_FONT_INFO, PopplerFontInfo))
 #define POPPLER_IS_FONT_INFO(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), POPPLER_TYPE_FONT_INFO))
 POPPLER_PUBLIC
-GType poppler_font_info_get_type(void) G_GNUC_CONST;
+GType poppler_font_info_get_type(void);
 POPPLER_PUBLIC
 PopplerFontInfo *poppler_font_info_new(PopplerDocument *document);
 POPPLER_PUBLIC
@@ -465,7 +466,7 @@ void poppler_font_info_free(PopplerFontInfo *font_info);
 
 #define POPPLER_TYPE_FONTS_ITER (poppler_fonts_iter_get_type())
 POPPLER_PUBLIC
-GType poppler_fonts_iter_get_type(void) G_GNUC_CONST;
+GType poppler_fonts_iter_get_type(void);
 POPPLER_PUBLIC
 PopplerFontsIter *poppler_fonts_iter_copy(PopplerFontsIter *iter);
 POPPLER_PUBLIC
@@ -491,7 +492,7 @@ gboolean poppler_fonts_iter_next(PopplerFontsIter *iter);
 
 #define POPPLER_TYPE_LAYERS_ITER (poppler_layers_iter_get_type())
 POPPLER_PUBLIC
-GType poppler_layers_iter_get_type(void) G_GNUC_CONST;
+GType poppler_layers_iter_get_type(void);
 POPPLER_PUBLIC
 PopplerLayersIter *poppler_layers_iter_new(PopplerDocument *document);
 POPPLER_PUBLIC
@@ -512,7 +513,7 @@ gboolean poppler_layers_iter_next(PopplerLayersIter *iter);
 #define POPPLER_PS_FILE(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_PS_FILE, PopplerPSFile))
 #define POPPLER_IS_PS_FILE(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), POPPLER_TYPE_PS_FILE))
 POPPLER_PUBLIC
-GType poppler_ps_file_get_type(void) G_GNUC_CONST;
+GType poppler_ps_file_get_type(void);
 POPPLER_PUBLIC
 PopplerPSFile *poppler_ps_file_new(PopplerDocument *document, const char *filename, int first_page, int n_pages);
 #ifndef G_OS_WIN32

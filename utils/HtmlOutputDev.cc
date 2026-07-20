@@ -1417,6 +1417,8 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
     writer.close();
 
     if (dataUrls) {
+        // Need to reset f1 here so the contents get flushed to ims
+        f1.reset();
         fName = std::string("data:image/png;base64,") + gbase64Encode(ims.getBuffer());
     }
     pages->addImage(std::move(fName), state);

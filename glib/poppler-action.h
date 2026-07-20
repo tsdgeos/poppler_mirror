@@ -1,5 +1,6 @@
 /* poppler-action.h: glib interface to poppler
  * Copyright (C) 2004, Red Hat, Inc.
+ * Copyright (C) 2026 Maximiliano Sandoval <msandova@protonmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -431,7 +432,7 @@ union _PopplerAction {
 #define POPPLER_ACTION(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_ACTION, PopplerAction))
 
 POPPLER_PUBLIC
-GType poppler_action_get_type(void) G_GNUC_CONST;
+GType poppler_action_get_type(void);
 
 POPPLER_PUBLIC
 void poppler_action_free(PopplerAction *action);
@@ -440,7 +441,7 @@ PopplerAction *poppler_action_copy(PopplerAction *action);
 
 #define POPPLER_TYPE_DEST (poppler_dest_get_type())
 POPPLER_PUBLIC
-GType poppler_dest_get_type(void) G_GNUC_CONST;
+GType poppler_dest_get_type(void);
 
 POPPLER_PUBLIC
 void poppler_dest_free(PopplerDest *dest);

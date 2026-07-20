@@ -2165,7 +2165,7 @@ gchar *poppler_document_get_metadata(PopplerDocument *document)
 
     catalog = document->doc->getCatalog();
     if (catalog && catalog->isOk()) {
-        std::unique_ptr<GooString> s = catalog->readMetadata();
+        std::optional<std::string> s = catalog->readMetadata();
 
         if (s) {
             retval = g_strdup(s->c_str());

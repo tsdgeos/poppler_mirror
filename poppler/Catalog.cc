@@ -158,7 +158,7 @@ Catalog::~Catalog()
     delete structTreeRoot;
 }
 
-std::unique_ptr<GooString> Catalog::readMetadata()
+std::optional<std::string> Catalog::readMetadata()
 {
     catalogLocker();
     if (metadata.isNone()) {
@@ -179,8 +179,8 @@ std::unique_ptr<GooString> Catalog::readMetadata()
     if (!obj.isName("XML")) {
         error(errSyntaxWarning, -1, "Unknown Metadata type: '{0:s}'", obj.isName() ? obj.getName() : "???");
     }
-    std::unique_ptr<GooString> s = std::make_unique<GooString>();
-    metadataStream->fillGooString(s.get());
+    std::string s;
+    metadataStream->fillString(s);
     metadataStream->close();
     return s;
 }

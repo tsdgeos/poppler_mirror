@@ -2,6 +2,7 @@
  * Copyright (C) 2004, Red Hat, Inc.
  * Copyright (C) 2025, Marco Trevisan <mail@3v1n0.net>
  * Copyright (C) 2025, Nelson Benítez León <nbenitezl@gmail.com>
+ * Copyright (C) 2026 Maximiliano Sandoval <msandova@protonmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +43,7 @@ G_BEGIN_DECLS
  */
 
 POPPLER_PUBLIC
-GType poppler_page_get_type(void) G_GNUC_CONST;
+GType poppler_page_get_type(void);
 
 POPPLER_PUBLIC
 void poppler_page_render(PopplerPage *page, cairo_t *cairo);
@@ -151,7 +152,7 @@ struct _PopplerRectangle
 };
 
 POPPLER_PUBLIC
-GType poppler_rectangle_get_type(void) G_GNUC_CONST;
+GType poppler_rectangle_get_type(void);
 POPPLER_PUBLIC
 PopplerRectangle *poppler_rectangle_new(void);
 POPPLER_PUBLIC
@@ -181,7 +182,7 @@ struct _PopplerPoint
 };
 
 POPPLER_PUBLIC
-GType poppler_point_get_type(void) G_GNUC_CONST;
+GType poppler_point_get_type(void);
 POPPLER_PUBLIC
 PopplerPoint *poppler_point_new(void);
 POPPLER_PUBLIC
@@ -220,7 +221,7 @@ struct _PopplerQuadrilateral
 };
 
 POPPLER_PUBLIC
-GType poppler_quadrilateral_get_type(void) G_GNUC_CONST;
+GType poppler_quadrilateral_get_type(void);
 POPPLER_PUBLIC
 PopplerQuadrilateral *poppler_quadrilateral_new(void);
 POPPLER_PUBLIC
@@ -250,7 +251,7 @@ struct _PopplerColor
 };
 
 POPPLER_PUBLIC
-GType poppler_color_get_type(void) G_GNUC_CONST;
+GType poppler_color_get_type(void);
 POPPLER_PUBLIC
 PopplerColor *poppler_color_new(void);
 POPPLER_PUBLIC
@@ -287,7 +288,7 @@ struct _PopplerTextAttributes
 };
 
 POPPLER_PUBLIC
-GType poppler_text_attributes_get_type(void) G_GNUC_CONST;
+GType poppler_text_attributes_get_type(void);
 POPPLER_PUBLIC
 PopplerTextAttributes *poppler_text_attributes_new(void);
 POPPLER_PUBLIC
@@ -315,7 +316,7 @@ struct _PopplerLinkMapping
 };
 
 POPPLER_PUBLIC
-GType poppler_link_mapping_get_type(void) G_GNUC_CONST;
+GType poppler_link_mapping_get_type(void);
 POPPLER_PUBLIC
 PopplerLinkMapping *poppler_link_mapping_new(void);
 POPPLER_PUBLIC
@@ -363,7 +364,7 @@ struct _PopplerPageTransition
 };
 
 POPPLER_PUBLIC
-GType poppler_page_transition_get_type(void) G_GNUC_CONST;
+GType poppler_page_transition_get_type(void);
 POPPLER_PUBLIC
 PopplerPageTransition *poppler_page_transition_new(void);
 POPPLER_PUBLIC
@@ -391,7 +392,7 @@ struct _PopplerImageMapping
 };
 
 POPPLER_PUBLIC
-GType poppler_image_mapping_get_type(void) G_GNUC_CONST;
+GType poppler_image_mapping_get_type(void);
 POPPLER_PUBLIC
 PopplerImageMapping *poppler_image_mapping_new(void);
 POPPLER_PUBLIC
@@ -419,7 +420,7 @@ struct _PopplerFormFieldMapping
 };
 
 POPPLER_PUBLIC
-GType poppler_form_field_mapping_get_type(void) G_GNUC_CONST;
+GType poppler_form_field_mapping_get_type(void);
 POPPLER_PUBLIC
 PopplerFormFieldMapping *poppler_form_field_mapping_new(void);
 POPPLER_PUBLIC
@@ -447,7 +448,7 @@ struct _PopplerAnnotMapping
 };
 
 POPPLER_PUBLIC
-GType poppler_annot_mapping_get_type(void) G_GNUC_CONST;
+GType poppler_annot_mapping_get_type(void);
 POPPLER_PUBLIC
 PopplerAnnotMapping *poppler_annot_mapping_new(void);
 POPPLER_PUBLIC

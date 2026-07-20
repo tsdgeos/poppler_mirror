@@ -26,6 +26,7 @@
 // Copyright (C) 2024 Fernando Herrera <fherrera@onirica.com>
 // Copyright (C) 2024 Sebastian J. Bronner <waschtl@sbronner.com>
 // Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Michael <ttmigueltt@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -63,6 +64,8 @@ static char userPassword[33] = "\001";
 static bool quiet = false;
 static bool printVersion = false;
 static bool printHelp = false;
+static int minHeight = 0;
+static int minWidth = 0;
 
 static const ArgDesc argDesc[] = { { .arg = "-f", .kind = argInt, .val = &firstPage, .size = 0, .usage = "first page to convert" },
                                    { .arg = "-l", .kind = argInt, .val = &lastPage, .size = 0, .usage = "last page to convert" },
@@ -82,6 +85,8 @@ static const ArgDesc argDesc[] = { { .arg = "-f", .kind = argInt, .val = &firstP
                                    { .arg = "-upw", .kind = argString, .val = userPassword, .size = sizeof(userPassword), .usage = "user password (for encrypted files)" },
                                    { .arg = "-p", .kind = argFlag, .val = &pageNames, .size = 0, .usage = "include page numbers in output file names" },
                                    { .arg = "-print-filenames", .kind = argFlag, .val = &printFilenames, .size = 0, .usage = "print image filenames to stdout" },
+                                   { .arg = "-min-height", .kind = argInt, .val = &minHeight, .size = 0, .usage = "images with smaller height will be ignored" },
+                                   { .arg = "-min-width", .kind = argInt, .val = &minWidth, .size = 0, .usage = "images with smaller width will be ignored" },
                                    { .arg = "-q", .kind = argFlag, .val = &quiet, .size = 0, .usage = "don't print any messages or errors" },
                                    { .arg = "-v", .kind = argFlag, .val = &printVersion, .size = 0, .usage = "print copyright and version info" },
                                    { .arg = "-h", .kind = argFlag, .val = &printHelp, .size = 0, .usage = "print usage information" },
@@ -167,6 +172,8 @@ int main(int argc, char *argv[])
 
     // write image files
     auto *imgOut = new ImageOutputDev(imgRoot, pageNames, listImages);
+    imgOut->setMinHeight(minHeight);
+    imgOut->setMinWidth(minWidth);
     if (imgOut->isOk()) {
         if (allFormats) {
             imgOut->enablePNG(true);

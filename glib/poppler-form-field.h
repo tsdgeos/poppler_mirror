@@ -4,6 +4,7 @@
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  * Copyright (C) 2021, 2023 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2025 Marco Trevisan <mail@3v1n0.net>
+ * Copyright (C) 2026 Maximiliano Sandoval <msandova@protonmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -158,7 +159,7 @@ typedef enum
  */
 
 POPPLER_PUBLIC
-GType poppler_form_field_get_type(void) G_GNUC_CONST;
+GType poppler_form_field_get_type(void);
 
 POPPLER_PUBLIC
 PopplerFormFieldType poppler_form_field_get_field_type(PopplerFormField *field);
@@ -244,7 +245,7 @@ PopplerSignatureInfo *poppler_form_field_signature_validate_finish(PopplerFormFi
 /* Signature Field */
 #define POPPLER_TYPE_SIGNATURE_INFO (poppler_signature_info_get_type())
 POPPLER_PUBLIC
-GType poppler_signature_info_get_type(void) G_GNUC_CONST;
+GType poppler_signature_info_get_type(void);
 POPPLER_PUBLIC
 PopplerSignatureInfo *poppler_signature_info_copy(const PopplerSignatureInfo *siginfo);
 POPPLER_PUBLIC
@@ -263,7 +264,7 @@ GDateTime *poppler_signature_info_get_local_signing_time(const PopplerSignatureI
 /* Signing Data */
 #define POPPLER_TYPE_SIGNING_DATA (poppler_signing_data_get_type())
 POPPLER_PUBLIC
-GType poppler_signing_data_get_type(void) G_GNUC_CONST;
+GType poppler_signing_data_get_type(void);
 POPPLER_PUBLIC
 PopplerSigningData *poppler_signing_data_new(void);
 POPPLER_PUBLIC
@@ -350,7 +351,7 @@ const gchar *poppler_signing_data_get_document_user_password(const PopplerSignin
 /* Certificate Information */
 #define POPPLER_TYPE_CERTIFICATE_INFO (poppler_certificate_info_get_type())
 POPPLER_PUBLIC
-GType poppler_certificate_info_get_type(void) G_GNUC_CONST;
+GType poppler_certificate_info_get_type(void);
 PopplerCertificateInfo *poppler_certificate_info_new(void);
 POPPLER_PUBLIC
 PopplerCertificateInfo *poppler_certificate_info_copy(const PopplerCertificateInfo *certificate_info);

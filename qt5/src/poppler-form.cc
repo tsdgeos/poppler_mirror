@@ -1126,8 +1126,8 @@ static SignatureValidationInfo fromInternal(SignatureInfo *si, FormWidgetSignatu
     priv->signer_name = QString::fromStdString(si->getSignerName());
     priv->signer_subject_dn = QString::fromStdString(si->getSubjectDN());
     priv->hash_algorithm = si->getHashAlgorithm();
-    priv->location = UnicodeParsedString(si->getLocation().toStr());
-    priv->reason = UnicodeParsedString(si->getReason().toStr());
+    priv->location = UnicodeParsedString(si->getLocation());
+    priv->reason = UnicodeParsedString(si->getReason());
 
     priv->signing_time = si->getSigningTime();
     const std::vector<Goffset> ranges = fws->getSignedRangeBounds();

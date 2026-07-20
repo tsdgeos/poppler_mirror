@@ -30,6 +30,7 @@
 // Copyright (C) 2024 Sebastian J. Bronner <waschtl@sbronner.com>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Michael <ttmigueltt@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -71,6 +72,8 @@ ImageOutputDev::ImageOutputDev(char *fileRootA, bool pageNamesA, bool listImages
     imgNum = 0;
     pageNum = 0;
     errorCode = 0;
+    minHeight = 0;
+    minWidth = 0;
     if (listImages) {
         printf("page   num  type   width height color comp bpc  enc interp  object ID x-ppi y-ppi size ratio\n");
         printf("--------------------------------------------------------------------------------------------\n");
@@ -714,6 +717,9 @@ bool ImageOutputDev::tilingPatternFill(GfxState * /*state*/, Gfx * /*gfx*/, Cata
 
 void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool /*invert*/, bool interpolate, bool inlineImg)
 {
+    if (!passesSizeFilter(width, height)) {
+        return;
+    }
     if (listImages) {
         listImage(state, ref, str, width, height, nullptr, interpolate, inlineImg, imgStencil);
     } else {
@@ -723,6 +729,9 @@ void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, in
 
 void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int * /*maskColors*/, bool inlineImg)
 {
+    if (!passesSizeFilter(width, height)) {
+        return;
+    }
     if (listImages) {
         listImage(state, ref, str, width, height, colorMap, interpolate, inlineImg, imgImage);
     } else {
@@ -732,6 +741,9 @@ void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int wi
 
 void ImageOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool /*maskInvert*/, bool maskInterpolate)
 {
+    if (!passesSizeFilter(width, height)) {
+        return;
+    }
     if (listImages) {
         listImage(state, ref, str, width, height, colorMap, interpolate, false, imgImage);
         listImage(state, ref, maskStr, maskWidth, maskHeight, nullptr, maskInterpolate, false, imgMask);
@@ -744,6 +756,9 @@ void ImageOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, 
 void ImageOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,
                                          bool maskInterpolate)
 {
+    if (!passesSizeFilter(width, height)) {
+        return;
+    }
     if (listImages) {
         listImage(state, ref, str, width, height, colorMap, interpolate, false, imgImage);
         listImage(state, ref, maskStr, maskWidth, maskHeight, maskColorMap, maskInterpolate, false, imgSmask);
@@ -751,4 +766,9 @@ void ImageOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
         writeImage(state, ref, str, width, height, colorMap, false);
         writeImage(state, ref, maskStr, maskWidth, maskHeight, maskColorMap, false);
     }
+}
+
+bool ImageOutputDev::passesSizeFilter(int width, int height) const
+{
+    return height >= minHeight && width >= minWidth;
 }

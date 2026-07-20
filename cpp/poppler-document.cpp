@@ -796,9 +796,9 @@ bool document::has_permission(permission_enum which) const
  */
 ustring document::metadata() const
 {
-    std::unique_ptr<GooString> md(d->doc->getCatalog()->readMetadata());
+    std::optional<std::string> md(d->doc->getCatalog()->readMetadata());
     if (md) {
-        return detail::unicode_string_to_ustring(md->toStr());
+        return detail::unicode_string_to_ustring(md.value());
     }
     return ustring();
 }

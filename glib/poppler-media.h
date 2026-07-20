@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2010 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2025 Marco Trevisan <mail@3v1n0.net>
+ * Copyright (C) 2026 Maximiliano Sandoval <msandova@protonmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +55,7 @@ G_BEGIN_DECLS
 typedef gboolean (*PopplerMediaSaveFunc)(const gchar *buf, gsize count, gpointer data, GError **error);
 
 POPPLER_PUBLIC
-GType poppler_media_get_type(void) G_GNUC_CONST;
+GType poppler_media_get_type(void);
 POPPLER_PUBLIC
 gboolean poppler_media_is_embedded(PopplerMedia *poppler_media);
 POPPLER_PUBLIC
