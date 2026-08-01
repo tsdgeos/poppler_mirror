@@ -143,6 +143,7 @@ build_qt611_android:
   before_script:
     - echo "workaround for ECM Android toolchain wanting all binaries to be shared libraries"
     - sed -i -e 's/<LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS>/<LINK_FLAGS>/g' /opt/nativetooling/share/ECM/toolchain/Android.cmake
+    - sudo apt update
     - sudo apt install --yes wget
   script:
     - wget https://download.savannah.gnu.org/releases/freetype/freetype-2.13.3.tar.xz

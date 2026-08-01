@@ -1224,7 +1224,7 @@ bool JBIG2Stream::rewind()
     mmrDecoder->setStream(curStr);
     rewindSuccess = rewindSuccess && readSegments();
 
-    if (pageBitmap) {
+    if (pageBitmap && pageBitmap->isOk()) {
         dataPtr = pageBitmap->getDataPtr();
         dataEnd = dataPtr + pageBitmap->getDataSize();
     } else {

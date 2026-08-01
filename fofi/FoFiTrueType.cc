@@ -598,14 +598,15 @@ int FoFiTrueType::mapCodeToGID(int i, unsigned int c) const
         gid = getU16BE(pos + 10 + 2 * (c - cmapFirst), &ok);
         break;
     case 12:
-    case 13:
+    case 13: {
         segCnt = getU32BE(pos + 12, &ok);
         a = -1;
         b = segCnt - 1;
-        if (b > std::numeric_limits<int>::max() / 12) {
+        int b12;
+        if (checkedMultiply(b, 12, &b12)) {
             return 0;
         }
-        segEnd = getU32BE(pos + 16 + 12 * b + 4, &ok);
+        segEnd = getU32BE(pos + 16 + b12 + 4, &ok);
         if (c > segEnd) {
             return 0;
         }
@@ -629,6 +630,7 @@ int FoFiTrueType::mapCodeToGID(int i, unsigned int c) const
         // for an entire segment.
         gid = segDelta + (cmaps[i].fmt == 12 ? (c - segStart) : 0);
         break;
+    }
     default:
         return 0;
     }
