@@ -370,9 +370,9 @@ XRef::~XRef()
     }
 }
 
-XRef *XRef::copy() const
+std::unique_ptr<XRef> XRef::copy() const
 {
-    XRef *xref = new XRef();
+    auto xref = std::make_unique<XRef>();
     xref->strOwner = str->copy();
     xref->str = xref->strOwner.get();
     xref->encrypted = encrypted;
@@ -398,7 +398,6 @@ XRef *XRef::copy() const
 
     if (xref->reserve(size) == 0) {
         error(errSyntaxError, -1, "unable to allocate {0:d} entries", size);
-        delete xref;
         return nullptr;
     }
     xref->size = size;

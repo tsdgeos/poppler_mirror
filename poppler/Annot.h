@@ -84,6 +84,7 @@ class Movie;
 class LinkAction;
 class Sound;
 class FileSpec;
+class FontSubsetter;
 
 enum AnnotLineEndingStyle
 {
@@ -1087,6 +1088,9 @@ public:
     const PDFRectangle *getRectangle() const { return rectangle.get(); }
     AnnotLineEndingStyle getEndStyle() const { return endStyle; }
 
+    // Performs the subsetting and returns the original fonts to delete
+    std::vector<std::shared_ptr<const GfxFont>> subsetFonts(const FontSubsetter *fontSubsetter);
+
 protected:
     void initialize(Dict *dict);
     void generateFreeTextAppearance();
@@ -1778,5 +1782,7 @@ private:
     PDFDoc *doc;
     std::vector<std::shared_ptr<Annot>> annots;
 };
+
+Dict POPPLER_PRIVATE_EXPORT *getFontDictFromResourcesDict(const Object &resources, XRef *xref, bool transparency);
 
 #endif

@@ -108,6 +108,10 @@
 #include "JSInfo.h"
 #include "ImageEmbeddingUtils.h"
 
+#if ENABLE_HARFBUZZ
+#    include <FontSubsetter.h>
+#endif
+
 //------------------------------------------------------------------------
 
 struct FILECloser
@@ -1069,6 +1073,11 @@ int PDFDoc::saveWithoutChangesAs(OutStream *outStr)
 
 void PDFDoc::saveIncrementalUpdate(OutStream *outStr)
 {
+#if ENABLE_HARFBUZZ
+    FontSubsetter fontSubsetter(this);
+    fontSubsetter.subsetAll();
+#endif
+
     // copy the original file
     std::unique_ptr<BaseStream> copyStr { str->copy() };
     if (!copyStr->rewind()) {
@@ -1149,6 +1158,11 @@ void PDFDoc::saveIncrementalUpdate(OutStream *outStr)
 
 void PDFDoc::saveCompleteRewrite(OutStream *outStr)
 {
+#if ENABLE_HARFBUZZ
+    FontSubsetter fontSubsetter(this);
+    fontSubsetter.subsetAll();
+#endif
+
     // Make sure that special flags are set, because we are going to read
     // all objects, including Unencrypted ones.
     xref->scanSpecialFlags();

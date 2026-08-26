@@ -49,6 +49,7 @@
 // Copyright (C) 2024-2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2025 Hagen Möbius <hagen.moebius@googlemail.com>
 // Copyright (C) 2026 Aditya Tiwari <suntiwari3495@gmail.com>
+// Copyright (C) 2026 Diego Costa R. <diegocostar@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -754,6 +755,9 @@ void TextWord::merge(TextWord *word)
     chars.insert(chars.end(), word->chars.begin(), word->chars.end());
     edgeEnd = word->edgeEnd;
     charPosEnd = word->charPosEnd;
+    if (!link) {
+        link = word->link;
+    }
 }
 
 inline int TextWord::primaryCmp(const TextWord *word) const
@@ -2854,6 +2858,15 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
     if (rawOrder) {
         primaryRot = 0;
         primaryLR = true;
+        if (inlineLinkURIs) {
+            for (TextWord *word = rawWords; word; word = word->next) {
+                for (const std::unique_ptr<TextLink> &link : links) {
+                    if (link->xMin < word->xMin + hyperlinkSlack && word->xMax - hyperlinkSlack < link->xMax && link->yMin < word->yMin + hyperlinkSlack && word->yMax - hyperlinkSlack < link->yMax) {
+                        word->link = link->link;
+                    }
+                }
+            }
+        }
         return;
     }
 
@@ -2950,6 +2963,9 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
                 }
             }
         }
+    }
+
+    if (doHTML || inlineLinkURIs) {
 
         //----- handle links
         for (const std::unique_ptr<TextLink> &link : links) {
@@ -5177,6 +5193,48 @@ static bool isHyphenChar(Unicode c)
     return c == static_cast<Unicode>('-') || c == static_cast<Unicode>(0x2010) || c == static_cast<Unicode>(0xFE63) || c == static_cast<Unicode>(0xFF0D);
 }
 
+// sanitize output to prevent terminal escape injection and line spoofing
+static bool isDangerousCtrl(unsigned char c)
+{
+    switch (c) {
+    case 0x07: // BEL - audible bell, terminates OSC
+    case 0x08: // BS  - erases previous character
+    case 0x0a: // LF  - newline injection
+    case 0x0b: // VT  - acts as linefeed
+    case 0x0c: // FF  - acts as linefeed
+    case 0x0d: // CR  - overwrites line start
+    case 0x0e: // SO  - corrupts charset
+    case 0x0f: // SI  - corrupts charset
+    case 0x1b: // ESC - starts escape sequences
+    case 0x7f: // DEL - may erase
+        return true;
+    default:
+        return false;
+    }
+}
+
+static int appendInlineLinkURI(const AnnotLink *link, const UnicodeMap *uMap, GooString *s)
+{
+    const LinkAction *action = link->getAction();
+    if (!action || action->getKind() != actionURI) {
+        return 0;
+    }
+    char buf[8];
+    int nCols = 0;
+    const auto append = [&](Unicode u) {
+        s->append(buf, uMap->mapUnicode(u, buf, sizeof(buf)));
+        ++nCols;
+    };
+    append(0x20);
+    append('[');
+    for (const char c : static_cast<const LinkURI *>(action)->getURI()) {
+        const auto uc = static_cast<unsigned char>(c);
+        append(isDangerousCtrl(uc) ? '?' : uc);
+    }
+    append(']');
+    return nCols;
+}
+
 void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol, std::optional<PDFRectangle> area, EndOfLineHyphenMode hyphenMode) const
 {
     const UnicodeMap *uMap;
@@ -5228,6 +5286,12 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
             std::ranges::transform(word->chars, uText.begin(), [](auto &c) { return c.text; });
             dumpFragment(uText.data(), uText.size(), uMap, &s);
             (*outputFunc)(outputStream, s.c_str(), s.size());
+
+            if (inlineLinkURIs && word->link && (!word->next || word->next->link != word->link)) {
+                s.clear();
+                appendInlineLinkURI(word->link, uMap, &s);
+                (*outputFunc)(outputStream, s.c_str(), s.size());
+            }
 
             if (!word->next) {
                 continue;
@@ -5318,6 +5382,19 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
             col += dumpFragment(frag.line->text + frag.start, frag.len, uMap, &s);
             (*outputFunc)(outputStream, s.c_str(), s.size());
 
+            if (inlineLinkURIs) {
+                s.clear();
+                int offset = 0;
+                for (const TextWord *word = frag.line->words; word && offset < frag.start + frag.len; word = word->next) {
+                    const int wordEnd = offset + static_cast<int>(word->len());
+                    if (word->link && (!word->next || word->next->link != word->link) && wordEnd > frag.start) {
+                        col += appendInlineLinkURI(word->link, uMap, &s);
+                    }
+                    offset = wordEnd + (word->spaceAfter ? 1 : 0);
+                }
+                (*outputFunc)(outputStream, s.c_str(), s.size());
+            }
+
             // print one or more returns if necessary
             if (i == frags.size() - 1) {
                 if (!suppressLastEol) {
@@ -5358,6 +5435,23 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
                     s.clear();
                     dumpFragment(line->text, n, uMap, &s);
                     (*outputFunc)(outputStream, s.c_str(), s.size());
+                    if (inlineLinkURIs) {
+                        s.clear();
+                        for (const TextWord *word = line->words; word; word = word->next) {
+                            const TextWord *nextWord = word->next;
+                            if (!nextWord) {
+                                if (line->next) {
+                                    nextWord = line->next->words;
+                                } else if (blk->next && blk->next->lines) {
+                                    nextWord = blk->next->lines->words;
+                                }
+                            }
+                            if (word->link && (!nextWord || nextWord->link != word->link)) {
+                                appendInlineLinkURI(word->link, uMap, &s);
+                            }
+                        }
+                        (*outputFunc)(outputStream, s.c_str(), s.size());
+                    }
                     if (!suppressHyphen) {
                         (*outputFunc)(outputStream, eol, eolLen);
                     }
@@ -5376,6 +5470,11 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
 void TextPage::setMergeCombining(bool merge)
 {
     mergeCombining = merge;
+}
+
+void TextPage::setInlineLinkURIs(bool inlineLinkURIsA)
+{
+    inlineLinkURIs = inlineLinkURIsA;
 }
 
 void TextPage::assignColumns(TextLineFrag *frags, int nFrags, bool oneRot)
@@ -5609,6 +5708,13 @@ TextOutputDev::~TextOutputDev()
     }
 }
 
+bool TextOutputDev::checkPageSlice(Page *pageA, double /*hDPI*/, double /*vDPI*/, int /*rotate*/, bool /*useMediaBox*/, bool /*crop*/, int /*sliceX*/, int /*sliceY*/, int /*sliceW*/, int /*sliceH*/, bool /*printing*/,
+                                   bool (* /*abortCheckCbk*/)(void *data), void * /*abortCheckCbkData*/, bool (* /*annotDisplayDecideCbk*/)(Annot *annot, void *user_data), void * /*annotDisplayDecideCbkData*/)
+{
+    currentPage = pageA;
+    return true;
+}
+
 void TextOutputDev::startPage(int /*pageNum*/, GfxState *state, XRef * /*xref*/)
 {
     text->startPage(state);
@@ -5616,11 +5722,18 @@ void TextOutputDev::startPage(int /*pageNum*/, GfxState *state, XRef * /*xref*/)
 
 void TextOutputDev::endPage()
 {
+    if (inlineLinkURIs && currentPage) {
+        const std::unique_ptr<Links> pageLinks = currentPage->getLinks();
+        for (const std::shared_ptr<AnnotLink> &annot : pageLinks->getLinks()) {
+            processLink(annot.get());
+        }
+    }
     text->endPage();
     text->coalesce(physLayout, fixedPitch, doHTML, minColSpacing1);
     if (outputStream) {
         text->dump(outputStream, outputFunc, physLayout, textEOL, textPageBreaks, false, std::nullopt, hyphenMode);
     }
+    currentPage = nullptr;
 }
 
 void TextOutputDev::restoreState(GfxState *state)
@@ -5759,7 +5872,7 @@ void TextOutputDev::processLink(AnnotLink *link)
     double x1, y1, x2, y2;
     int xMin, yMin, xMax, yMax, x, y;
 
-    if (!doHTML) {
+    if (!doHTML && !inlineLinkURIs) {
         return;
     }
     link->getRect(&x1, &y1, &x2, &y2);
@@ -5847,8 +5960,15 @@ std::unique_ptr<TextPage> TextOutputDev::takeText()
     auto ret = std::move(text);
 
     text = std::make_unique<TextPage>(rawOrder, discardDiag);
+    text->setInlineLinkURIs(inlineLinkURIs);
     actualText = std::make_unique<ActualText>(text.get());
     return ret;
+}
+
+void TextOutputDev::setInlineLinkURIs(bool inlineLinkURIsA)
+{
+    inlineLinkURIs = inlineLinkURIsA;
+    text->setInlineLinkURIs(inlineLinkURIsA);
 }
 
 const TextFlow *TextOutputDev::getFlows() const

@@ -27,6 +27,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2019, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Eddie Kohler <ekohler@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -234,6 +235,11 @@ public:
     // Does this device use drawChar() or drawString()?
     bool useDrawChar() override { return true; }
 
+    // Does this device use tilingPatternFill()?  If this returns false,
+    // tiling pattern fills will be reduced to a series of other drawing
+    // operations.
+    bool useTilingPatternFill() override { return true; }
+
     // Does this device use beginType3Char/endType3Char?  Otherwise,
     // text in Type 3 fonts will be drawn with drawChar/drawString.
     bool interpretType3Chars() override { return false; }
@@ -260,6 +266,13 @@ public:
     // add a background image to the list of background images,
     // as this seems to be done outside other processing. takes ownership of img.
     void addBackgroundImage(const std::string &img);
+
+    //----- path painting
+    bool tilingPatternFill(GfxState * /*state*/, Gfx * /*gfx*/, Catalog * /*cat*/, GfxTilingPattern * /*tPat*/, const std::array<double, 6> & /*mat*/, int /*x0*/, int /*y0*/, int /*x1*/, int /*y1*/, double /*xStep*/,
+                           double /*yStep*/) override
+    {
+        return true;
+    }
 
     //----- update text state
     void updateFont(GfxState *state) override;

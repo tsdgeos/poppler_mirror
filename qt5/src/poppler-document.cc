@@ -247,10 +247,10 @@ QByteArray Document::fontData(const FontInfo &fi) const
 {
     QByteArray result;
     if (fi.isEmbedded()) {
-        XRef *xref = m_doc->doc->getXRef()->copy();
+        const std::unique_ptr<XRef> xref = m_doc->doc->getXRef()->copy();
 
         Object refObj(fi.m_data->embRef);
-        Object strObj = refObj.fetch(xref);
+        Object strObj = refObj.fetch(xref.get());
         if (strObj.isStream()) {
             Stream *stream = strObj.getStream();
             if (stream->rewind()) {
@@ -261,7 +261,6 @@ QByteArray Document::fontData(const FontInfo &fi) const
                 stream->close();
             }
         }
-        delete xref;
     }
     return result;
 }
@@ -425,7 +424,7 @@ QStringList Document::infoKeys() const
         return QStringList();
     }
 
-    QScopedPointer<XRef> xref(m_doc->doc->getXRef()->copy());
+    const std::unique_ptr<XRef> xref = m_doc->doc->getXRef()->copy();
     if (!xref) {
         return QStringList();
     }

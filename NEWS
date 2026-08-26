@@ -1,3 +1,20 @@
+Release 26.08.0:
+        core:
+         * GPG based signature improvements
+         * Internal code improvements
+
+        utils:
+         * pdftohtml: Fix crash when using dataurls. Issue #1751
+         * pdfimages: Add min-height and min-width options
+
+        glib:
+         * Stop using G_GNUC_CONST in _get_type funcs
+
+        build system:
+         * Slight increase in compilation of utils folder
+         * Fix -Wunused-command-line-argument when using clang
+         * Use cmake modern way to check for linker support
+
 Release 26.07.0:
         core:
          * Remove deprecated DCT and JPX decoders

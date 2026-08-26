@@ -603,10 +603,12 @@ void Page::displaySlice(OutputDev *out, double hDPI, double vDPI, int rotate, bo
         return;
     }
     pageLocker();
-    XRef *localXRef = copyXRef ? xref->copy() : xref;
+    std::unique_ptr<XRef> copiedXRefIfNeeded;
     if (copyXRef) {
-        replaceXRef(localXRef);
+        copiedXRefIfNeeded = xref->copy();
+        replaceXRef(copiedXRefIfNeeded.get());
     }
+    XRef *localXRef = copyXRef ? copiedXRefIfNeeded.get() : xref;
 
     std::unique_ptr<Gfx> gfx = createGfx(out, hDPI, vDPI, rotate, useMediaBox, crop, sliceX, sliceY, sliceW, sliceH, abortCheckCbk, abortCheckCbkData, localXRef);
 
@@ -638,7 +640,6 @@ void Page::displaySlice(OutputDev *out, double hDPI, double vDPI, int rotate, bo
 
     if (copyXRef) {
         replaceXRef(doc->getXRef());
-        delete localXRef;
     }
 }
 

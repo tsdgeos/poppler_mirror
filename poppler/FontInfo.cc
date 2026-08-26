@@ -66,11 +66,14 @@ std::vector<FontInfo *> FontInfoScanner::scan(int nPages)
         lastPage = doc->getNumPages() + 1;
     }
 
-    std::unique_ptr<XRef> xrefA(doc->getXRef()->copy());
+    std::unique_ptr<XRef> xrefA;
     for (int pg = currentPage; pg < lastPage; ++pg) {
         page = doc->getPage(pg);
         if (!page) {
             continue;
+        }
+        if (!xrefA) {
+            xrefA = doc->getXRef()->copy();
         }
 
         if (std::unique_ptr<Dict> resDict = page->getResourceDictCopy(xrefA.get())) {

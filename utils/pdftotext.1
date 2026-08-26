@@ -122,6 +122,13 @@ Sets the end-of-line convention to use for text output.
 .B \-nopgbrk
 Don't insert page breaks (form feed characters) between pages.
 .TP
+.B \-urls
+Print the URL of each link next to its link text, enclosed in square
+brackets at the end of the line (or line fragment) that contains the
+linked text.  Links that do not point to a URL, such as links to another
+place in the same document, are ignored.
+Not compatible with \-bbox, \-bbox\-layout, \-tsv or \-htmlmeta.
+.TP
 .BI \-opw " password"
 Specify the owner password for the PDF file.  Providing this will
 bypass all security restrictions.

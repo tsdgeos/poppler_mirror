@@ -31,6 +31,7 @@
 // Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Hagen Möbius <hagen.moebius@googlemail.com>
 // Copyright (C) 2026 Aditya Tiwari <suntiwari3495@gmail.com>
+// Copyright (C) 2026 Diego Costa R. <diegocostar@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -657,6 +658,8 @@ public:
     // character are drawn on eachother.
     void setMergeCombining(bool merge);
 
+    void setInlineLinkURIs(bool inlineLinkURIsA);
+
     // Build a flat word list, in content stream order (if
     // this->rawOrder is true), physical layout order (if <physLayout>
     // is true and this->rawOrder is false), or reading order (if both
@@ -671,6 +674,7 @@ private:
 
     bool rawOrder; // keep text in content stream order
     bool discardDiag; // discard diagonal text
+    bool inlineLinkURIs = false;
     bool mergeCombining; // merge when combining and base characters
                          // are drawn on top of each other
 
@@ -797,6 +801,9 @@ public:
 
     //----- initialization and control
 
+    bool checkPageSlice(Page *pageA, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, int sliceX, int sliceY, int sliceW, int sliceH, bool printing, bool (*abortCheckCbk)(void *data) = nullptr,
+                        void *abortCheckCbkData = nullptr, bool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr, void *annotDisplayDecideCbkData = nullptr) override;
+
     // Start a page.
     void startPage(int pageNum, GfxState *state, XRef *xref) override;
 
@@ -868,6 +875,8 @@ public:
     // Turn extra processing for HTML conversion on or off.
     void enableHTMLExtras(bool doHTMLA) { doHTML = doHTMLA; }
 
+    void setInlineLinkURIs(bool inlineLinkURIsA);
+
     // Get the head of the linked list of TextFlows for the
     // last rasterized page.
     const TextFlow *getFlows() const;
@@ -895,6 +904,8 @@ private:
                       // 0, 90, 180, or 270 degree axes, is discarded. This is useful
                       // to skip watermarks drawn on top of body text, etc.
     bool doHTML; // extra processing for HTML conversion
+    bool inlineLinkURIs = false;
+    Page *currentPage = nullptr;
     bool ok; // set up ok?
     bool textPageBreaks; // insert end-of-page markers?
     EndOfLineKind textEOL; // type of EOL marker to use

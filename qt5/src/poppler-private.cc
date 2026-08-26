@@ -150,14 +150,7 @@ std::unique_ptr<GooString> QStringToUnicodeGooString(const QString &s)
 
 std::unique_ptr<GooString> QStringToGooString(const QString &s)
 {
-    int len = s.length();
-    char *cstring = static_cast<char *>(gmallocn(s.length(), sizeof(char)));
-    for (int i = 0; i < len; ++i) {
-        cstring[i] = s.at(i).unicode();
-    }
-    std::unique_ptr<GooString> ret = std::make_unique<GooString>(cstring, len);
-    gfree(cstring);
-    return ret;
+    return std::make_unique<GooString>(s.toLatin1().toStdString());
 }
 
 std::unique_ptr<GooString> QDateTimeToUnicodeGooString(const QDateTime &dt)

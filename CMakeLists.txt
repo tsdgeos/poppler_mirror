@@ -41,7 +41,7 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "26")
-set(POPPLER_MINOR_VERSION_STRING "07")
+set(POPPLER_MINOR_VERSION_STRING "08")
 # We want the string version to have 08 but the integer version can't have a leading 0 since otherwise it's considered octal
 # So strip a leading 0 if found in POPPLER_MINOR_VERSION_STRING and store the result in POPPLER_MINOR_VERSION
 string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VERSION_STRING}")
@@ -87,6 +87,7 @@ option(ENABLE_ZLIB_UNCOMPRESS "Use zlib to uncompress flate streams (not totally
 option(BUILD_SHARED_LIBS "Build poppler as a shared library" ON)
 option(RUN_GPERF_IF_PRESENT "Run gperf if it is found" ON)
 option(INSTALL_GLIB_DEMO "Whether to install the poppler-glib-demo program." OFF)
+option(ENABLE_HARFBUZZ "Build with support for font subsetting (uses Harfbuzz)" ON)
 if(WIN32)
   option(ENABLE_RELOCATABLE "Do not hardcode the poppler library location (on Windows)." ON)
 else()
@@ -175,6 +176,8 @@ endmacro()
 find_soft_mandatory_package(ENABLE_NSS3 NSS3 ${NSS3_VERSION})
 find_soft_mandatory_package(ENABLE_GPGME Gpgmepp ${GPGME_VERSION})
 find_soft_mandatory_package(ENABLE_LIBTIFF TIFF ${TIFF_VERSION})
+
+find_soft_mandatory_package(ENABLE_HARFBUZZ harfbuzz "")
 
 macro_optional_find_package(PNG)
 if(ENABLE_LIBJPEG)
@@ -558,6 +561,13 @@ endif()
 if(Boost_FOUND)
   set(poppler_LIBS ${poppler_LIBS} Boost::boost)
 endif()
+if(ENABLE_HARFBUZZ)
+  set(poppler_SRCS ${poppler_SRCS}
+    poppler/FontSubsetter.cc
+  )
+  set(poppler_LIBS ${poppler_LIBS} harfbuzz::harfbuzz harfbuzz::subset)
+  set(PC_REQUIRES_PRIVATE "${PC_REQUIRES_PRIVATE} harfbuzz harfbuzz-subset")
+endif()
 
 if (GPERF AND SED AND RUN_GPERF_IF_PRESENT)
     macro(ADD_GPERF_FILE input)
@@ -596,7 +606,7 @@ ADD_GPERF_FILE(TimesItalicWidths)
 ADD_GPERF_FILE(TimesRomanWidths)
 ADD_GPERF_FILE(ZapfDingbatsWidths)
 
-set(POPPLER_SOVERSION_NUMBER "162")
+set(POPPLER_SOVERSION_NUMBER "163")
 
 set(LINKER_SCRIPT "${CMAKE_BINARY_DIR}/libpoppler.map")
 configure_file(
@@ -886,6 +896,7 @@ show_end_message_yesno("use lcms2" USE_CMS)
 show_end_message_yesno("command line utils" ENABLE_UTILS)
 show_end_message_yesno("fuzz target" ENABLE_FUZZER)
 show_end_message("test data dir" ${TESTDATADIR})
+show_end_message_yesno("font subsetting" ENABLE_HARFBUZZ)
 
 if(NOT ENABLE_LIBJPEG)
   message("Warning: You're not compiling any DCT decoder. Some files will fail to display properly.")

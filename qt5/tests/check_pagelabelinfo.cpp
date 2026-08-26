@@ -38,27 +38,27 @@ void TestPageLabelInfo::testFromDecimalUnicode()
 
 void TestPageLabelInfo::testToRoman()
 {
-    GooString str;
+    std::string str;
     toRoman(177, &str, false);
     QCOMPARE(str.c_str(), "clxxvii");
 }
 
 void TestPageLabelInfo::testFromRoman()
 {
-    GooString roman("clxxvii");
+    const std::string roman("clxxvii");
     QCOMPARE(fromRoman(roman.c_str()), 177);
 }
 
 void TestPageLabelInfo::testToLatin()
 {
-    GooString str;
+    std::string str;
     toLatin(54, &str, false);
     QCOMPARE(str.c_str(), "bbb");
 }
 
 void TestPageLabelInfo::testFromLatin()
 {
-    GooString latin("ddd");
+    const std::string latin("ddd");
     QCOMPARE(fromLatin(latin.c_str()), 56);
 }
 

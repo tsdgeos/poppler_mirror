@@ -37,6 +37,7 @@
 // Copyright (C) 2025 Hagen Möbius <hagen.moebius@googlemail.com>
 // Copyright (C) 2026 Ojas Maheshwari <workonlyojas@gmail.com>
 // Copyright (C) 2026 Aditya Tiwari <suntiwari3495@gmail.com>
+// Copyright (C) 2026 Diego Costa R. <diegocostar@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -96,6 +97,7 @@ static bool htmlMeta = false;
 static char textEncName[128] = "";
 static char textEOLStr[16] = "";
 static bool noPageBreaks = false;
+static bool printURLs = false;
 static char ownerPassword[33] = "\001";
 static char userPassword[33] = "\001";
 static bool quiet = false;
@@ -123,6 +125,7 @@ static const ArgDesc argDesc[] = { { .arg = "-f", .kind = argInt, .val = &firstP
                                    { .arg = "-listenc", .kind = argFlag, .val = &printEnc, .size = 0, .usage = "list available encodings" },
                                    { .arg = "-eol", .kind = argString, .val = textEOLStr, .size = sizeof(textEOLStr), .usage = "output end-of-line convention (unix, dos, or mac)" },
                                    { .arg = "-nopgbrk", .kind = argFlag, .val = &noPageBreaks, .size = 0, .usage = "don't insert page breaks between pages" },
+                                   { .arg = "-urls", .kind = argFlag, .val = &printURLs, .size = 0, .usage = "print the URL of each link next to its link text" },
                                    { .arg = "-bbox", .kind = argFlag, .val = &bbox, .size = 0, .usage = "output bounding box for each word and page size to html. Sets -htmlmeta" },
                                    { .arg = "-bbox-layout", .kind = argFlag, .val = &bboxLayout, .size = 0, .usage = "like -bbox but with extra layout bounding box data.  Sets -htmlmeta" },
                                    { .arg = "-cropbox", .kind = argFlag, .val = &useCropBox, .size = 0, .usage = "use the crop box rather than media box" },
@@ -199,6 +202,10 @@ int main(int argc, char *argv[])
     }
     if (colspacing <= 0 || colspacing > 10) {
         error(errCommandLine, -1, "Bogus value provided for -colspacing");
+        return 99;
+    }
+    if (printURLs && (htmlMeta || tsvMode)) {
+        error(errCommandLine, -1, "'-urls' is only supported in plain text mode");
         return 99;
     }
     if (!ok || (argc < 2 && !printEnc) || argc > 3 || printVersion || printHelp) {
@@ -402,6 +409,7 @@ int main(int argc, char *argv[])
                 textOut.setTextEOL(textEOL);
                 textOut.setMinColSpacing1(colspacing);
                 textOut.setEndOfLineHyphenMode(hyphenMode);
+                textOut.setInlineLinkURIs(printURLs);
                 if (noPageBreaks) {
                     textOut.setTextPageBreaks(false);
                 }

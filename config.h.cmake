@@ -115,3 +115,6 @@
 
 /* Define for large files, on AIX-style hosts. */
 /* TODO This is wrong, port if needed #undef _LARGE_FILES */
+
+/* Build with support for font subsetting (uses Harfbuzz) */
+#cmakedefine01 ENABLE_HARFBUZZ

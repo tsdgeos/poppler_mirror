@@ -100,6 +100,10 @@
 #include <algorithm>
 #include <utility>
 
+#if ENABLE_HARFBUZZ
+#    include <FontSubsetter.h>
+#endif
+
 #include "annot_stamp_approved.h"
 #include "annot_stamp_as_is.h"
 #include "annot_stamp_confidential.h"
@@ -3085,6 +3089,58 @@ static std::unique_ptr<GfxFont> createAnnotDrawFont(XRef *xref, Dict *fontParent
     return font;
 }
 
+struct GetPrimaryFontResult
+{
+    std::shared_ptr<const GfxFont> font;
+    Object resourceObj;
+};
+static GetPrimaryFontResult getPrimaryFont(const std::string &appearanceString, PDFDoc *doc)
+{
+    std::shared_ptr<const GfxFont> primaryFont = nullptr;
+
+    // Parse the DA for fontname
+    DefaultAppearance da { appearanceString };
+
+    // Default value for fontname
+    if (da.getFontName().empty()) {
+        da.setFontName("AnnotDrawFont");
+    }
+
+    // look for font name in the default resources
+    Form *form = doc->getCatalog()->getForm(); // form is owned by catalog, no need to clean it up
+
+    Object resourceObj;
+    if (form && form->getDefaultResourcesObj() && form->getDefaultResourcesObj()->isDict()) {
+        resourceObj = form->getDefaultResourcesObj()->copy(); // No real copy, but increment refcount of /DR Dict
+
+        Dict *resDict = resourceObj.getDict();
+        Object fontResources = resDict->lookup("Font"); // The 'Font' subdictionary
+
+        if (!fontResources.isDict()) {
+            error(errSyntaxWarning, -1, "Font subdictionary is not a dictionary");
+        } else {
+            // Get the font dictionary for the actual requested font
+            Ref fontReference;
+            Object fontDictionary = fontResources.getDict()->lookup(da.getFontName(), &fontReference);
+
+            if (fontDictionary.isDict()) {
+                primaryFont = GfxFont::makeFont(doc->getXRef(), da.getFontName(), fontReference, *fontDictionary.getDict());
+            } else {
+                error(errSyntaxWarning, -1, "Font dictionary is not a dictionary");
+            }
+        }
+    }
+
+    // if fontname is not in the default resources, create a Helvetica fake font
+    if (!primaryFont) {
+        auto fontResDict = std::make_unique<Dict>(doc->getXRef());
+        primaryFont = createAnnotDrawFont(doc->getXRef(), fontResDict.get(), da.getFontName());
+        resourceObj = Object(std::move(fontResDict));
+    }
+
+    return { .font = primaryFont, .resourceObj = std::move(resourceObj) };
+}
+
 class HorizontalTextLayouter
 {
 public:
@@ -3194,12 +3250,148 @@ public:
         const std::string text;
         const std::string fontName;
         const double width;
-        const int charCount;
+        const unsigned int charCount;
     };
 
     std::vector<Data> data;
     int consumedText;
 };
+
+Dict *getFontDictFromResourcesDict(const Object &resources, XRef *xref, bool transparency)
+{
+    if (!resources.isDict()) {
+        return nullptr;
+    }
+    // We use dictLookupNF instead of dictLookup here because we do not want to follow the refs
+    // It may happen that the objects are shared between different annotations and in that case modifying one would modify it for all others
+    // We want to avoid that and so only consider the case where everything is embedded directly and not shared using refs
+    // The only exception we have made here is the font subdictionary. It's relatively common to have it shared and so we copy it and replace it in the resources.
+    // TODO: Do something here so we can work safely with all shared objects as well
+    Dict *fontDict = nullptr;
+    if (transparency) {
+        if (const Object &xObject = resources.dictLookupNF("XObject"); xObject.isDict()) {
+            if (const Object &fm0 = xObject.dictLookupNF("Fm0"); fm0.isStream()) {
+                Stream *apStream = fm0.getStream();
+                if (const Object *apDictObj = apStream->getDictObject(); apDictObj->isDict()) {
+                    if (const Object &resDict = apDictObj->dictLookupNF("Resources"); resDict.isDict()) {
+                        if (const Object &fontSubDict = resDict.dictLookupNF("Font"); fontSubDict.isDict()) {
+                            fontDict = fontSubDict.getDict();
+                        } else if (fontSubDict.isRef()) {
+                            Object fontSubDictCopy = fontSubDict.fetch(xref).deepCopy();
+                            if (fontSubDictCopy.isDict()) {
+                                resDict.getDict()->set("Font", std::move(fontSubDictCopy));
+                                return resDict.dictLookup("Font").getDict();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        if (const Object &fontSubDict = resources.dictLookupNF("Font"); fontSubDict.isDict()) {
+            fontDict = fontSubDict.getDict();
+        } else if (fontSubDict.isRef()) {
+            Object fontSubDictCopy = fontSubDict.fetch(xref).deepCopy();
+            if (fontSubDictCopy.isDict()) {
+                resources.getDict()->set("Font", std::move(fontSubDictCopy));
+                return resources.dictLookup("Font").getDict();
+            }
+        }
+    }
+    return fontDict;
+}
+
+std::vector<std::shared_ptr<const GfxFont>> AnnotFreeText::subsetFonts(const FontSubsetter *fontSubsetter)
+{
+#if ENABLE_HARFBUZZ
+    if (appearance.isNull()) {
+        generateFreeTextAppearance();
+    }
+
+    GetPrimaryFontResult primaryFontResult = getPrimaryFont(appearanceString, doc);
+    Form *form = doc->getCatalog()->getForm();
+    HorizontalTextLayouter textLayouter(contents.toStr(), form, *primaryFontResult.font, std::nullopt, false);
+    FontSubsetter::FontStringMap fontStringMap;
+
+    for (const auto &d : textLayouter.data) {
+        const std::string &text = d.text;
+
+        std::shared_ptr<const GfxFont> font = nullptr;
+
+        if (d.fontName.empty()) {
+            font = primaryFontResult.font;
+        } else {
+            font = form->getDefaultResources()->lookupFont(d.fontName);
+            if (!font) {
+                error(errInternal, -1, "AnnotFreeText::subsetFonts, Could not find font in default resources");
+                return {};
+            }
+        }
+
+        bool isUnicode;
+        if (d.charCount == text.size()) {
+            isUnicode = false;
+        } else if (d.charCount * 2 == text.size()) {
+            isUnicode = true;
+        } else {
+            error(errInternal, -1, "AnnotFreeText::subsetFonts, Invalid result from HorizontalTextLayouter");
+            return {};
+        }
+
+        if (text.empty()) {
+            if (!fontStringMap.contains(font)) {
+                fontStringMap[font] = {};
+            }
+        }
+
+        size_t i = 0;
+        while (i < text.size()) {
+            if (isUnicode) {
+                Unicode uChar = ((text[i] & 0xff) << 8) | (text[i + 1] & 0xff);
+                fontStringMap[font].emplace_back(uChar);
+            } else {
+                Unicode uChar = pdfDocEncoding[text[i] & 0xff];
+                fontStringMap[font].emplace_back(uChar);
+            }
+            i += (isUnicode ? 2 : 1);
+        }
+    }
+
+    FontSubsetter::GetSubsetFontsResult result = fontSubsetter->getSubsetFonts(fontStringMap);
+
+    /*
+        - Deep copy the Resources present in appearance dictionary
+        - Get a pointer to the font dictionary inside the resources copy
+        - Modify the font dictionary
+        - Set "Resources" in the appearance dictionary to our resources copy
+    */
+
+    Object resourcesCopy = getAppearanceResDict().deepCopy();
+    Dict *fontDict = getFontDictFromResourcesDict(resourcesCopy, doc->getXRef(), (opacity != 1));
+
+    if (!fontDict) {
+        error(errInternal, -1, "AnnotFreeText::subsetFonts, Unable to find font dictionary inside appearance resource dictionary");
+        return {};
+    }
+
+    for (const auto &[tag, newFontRef] : result.tagRefMappings) {
+        if (fontDict->hasKey(tag)) {
+            fontDict->set(tag, Object(newFontRef));
+        } else {
+            // This should never happen. We are just being extra safe here.
+            error(errInternal, -1, "AnnotFreeText::subsetFonts, a tag was not found in font dictionary. Aborting subsetting.");
+            return {};
+        }
+    }
+
+    Dict *apDict = appearance.fetch(doc->getXRef()).getStream()->getDict();
+    apDict->set("Resources", std::move(resourcesCopy));
+
+    return result.fontsToRemove;
+#else
+    return {};
+#endif
+}
 
 double Annot::calculateFontSize(const Form *form, const GfxFont &font, const std::string &text, double wMax, double hMax, const bool forceZapfDingbats)
 {
@@ -3359,39 +3551,11 @@ void AnnotFreeText::generateFreeTextAppearance()
     const double textwidth = width - 2 * textmargin;
     appearBuilder.appendf("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re W n\n", textmargin, textwidth, height - 2 * textmargin);
 
-    std::unique_ptr<const GfxFont> font = nullptr;
+    GetPrimaryFontResult primaryFontResult = getPrimaryFont(appearanceString, doc);
+    std::shared_ptr<const GfxFont> font = primaryFontResult.font;
+    Object &resourceObj = primaryFontResult.resourceObj;
 
-    // look for font name in the default resources
     Form *form = doc->getCatalog()->getForm(); // form is owned by catalog, no need to clean it up
-
-    Object resourceObj;
-    if (form && form->getDefaultResourcesObj() && form->getDefaultResourcesObj()->isDict()) {
-        resourceObj = form->getDefaultResourcesObj()->copy(); // No real copy, but increment refcount of /DR Dict
-
-        Dict *resDict = resourceObj.getDict();
-        Object fontResources = resDict->lookup("Font"); // The 'Font' subdictionary
-
-        if (!fontResources.isDict()) {
-            error(errSyntaxWarning, -1, "Font subdictionary is not a dictionary");
-        } else {
-            // Get the font dictionary for the actual requested font
-            Ref fontReference;
-            Object fontDictionary = fontResources.getDict()->lookup(da.getFontName(), &fontReference);
-
-            if (fontDictionary.isDict()) {
-                font = GfxFont::makeFont(doc->getXRef(), da.getFontName(), fontReference, *fontDictionary.getDict());
-            } else {
-                error(errSyntaxWarning, -1, "Font dictionary is not a dictionary");
-            }
-        }
-    }
-
-    // if fontname is not in the default resources, create a Helvetica fake font
-    if (!font) {
-        auto fontResDict = std::make_unique<Dict>(doc->getXRef());
-        font = createAnnotDrawFont(doc->getXRef(), fontResDict.get(), da.getFontName());
-        resourceObj = Object(std::move(fontResDict));
-    }
 
     // Set font state
     appearBuilder.setDrawColor(*da.getFontColor(), true);

@@ -3,7 +3,7 @@
 // This file is under the GPLv2 or later license
 //
 // Copyright (C) 2005-2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2014, 2019, 2020, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2014, 2019, 2020, 2022, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Simon Kellner <kellner@kit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -113,7 +113,7 @@ static int fromRoman(const char *buffer)
     return value;
 }
 
-static void toRoman(int number, GooString *str, bool uppercase)
+static void toRoman(int number, std::string *str, bool uppercase)
 {
     static const char uppercaseNumerals[] = "IVXLCDM";
     static const char lowercaseNumerals[] = "ivxlcdm";
@@ -191,7 +191,7 @@ static int fromLatin(const char *buffer)
     return -1;
 }
 
-static void toLatin(int number, GooString *str, bool uppercase)
+static void toLatin(int number, std::string *str, bool uppercase)
 {
     char base, letter;
     int i, count;

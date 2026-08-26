@@ -4115,7 +4115,12 @@ bool JBIG2Stream::readCodeTableSeg(unsigned int segNum)
             return false;
         }
     }
-    huffTab[i].val = lowVal - 1;
+    int lowValMinusOne;
+    if (unlikely(checkedSubtraction(lowVal, 1, &lowValMinusOne))) {
+        free(huffTab);
+        return false;
+    }
+    huffTab[i].val = lowValMinusOne;
     huffTab[i].prefixLen = huffDecoder->readBits(prefixBits);
     huffTab[i].rangeLen = jbig2HuffmanLOW;
     ++i;

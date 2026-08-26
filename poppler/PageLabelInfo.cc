@@ -170,7 +170,7 @@ bool PageLabelInfo::indexToLabel(int index, std::string *label) const
     char buffer[32];
     int base, number;
     const Interval *matching_interval;
-    GooString number_string;
+    std::string number_string;
 
     base = 0;
     matching_interval = nullptr;
@@ -218,11 +218,11 @@ bool PageLabelInfo::indexToLabel(int index, std::string *label) const
         len = number_string.size();
         ucs2_char[0] = 0;
         for (i = 0; i < len; ++i) {
-            ucs2_char[1] = number_string.getChar(i);
+            ucs2_char[1] = number_string[i];
             label->append(ucs2_char, 2);
         }
     } else {
-        label->append(number_string.toStr());
+        label->append(number_string);
     }
 
     return true;

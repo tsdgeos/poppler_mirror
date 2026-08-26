@@ -77,7 +77,10 @@ void PreScanOutputDev::eoFill(GfxState *state)
 bool PreScanOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog * /*catalog*/, GfxTilingPattern *tPat, const std::array<double, 6> &mat, int x0, int y0, int x1, int y1, double /*xStep*/, double /*yStep*/)
 {
     if (tPat->getPaintType() == 1) {
-        bool tilingNeeded = (x1 - x0 != 1 || y1 - y0 != 1);
+        int diffX, diffY;
+        const bool xNeedsTiling = !checkedSubtraction(x1, x0, &diffX) || (diffX != 1);
+        const bool yNeedsTiling = !checkedSubtraction(y1, y0, &diffY) || (diffY != 1);
+        const bool tilingNeeded = xNeedsTiling || yNeedsTiling;
         if (tilingNeeded) {
             inTilingPatternFill++;
         }

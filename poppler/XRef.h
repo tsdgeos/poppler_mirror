@@ -121,7 +121,7 @@ public:
     XRef &operator=(const XRef &) = delete;
 
     // Copy xref but with new base stream!
-    XRef *copy() const;
+    std::unique_ptr<XRef> copy() const;
 
     // Is xref table valid?
     bool isOk() const { return ok; }
