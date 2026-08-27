@@ -3389,6 +3389,7 @@ std::vector<std::shared_ptr<const GfxFont>> AnnotFreeText::subsetFonts(const Fon
 
     return result.fontsToRemove;
 #else
+    (void)fontSubsetter;
     return {};
 #endif
 }

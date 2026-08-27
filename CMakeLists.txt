@@ -140,6 +140,11 @@ else()
   message(FATAL_ERROR "Invalid font configuration setting: ${FONT_CONFIGURATION}")
 endif()
 
+if(NOT WITH_FONTCONFIGURATION_FONTCONFIG)
+  set(ENABLE_HARFBUZZ OFF)
+  message(STATUS "Disabling HarfBuzz support because the font configuration is not fontconfig")
+endif()
+
 # setting the minimum required versions for some components
 set(CAIRO_VERSION "1.18.0")
 set(GLIB_REQUIRED "2.80")

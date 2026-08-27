@@ -241,8 +241,11 @@ static Certificate::timePointSeconds fromPRTime(PRTime time)
 }
 
 // a dummy, actually
-static char *passwordCallback(PK11SlotInfo * /*slot*/, PRBool /*retry*/, void *arg)
+static char *passwordCallback(PK11SlotInfo * /*slot*/, PRBool retry, void *arg)
 {
+    if (retry) {
+        return nullptr;
+    }
     return PL_strdup(static_cast<char *>(arg));
 }
 
