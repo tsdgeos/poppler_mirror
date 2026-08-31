@@ -17,7 +17,7 @@ G_BEGIN_DECLS
 
 /*** BEGIN value-header ***/
 POPPLER_PUBLIC
-GType @enum_name@_get_type (void) G_GNUC_CONST;
+GType @enum_name@_get_type (void);
 #define POPPLER_TYPE_@ENUMSHORT@ (@enum_name@_get_type ())
 /*** END value-header ***/
 

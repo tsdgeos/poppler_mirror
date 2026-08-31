@@ -3,7 +3,7 @@
 // FontInfo.h
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2008, 2010, 2011, 2018, 2019, 2021, 2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2008, 2010, 2011, 2018, 2019, 2021, 2023, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2009 Pino Toscano <pino@kde.org>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
@@ -32,6 +32,7 @@
 
 #include <optional>
 #include <string>
+#include <vector>
 #include <unordered_set>
 
 class Dict;

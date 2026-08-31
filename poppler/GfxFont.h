@@ -291,6 +291,8 @@ public:
     // the char code.
     virtual int getNextChar(const char *s, int len, CharCode *code, Unicode const **u, int *uLen, double *dx, double *dy, double *ox, double *oy) const = 0;
 
+    virtual double getWidth(CID code) const = 0;
+
     // Does this font have a toUnicode map?
     bool hasToUnicodeCMap() const { return hasToUnicode; }
 
@@ -359,7 +361,11 @@ public:
     bool getUsesMacRomanEnc() const { return usesMacRomanEnc; }
 
     // Get width of a character.
-    double getWidth(unsigned char c) const { return widths[c]; }
+    double getWidth(CID code) const override
+    {
+        assert(code < 256);
+        return widths[code];
+    }
 
     // Return a char code-to-GID mapping for the provided font file.
     // (This is only useful for TrueType fonts.)
@@ -422,12 +428,12 @@ public:
     std::vector<int> getCodeToGIDMap(FoFiTrueType *ff);
 
     double getWidth(char *s, int len) const;
+    double getWidth(CID cid) const override;
 
     ~GfxCIDFont() override;
 
 private:
     static int mapCodeToGID(FoFiTrueType *ff, int cmapi, Unicode unicode, GfxFont::WritingMode wmode);
-    double getWidth(CID cid) const; // Get width of a character.
 
     std::shared_ptr<CMap> cMap; // char code --> CID
     std::shared_ptr<CharCodeToUnicode> ctu; // CID --> Unicode

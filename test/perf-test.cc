@@ -107,7 +107,6 @@ static StrList *gArgsListRoot = nullptr;
 /* Names of all command-line switches we recognize */
 constexpr const char *TIMINGS_ARG = "-timings";
 constexpr const char *RESOLUTION_ARG = "-resolution";
-constexpr const char *RECURSIVE_ARG = "-recursive";
 constexpr const char *OUT_ARG = "-out";
 constexpr const char *LOAD_ONLY_ARG = "-loadonly";
 constexpr const char *PAGE_ARG = "-page";
@@ -116,10 +115,6 @@ constexpr const char *TEXT_ARG = "-text";
 /* Should we record timings? True if -timings command-line argument was given. */
 static bool gfTimings = false;
 
-/* If true, we use render each page at resolution 'gResolutionX'/'gResolutionY'.
-   If false, we render each page at its native resolution.
-   True if -resolution NxM command-line argument was given. */
-static bool gfForceResolution = false;
 static int gResolutionX = 0;
 static int gResolutionY = 0;
 /* If NULL, we output the log info to stdout. If not NULL, should be a name
@@ -129,14 +124,12 @@ static char *gOutFileName = nullptr;
 /* FILE * corresponding to gOutFileName or stdout if gOutFileName is NULL or
    was invalid name */
 static FILE *gOutFile = nullptr;
+
+#if 0
 /* FILE * corresponding to gOutFileName or stderr if gOutFileName is NULL or
    was invalid name */
 static FILE *gErrFile = nullptr;
-
-/* If True and a directory is given as a command-line argument, we'll process
-   pdf files in sub-directories as well.
-   Controlled by -recursive command-line argument */
-static bool gfRecursive = false;
+#endif
 
 /* If true, we only dump the text, not render */
 static bool gfTextOnly = false;
@@ -747,9 +740,6 @@ static void ParseCommandLine(int argc, char **argv)
                 if (!ParseResolutionString(argv[i], &gResolutionX, &gResolutionY)) {
                     PrintUsageAndExit(argc, argv);
                 }
-                gfForceResolution = true;
-            } else if (str_ieq(arg, RECURSIVE_ARG)) {
-                gfRecursive = true;
             } else if (str_ieq(arg, OUT_ARG)) {
                 /* expect a file name after that */
                 ++i;
@@ -832,11 +822,13 @@ int main(int argc, char **argv)
         gOutFile = stdout;
     }
 
+#if 0
     if (gOutFileName) {
         gErrFile = outFile;
     } else {
         gErrFile = stderr;
     }
+#endif
 
     StrList *curr = gArgsListRoot;
     while (curr) {

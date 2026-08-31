@@ -1,3 +1,12 @@
+//========================================================================
+//
+// fontsubsetting-basic-test.cc
+//
+// This file is licensed under the GPLv2 or later
+//
+// Copyright 2026 Ojas Maheshwari <workonlyojas@gmail.com>
+//========================================================================
+
 #include "GlobalParams.h"
 #include "PDFDocFactory.h"
 #include "goo/GooString.h"

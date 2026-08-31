@@ -1974,7 +1974,7 @@ static std::string poppler_font_description_to_style(PopplerFontDescription *fon
     std::function<void(const char *)> add_style = [&style](const char *a) {
         if (strcmp(a, "") != 0) {
             if (!style.empty()) {
-                style += " ";
+                style += ' ';
             }
             style += a;
         }

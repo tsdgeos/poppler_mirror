@@ -1,3 +1,14 @@
+//========================================================================
+//
+// FontSubsetter.cc
+//
+// This file is licensed under the GPLv2 or later
+//
+// Copyright 2026 Ojas Maheshwari <workonlyojas@gmail.com>
+// Copyright 2026 Albert Astals Cid <aacid@kde.org>
+//
+//========================================================================
+
 #include <cstddef>
 #include <optional>
 #include <random>
@@ -15,8 +26,6 @@
 #include <CharCodeToUnicode.h>
 #include <fofi/FoFiTrueType.h>
 #include <CIDFontsWidthsBuilder.h>
-#include <ft2build.h>
-#include FT_FREETYPE_H
 
 // helper for using std::visit to get a dependent false for static_asserts
 // to help get compile errors if one ever extends variants
@@ -171,6 +180,7 @@ void FontSubsetter::subsetAll() const
         return;
     }
 
+    bool subsettingSuccessful = true;
     for (int i = 1; i <= numPages; i++) {
         Page *page = doc->getPage(i);
 
@@ -191,6 +201,9 @@ void FontSubsetter::subsetAll() const
                 auto *ftAnnot = static_cast<AnnotFreeText *>(annot.get());
 
                 auto fontsToRemoveLocal = ftAnnot->subsetFonts(this);
+                if (fontsToRemoveLocal.empty()) {
+                    subsettingSuccessful = false;
+                }
 
                 for (const auto &font : fontsToRemoveLocal) {
                     if (!refSet.contains(*font->getID())) {
@@ -200,6 +213,13 @@ void FontSubsetter::subsetAll() const
                 }
             }
         }
+    }
+
+    /*
+     * If subsetting fails for even one entity (annotation or form), it may not be safe to remove the original fonts since the entity might be using the old fonts
+     */
+    if (!subsettingSuccessful) {
+        return;
     }
 
     // Remove all old font refs from the global resources
@@ -309,7 +329,7 @@ FontSubsetter::GetSubsetFontsResult FontSubsetter::getSubsetFonts(const FontStri
         }
 
         Ref newFontRef = Ref::INVALID();
-        Object newFontObj = createNewSubsetFont(font.get(), subsettingResult, newFontRef);
+        Object newFontObj = createNewSubsetFont(font.get(), std::move(subsettingResult), codepoints, newFontRef);
 
         if (newFontObj.isNull()) {
             continue;
@@ -358,40 +378,20 @@ static Ref createCIDToGIDMap(const std::shared_ptr<FoFiTrueType> &fft, const int
     return cidToGidMapStream;
 }
 
-static std::unique_ptr<Array> createWidthArray(const unsigned char *data, size_t size, const std::shared_ptr<FoFiTrueType> &fft, const int unicodeBMPCMap, XRef *xref)
+static std::unique_ptr<Array> createWidthArray(const GfxFont *oldFont, XRef *xref, const std::vector<Unicode> &unicodeValues)
 {
-    FT_Library ft_library;
-    FT_Error ft_error;
-
-    ft_error = FT_Init_FreeType(&ft_library);
-    if (ft_error) {
-        error(errInternal, -1, "FontSubsetter, FT_Init_FreeType failed");
-        return nullptr;
-    }
-    const std::unique_ptr<FT_Library, void (*)(FT_Library *)> freetypeLibDeleter(&ft_library, [](FT_Library *l) { FT_Done_FreeType(*l); });
-
-    FT_Face face;
-    ft_error = FT_New_Memory_Face(ft_library, data, size, 0, &face);
-    if (ft_error) {
-        error(errInternal, -1, "FontSubsetter, FT_New_Memory_Face failed");
-        return nullptr;
-    }
-    const std::unique_ptr<FT_Face, void (*)(FT_Face *)> faceDeleter(&face, [](FT_Face *f) { FT_Done_Face(*f); });
-
-    if (FT_Set_Char_Size(face, 1000, 1000, 0, 0)) {
-        error(errIO, -1, "FontSubsetter, FT_Set_Char_Size failed");
-        return nullptr;
-    }
-
     CIDFontsWidthsBuilder fontsWidths;
-    static const int basicMultilingualMaxCode = 65535;
-    for (int code = 0; code <= basicMultilingualMaxCode; ++code) {
-        const int glyph = fft->mapCodeToGID(unicodeBMPCMap, code);
-        if (FT_Load_Glyph(face, glyph, FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING)) {
-            fontsWidths.addWidth(code, 0);
-        } else {
-            fontsWidths.addWidth(code, static_cast<int>(face->glyph->metrics.horiAdvance));
-        }
+
+    const std::vector<Unicode> sortedUniqueUnicodeValues = [&unicodeValues]() {
+        auto copy = unicodeValues;
+        std::ranges::sort(copy);
+        const auto [first, last] = std::ranges::unique(copy);
+        copy.erase(first, last);
+        return copy;
+    }();
+
+    for (Unicode code : sortedUniqueUnicodeValues) {
+        fontsWidths.addWidth(code, oldFont->getWidth(code) * 1000);
     }
 
     auto widths = std::make_unique<Array>(xref);
@@ -420,7 +420,7 @@ static std::unique_ptr<Array> createWidthArray(const unsigned char *data, size_t
     return widths;
 }
 
-Object FontSubsetter::createNewSubsetFont(const GfxFont *oldFont, SubsetFontResult &subsettingResult, Ref &newFontRef) const
+Object FontSubsetter::createNewSubsetFont(const GfxFont *oldFont, SubsetFontResult &&subsettingResult, const std::vector<Unicode> &unicodeValues, Ref &newFontRef) const
 {
     XRef *xref = doc->getXRef();
 
@@ -465,7 +465,7 @@ Object FontSubsetter::createNewSubsetFont(const GfxFont *oldFont, SubsetFontResu
         }
 
         cidToGidMapStream = createCIDToGIDMap(fft, unicodeBMPCMap, xref);
-        widths = createWidthArray(data_uc.data(), data_uc.size(), fft, unicodeBMPCMap, xref);
+        widths = createWidthArray(oldFont, xref, unicodeValues);
     }
 
     if (cidToGidMapStream == Ref::INVALID()) {

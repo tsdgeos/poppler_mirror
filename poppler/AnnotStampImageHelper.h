@@ -3,7 +3,7 @@
 // AnnotStampImageHelper.h
 //
 // Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
-// Copyright (C) 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2021, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2026 Malika Asman <asmanodeny@gmail.com>
 // Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
@@ -14,7 +14,10 @@
 #ifndef ANNOTSTAMPIMAGEHELPER_H
 #define ANNOTSTAMPIMAGEHELPER_H
 
-#include "Object.h"
+#include "Ref.h"
+#include "poppler_private_export.h"
+
+#include <vector>
 
 class PDFDoc;
 
