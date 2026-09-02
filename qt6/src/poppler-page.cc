@@ -630,7 +630,7 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
         qpainter_output.setCallbacks(partialUpdateCallback, shouldDoPartialUpdateCallback, shouldAbortRenderCallback, payload);
         renderToQPainter(&qpainter_output, &painter, m_page, xres, yres, xPos, yPos, w, h, rotate, DontSaveAndRestore);
         painter.end();
-        img = tmpimg;
+        img = std::move(tmpimg);
         break;
     }
     }

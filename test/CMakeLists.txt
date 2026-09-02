@@ -302,11 +302,11 @@ if(ENABLE_NSS3)
 endif()
 
 if (ENABLE_HARFBUZZ)
-  set(fontsubsetting_basic_test_SRCS font-subsetting/fontsubsetting-basic-test.cc)
-  add_executable(fontsubsetting-basic-test ${fontsubsetting_basic_test_SRCS})
-  target_link_libraries(fontsubsetting-basic-test Freetype::Freetype poppler)
-  add_test(
-    NAME fontsubsetting-basic-test
-    COMMAND fontsubsetting-basic-test ${TESTDATADIR}/unittestcases/UseNone.pdf
-  )
+    set(fontsubsetting_basic_test_SRCS font-subsetting/fontsubsetting-basic-test.cc)
+    add_executable(fontsubsetting-basic-test ${fontsubsetting_basic_test_SRCS})
+    target_link_libraries(fontsubsetting-basic-test Freetype::Freetype poppler)
+    add_test(
+      NAME fontsubsetting-basic-test
+      COMMAND fontsubsetting-basic-test ${TESTDATADIR}/unittestcases/UseNone.pdf ${TESTDATADIR}/unittestcases/pdf_with_text_form_field.pdf
+    )
 endif()

@@ -37,7 +37,7 @@ enum class SignatureType
 
 SignatureType signatureTypeFromString(std::string_view data);
 
-std::string toStdString(SignatureType type);
+std::string_view toStdString(SignatureType type);
 
 // experiments seems to say that this is a bit above
 // what we have seen in the wild, and much larger than

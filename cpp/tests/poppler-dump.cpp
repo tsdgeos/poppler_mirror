@@ -137,7 +137,7 @@ static std::string out_hex_string(const poppler::byte_array &str)
     return ret;
 }
 
-static std::string out_page_orientation(poppler::page::orientation_enum o)
+static std::string_view out_page_orientation(poppler::page::orientation_enum o)
 {
     switch (o) {
     case poppler::page::landscape:
@@ -152,7 +152,7 @@ static std::string out_page_orientation(poppler::page::orientation_enum o)
     return "<unknown orientation>";
 }
 
-static std::string out_font_info_type(poppler::font_info::type_enum t)
+static std::string_view out_font_info_type(poppler::font_info::type_enum t)
 {
 #define OUT_FONT_TYPE(thetype)                                                                                                                                                                                                                 \
     case poppler::font_info::thetype:                                                                                                                                                                                                          \

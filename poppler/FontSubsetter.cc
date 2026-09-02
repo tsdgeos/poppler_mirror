@@ -96,6 +96,38 @@ static void removeOldFont(const std::shared_ptr<const GfxFont> &font, XRef *xref
     xref->removeIndirectObject(fontStreamRef);
 }
 
+void FontSubsetter::subsetFormFieldText(const std::unique_ptr<FormPageWidgets> &form, std::vector<std::shared_ptr<const GfxFont>> &fontsToRemove, std::unordered_set<Ref> &refSet, XRef *xref, bool &subsettingSuccessful) const
+{
+    int numWidgets = form->getNumWidgets();
+    for (int i = 0; i < numWidgets; ++i) {
+        FormWidget *widget = form->getWidget(i);
+        if (widget->getType() != FormFieldType::formText) {
+            continue;
+        }
+
+        auto *widgetText = static_cast<FormWidgetText *>(widget);
+
+        if (auto wdgAnnot = widgetText->getWidgetAnnotation(); wdgAnnot != nullptr) {
+            unsigned int id = wdgAnnot->getId();
+            if (!xref->getEntry(id)->getFlag(XRefEntry::Updated) || !widgetText->getContent()) {
+                continue;
+            }
+
+            auto result = wdgAnnot->subsetFonts(this, widgetText->getContent()->toStr());
+            if (!result.success) {
+                subsettingSuccessful = false;
+            }
+
+            for (const auto &font : result.fontsToRemove) {
+                if (!refSet.contains(*font->getID())) {
+                    fontsToRemove.emplace_back(font);
+                    refSet.insert(*font->getID());
+                }
+            }
+        }
+    }
+}
+
 static void removeFontsFromFontDict(Dict *fontDict, std::unordered_set<Ref> &refSet)
 {
     std::vector<std::string> keysToRemove;
@@ -119,40 +151,29 @@ static void removeFontsFromFontDict(Dict *fontDict, std::unordered_set<Ref> &ref
     }
 }
 
-static bool formFieldModified(const FormField *field, XRef *xref)
+static void removeFontsFromFieldRes(const std::unique_ptr<FormPageWidgets> &form, std::unordered_set<Ref> &refSet, XRef *xref)
 {
-    int numChildren = field->getNumChildren();
-    if (numChildren == 0) {
-        int numWidgets = field->getNumWidgets();
+    int numWidgets = form->getNumWidgets();
+    for (int i = 0; i < numWidgets; ++i) {
+        FormWidget *widget = form->getWidget(i);
+        if (widget->getType() != FormFieldType::formText || !widget->getField()) {
+            continue;
+        }
 
-        for (int i = 0; i < numWidgets; ++i) {
-            if (FormWidget *wdg = field->getWidget(i); wdg != nullptr) {
-                if (std::shared_ptr<AnnotWidget> wdgAnnot = wdg->getWidgetAnnotation(); wdgAnnot != nullptr) {
-                    unsigned int id = wdgAnnot->getId();
-                    if (xref->getEntry(id)->getFlag(XRefEntry::Updated)) {
-                        return true;
-                    }
+        FormField *field = widget->getField();
+        if (Object *fieldObj = field->getObj(); fieldObj && fieldObj->isDict()) {
+            if (Object dr = fieldObj->dictLookup("DR"); dr.isDict()) {
+                if (Dict *fontDict = getFontDictFromResourcesDict(dr, xref, false); fontDict != nullptr) {
+                    removeFontsFromFontDict(fontDict, refSet);
                 }
             }
         }
-        return false;
     }
-
-    for (int i = 0; i < numChildren; ++i) {
-        if (const FormField *childField = field->getChildren(i); childField != nullptr) {
-            if (formFieldModified(childField, xref)) {
-                return true;
-            }
-        }
-    }
-
-    return false;
 }
 
 void FontSubsetter::subsetAll() const
 {
     XRef *xref = doc->getXRef();
-    Form *form = doc->getCatalog()->getCreateForm();
     int numPages = doc->getNumPages();
     Object *acroForm = doc->getCatalog()->getAcroForm();
 
@@ -162,25 +183,13 @@ void FontSubsetter::subsetAll() const
     std::unordered_set<Ref> refSet;
     std::vector<std::shared_ptr<const GfxFont>> fontsToRemove;
 
-    /*
-     * Do not perform font subsetting if a form field is also modified
-     * This is because we might remove a font that is already getting used in a form field
-     * TODO: Remove this code when we have font subsetting ready for form fields
-     */
-    bool anyFormFieldModified = false;
-    for (int i = 0; i < form->getNumFields(); i++) {
-        if (FormField *field = form->getRootField(i); field != nullptr) {
-            if (formFieldModified(field, xref)) {
-                anyFormFieldModified = true;
-                break;
-            }
-        }
-    }
-    if (anyFormFieldModified) {
-        return;
+    bool subsettingSuccessful = true;
+
+    for (int i = 1; i <= numPages; i++) {
+        Page *page = doc->getPage(i);
+        subsetFormFieldText(page->getFormWidgets(), fontsToRemove, refSet, xref, subsettingSuccessful);
     }
 
-    bool subsettingSuccessful = true;
     for (int i = 1; i <= numPages; i++) {
         Page *page = doc->getPage(i);
 
@@ -200,12 +209,12 @@ void FontSubsetter::subsetAll() const
             if (annot->getType() == Annot::typeFreeText) {
                 auto *ftAnnot = static_cast<AnnotFreeText *>(annot.get());
 
-                auto fontsToRemoveLocal = ftAnnot->subsetFonts(this);
-                if (fontsToRemoveLocal.empty()) {
+                auto result = ftAnnot->subsetFonts(this);
+                if (!result.success) {
                     subsettingSuccessful = false;
                 }
 
-                for (const auto &font : fontsToRemoveLocal) {
+                for (const auto &font : result.fontsToRemove) {
                     if (!refSet.contains(*font->getID())) {
                         fontsToRemove.emplace_back(font);
                         refSet.insert(*font->getID());
@@ -219,6 +228,7 @@ void FontSubsetter::subsetAll() const
      * If subsetting fails for even one entity (annotation or form), it may not be safe to remove the original fonts since the entity might be using the old fonts
      */
     if (!subsettingSuccessful) {
+        error(errInternal, -1, "FontSubsetter::subsetAll, subsetting was not fully successful so skipping removal of original fonts");
         return;
     }
 
@@ -232,7 +242,7 @@ void FontSubsetter::subsetAll() const
         }
     }
 
-    // Scan local resources of all modified annotations and remove the old font refs
+    // Scan local resources of all modified freetext annotations and widget annotations (forms) and remove the old font refs
     for (int i = 1; i <= numPages; i++) {
         Page *page = doc->getPage(i);
 
@@ -249,15 +259,18 @@ void FontSubsetter::subsetAll() const
                 continue;
             }
 
-            if (annot->getType() == Annot::typeFreeText) {
-                auto *ftAnnot = static_cast<AnnotFreeText *>(annot.get());
-
-                Object resourcesCopy = ftAnnot->getAppearanceResDict().deepCopy();
+            if (annot->getType() == Annot::typeFreeText || annot->getType() == Annot::typeWidget) {
+                Object resourcesCopy = annot->getAppearanceResDict().deepCopy();
                 if (!resourcesCopy.isDict()) {
                     continue;
                 }
 
-                Dict *fontDict = getFontDictFromResourcesDict(resourcesCopy, xref, (ftAnnot->getOpacity() != 1));
+                bool transparency = false;
+                if (annot->getType() == Annot::typeFreeText) {
+                    auto *ftAnnot = static_cast<AnnotFreeText *>(annot.get());
+                    transparency = (ftAnnot->getOpacity() != 1);
+                }
+                Dict *fontDict = getFontDictFromResourcesDict(resourcesCopy, xref, transparency);
                 if (!fontDict) {
                     continue;
                 }
@@ -273,6 +286,12 @@ void FontSubsetter::subsetAll() const
                 apDict->set("Resources", std::move(resourcesCopy));
             }
         }
+    }
+
+    // Remove old font refs from modified field resources
+    for (int i = 1; i <= numPages; i++) {
+        Page *page = doc->getPage(i);
+        removeFontsFromFieldRes(page->getFormWidgets(), refSet, xref);
     }
 
     // Remove the actual font and it's associated objects

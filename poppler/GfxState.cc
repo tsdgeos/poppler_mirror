@@ -6813,7 +6813,7 @@ void GfxState::setTransfer(std::vector<std::unique_ptr<Function>> funcs)
 
 void GfxState::setLineDash(std::vector<double> &&dash, double start)
 {
-    lineDash = dash;
+    lineDash = std::move(dash);
     lineDashStart = start;
 }
 

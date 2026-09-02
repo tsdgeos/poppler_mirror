@@ -3302,7 +3302,7 @@ Dict *getFontDictFromResourcesDict(const Object &resources, XRef *xref, bool tra
     return fontDict;
 }
 
-std::vector<std::shared_ptr<const GfxFont>> AnnotFreeText::subsetFonts(const FontSubsetter *fontSubsetter)
+AnnotFreeText::SubsetFontsResult AnnotFreeText::subsetFonts(const FontSubsetter *fontSubsetter)
 {
 #if ENABLE_HARFBUZZ
     if (appearance.isNull()) {
@@ -3388,7 +3388,7 @@ std::vector<std::shared_ptr<const GfxFont>> AnnotFreeText::subsetFonts(const Fon
     Dict *apDict = appearance.fetch(doc->getXRef()).getStream()->getDict();
     apDict->set("Resources", std::move(resourcesCopy));
 
-    return result.fontsToRemove;
+    return { .success = true, .fontsToRemove = result.fontsToRemove };
 #else
     (void)fontSubsetter;
     return {};
@@ -4733,11 +4733,9 @@ bool AnnotAppearanceBuilder::drawText(const std::string &inputText, const Form *
     const bool forceZapfDingbats = flags & ForceZapfDingbatsDrawTextFlag;
 
     std::vector<std::string> daToks;
-    const GfxFont *font;
     double fontSize;
     int tfPos, tmPos;
     std::unique_ptr<std::string> textToFree;
-    std::unique_ptr<const GfxFont> fontToFree = nullptr;
 
     //~ if there is no MK entry, this should use the existing content stream,
     //~ and only replace the marked content portion of it
@@ -4761,39 +4759,11 @@ bool AnnotAppearanceBuilder::drawText(const std::string &inputText, const Form *
     }
 
     // get the font and font size
-    font = nullptr;
-    fontSize = 0;
-    if (tfPos >= 0) {
-        std::string &tok = daToks[tfPos];
-        if (forceZapfDingbats) {
-            if (tok != "/ZaDb") {
-                tok = "/ZaDb";
-            }
-        }
-        if (!tok.empty() && tok[0] == '/') {
-            const auto fontName = std::string_view(tok).substr(1);
-            if (!resources || !(font = resources->lookupFont(fontName).get())) {
-                const char *fallback = determineFallbackFont(tok, forceZapfDingbats ? "ZapfDingbats" : "Helvetica");
-                // The font variable sometimes points to an object that needs to be deleted
-                // and sometimes not, depending on whether the call to lookupFont above fails.
-                // When the code path right here is taken, the destructor of fontToFree
-                // (which is a std::unique_ptr) will delete the font object at the end of this method.
-                fontToFree = createAnnotDrawFont(&xref, &resourcesDict, fontName, fallback);
-                font = fontToFree.get();
-                if (font && forceZapfDingbats) {
-                    addedDingbatsResource = true;
-                }
-            }
-        } else {
-            error(errSyntaxError, -1, "Invalid font name in 'Tf' operator in field's DA string");
-        }
-        fontSize = gatof(daToks[tfPos + 1].c_str());
-    } else {
-        error(errSyntaxError, -1, "Missing 'Tf' operator in field's DA string");
-    }
+    std::shared_ptr<const GfxFont> font = calculateFont(daToks, resources, resourcesDict, xref, tfPos, flags);
     if (!font) {
         return false;
     }
+    fontSize = gatof(daToks[tfPos + 1].c_str());
 
     if (tmPos < 0) {
         // Add fake Tm to the DA tokens
@@ -4938,7 +4908,7 @@ bool AnnotAppearanceBuilder::drawText(const std::string &inputText, const Form *
                     int uLen, n;
                     double char_dx, char_dy, ox, oy;
 
-                    const GfxFont *currentFont = font;
+                    const GfxFont *currentFont = font.get();
                     if (!d.fontName.empty()) {
                         appearBuf.append(" q\n");
                         GooString::appendf(appearBuf, "/{0:s} {1:.2f} Tf\n", d.fontName.c_str(), fontSize);
@@ -5581,6 +5551,196 @@ static void recursiveMergeDicts(Dict *primary, const Dict *secondary)
 {
     RefRecursionChecker alreadySeenDicts;
     recursiveMergeDicts(primary, secondary, &alreadySeenDicts);
+}
+
+AnnotWidget::SubsetFontsResult AnnotWidget::subsetFonts(const FontSubsetter *fontSubsetter, const std::string &content)
+{
+#if ENABLE_HARFBUZZ
+    const auto *textField = dynamic_cast<FormFieldText *>(field);
+    if (!textField) {
+        error(errInternal, -1, "AnnotWidget::subsetFonts, subsetFonts() called on a non-text form field. This should never happen. Abort subsetting.");
+        return {};
+    }
+
+    // TODO: Implement subsetting when appearance is null
+    if (appearance.isNull() || form->getNeedAppearances()) {
+        return {};
+    }
+
+    Object resourcesDictObj;
+    const GfxResources *resources = nullptr;
+    std::unique_ptr<GfxResources> resourcesToFree = nullptr;
+    if (field->getObj() && field->getObj()->isDict()) {
+        // Let's use a field's resource dictionary.
+        resourcesDictObj = field->getObj()->dictLookup("DR");
+        if (resourcesDictObj.isDict()) {
+            if (form && form->getDefaultResourcesObj()->isDict()) {
+                resourcesDictObj = resourcesDictObj.deepCopy();
+                recursiveMergeDicts(resourcesDictObj.getDict(), form->getDefaultResourcesObj()->getDict());
+            }
+            resourcesToFree = std::make_unique<GfxResources>(doc->getXRef(), resourcesDictObj.getDict(), nullptr);
+            resources = resourcesToFree.get();
+        }
+    }
+    if (!resourcesDictObj.isDict()) {
+        // No luck with a field's resource dictionary. Let's use an AcroForm's resource dictionary.
+        if (form && form->getDefaultResourcesObj()->isDict()) {
+            resourcesDictObj = form->getDefaultResourcesObj()->deepCopy();
+            resources = form->getDefaultResources();
+        }
+    }
+    if (!resourcesDictObj.isDict()) {
+        resourcesDictObj = Object(std::make_unique<Dict>(doc->getXRef()));
+    }
+
+    const std::string &fieldDA = field->getDefaultAppearance();
+    const std::string &daToUse = fieldDA.empty() && form ? form->getDefaultAppearance() : fieldDA;
+
+    std::vector<std::string> daToks;
+    int tfPos = -1;
+
+    // parse the default appearance string
+    FormFieldText::tokenizeDA(daToUse, &daToks, nullptr /*searchTok*/);
+    for (size_t i = 2; i < daToks.size(); ++i) {
+        if (daToks[i] == "Tf") {
+            tfPos = i - 2;
+        }
+    }
+
+    AnnotAppearanceBuilder appearBuilderA;
+    std::shared_ptr<const GfxFont> primaryFont = appearBuilderA.calculateFont(daToks, resources, *resourcesDictObj.getDict(), *doc->getXRef(), tfPos, 0 /* No flags required when our purpose is to get the primary font for a form field*/);
+
+    if (!primaryFont) {
+        error(errInternal, -1, "AnnotWidget::subsetFonts, Could not determine primary font");
+        return {};
+    }
+
+    HorizontalTextLayouter textLayouter(content, form, *primaryFont, std::nullopt, false);
+
+    FontSubsetter::FontStringMap fontStringMap;
+    bool isPassword = textField->isPassword();
+
+    for (const auto &d : textLayouter.data) {
+        const std::string &text = d.text;
+
+        std::shared_ptr<const GfxFont> font = nullptr;
+
+        if (d.fontName.empty()) {
+            font = primaryFont;
+        } else {
+            font = form->getDefaultResources()->lookupFont(d.fontName);
+            if (!font) {
+                error(errInternal, -1, "AnnotWidget::subsetFonts, Could not find font in default resources");
+                return {};
+            }
+        }
+
+        // If it's a password field, subset only '*' in all the fonts
+        if (isPassword) {
+            Unicode uChar = pdfDocEncoding['*' & 0xff];
+            fontStringMap[font] = { uChar };
+            continue;
+        }
+
+        bool isUnicode;
+        if (d.charCount == text.size()) {
+            isUnicode = false;
+        } else if (d.charCount * 2 == text.size()) {
+            isUnicode = true;
+        } else {
+            error(errInternal, -1, "AnnotWidget::subsetFonts, Invalid result from HorizontalTextLayouter");
+            return {};
+        }
+
+        if (text.empty()) {
+            if (!fontStringMap.contains(font)) {
+                fontStringMap[font] = {};
+            }
+        }
+
+        size_t i = 0;
+        while (i < text.size()) {
+            if (isUnicode) {
+                Unicode uChar = ((text[i] & 0xff) << 8) | (text[i + 1] & 0xff);
+                fontStringMap[font].emplace_back(uChar);
+            } else {
+                Unicode uChar = pdfDocEncoding[text[i] & 0xff];
+                fontStringMap[font].emplace_back(uChar);
+            }
+            i += (isUnicode ? 2 : 1);
+        }
+    }
+
+    FontSubsetter::GetSubsetFontsResult result = fontSubsetter->getSubsetFonts(fontStringMap);
+
+    /*
+        - Deep copy the Resources present in appearance dictionary
+        - Get a pointer to the font dictionary inside the resources copy
+        - Modify the font dictionary
+        - Set "Resources" in the appearance dictionary to our resources copy
+    */
+
+    Object resourcesCopy = getAppearanceResDict().deepCopy();
+    Dict *fontDict = getFontDictFromResourcesDict(resourcesCopy, doc->getXRef(), false);
+
+    if (!fontDict) {
+        error(errInternal, -1, "AnnotWidget::subsetFonts, Unable to find font dictionary inside appearance resource dictionary");
+        return {};
+    }
+
+    for (const auto &[tag, newFontRef] : result.tagRefMappings) {
+        if (fontDict->hasKey(tag)) {
+            fontDict->set(tag, Object(newFontRef));
+        } else {
+            // This should never happen. We are just being extra safe here.
+            error(errInternal, -1, "AnnotWidget::subsetFonts, a tag was not found in font dictionary. Aborting subsetting.");
+            return {};
+        }
+    }
+
+    Dict *apDict = appearance.fetch(doc->getXRef()).getStream()->getDict();
+    apDict->set("Resources", std::move(resourcesCopy));
+
+    return { .success = true, .fontsToRemove = result.fontsToRemove };
+#else
+    (void)fontSubsetter;
+    (void)content;
+    return {};
+#endif
+}
+
+std::shared_ptr<const GfxFont> AnnotAppearanceBuilder::calculateFont(std::vector<std::string> &daToks, const GfxResources *resources, Dict &resourcesDict, XRef &xref, int tfPos, const int flags)
+{
+    const bool forceZapfDingbats = flags & ForceZapfDingbatsDrawTextFlag;
+
+    std::shared_ptr<const GfxFont> font;
+
+    // get the font
+    font = nullptr;
+    if (tfPos >= 0) {
+        std::string &tok = daToks[tfPos];
+        if (forceZapfDingbats) {
+            if (tok != "/ZaDb") {
+                tok = "/ZaDb";
+            }
+        }
+        if (!tok.empty() && tok[0] == '/') {
+            const auto fontName = std::string_view(tok).substr(1);
+            if (!resources || !(font = resources->lookupFont(fontName))) {
+                const char *fallback = determineFallbackFont(tok, forceZapfDingbats ? "ZapfDingbats" : "Helvetica");
+                font = createAnnotDrawFont(&xref, &resourcesDict, fontName, fallback);
+                if (font && forceZapfDingbats) {
+                    addedDingbatsResource = true;
+                }
+            }
+        } else {
+            error(errSyntaxError, -1, "Invalid font name in 'Tf' operator in field's DA string");
+        }
+    } else {
+        error(errSyntaxError, -1, "Missing 'Tf' operator in field's DA string");
+    }
+
+    return font;
 }
 
 void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)

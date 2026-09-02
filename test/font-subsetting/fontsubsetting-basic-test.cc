@@ -167,7 +167,7 @@ static bool match(std::vector<unsigned long> &v1, std::vector<unsigned long> &v2
  * Goes over all the fonts used by the annotation and collects all the glyphs
  * Checks if the glyphs are only what we need
  */
-static bool subsettingWorksInAnnot(Annot *annot, XRef *xref, bool transparency)
+static bool subsettingWorksInAnnot(Annot *annot, const std::string &text, XRef *xref, bool transparency)
 {
     Object resources = annot->getAppearanceResDict();
     const Dict *fontDict = getFontDictFromResourcesDict(resources, xref, transparency);
@@ -180,7 +180,6 @@ static bool subsettingWorksInAnnot(Annot *annot, XRef *xref, bool transparency)
     std::vector<unsigned long> allChars;
     for (auto &font : allFonts) {
         std::string data = getFontDataFromFont(font, xref);
-
         if (data.empty()) {
             continue;
         }
@@ -195,8 +194,7 @@ static bool subsettingWorksInAnnot(Annot *annot, XRef *xref, bool transparency)
         }
     }
 
-    std::vector<unsigned long> neededChars = convertUnicodetoNormalStr(annot->getContents().toStr());
-
+    std::vector<unsigned long> neededChars = convertUnicodetoNormalStr(text);
     return match(allChars, neededChars);
 }
 
@@ -264,7 +262,7 @@ static bool testSingleAnnotationSubsetting(std::shared_ptr<GooString> &filename)
         return false;
     }
 
-    return subsettingWorksInAnnot(annot.get(), doc->getXRef(), false);
+    return subsettingWorksInAnnot(annot.get(), annot->getContents().toStr(), doc->getXRef(), false);
 }
 
 /*
@@ -279,7 +277,6 @@ static bool testSingleAnnotationSubsettingWithOpacity(std::shared_ptr<GooString>
     }
 
     auto doc = PDFDocFactory().createPDFDoc(*filename);
-
     if (!doc->isOk() || doc->getNumPages() < 1) {
         return false;
     }
@@ -299,7 +296,6 @@ static bool testSingleAnnotationSubsettingWithOpacity(std::shared_ptr<GooString>
 
     // Re-open the file and check if the fonts only contain the needed glyphs
     doc = PDFDocFactory().createPDFDoc(*tempFilePath);
-
     if (!doc->isOk() || doc->getNumPages() < 1) {
         return false;
     }
@@ -321,24 +317,100 @@ static bool testSingleAnnotationSubsettingWithOpacity(std::shared_ptr<GooString>
         return false;
     }
 
-    return subsettingWorksInAnnot(annot.get(), doc->getXRef(), true);
+    return subsettingWorksInAnnot(annot.get(), annot->getContents().toStr(), doc->getXRef(), true);
+}
+
+static bool testFormFieldSubsetting(std::shared_ptr<GooString> &filename)
+{
+    std::string UNICODE_TEXT;
+    int unicodeVals[] = { -2, -1, 101, -27, 103, 44, -118, -98 }; // "日本語"
+    for (int val : unicodeVals) {
+        UNICODE_TEXT += static_cast<char>(val);
+    }
+
+    auto doc = PDFDocFactory().createPDFDoc(*filename);
+    if (!doc->isOk() || doc->getNumPages() < 1) {
+        return false;
+    }
+
+    Form *form = doc->getCatalog()->getCreateForm();
+
+    int numFields = form->getNumFields();
+
+    if (numFields != 1) {
+        return false;
+    }
+
+    FormField *field = form->getRootField(0);
+    if (field->getNumChildren() != 0 || field->getType() != FormFieldType::formText) {
+        return false;
+    }
+
+    auto *textField = dynamic_cast<FormFieldText *>(field);
+
+    textField->setContent(std::make_unique<GooString>(UNICODE_TEXT));
+
+    auto tempFilePath = std::make_unique<GooString>(std::filesystem::current_path() / "temp.pdf");
+
+    doc->saveAs(tempFilePath->toStr());
+
+    doc = PDFDocFactory().createPDFDoc(*tempFilePath);
+    if (!doc->isOk() || doc->getNumPages() < 1) {
+        return false;
+    }
+
+    form = doc->getCatalog()->getCreateForm();
+
+    numFields = form->getNumFields();
+    if (numFields != 1) {
+        return false;
+    }
+
+    field = form->getRootField(0);
+    if (field->getNumChildren() != 0 || field->getType() != FormFieldType::formText) {
+        return false;
+    }
+
+    textField = dynamic_cast<FormFieldText *>(field);
+    std::string newText = textField->getContent()->toStr();
+
+    if (newText != UNICODE_TEXT) {
+        return false;
+    }
+
+    int numWidgets = textField->getNumWidgets();
+    if (numWidgets != 1) {
+        return false;
+    }
+
+    FormWidget *widget = textField->getWidget(0);
+
+    std::shared_ptr<AnnotWidget> wdgAnnot = widget->getWidgetAnnotation();
+
+    return subsettingWorksInAnnot(wdgAnnot.get(), newText, doc->getXRef(), false);
 }
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2) {
+    if (argc != 3) {
         return 1;
     }
 
     globalParams = std::make_unique<GlobalParams>();
 
-    // For test1 and test2
-    auto filename = std::make_shared<GooString>(argv[1]);
+    auto filename1 = std::make_shared<GooString>(argv[1]);
+    auto filename2 = std::make_shared<GooString>(argv[2]);
 
-    auto test1 = testSingleAnnotationSubsetting(filename);
-    auto test2 = testSingleAnnotationSubsettingWithOpacity(filename);
+    auto test1 = testSingleAnnotationSubsetting(filename1);
+    auto test2 = testSingleAnnotationSubsettingWithOpacity(filename1);
+    auto test3 = testFormFieldSubsetting(filename2);
 
-    if (!(test1 && test2)) {
+    // Check and remove the temporary pdf file we save for the tests
+    if (std::filesystem::exists(std::filesystem::current_path() / "temp.pdf")) {
+        std::filesystem::remove(std::filesystem::current_path() / "temp.pdf");
+    }
+
+    if (!(test1 && test2 && test3)) {
         return 1;
     }
 

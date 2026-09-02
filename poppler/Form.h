@@ -491,7 +491,7 @@ protected:
 // FormFieldText
 //------------------------------------------------------------------------
 
-class FormFieldText : public FormField
+class POPPLER_PRIVATE_EXPORT FormFieldText : public FormField
 {
 public:
     FormFieldText(PDFDoc *docA, Object &&dictObj, Ref ref, FormField *parent, std::set<int> *usedParents);

@@ -14,10 +14,12 @@
 #include "GfxFont.h"
 #include "Object.h"
 #include <vector>
+#include <unordered_set>
 
 struct hb_blob_t;
 
 class PDFDoc;
+class FormPageWidgets;
 
 class FontSubsetter
 {
@@ -48,6 +50,8 @@ private:
     Object createFontStreamFromData(std::vector<char> &&data, Ref &ref, const std::string &subtype) const;
 
     Object createNewSubsetFont(const GfxFont *oldFont, SubsetFontResult &&subsettingResult, const std::vector<Unicode> &unicodeValues, Ref &newFontRef) const;
+
+    void subsetFormFieldText(const std::unique_ptr<FormPageWidgets> &form, std::vector<std::shared_ptr<const GfxFont>> &fontsToRemove, std::unordered_set<Ref> &refSet, XRef *xref, bool &subsettingSuccessful) const;
 
     // Harfbuzz related APIs
     static SubsetFontResult hbSubsetFont(std::string &fontStream, const std::vector<Unicode> &unicodeValues);

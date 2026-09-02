@@ -161,7 +161,7 @@ void SplashState::setFillPattern(SplashPattern *fillPatternA)
 
 void SplashState::setLineDash(std::vector<double> &&lineDashA, double lineDashPhaseA)
 {
-    lineDash = lineDashA;
+    lineDash = std::move(lineDashA);
     lineDashPhase = lineDashPhaseA;
 }
 

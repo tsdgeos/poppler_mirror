@@ -35,7 +35,7 @@ SignatureType signatureTypeFromString(std::string_view data)
     return CryptoSign::SignatureType::unknown_signature_type;
 }
 
-std::string toStdString(SignatureType type)
+std::string_view toStdString(SignatureType type)
 {
     switch (type) {
     case CryptoSign::SignatureType::unsigned_signature_field:

@@ -259,6 +259,6 @@ void FoFiType1::undoPFB()
         pos2 += segLen;
     }
     file2.resize(pos2);
-    fileOwner = file2;
+    fileOwner = std::move(file2);
     file = fileOwner;
 }

@@ -609,6 +609,8 @@ public:
     const std::string &buffer() const;
     bool getAddedDingbatsResource() const { return addedDingbatsResource; }
 
+    std::shared_ptr<const GfxFont> calculateFont(std::vector<std::string> &daToks, const GfxResources *resources, Dict &resourcesDict, XRef &xref, int tfPos, int flags);
+
 private:
     enum DrawTextFlags
     {
@@ -1090,7 +1092,12 @@ public:
     AnnotLineEndingStyle getEndStyle() const { return endStyle; }
 
     // Performs the subsetting and returns the original fonts to delete
-    std::vector<std::shared_ptr<const GfxFont>> subsetFonts(const FontSubsetter *fontSubsetter);
+    struct SubsetFontsResult
+    {
+        bool success = false;
+        std::vector<std::shared_ptr<const GfxFont>> fontsToRemove;
+    };
+    SubsetFontsResult subsetFonts(const FontSubsetter *fontSubsetter);
 
 protected:
     void initialize(Dict *dict);
@@ -1485,6 +1492,14 @@ public:
     bool setFormAdditionalAction(FormAdditionalActionsType type, const std::string &js);
 
     void setField(FormField *f) { field = f; };
+
+    // Performs the subsetting and returns the original fonts to delete
+    struct SubsetFontsResult
+    {
+        bool success = false;
+        std::vector<std::shared_ptr<const GfxFont>> fontsToRemove;
+    };
+    SubsetFontsResult subsetFonts(const FontSubsetter *fontSubsetter, const std::string &content);
 
 private:
     void initialize(Dict *dict);
