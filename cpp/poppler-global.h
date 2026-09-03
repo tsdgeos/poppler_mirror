@@ -3,7 +3,7 @@
  * Copyright (C) 2010, Patrick Spendrin <ps_ml@gmx.de>
  * Copyright (C) 2014, Hans-Peter Deifel <hpdeifel@gmx.de>
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
- * Copyright (C) 2021, 2022, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2021, 2022, 2026, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2022, Tobias C. Berner <tcberner@gmail.com>
  * Copyright (C) 2022, Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2024, hugegameartgd@gmail.com
@@ -52,7 +52,7 @@ protected:
 
 }
 
-using noncopyable = detail::noncopyable;
+using detail::noncopyable;
 /// \endcond
 
 enum rotation_enum
