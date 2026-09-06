@@ -15,6 +15,7 @@
 // Copyright 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 // Copyright (C) 2026 Adam Sampson <ats@offog.org>
+// Copyright (C) 2026 William Bader <williambader@hotmail.com>
 //
 // Licensed under GPLv2 or later
 //
@@ -84,6 +85,14 @@ JPXStream::~JPXStream()
 
 bool JPXStream::rewind()
 {
+    // close() frees the decoded image without clearing inited, so without this
+    // every read after a close() would return EOF while rewind() still
+    // reported success.  Decoding is expensive, so only re-init when the image
+    // is actually gone; otherwise resetting the counters is enough.
+    if (priv->image == nullptr) {
+        priv->inited = false;
+    }
+
     priv->counter = 0;
     priv->ccounter = 0;
 
