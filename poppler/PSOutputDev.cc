@@ -2766,16 +2766,34 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
         str = new ASCII85Encoder(str);
     }
 
-    // compute image data size
+    // Encode the image once and keep the result.  The array size has to be
+    // written before the data, and re-running the encoder just to count lines
+    // costs as much as the encoding itself.  Line breaks are dropped here so
+    // the loops below do not have to skip them.
+    std::string encoded;
     if (!str->rewind()) {
         delete str;
         return;
     }
+    {
+        unsigned char readBuf[4096];
+        int nRead;
+        while ((nRead = str->doGetChars(sizeof(readBuf), readBuf)) > 0) {
+            for (int k = 0; k < nRead; ++k) {
+                if (readBuf[k] != '\n' && readBuf[k] != '\r') {
+                    encoded.push_back(static_cast<char>(readBuf[k]));
+                }
+            }
+        }
+    }
+    str->close();
+    delete str;
+    str = nullptr;
+
+    size_t encPos = 0;
     col = size = 0;
     do {
-        do {
-            c = str->getChar();
-        } while (c == '\n' || c == '\r');
+        c = encPos < encoded.size() ? static_cast<unsigned char>(encoded[encPos++]) : EOF;
         if (c == (doUseASCIIHex ? '>' : '~') || c == EOF) {
             break;
         }
@@ -2784,9 +2802,7 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
         } else {
             ++col;
             for (i = 1; i <= (doUseASCIIHex ? 1 : 4); ++i) {
-                do {
-                    c = str->getChar();
-                } while (c == '\n' || c == '\r');
+                c = encPos < encoded.size() ? static_cast<unsigned char>(encoded[encPos++]) : EOF;
                 if (c == (doUseASCIIHex ? '>' : '~') || c == EOF) {
                     break;
                 }
@@ -2810,13 +2826,9 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
     outerSize = size / 65535 + 1;
 
     writePSFmt("{0:d} array dup /{1:s}Data_{2:d}_{3:d} exch def\n", outerSize, mask ? "Mask" : "Im", id.num, id.gen);
-    str->close();
 
     // write the data into the array
-    if (!str->rewind()) {
-        delete str;
-        return;
-    }
+    encPos = 0;
     for (outer = 0; outer < outerSize; outer++) {
         int innerSize = size > 65535 ? 65535 : size;
 
@@ -2825,9 +2837,7 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
         line = col = 0;
         writePS(doUseASCIIHex ? "dup 0 <" : "dup 0 <~");
         for (;;) {
-            do {
-                c = str->getChar();
-            } while (c == '\n' || c == '\r');
+            c = encPos < encoded.size() ? static_cast<unsigned char>(encoded[encPos++]) : EOF;
             if (c == (doUseASCIIHex ? '>' : '~') || c == EOF) {
                 break;
             }
@@ -2838,9 +2848,7 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
                 writePSChar(c);
                 ++col;
                 for (i = 1; i <= (doUseASCIIHex ? 1 : 4); ++i) {
-                    do {
-                        c = str->getChar();
-                    } while (c == '\n' || c == '\r');
+                    c = encPos < encoded.size() ? static_cast<unsigned char>(encoded[encPos++]) : EOF;
                     if (c == (doUseASCIIHex ? '>' : '~') || c == EOF) {
                         break;
                     }
@@ -2883,9 +2891,6 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
         size -= innerSize;
     }
     writePS("pop\n");
-    str->close();
-
-    delete str;
 }
 
 void PSOutputDev::setupForms(Dict *resDict)
