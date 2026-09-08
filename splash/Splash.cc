@@ -599,7 +599,7 @@ void Splash::pipeRun(SplashPipe *pipe)
         } else if (pipe->alpha0Ptr) {
             if (state->inKnockoutGroup) {
                 // non-isolated, knockout
-                aResult = aSrc + div255(aDest * (255 - pipe->shape));
+                aResult = clip255(aSrc + div255(aDest * (255 - pipe->shape)));
                 alpha0 = *pipe->alpha0Ptr++;
                 alphaI = aResult + alpha0 - div255(aResult * alpha0);
                 alphaIm1 = alpha0;
@@ -613,7 +613,7 @@ void Splash::pipeRun(SplashPipe *pipe)
         } else {
             if (state->inKnockoutGroup) {
                 // isolated, knockout
-                aResult = aSrc + div255(aDest * (255 - pipe->shape));
+                aResult = clip255(aSrc + div255(aDest * (255 - pipe->shape)));
                 alphaI = aResult;
                 alphaIm1 = 0;
             } else {
