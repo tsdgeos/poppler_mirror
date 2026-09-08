@@ -373,7 +373,8 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) : cacheOut {}
     }
     buf = 0;
     bits = 0;
-    bitMask = (1 << sampleBits) - 1;
+    // sampleBits can be 32, so shift a 64-bit value to avoid overflowing int
+    bitMask = static_cast<unsigned int>((1ULL << sampleBits) - 1);
     for (i = 0; i < nSamples; ++i) {
         if (sampleBits == 8) {
             s = str->getChar();
