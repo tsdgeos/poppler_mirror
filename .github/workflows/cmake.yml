@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-14, macos-15, macos-26]
+        os: [macos-15, macos-26, xcode-27]
 
     steps:
     - uses: actions/checkout@v6
@@ -35,8 +35,8 @@ jobs:
 
     - name: Configure CMake
       run: |
-        if [[ "${{ matrix.os }}" == "macos-14" ]]; then
-          sudo xcode-select -s /Applications/Xcode_16.2.app
+        if [[ "${{ matrix.os }}" == "macos-15" ]]; then
+          sudo xcode-select -s /Applications/Xcode_26.3.app
         fi
         cmake -DENABLE_QT5=OFF -DCMAKE_CXX_FLAGS="-Werror -Wno-deprecated-declarations" -B ${{github.workspace}}/build -G Ninja -DFONT_CONFIGURATION=generic -DENABLE_GPGME=OFF -DBUILD_SHARED_LIBS=OFF -DTESTDATADIR=${{github.workspace}}/testfiles
 
