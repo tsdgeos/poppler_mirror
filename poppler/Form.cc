@@ -3054,7 +3054,7 @@ Form::AddFontResult Form::doGetAddFontToDefaultResources(Unicode uChar, const Gf
     const UCharFontSearchResult res = globalParams->findSystemFontFileForUChar(uChar, fontToEmulate);
 
     std::string pdfFontName = findFontInDefaultResources(res.family, res.style);
-    if (pdfFontName.empty()) {
+    if (pdfFontName.empty() && !res.filepath.empty()) {
         return addFontToDefaultResources(res.filepath, res.faceIndex, res.family, res.style,
                                          true /*This is called when a string contains a uChar that is not present in the font for that string so we find a another font to display it, thus it's always a 'substitute' font*/,
                                          false /*forceName*/);

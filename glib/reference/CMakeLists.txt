@@ -1,10 +1,12 @@
 # The docs generation scans the glib build dir while g-ir-scanner may still be
 # writing its temporary introspection files there, racing the docs build.
-# Serialize the two targets by depending on the gir output when introspection
-# is enabled.
+# Serialize the two commands by depending on the gir-typelibs target (which
+# covers the gir output) when introspection is enabled. Using a target
+# instead of the gir file path keeps the dependency working with both the
+# Makefile and Ninja generators.
 set(_poppler_glib_docs_deps poppler-glib)
 if (HAVE_INTROSPECTION AND BUILD_SHARED_LIBS)
-  list(APPEND _poppler_glib_docs_deps ${CMAKE_BINARY_DIR}/glib/Poppler-0.18.gir)
+  list(APPEND _poppler_glib_docs_deps gir-typelibs)
 endif ()
 
 add_custom_command(

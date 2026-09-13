@@ -149,6 +149,16 @@ if [ "$SANITIZER" != "memory" ]; then
     popd
 fi
 
+pushd $SRC/harfbuzz
+meson \
+    --prefix=$PREFIX \
+    --libdir=lib \
+    --default-library=static \
+    _builddir
+ninja -C _builddir
+ninja -C _builddir install
+popd
+
 QT6_LDFLAGS=""
 if [[ $FUZZING_ENGINE == "afl" ]]; then
     QT6_LDFLAGS="-fuse-ld=lld"
@@ -171,6 +181,12 @@ else
     POPPLER_FONT_CONFIGURATION=generic
 fi
 
+if [ "$POPPLER_FONT_CONFIGURATION" = "fontconfig" ]; then
+    POPPLER_ENABLE_HARFBUZZ=ON
+else
+    POPPLER_ENABLE_HARFBUZZ=OFF
+fi
+
 mkdir -p $SRC/poppler/build
 pushd $SRC/poppler/build
 cmake .. \
@@ -189,7 +205,7 @@ cmake .. \
   -DENABLE_QT6=ON \
   -DENABLE_QT5=OFF \
   -DENABLE_UTILS=OFF \
-  -DENABLE_HARFBUZZ=OFF \
+  -DENABLE_HARFBUZZ=$POPPLER_ENABLE_HARFBUZZ \
   -DWITH_Cairo=$POPPLER_ENABLE_GLIB \
   -DCMAKE_INSTALL_PREFIX=$PREFIX
 
@@ -200,7 +216,7 @@ if [ "$SANITIZER" != "memory" ]; then
 fi
 
 PREDEPS_LDFLAGS="-Wl,-Bdynamic -ldl -lm -lc -lz -pthread -lrt -lpthread"
-DEPS="freetype2 lcms2 libopenjp2"
+DEPS="freetype2 lcms2 libopenjp2 harfbuzz-subset"
 if [ "$SANITIZER" != "memory" ]; then
     DEPS="$DEPS fontconfig libpng"
 fi
@@ -228,7 +244,7 @@ for f in $fuzzers; do
 done
 
 if [ "$SANITIZER" != "memory" ]; then
-    DEPS="gmodule-2.0 glib-2.0 gio-2.0 gobject-2.0 freetype2 lcms2 libopenjp2 cairo cairo-gobject pango fontconfig libpng"
+    DEPS="gmodule-2.0 glib-2.0 gio-2.0 gobject-2.0 freetype2 lcms2 libopenjp2 cairo cairo-gobject pango fontconfig libpng harfbuzz-subset"
     BUILD_CFLAGS="$CFLAGS `pkg-config --static --cflags $DEPS`"
     BUILD_LDFLAGS="-Wl,-static `pkg-config --static --libs $DEPS`"
     BUILD_LDFLAGS="$BUILD_LDFLAGS $NSS_STATIC_LIBS"
@@ -251,7 +267,7 @@ if [ "$SANITIZER" != "memory" ]; then
 fi
 
 PREDEPS_LDFLAGS="-Wl,-Bdynamic -ldl -lm -lc -lz -pthread -lrt -lpthread"
-DEPS="freetype2 lcms2 libopenjp2"
+DEPS="freetype2 lcms2 libopenjp2 harfbuzz-subset"
 if [ "$SANITIZER" != "memory" ]; then
     DEPS="$DEPS fontconfig"
 fi

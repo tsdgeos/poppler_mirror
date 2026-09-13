@@ -73,6 +73,10 @@
 #include "Stream-CCITT.h"
 #include "CachedFile.h"
 
+#if ENABLE_BROTLI
+#    include "BrotliStream.h"
+#endif
+
 #include "splash/SplashBitmap.h"
 
 #if ENABLE_LIBJPEG
@@ -375,6 +379,14 @@ std::unique_ptr<Stream> Stream::makeFilter(const std::string &name, std::unique_
             }
         }
         str = std::make_unique<FlateStream>(std::move(str), pred, columns, colors, bits);
+    } else if (name == "BrotliDecode") {
+#if ENABLE_BROTLI
+        str = std::make_unique<BrotliStream>(std::move(str));
+#else
+        error(errSyntaxError, str->getPos(), "Brotli unsuppported in this poppler");
+        str = wrapEOFStream(std::move(str));
+#endif
+
     } else if (name == "JBIG2Decode") {
         Object globals;
         if (params->isDict()) {

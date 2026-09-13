@@ -30,6 +30,7 @@
 // Copyright 2023-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2024 Pratham Gandhi <ppg.1382@gmail.com>
 // Copyright 2025 Blair Bonnett <blair.bonnett@gmail.com>
+// Copyright 2026 Ojas Maheshwari <workonlyojas@gmail.com>
 //
 //========================================================================
 

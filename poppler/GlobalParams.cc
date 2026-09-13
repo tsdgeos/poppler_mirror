@@ -1169,6 +1169,7 @@ UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, co
         }
     }
 
+    error(errIO, -1, "Couldn't find a font similar to '{0:s}' that can represent U+{1:04uX}", fontToEmulate.getName().value_or("(unnamed)").c_str(), uChar);
     return {};
 }
 #elif WITH_FONTCONFIGURATION_ANDROID

@@ -364,7 +364,7 @@ std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> GpgSig
         case GPG_ERR_BAD_PASSPHRASE:
             return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::BadPassphrase, .message = ErrorString { .text = errorString(signingResult.error()), .type = ErrorStringType::UserString } };
         }
-        error(errInternal, -1, "Signing error from gpgme: '%s'", errorString(signingResult.error()).c_str());
+        error(errInternal, -1, "Signing error from gpgme: '{0:s}'", errorString(signingResult.error()).c_str());
         return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::GenericError, .message = ErrorString { .text = errorString(signingResult.error()), .type = ErrorStringType::UserString } };
     }
 

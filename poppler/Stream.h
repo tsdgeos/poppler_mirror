@@ -76,6 +76,7 @@ enum StreamKind
     strCCITTFax,
     strDCT,
     strFlate,
+    strBrotli,
     strJBIG2,
     strJPX,
     strWeird, // internal-use stream types

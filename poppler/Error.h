@@ -83,4 +83,10 @@ struct ErrorString
         std::string { POPPLER_FUNCTION_INFO } + ":" + std::to_string(__LINE__), ErrorStringType::ErrorCodeString                                                                                                                               \
     }
 
+#define ERROR_IN_CODE_LOCATION_WITH_CODE(code)                                                                                                                                                                                                 \
+    ErrorString                                                                                                                                                                                                                                \
+    {                                                                                                                                                                                                                                          \
+        std::string { POPPLER_FUNCTION_INFO } + ":" + std::to_string(__LINE__) + ":" + std::to_string(code), ErrorStringType::ErrorCodeString                                                                                                  \
+    }
+
 #endif

@@ -8,7 +8,7 @@
 // Copyright 2004 Klarälvdalens Datakonsult AB
 // Copyright 2021 g10 Code GmbH
 // Copyright 2023, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
-// Copyright 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright 2024, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright 2025 Ingo Klöcker <dev@ingo-kloecker.de>
 //
 // Derived from libkleopatra (KDE key management library) dn.cpp

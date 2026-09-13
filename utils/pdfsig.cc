@@ -117,6 +117,25 @@ static const char *getReadableCertState(CertificateValidationStatus cert_vs)
     }
 }
 
+static const char *getErrorCodeAsString(CryptoSign::SigningError err)
+{
+    switch (err) {
+    case CryptoSign::SigningError::GenericError:
+        return "Generic error";
+    case CryptoSign::SigningError::InternalError:
+        return "Internal error";
+    case CryptoSign::SigningError::BadPassphrase:
+        return "Bad passphrase";
+    case CryptoSign::SigningError::KeyMissing:
+        return "Key not found";
+    case CryptoSign::SigningError::UserCancelled:
+        return "Cancelled by user";
+    case CryptoSign::SigningError::WriteFailed:
+        return "Write failed";
+    }
+    return "Unknown error";
+}
+
 static std::string getReadableTime(time_t unix_time)
 {
     std::stringstream stringStream;
@@ -524,7 +543,11 @@ int main(int argc, char *argv[])
         const auto failure = doc->sign(std::string { argv[2] }, std::string { certNickname }, std::string { password }, newSignatureFieldName.copy(), /*page*/ 1,
                                        /*rect */ { 0, 0, 0, 0 }, /*signatureText*/ {}, /*signatureTextLeft*/ {}, /*fontSize */ 0, /*leftFontSize*/ 0,
                                        /*fontColor*/ {}, /*borderWidth*/ 0, /*borderColor*/ {}, /*backgroundColor*/ {}, rs.get(), /* location */ nullptr, /* image path */ "", ownerPW, userPW);
-        return !failure.has_value() ? 0 : 3;
+        if (failure.has_value()) {
+            fprintf(stderr, "failed signing document: %s %s %d", failure->message.text.c_str(), getErrorCodeAsString(failure->type), static_cast<int>(failure->type));
+            return 3;
+        }
+        return 0;
     }
 
     const std::vector<FormFieldSignature *> signatures = doc->getSignatureFields();
@@ -616,7 +639,11 @@ int main(int argc, char *argv[])
         const auto gSignatureText = std::make_unique<GooString>((signatureText.empty() || noAppearance) ? "" : utf8ToUtf16WithBom(signatureText));
         const auto gSignatureLeftText = std::make_unique<GooString>((signerName.empty() || noAppearance) ? "" : utf8ToUtf16WithBom(signerName));
         const auto failure = fws->signDocumentWithAppearance(argv[2], std::string { certNickname }, std::string { password }, rs.get(), nullptr, {}, {}, *gSignatureText, *gSignatureLeftText, 0, 0, std::make_unique<AnnotColor>(blackColor));
-        return !failure.has_value() ? 0 : 3;
+        if (failure.has_value()) {
+            fprintf(stderr, "failed signing document: %s %s %d", failure->message.text.c_str(), getErrorCodeAsString(failure->type), static_cast<int>(failure->type));
+            return 3;
+        }
+        return 0;
     }
 
     if (argc > 2) {

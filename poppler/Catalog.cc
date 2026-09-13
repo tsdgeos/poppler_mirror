@@ -422,7 +422,9 @@ std::unique_ptr<LinkDest> Catalog::findDest(const GooString *name)
     // try named destination dictionary then name tree
     if (getDests()->isDict()) {
         Object obj1 = getDests()->dictLookup(*name);
-        return createLinkDest(&obj1);
+        if (!obj1.isNull()) {
+            return createLinkDest(&obj1);
+        }
     }
 
     catalogLocker();

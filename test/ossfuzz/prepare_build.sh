@@ -36,6 +36,7 @@ git clone --depth 1 --branch=dev git://code.qt.io/qt/qtbase.git
 # Header for g_sort_array() was not included in gen_script_for_lang.c
 # https://gitlab.gnome.org/GNOME/pango/-/commits/main/tools/gen-script-for-lang.c?ref_type=heads
 git clone https://gitlab.gnome.org/GNOME/pango.git && cd pango && git checkout d0cd499e17cdcfdc3f7a93d0d28a3df3c5f9b10e && cd ..
+git clone --depth 1 https://github.com/harfbuzz/harfbuzz.git
 wget https://ftp.gnome.org/pub/gnome/sources/glib/2.80/glib-2.80.0.tar.xz && tar xvJf $SRC/glib-2.80.0.tar.xz && rm $SRC/glib-2.80.0.tar.xz
 wget https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.bz2 && tar xvjf $SRC/boost_1_87_0.tar.bz2 && rm $SRC/boost_1_87_0.tar.bz2
 wget https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_99_RTM/src/nss-3.99-with-nspr-4.35.tar.gz && tar xvzf $SRC/nss-3.99-with-nspr-4.35.tar.gz && rm $SRC/nss-3.99-with-nspr-4.35.tar.gz

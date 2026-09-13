@@ -8,6 +8,9 @@
 /* Build with libopenjpeg support. */
 #cmakedefine01 ENABLE_LIBOPENJPEG
 
+/* Build with brotli support. */
+#cmakedefine01 ENABLE_BROTLI
+
 /* Do not hardcode the library location */
 #cmakedefine01 ENABLE_RELOCATABLE
 

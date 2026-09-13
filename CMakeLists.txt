@@ -41,7 +41,7 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "26")
-set(POPPLER_MINOR_VERSION_STRING "08")
+set(POPPLER_MINOR_VERSION_STRING "09")
 # We want the string version to have 08 but the integer version can't have a leading 0 since otherwise it's considered octal
 # So strip a leading 0 if found in POPPLER_MINOR_VERSION_STRING and store the result in POPPLER_MINOR_VERSION
 string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VERSION_STRING}")
@@ -59,6 +59,9 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 set(CMAKE_VERIFY_INTERFACE_HEADER_SETS ON)
 
+# We don't currently use modules, so no need to do the work for them
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+
 
 # command line switches
 option(ENABLE_UNSTABLE_API_ABI_HEADERS "Install API/ABI unstable xpdf headers." OFF)
@@ -75,6 +78,7 @@ option(ENABLE_GOBJECT_INTROSPECTION "Whether to generate GObject introspection."
 option(ENABLE_GTK_DOC "Whether to generate glib API documentation." OFF)
 option(ENABLE_QT5 "Compile poppler qt5 wrapper." ON)
 option(ENABLE_QT6 "Compile poppler qt6 wrapper." ON)
+option(ENABLE_BROTLI "Compile with support for brotli compressed streams" ON)
 option(ENABLE_LIBOPENJPEG "Use libopenjpeg for JPX streams." ON)
 option(ENABLE_LIBJPEG "Use libjpeg for DCT streams." ON)
 option(ENABLE_LCMS "Use LCMS for color management." ON)
@@ -161,6 +165,7 @@ set(QT5_VERSION "5.15")
 set(QT6_VERSION "6.4")
 set(BOOST_VERSION "1.83")
 set(GOBJECT_INTROSPECTION_VERSION "1.80")
+set(BROTLI_VERSION "1.1")
 
 find_package(Freetype ${FREETYPE_VERSION} REQUIRED)
 if(WITH_FONTCONFIGURATION_FONTCONFIG)
@@ -181,6 +186,7 @@ endmacro()
 find_soft_mandatory_package(ENABLE_NSS3 NSS3 ${NSS3_VERSION})
 find_soft_mandatory_package(ENABLE_GPGME Gpgmepp ${GPGME_VERSION})
 find_soft_mandatory_package(ENABLE_LIBTIFF TIFF ${TIFF_VERSION})
+find_soft_mandatory_package(ENABLE_BROTLI libbrotlidec ${BROTLI_VERSION})
 
 find_soft_mandatory_package(ENABLE_HARFBUZZ harfbuzz "")
 
@@ -501,6 +507,15 @@ if(Androidlib)
   set(PC_LIBS_PRIVATE "${PC_LIBS_PRIVATE} ${Androidlib}")
 endif()
 
+if (ENABLE_BROTLI)
+  set(poppler_SRCS ${poppler_SRCS}
+      poppler/BrotliStream.cc
+  )
+  set(poppler_LIBS ${poppler_LIBS} PkgConfig::libbrotlidec)
+  set(PC_REQUIRES_PRIVATE "${PC_REQUIRES_PRIVATE} libbrotlidec >= ${BROTLI_VERSION}")
+endif()
+
+
 if(ENABLE_LIBJPEG)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/DCTStream.cc
@@ -611,7 +626,7 @@ ADD_GPERF_FILE(TimesItalicWidths)
 ADD_GPERF_FILE(TimesRomanWidths)
 ADD_GPERF_FILE(ZapfDingbatsWidths)
 
-set(POPPLER_SOVERSION_NUMBER "163")
+set(POPPLER_SOVERSION_NUMBER "164")
 
 set(LINKER_SCRIPT "${CMAKE_BINARY_DIR}/libpoppler.map")
 configure_file(
@@ -891,6 +906,7 @@ show_end_message_yesno("cpp wrapper" ENABLE_CPP)
 show_end_message_yesno("use libjpeg" ENABLE_LIBJPEG)
 show_end_message_yesno("use libpng" ENABLE_LIBPNG)
 show_end_message_yesno("use libtiff" ENABLE_LIBTIFF)
+show_end_message_yesno("use brotli" ENABLE_BROTLI)
 show_end_message_yesno("use zlib uncompress" ENABLE_ZLIB_UNCOMPRESS)
 show_end_message_yesno("use nss3" ENABLE_NSS3)
 show_end_message_yesno("use gpg" ENABLE_GPGME)

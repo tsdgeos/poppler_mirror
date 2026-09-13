@@ -6,6 +6,8 @@
 //
 // Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2026 Juraj Šarinay <juraj@sarinay.com>
+// Copyright 2026 Albert Astals Cid <aacid@kde.org>
+//
 //========================================================================
 
 #ifndef SIGNATUREBACKEND_H

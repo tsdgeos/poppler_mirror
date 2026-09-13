@@ -1,3 +1,21 @@
+Release 26.09.0:
+        core:
+         * Subset fonts when saving changes in Annotations and Forms when using fontconfig
+         * NSS: Don't infinite loop on wrong password
+         * Internal code improvements
+         * Fix crashes in malformed documents
+
+        utils:
+         * pdftotext: Add -urls option to print link URLs next to their text
+         * pdftohtml: Improve speed by ignoring tiling patterns earlier
+         * pdfimages: Fix typo in manpage
+
+        glib:
+         * Remove G_GNUC_CONST in enum _get_type funcs
+
+        build system:
+         * harfbuzz is now required for font subsetting
+
 Release 26.08.0:
         core:
          * GPG based signature improvements

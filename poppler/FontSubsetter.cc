@@ -187,11 +187,17 @@ void FontSubsetter::subsetAll() const
 
     for (int i = 1; i <= numPages; i++) {
         Page *page = doc->getPage(i);
+        if (!page) {
+            continue;
+        }
         subsetFormFieldText(page->getFormWidgets(), fontsToRemove, refSet, xref, subsettingSuccessful);
     }
 
     for (int i = 1; i <= numPages; i++) {
         Page *page = doc->getPage(i);
+        if (!page) {
+            continue;
+        }
 
         Annots *annotsPtr = page->getAnnots();
         if (!annotsPtr) {
@@ -245,6 +251,9 @@ void FontSubsetter::subsetAll() const
     // Scan local resources of all modified freetext annotations and widget annotations (forms) and remove the old font refs
     for (int i = 1; i <= numPages; i++) {
         Page *page = doc->getPage(i);
+        if (!page) {
+            continue;
+        }
 
         Annots *annotsPtr = page->getAnnots();
         if (!annotsPtr) {
@@ -291,6 +300,9 @@ void FontSubsetter::subsetAll() const
     // Remove old font refs from modified field resources
     for (int i = 1; i <= numPages; i++) {
         Page *page = doc->getPage(i);
+        if (!page) {
+            continue;
+        }
         removeFontsFromFieldRes(page->getFormWidgets(), refSet, xref);
     }
 
