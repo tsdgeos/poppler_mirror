@@ -235,7 +235,7 @@ static bool testSingleAnnotationSubsetting(std::shared_ptr<GooString> &filename)
 
     page->addAnnot(ftextann);
 
-    auto tempFilePath = std::make_unique<GooString>(std::filesystem::current_path() / "temp.pdf");
+    auto tempFilePath = std::make_unique<GooString>((std::filesystem::current_path() / "temp.pdf").string());
 
     doc->saveAs(tempFilePath->toStr());
 
@@ -291,7 +291,7 @@ static bool testSingleAnnotationSubsettingWithOpacity(std::shared_ptr<GooString>
 
     page->addAnnot(ftextann);
 
-    auto tempFilePath = std::make_unique<GooString>(std::filesystem::current_path() / "temp.pdf");
+    auto tempFilePath = std::make_unique<GooString>((std::filesystem::current_path() / "temp.pdf").string());
 
     doc->saveAs(tempFilePath->toStr());
 
@@ -351,7 +351,7 @@ static bool testFormFieldSubsetting(std::shared_ptr<GooString> &filename)
 
     textField->setContent(std::make_unique<GooString>(UNICODE_TEXT));
 
-    auto tempFilePath = std::make_unique<GooString>(std::filesystem::current_path() / "temp.pdf");
+    auto tempFilePath = std::make_unique<GooString>((std::filesystem::current_path() / "temp.pdf").string());
 
     doc->saveAs(tempFilePath->toStr());
 
