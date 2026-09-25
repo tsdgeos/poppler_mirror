@@ -16,6 +16,7 @@
 #include "GPGMECryptoSignBackendConfiguration.h"
 #include "DistinguishedNameParser.h"
 #include "Error.h"
+#include <algorithm>
 #include <array>
 #include <gpgme++/global.h>
 #include <gpgme.h>
@@ -43,6 +44,29 @@ bool GpgSignatureBackend::hasSufficientVersion()
         return false;
     }
     return version >= "2.2.42";
+}
+
+static bool supportsSigningCertificatesReal()
+{
+    auto version = GpgME::engineInfo(GpgME::GpgSMEngine).engineVersion();
+    auto context = GpgME::Context::create(GpgME::CMS);
+    auto error = context->addSignatureNotation("_signingCertificateV2", nullptr, 0);
+    return version >= "2.5.20" && !error;
+}
+
+static bool supportsSigningCertificates()
+{
+    static bool supportsSigningCertificatesCached = supportsSigningCertificatesReal(); // supportsSigningCertificates effectively asks gpg executable each time. This can be cached; the downside of caching is that one could theoreticcaly
+                                                                                       // launch a long-running poppler-app and upgrade gpg underneath it. That's unlikely to be an expected scenario, so let's take the speedup.
+    return supportsSigningCertificatesCached;
+}
+
+static std::vector<CryptoSign::SMimeSignatureType> supportedSMimeTypes()
+{
+    if (supportsSigningCertificates()) {
+        return { CryptoSign::SMimeSignatureType::adbe_pkcs7_detached, CryptoSign::SMimeSignatureType::ETSI_CAdES_B };
+    }
+    return { CryptoSign::SMimeSignatureType::adbe_pkcs7_detached };
 }
 
 /// GPGME helper methods
@@ -191,6 +215,7 @@ static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromKey(const GpgM
             subjectInfo.email = fromCharPtr(key.userID(1).email());
         }
         certificateInfo->setSubjectInfo(std::move(subjectInfo));
+        certificateInfo->setSupportedSMimeSignatureTypes(supportedSMimeTypes());
     } else if (protocol == GpgME::OpenPGP) {
         X509CertificateInfo::EntityInfo info;
         info.email = fromCharPtr(key.userID(0).email());
@@ -342,6 +367,9 @@ GpgSignatureCreation::GpgSignatureCreation(const std::string &certId, CryptoSign
             break;
         }
     }
+    if (protocol == GpgME::Protocol::CMS && supportsSigningCertificates()) {
+        gpgContext->addSignatureNotation("_signingCertificateV2", nullptr, 0);
+    }
 }
 
 void GpgSignatureCreation::addData(unsigned char *dataBlock, int dataLen)
@@ -399,13 +427,23 @@ std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> GpgSig
 }
 CryptoSign::SignatureType GpgSignatureCreation::signatureType() const
 {
-    if (m_requestedType == CryptoSign::SMimeSignatureType::none || m_requestedType == CryptoSign::SMimeSignatureType::adbe_pkcs7_detached) {
-        if (protocol == GpgME::CMS) {
-            return CryptoSign::SignatureType::adbe_pkcs7_detached;
-        }
+    auto supportedTypes = supportedSMimeTypes();
+    switch (m_requestedType) {
+    case CryptoSign::SMimeSignatureType::none:
         if (protocol == GpgME::OpenPGP) {
             return CryptoSign::SignatureType::g10c_pgp_signature_detached;
         }
+        [[fallthrough]];
+    case CryptoSign::SMimeSignatureType::adbe_pkcs7_detached:
+        return CryptoSign::SignatureType::adbe_pkcs7_detached;
+    case CryptoSign::SMimeSignatureType::ETSI_CAdES_B:
+    case CryptoSign::SMimeSignatureType::ETSI_CAdES_T:
+    case CryptoSign::SMimeSignatureType::ETSI_CAdES_LT:
+    case CryptoSign::SMimeSignatureType::ETSI_CAdES_LTA:
+        if (std::ranges::contains(supportedTypes, m_requestedType)) {
+            return CryptoSign::SignatureType::ETSI_CAdES_detached;
+        }
+        return CryptoSign::SignatureType::unknown_signature_type;
     }
     return CryptoSign::SignatureType::unknown_signature_type;
 }
@@ -416,11 +454,12 @@ std::optional<CryptoSign::SigningErrorMessage> GpgSignatureCreation::checkOk() c
         return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::KeyMissing, .message = ERROR_IN_CODE_LOCATION };
     }
     switch (protocol) {
-    case GpgME::CMS:
-        if (m_requestedType != CryptoSign::SMimeSignatureType::adbe_pkcs7_detached && m_requestedType != CryptoSign::SMimeSignatureType::none) {
+    case GpgME::CMS: {
+        auto supportedTypes = supportedSMimeTypes();
+        if (!std::ranges::contains(supportedTypes, m_requestedType) && m_requestedType != CryptoSign::SMimeSignatureType::none) {
             return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::UnsupportedSignatureType, .message = ERROR_IN_CODE_LOCATION };
         }
-        break;
+    } break;
     case GpgME::OpenPGP:
         if (m_requestedType != CryptoSign::SMimeSignatureType::none) {
             return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::UnsupportedSignatureType, .message = ERROR_IN_CODE_LOCATION };
