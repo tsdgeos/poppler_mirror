@@ -144,9 +144,9 @@ else()
   message(FATAL_ERROR "Invalid font configuration setting: ${FONT_CONFIGURATION}")
 endif()
 
-if(NOT WITH_FONTCONFIGURATION_FONTCONFIG)
+if(WITH_FONTCONFIGURATION_ANDROID OR font_configuration STREQUAL "generic")
   set(ENABLE_HARFBUZZ OFF)
-  message(STATUS "Disabling HarfBuzz support because the font configuration is not fontconfig")
+  message(STATUS "Disabling HarfBuzz support because the font configuration does not have support for subsetting (generic, android)")
 endif()
 
 # setting the minimum required versions for some components
