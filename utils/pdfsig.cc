@@ -32,6 +32,7 @@
 #include <cstring>
 #include <ctime>
 #include <fstream>
+#include <iostream>
 #include <random>
 #include <filesystem>
 #include <iomanip>
@@ -39,6 +40,10 @@
 #include <sstream>
 #include <unordered_map>
 #include <vector>
+#if HAVE_TCGETATTR
+#    include <termios.h>
+#    include <unistd.h>
+#endif
 #include "parseargs.h"
 #include "goo/gbasename.h"
 #include "Form.h"
@@ -309,22 +314,52 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
 #if ENABLE_NSS3
     bool wrongPassword = false;
     bool passwordNeeded = false;
-    bool nssPasswordAnswered = false;
     std::string missingPasswordStore;
     std::set<std::string> answeredPasswordStores;
-    auto passwordCallback = [&passwordNeeded, &wrongPassword, &nssPasswordAnswered, &missingPasswordStore, &answeredPasswordStores](const char *store) -> char * {
+    auto passwordCallback = [&passwordNeeded, &wrongPassword, &missingPasswordStore, &answeredPasswordStores](const char *store) -> char * {
         const std::string_view storeName = store ? store : "";
         if (nssPasswords.empty()) {
-            if (nssPasswordAnswered) {
+            if (!answeredPasswordStores.insert(std::string(storeName)).second) {
                 wrongPassword = true;
                 return nullptr;
             }
-            nssPasswordAnswered = true;
             if (!nssPassword.empty()) {
                 return strdup(nssPassword.c_str());
             }
+
+            std::string nssPasswordInput;
+            fprintf(stderr, "Enter password for NSS store '%s': ", store ? store : "(null)");
+            fflush(stderr);
+
+#    if HAVE_TCGETATTR
+            termios originalTermios;
+            bool inputModeChanged = false;
+            if (tcgetattr(fileno(stdin), &originalTermios) == 0) {
+                termios passwordTermios = originalTermios;
+                passwordTermios.c_lflag &= ~ECHO;
+                inputModeChanged = tcsetattr(fileno(stdin), TCSANOW, &passwordTermios) == 0;
+            }
+#    else
+            // TODO there is possibly something similar for Windows so that the user can type the password without it being printed back on the terminal
+#    endif
+
+            const bool passwordRead = static_cast<bool>(std::getline(std::cin, nssPasswordInput));
+
+#    if HAVE_TCGETATTR
+            if (inputModeChanged) {
+                tcsetattr(fileno(stdin), TCSANOW, &originalTermios);
+                fprintf(stderr, "\n");
+                fflush(stderr);
+            }
+#    endif
+
+            if (passwordRead) {
+                return strdup(nssPasswordInput.c_str());
+            }
+
             passwordNeeded = true;
             missingPasswordStore = storeName;
+
             return nullptr;
         }
 

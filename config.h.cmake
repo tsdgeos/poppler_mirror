@@ -53,6 +53,9 @@
 /* Defines if strtok_r is available on your system */
 #cmakedefine01 HAVE_STRTOK_R
 
+/* Defines if tcgetattr is available on your system */
+#cmakedefine01 HAVE_TCGETATTR
+
 /* Define to 1 if you have a big endian machine */
 #cmakedefine01 WORDS_BIGENDIAN
 
