@@ -9,5 +9,8 @@ add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x050E00)
 add_definitions(-DQT_NO_DEPRECATED_WARNINGS)
 
 add_subdirectory(src)
-add_subdirectory(tests)
-add_subdirectory(demos)
+
+if(BUILD_QT5_TESTS)
+  add_subdirectory(tests)
+  add_subdirectory(demos)
+endif()

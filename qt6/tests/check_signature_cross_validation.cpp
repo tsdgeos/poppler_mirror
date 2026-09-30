@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2026 Sune Stolborg Vuorela <sune@vuorela.dk>, work sponsored by the Direction Interministérielle du Numérique
 //========================================================================
 
 // Simple tests of reading signatures
@@ -60,6 +61,7 @@ private Q_SLOTS:
     static void cleanupTestCase();
     static void testKeyList();
     static void testSignVerify();
+    static void testBasicFailures();
 };
 
 std::unique_ptr<QTemporaryDir> CheckSignatureCrossValidation::nssdir;
@@ -75,6 +77,40 @@ void CheckSignatureCrossValidation::init()
     keyId = keyid;
 
     globalParams = std::make_unique<GlobalParams>();
+}
+
+void CheckSignatureCrossValidation::testBasicFailures()
+{
+    auto doc = std::make_unique<PDFDoc>(std::make_unique<GooString>(TESTDATADIR "/unittestcases/WithActualText.pdf"));
+    QVERIFY(doc->isOk());
+    {
+        auto signatureFields = doc->getSignatureFields();
+        QCOMPARE(signatureFields.size(), 0);
+    }
+
+    {
+        QTemporaryDir d;
+        CryptoSign::SigningOperationData signingData;
+        signingData.nickName = "nickname-that-does-not-exist"; // We should not have
+
+        auto signingResult = doc->sign(std::string { d.filePath(QStringLiteral("signedFile.pdf")).toStdString() }, signingData, std::make_unique<GooString>("newSignatureFieldName"), /*page*/ 1,
+                                       /*rect */ { 0, 0, 0, 0 }, /*signatureText*/ {}, /*signatureTextLeft*/ {}, /*fontSize */ 0, /*leftFontSize*/ 0,
+                                       /*fontColor*/ {}, /*borderWidth*/ 0, /*borderColor*/ {}, /*backgroundColor*/ {}, /*reason*/ {}, /* location */ nullptr, /* image path */ "", {}, {});
+
+        QCOMPARE(signingResult->type, CryptoSign::SigningError::KeyMissing);
+    }
+    {
+        QTemporaryDir d;
+        CryptoSign::SigningOperationData signingData;
+        signingData.nickName = keyId;
+        signingData.type = CryptoSign::SMimeSignatureType::ETSI_CAdES_LTA;
+
+        auto signingResult = doc->sign(std::string { d.filePath(QStringLiteral("signedFile.pdf")).toStdString() }, signingData, std::make_unique<GooString>("newSignatureFieldName"), /*page*/ 1,
+                                       /*rect */ { 0, 0, 0, 0 }, /*signatureText*/ {}, /*signatureTextLeft*/ {}, /*fontSize */ 0, /*leftFontSize*/ 0,
+                                       /*fontColor*/ {}, /*borderWidth*/ 0, /*borderColor*/ {}, /*backgroundColor*/ {}, /*reason*/ {}, /* location */ nullptr, /* image path */ "", {}, {});
+
+        QCOMPARE(signingResult->type, CryptoSign::SigningError::UnsupportedSignatureType);
+    }
 }
 
 void CheckSignatureCrossValidation::initTestCase_data()
@@ -140,8 +176,10 @@ void CheckSignatureCrossValidation::testSignVerify()
     }
 
     QTemporaryDir d;
+    CryptoSign::SigningOperationData signingData;
+    signingData.nickName = keyId;
 
-    auto signingResult = doc->sign(std::string { d.filePath(QStringLiteral("signedFile.pdf")).toStdString() }, keyId, std::string {}, std::make_unique<GooString>("newSignatureFieldName"), /*page*/ 1,
+    auto signingResult = doc->sign(std::string { d.filePath(QStringLiteral("signedFile.pdf")).toStdString() }, signingData, std::make_unique<GooString>("newSignatureFieldName"), /*page*/ 1,
                                    /*rect */ { 0, 0, 0, 0 }, /*signatureText*/ {}, /*signatureTextLeft*/ {}, /*fontSize */ 0, /*leftFontSize*/ 0,
                                    /*fontColor*/ {}, /*borderWidth*/ 0, /*borderColor*/ {}, /*backgroundColor*/ {}, /*reason*/ {}, /* location */ nullptr, /* image path */ "", {}, {});
 

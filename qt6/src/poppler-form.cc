@@ -20,6 +20,7 @@
  * Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
  * Copyright (C) 2024 Stefan Brüns <stefan.bruens@rwth-aachen.de>
  * Copyright (C) 2025 Blair Bonnett <blair.bonnett@gmail.com>
+ * Copyright (C) 2026 Sune Stolborg Vuorela <sune@vuorela.dk>, work sponsored by the Direction Interministérielle du Numérique
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -623,6 +624,7 @@ public:
     bool is_qualified;
     CertificateInfo::CertificateType certificateType;
     CertificateInfo::KeyLocation keyLocation;
+    QVector<SMimeSignatureType> supportedSignatureTypes;
 };
 
 CertificateInfo::CertificateInfo() : d_ptr(new CertificateInfoPrivate())
@@ -766,6 +768,12 @@ CertificateInfo::KeyLocation CertificateInfo::keyLocation() const
     return d->keyLocation;
 }
 
+QVector<Poppler::SMimeSignatureType> CertificateInfo::supportedSMimeSignatureTypes() const
+{
+    Q_D(const CertificateInfo);
+    return d->supportedSignatureTypes;
+}
+
 QByteArray CertificateInfo::publicKey() const
 {
     Q_D(const CertificateInfo);
@@ -813,7 +821,10 @@ bool CertificateInfo::checkPassword(const QString &password) const
         return false;
     }
     Q_D(const CertificateInfo);
-    auto sigHandler = backend->createSigningHandler(d->nick_name.toStdString(), HashAlgorithm::Sha256);
+    auto sigHandler = backend->createSigningHandler(d->nick_name.toStdString(), HashAlgorithm::Sha256, CryptoSign::SMimeSignatureType::none);
+    if (sigHandler->checkOk()) {
+        return false;
+    }
     unsigned char buffer[5];
     memcpy(buffer, "test", 5);
     sigHandler->addData(buffer, 5);
@@ -1084,6 +1095,10 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
 
         certPriv->is_null = false;
         certPriv->is_qualified = ci->isQualified();
+
+        for (auto type : ci->supportedSMimeSignatureTypes()) {
+            certPriv->supportedSignatureTypes.push_back(fromPopplerCore(type));
+        }
     }
 
     return certPriv;
@@ -1228,8 +1243,13 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
     const auto gSignatureText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureText()));
     const auto gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureLeftText()));
 
-    const auto failure = fws->signDocumentWithAppearance(outputFileName.toStdString(), data.certNickname().toStdString(), data.password().toStdString(), reason.get(), location.get(), ownerPwd, userPwd, *gSignatureText, *gSignatureLeftText,
-                                                         data.fontSize(), data.leftFontSize(), convertQColor(data.fontColor()), data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()));
+    CryptoSign::SigningOperationData signingData;
+    signingData.nickName = data.certNickname().toStdString();
+    signingData.possiblePassword = data.password().toStdString();
+    signingData.type = toPopplerCore(data.requestedSignatureType());
+
+    const auto failure = fws->signDocumentWithAppearance(outputFileName.toStdString(), signingData, reason.get(), location.get(), ownerPwd, userPwd, *gSignatureText, *gSignatureLeftText, data.fontSize(), data.leftFontSize(),
+                                                         convertQColor(data.fontColor()), data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()));
     if (failure) {
         m_formData->lastSigningErrorDetails = fromPopplerCore(failure.value().message);
         switch (failure.value().type) {
@@ -1245,6 +1265,8 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
             return WriteFailed;
         case CryptoSign::SigningError::BadPassphrase:
             return BadPassphrase;
+        case CryptoSign::SigningError::UnsupportedSignatureType:
+            return UnsupportedSignatureType;
         }
         return GenericSigningError;
     }
@@ -1347,7 +1369,11 @@ static bool hasNSSBackendFeature(CryptoSignBackendFeature feature)
 {
     switch (feature) {
     case CryptoSignBackendFeature::BackendAsksPassphrase:
+#if ENABLE_NSS3
+        return NSSSignatureConfiguration::hasNSSPasswordCallback();
+#else
         return false;
+#endif
     }
     return false;
 }

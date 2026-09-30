@@ -17,15 +17,13 @@ macro(QT5_ADD_SIMPLETEST exe source)
 endmacro(QT5_ADD_SIMPLETEST)
 
 macro(QT5_ADD_QTEST exe source)
-  if (Qt5Test_FOUND)
-    string(REPLACE "-" "" test_name ${exe})
-    set(${test_name}_SOURCES
-      ${source}
-    )
-    poppler_add_test(${exe} BUILD_QT5_TESTS ${${test_name}_SOURCES})
-    add_test(${exe} ${EXECUTABLE_OUTPUT_PATH}/${exe})
-    target_link_libraries(${exe} poppler-qt5 Qt5::Widgets Qt5::Test Qt5::Core Qt5::Gui)
-  endif ()
+  string(REPLACE "-" "" test_name ${exe})
+  set(${test_name}_SOURCES
+    ${source}
+  )
+  poppler_add_test(${exe} BUILD_QT5_TESTS ${${test_name}_SOURCES})
+  add_test(${exe} ${EXECUTABLE_OUTPUT_PATH}/${exe})
+  target_link_libraries(${exe} poppler-qt5 Qt5::Widgets Qt5::Test Qt5::Core Qt5::Gui)
 endmacro(QT5_ADD_QTEST)
 
 qt5_add_simpletest(test-poppler-qt5 test-poppler-qt5.cpp)

@@ -334,11 +334,13 @@ MediaRendition::MediaRendition(const Dict &dict)
     if (tmp2.isDict()) { // media play parameters
         Object params = tmp2.dictLookup("MH");
         if (params.isDict()) {
-            MH.parseMediaPlayParameters(*params.getDict());
+            MH = MediaParameters {};
+            MH->parseMediaPlayParameters(*params.getDict());
         }
         params = tmp2.dictLookup("BE");
         if (params.isDict()) {
-            BE.parseMediaPlayParameters(*params.getDict());
+            BE = MediaParameters {};
+            BE->parseMediaPlayParameters(*params.getDict());
         }
     } else if (!hasClip) {
         error(errSyntaxError, -1, "Invalid Media Rendition");
@@ -351,11 +353,17 @@ MediaRendition::MediaRendition(const Dict &dict)
     if (tmp2.isDict()) { // media screen parameters
         Object params = tmp2.dictLookup("MH");
         if (params.isDict()) {
-            MH.parseMediaScreenParameters(*params.getDict());
+            if (!MH) {
+                MH = MediaParameters {};
+            }
+            MH->parseMediaScreenParameters(*params.getDict());
         }
         params = tmp2.dictLookup("BE");
         if (params.isDict()) {
-            BE.parseMediaScreenParameters(*params.getDict());
+            if (!BE) {
+                BE = MediaParameters {};
+            }
+            BE->parseMediaScreenParameters(*params.getDict());
         }
     }
 }

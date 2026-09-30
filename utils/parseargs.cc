@@ -15,7 +15,7 @@
  All changes made under the Poppler project to this file are licensed
  under GPL version 2 or later
 
- Copyright (C) 2008, 2009, 2018, 2025 Albert Astals Cid <aacid@kde.org>
+ Copyright (C) 2008, 2009, 2018, 2025, 2026 Albert Astals Cid <aacid@kde.org>
  Copyright (C) 2011, 2012 Adrian Johnson <ajohnson@redneon.com>
  Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 
@@ -87,20 +87,16 @@ void printUsage(const char *program, const char *otherArgs, const ArgDesc *args)
         w1 = 9 + w - strlen(arg->arg);
         switch (arg->kind) {
         case argInt:
-        case argIntDummy:
             typ = " <int>";
             break;
         case argFP:
-        case argFPDummy:
             typ = " <fp>";
             break;
         case argString:
-        case argStringDummy:
         case argGooString:
             typ = " <string>";
             break;
         case argFlag:
-        case argFlagDummy:
         default:
             typ = "";
             break;
@@ -118,7 +114,7 @@ static const ArgDesc *findArg(const ArgDesc *args, char *arg)
     const ArgDesc *p;
 
     for (p = args; p->arg; ++p) {
-        if (p->kind < argFlagDummy && !strcmp(p->arg, arg)) {
+        if (!strcmp(p->arg, arg)) {
             return p;
         }
     }

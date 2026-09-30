@@ -1191,6 +1191,10 @@ static Annotation::Flags fromPdfFlags(int flags)
 {
     Annotation::Flags qtflags;
 
+    if (flags & Annot::flagInvisible) {
+        qtflags |= Annotation::Hidden;
+        qtflags |= Annotation::DenyPrint;
+    }
     if (flags & Annot::flagHidden) {
         qtflags |= Annotation::Hidden;
     }
@@ -1213,6 +1217,12 @@ static Annotation::Flags fromPdfFlags(int flags)
     if (flags & Annot::flagToggleNoView) {
         qtflags |= Annotation::ToggleHidingOnMouse;
     }
+    if (flags & Annot::flagLockedContents) {
+        qtflags |= Annotation::DenyWrite;
+    }
+    if (flags & Annot::flagNoView) {
+        qtflags |= Annotation::Hidden;
+    }
 
     return qtflags;
 }
@@ -1223,6 +1233,7 @@ static int toPdfFlags(Annotation::Flags qtflags)
 
     if (qtflags & Annotation::Hidden) {
         flags |= Annot::flagHidden;
+        flags |= Annot::flagNoView;
     }
     if (qtflags & Annotation::FixedSize) {
         flags |= Annot::flagNoZoom;
@@ -3080,6 +3091,8 @@ SignatureAnnotation::SigningResult SignatureAnnotation::sign(const QString &outp
         return UserCancelled;
     case FormFieldSignature::BadPassphrase:
         return BadPassphrase;
+    case FormFieldSignature::UnsupportedSignatureType:
+        return UnsupportedSignatureType;
     }
     return GenericSigningError;
 }

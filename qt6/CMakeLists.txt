@@ -7,5 +7,7 @@ endif()
 
 add_subdirectory(src)
 
-add_subdirectory(tests)
-add_subdirectory(demos)
+if(BUILD_QT6_TESTS)
+  add_subdirectory(tests)
+  add_subdirectory(demos)
+endif()

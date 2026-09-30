@@ -613,19 +613,24 @@ static bool hashFileRange(FILE *f, CryptoSign::SigningInterface *handler, Goffse
     return true;
 }
 
-std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument(const std::string &saveFilename, const std::string &certNickname, const std::string &password, const GooString *reason, const GooString *location,
+std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument(const std::string &saveFilename, const CryptoSign::SigningOperationData &data, const GooString *reason, const GooString *location,
                                                                                  const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
     auto backend = CryptoSign::Factory::createActive();
     if (!backend) {
         return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::InternalError, .message = ERROR_IN_CODE_LOCATION };
     }
-    if (certNickname.empty()) {
+    if (data.nickName.empty()) {
         error(errInternal, -1, "signDocument: Empty nickname");
         return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::KeyMissing, .message = ERROR_IN_CODE_LOCATION };
     }
 
-    auto sigHandler = backend->createSigningHandler(certNickname, HashAlgorithm::Sha256);
+    auto sigHandler = backend->createSigningHandler(data.nickName, HashAlgorithm::Sha256, data.type);
+
+    auto failure = sigHandler->checkOk();
+    if (failure) {
+        return failure;
+    }
 
     const unsigned int maxExpectedSignatureSize = sigHandler->estimateSize();
 
@@ -679,7 +684,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
     }
 
     // and sign it
-    auto signature = sigHandler->signDetached(password);
+    auto signature = sigHandler->signDetached(data.possiblePassword);
     if (std::holds_alternative<CryptoSign::SigningErrorMessage>(signature)) {
         fclose(file);
         return std::get<CryptoSign::SigningErrorMessage>(signature);
@@ -724,11 +729,10 @@ static std::tuple<double, double> calculateDxDy(int rot, const PDFRectangle &rec
     }
 }
 
-std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocumentWithAppearance(const std::string &saveFilename, const std::string &certNickname, const std::string &password, const GooString *reason,
-                                                                                               const GooString *location, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword,
-                                                                                               const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, double leftFontSize,
-                                                                                               std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor,
-                                                                                               std::unique_ptr<AnnotColor> &&backgroundColor)
+std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocumentWithAppearance(const std::string &saveFilename, const CryptoSign::SigningOperationData &data, const GooString *reason, const GooString *location,
+                                                                                               const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, const GooString &signatureText,
+                                                                                               const GooString &signatureTextLeft, double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth,
+                                                                                               std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor)
 {
     // Set the appearance
     const std::string originalDefaultAppearance = getField()->getDefaultAppearance();
@@ -785,7 +789,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
     // say that there a now signatures and that we should append only
     doc->getCatalog()->getAcroForm()->dictSet("SigFlags", Object(3));
 
-    auto signingResult = signDocument(saveFilename, certNickname, password, reason, location, ownerPassword, userPassword);
+    auto signingResult = signDocument(saveFilename, data, reason, location, ownerPassword, userPassword);
 
     // Now bring back the annotation appearance back to what it was
     ffs->setDefaultAppearance(originalDefaultAppearance);

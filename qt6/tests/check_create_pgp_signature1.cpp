@@ -6,6 +6,7 @@
 //
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2025, 2026 Albert Astals Cid <aacid@kde.org>
+// Copyright 2026 Sune Stolborg Vuorela <sune@vuorela.dk>, work sponsored by the Direction Interministérielle du Numérique
 //========================================================================
 
 // Simple tests of reading signatures
@@ -62,6 +63,7 @@ private Q_SLOTS:
     static void testPgpSignVerify();
     static void testKeyList();
     static void testKeyListQt();
+    static void testDontAskForSMimeWhenPpg();
 };
 
 std::unique_ptr<QTemporaryDir> TestSignWithGnupgPgp::nssdir;
@@ -146,10 +148,12 @@ void TestSignWithGnupgPgp::testPgpSignVerify()
 
     QTemporaryDir d;
 
-    auto signingResult =
-            doc->sign(std::string { d.filePath(QStringLiteral("signedFile.pdf")).toStdString() }, std::string { "36E39802E4F49A259091DA69381B80FEF3535BC1" }, std::string {}, std::make_unique<GooString>("newSignatureFieldName"), /*page*/ 1,
-                      /*rect */ { 0, 0, 0, 0 }, /*signatureText*/ {}, /*signatureTextLeft*/ {}, /*fontSize */ 0, /*leftFontSize*/ 0,
-                      /*fontColor*/ {}, /*borderWidth*/ 0, /*borderColor*/ {}, /*backgroundColor*/ {}, /*reason*/ {}, /* location */ nullptr, /* image path */ "", {}, {});
+    CryptoSign::SigningOperationData signingData;
+    signingData.nickName = std::string { "36E39802E4F49A259091DA69381B80FEF3535BC1" };
+
+    auto signingResult = doc->sign(std::string { d.filePath(QStringLiteral("signedFile.pdf")).toStdString() }, signingData, std::make_unique<GooString>("newSignatureFieldName"), /*page*/ 1,
+                                   /*rect */ { 0, 0, 0, 0 }, /*signatureText*/ {}, /*signatureTextLeft*/ {}, /*fontSize */ 0, /*leftFontSize*/ 0,
+                                   /*fontColor*/ {}, /*borderWidth*/ 0, /*borderColor*/ {}, /*backgroundColor*/ {}, /*reason*/ {}, /* location */ nullptr, /* image path */ "", {}, {});
 
     auto activeBackendType = CryptoSign::Factory::getActive();
     if (activeBackendType == CryptoSign::Backend::Type::NSS3) {
@@ -167,6 +171,35 @@ void TestSignWithGnupgPgp::testPgpSignVerify()
         QCOMPARE(siginfo0->getSignatureValStatus(), SignatureValidationStatus::SIGNATURE_VALID);
         QCOMPARE(siginfo0->getSignerName(), std::string { "testuser" });
         QCOMPARE(siginfo0->getCertificateInfo()->getNickName().toStr(), std::string { "36E39802E4F49A259091DA69381B80FEF3535BC1" });
+    }
+}
+
+void TestSignWithGnupgPgp::testDontAskForSMimeWhenPpg()
+{
+    auto doc = std::make_unique<PDFDoc>(std::make_unique<GooString>(TESTDATADIR "/unittestcases/WithActualText.pdf"));
+    QVERIFY(doc->isOk());
+    {
+        auto signatureFields = doc->getSignatureFields();
+        QCOMPARE(signatureFields.size(), 0);
+    }
+
+    QTemporaryDir d;
+
+    CryptoSign::SigningOperationData signingData;
+    signingData.nickName = std::string { "36E39802E4F49A259091DA69381B80FEF3535BC1" };
+    signingData.type = CryptoSign::SMimeSignatureType::adbe_pkcs7_detached;
+
+    auto signingResult = doc->sign(std::string { d.filePath(QStringLiteral("signedFile.pdf")).toStdString() }, signingData, std::make_unique<GooString>("newSignatureFieldName"), /*page*/ 1,
+                                   /*rect */ { 0, 0, 0, 0 }, /*signatureText*/ {}, /*signatureTextLeft*/ {}, /*fontSize */ 0, /*leftFontSize*/ 0,
+                                   /*fontColor*/ {}, /*borderWidth*/ 0, /*borderColor*/ {}, /*backgroundColor*/ {}, /*reason*/ {}, /* location */ nullptr, /* image path */ "", {}, {});
+
+    auto activeBackendType = CryptoSign::Factory::getActive();
+    if (activeBackendType == CryptoSign::Backend::Type::NSS3) {
+        QVERIFY(signingResult.has_value());
+        QCOMPARE(signingResult.value().type, CryptoSign::SigningError::KeyMissing);
+    } else if (activeBackendType == CryptoSign::Backend::Type::GPGME) {
+        QVERIFY(signingResult.has_value());
+        QCOMPARE(signingResult.value().type, CryptoSign::SigningError::UnsupportedSignatureType);
     }
 }
 

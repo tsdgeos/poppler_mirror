@@ -7,6 +7,7 @@
 // Copyright 2023-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2026 Juraj Šarinay <juraj@sarinay.com>
+// Copyright 2026 Sune Stolborg Vuorela <sune@vuorela.dk>, work sponsored by the Direction Interministérielle du Numérique
 //========================================================================
 
 #include "CryptoSignBackend.h"
@@ -16,6 +17,7 @@
 #include "DistinguishedNameParser.h"
 #include "Error.h"
 #include <array>
+#include <gpgme++/global.h>
 #include <gpgme.h>
 #include <gpgme++/key.h>
 #include <gpgme++/gpgmepp_version.h>
@@ -273,9 +275,9 @@ GpgSignatureBackend::GpgSignatureBackend()
     GpgME::initializeLibrary();
 }
 
-std::unique_ptr<CryptoSign::SigningInterface> GpgSignatureBackend::createSigningHandler(const std::string &certID, HashAlgorithm /*digestAlgTag*/)
+std::unique_ptr<CryptoSign::SigningInterface> GpgSignatureBackend::createSigningHandler(const std::string &certID, HashAlgorithm /*digestAlgTag*/, CryptoSign::SMimeSignatureType type)
 {
-    return std::make_unique<GpgSignatureCreation>(certID);
+    return std::make_unique<GpgSignatureCreation>(certID, type);
 }
 
 std::unique_ptr<CryptoSign::VerificationInterface> GpgSignatureBackend::createVerificationHandler(std::vector<unsigned char> &&pkcs7, CryptoSign::SignatureType type)
@@ -326,7 +328,7 @@ std::vector<std::unique_ptr<X509CertificateInfo>> GpgSignatureBackend::getAvaila
     return certificates;
 }
 
-GpgSignatureCreation::GpgSignatureCreation(const std::string &certId)
+GpgSignatureCreation::GpgSignatureCreation(const std::string &certId, CryptoSign::SMimeSignatureType requestedType) : m_requestedType(requestedType)
 {
     for (auto type : allowedTypes()) {
         GpgME::Error error;
@@ -397,13 +399,37 @@ std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> GpgSig
 }
 CryptoSign::SignatureType GpgSignatureCreation::signatureType() const
 {
-    if (protocol == GpgME::CMS) {
-        return CryptoSign::SignatureType::adbe_pkcs7_detached;
-    }
-    if (protocol == GpgME::OpenPGP) {
-        return CryptoSign::SignatureType::g10c_pgp_signature_detached;
+    if (m_requestedType == CryptoSign::SMimeSignatureType::none || m_requestedType == CryptoSign::SMimeSignatureType::adbe_pkcs7_detached) {
+        if (protocol == GpgME::CMS) {
+            return CryptoSign::SignatureType::adbe_pkcs7_detached;
+        }
+        if (protocol == GpgME::OpenPGP) {
+            return CryptoSign::SignatureType::g10c_pgp_signature_detached;
+        }
     }
     return CryptoSign::SignatureType::unknown_signature_type;
+}
+
+std::optional<CryptoSign::SigningErrorMessage> GpgSignatureCreation::checkOk() const
+{
+    if (!key) {
+        return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::KeyMissing, .message = ERROR_IN_CODE_LOCATION };
+    }
+    switch (protocol) {
+    case GpgME::CMS:
+        if (m_requestedType != CryptoSign::SMimeSignatureType::adbe_pkcs7_detached && m_requestedType != CryptoSign::SMimeSignatureType::none) {
+            return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::UnsupportedSignatureType, .message = ERROR_IN_CODE_LOCATION };
+        }
+        break;
+    case GpgME::OpenPGP:
+        if (m_requestedType != CryptoSign::SMimeSignatureType::none) {
+            return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::UnsupportedSignatureType, .message = ERROR_IN_CODE_LOCATION };
+        }
+        break;
+    default:
+        return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::InternalError, .message = ERROR_IN_CODE_LOCATION };
+    }
+    return {};
 }
 
 std::unique_ptr<X509CertificateInfo> GpgSignatureCreation::getCertificateInfo() const

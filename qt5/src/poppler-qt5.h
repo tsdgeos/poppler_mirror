@@ -2429,6 +2429,7 @@ public:
         WriteFailed, ///< Write failed (permissions, faulty disk, ...)
         UserCancelled, ///< User cancelled the process
         BadPassphrase, ///< User entered bad passphrase
+        UnsupportedSignatureType, ///< User asked for a signature type that the current backend/key combo can't deliver
     };
 
     /**

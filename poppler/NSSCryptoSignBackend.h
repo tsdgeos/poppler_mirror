@@ -107,13 +107,14 @@ private:
 class NSSSignatureCreation final : public CryptoSign::SigningInterface
 {
 public:
-    NSSSignatureCreation(const std::string &certNickname, HashAlgorithm digestAlgTag);
+    NSSSignatureCreation(const std::string &certNickname, HashAlgorithm digestAlgTag, CryptoSign::SMimeSignatureType requestedType);
     ~NSSSignatureCreation() final;
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
     void addData(unsigned char *data_block, int data_len) final;
     std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> signDetached(const std::string &password) final;
-    CryptoSign::SignatureType signatureType() const final { return CryptoSign::SignatureType::adbe_pkcs7_detached; }
+    CryptoSign::SignatureType signatureType() const final;
     unsigned int estimateSize() const final;
+    std::optional<CryptoSign::SigningErrorMessage> checkOk() const final;
 
     NSSSignatureCreation(const NSSSignatureCreation &) = delete;
     NSSSignatureCreation &operator=(const NSSSignatureCreation &) = delete;
@@ -121,6 +122,7 @@ public:
 private:
     std::unique_ptr<HashContext> hashContext;
     CERTCertificate *signing_cert = nullptr;
+    CryptoSign::SMimeSignatureType m_requestedType;
     unsigned int estimated_size = CryptoSign::defaultMaxSignatureSize;
 };
 
@@ -137,6 +139,7 @@ public:
     static std::string getNSSDir();
 
     static void setNSSPasswordCallback(const std::function<char *(const char *)> &f);
+    static bool hasNSSPasswordCallback();
 
     NSSSignatureConfiguration() = delete;
 
@@ -148,7 +151,7 @@ class NSSCryptoSignBackend final : public CryptoSign::Backend
 {
 public:
     std::unique_ptr<CryptoSign::VerificationInterface> createVerificationHandler(std::vector<unsigned char> &&pkcs7, CryptoSign::SignatureType type) final;
-    std::unique_ptr<CryptoSign::SigningInterface> createSigningHandler(const std::string &certID, HashAlgorithm digestAlgTag) final;
+    std::unique_ptr<CryptoSign::SigningInterface> createSigningHandler(const std::string &certID, HashAlgorithm digestAlgTag, CryptoSign::SMimeSignatureType type) final;
     std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates() final;
     ~NSSCryptoSignBackend() final;
 };

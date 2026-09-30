@@ -50,16 +50,16 @@ build:
     - ninja -j ${FDO_CI_CONCURRENT} all_verify_interface_header_sets
     - ctest --output-on-failure
 
-build_clang17_libcpp_cmake328:
+build_clang19_libcpp_cmake328:
   stage: build
   image: debian:trixie
   script:
-    - echo "This is to simulate xcode 16.2 that is the minimum macos version we support"
+    - echo "This is to simulate xcode that can run macos 15 which is the minimum macos version we support"
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
-    - apt-get install --yes --no-install-recommends libclang-17-dev llvm-17-dev libc++-17-dev libc++abi-17-dev clang-17 clang-tools-17 libunwind-17-dev gperf jq fonts-droid-fallback libbrotli-dev
+    - apt-get install --yes --no-install-recommends libclang-19-dev llvm-19-dev libc++-19-dev libc++abi-19-dev clang-19 clang-tools-19 libunwind-19-dev gperf jq fonts-droid-fallback libbrotli-dev
     - mkdir -p build && cd build
     - echo "We disable Qt6 tests since Qt6 exposes std::string in its ABI which makes it not build in this CI since we're using libc++ but Qt6 in debian is build with libstdc++"
-    - CC=clang-17 CXX=clang++-17 cmake -G Ninja -DCMAKE_CXX_FLAGS="-stdlib=libc++ -Werror -Wno-deprecated-declarations -Wno-error=unused-command-line-argument" -DTESTDATADIR=$PWD/../test-data -DBUILD_QT6_TESTS=OFF -DENABLE_GPGME=OFF ..
+    - CC=clang-19 CXX=clang++-19 cmake -G Ninja -DCMAKE_CXX_FLAGS="-stdlib=libc++ -Werror -Wno-deprecated-declarations -Wno-error=unused-command-line-argument" -DTESTDATADIR=$PWD/../test-data -DBUILD_QT6_TESTS=OFF -DENABLE_GPGME=OFF ..
     - ninja -j ${FDO_CI_CONCURRENT}
     - ctest --output-on-failure
 
@@ -114,29 +114,27 @@ build_ubuntu_24_04:
     - PKG_CONFIG="$(which pkg-config) --static" cmake -G Ninja ..
     - ninja
 
-build_mingw64_fedora44:
+build_mingw64_fedora45:
   stage: build
-  image: fedora:44
+  image: fedora:45
   before_script:
     - dnf install -y 'dnf-command(builddep)'
     - dnf builddep -y mingw64-poppler
-    - dnf -y install glibc-langpack-en make ninja-build mingw64-boost mingw64-curl mingw64-qt6-qtbase mingw64-gcc-c++ cmake-rpm-macros
   script:
     - mkdir -p build && cd build
-    # TODO: Font Subsetting can be turned ON when harfbuzz releases 14.2.2 that contains fix for https://github.com/harfbuzz/harfbuzz/issues/6026
-    - mingw64-cmake -DENABLE_NSS3=OFF -DENABLE_GPGME=OFF -DENABLE_BOOST=OFF -DENABLE_HARFBUZZ=OFF -DENABLE_BROTLI=OFF -G Ninja ..
+    - mingw64-cmake -DENABLE_NSS3=OFF -DENABLE_GPGME=OFF -DENABLE_BOOST=OFF -DENABLE_BROTLI=OFF -G Ninja ..
     - ninja
 
-build_clazy_fedora44_clang22:
+build_clazy_fedora45_clang23:
   stage: build
-  image: fedora:44
+  image: fedora:45
   before_script:
     - dnf install -y 'dnf-command(builddep)'
     - dnf builddep -y poppler
     - dnf -y install clazy ninja-build glibc-langpack-en brotli-devel
   script:
     - mkdir -p build && cd build
-    - CC=clang-22 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations -Wno-error=c2y-extensions" cmake -G Ninja ..
+    - CC=clang-23 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja ..
     - CLAZY_CHECKS="level0,level1,level2,isempty-vs-count,qhash-with-char-pointer-key,tr-non-literal,no-non-pod-global-static" ninja -j ${FDO_CI_CONCURRENT}
 
 build_qt611_android:

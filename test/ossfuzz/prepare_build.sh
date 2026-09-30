@@ -20,6 +20,7 @@
 apt-get update && apt-get install -y wget autoconf automake libtool pkg-config gperf python
 pip3 install meson ninja gyp-next packaging
 
+git clone --depth 1 https://github.com/google/brotli.git
 git clone --depth 1 https://github.com/madler/zlib.git
 git clone --depth 1 https://gitlab.freedesktop.org/freetype/freetype.git
 git clone --depth 1 https://github.com/mm2/Little-CMS.git

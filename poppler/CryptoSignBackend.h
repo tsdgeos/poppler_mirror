@@ -54,7 +54,15 @@ enum class SigningError
     UserCancelled /**User cancelled the action*/,
     KeyMissing, /**The key/certificate not specified*/
     BadPassphrase, /** Bad passphrase */
+    UnsupportedSignatureType, /** Requested signature type and key is not compatible */
 
+};
+
+struct SigningOperationData
+{
+    std::string nickName;
+    std::string possiblePassword;
+    SMimeSignatureType type = SMimeSignatureType::none;
 };
 
 struct SigningErrorMessage
@@ -93,6 +101,10 @@ public:
     virtual std::unique_ptr<X509CertificateInfo> getCertificateInfo() const = 0;
     virtual std::variant<std::vector<unsigned char>, SigningErrorMessage> signDetached(const std::string &password) = 0;
     virtual unsigned int estimateSize() const = 0;
+    // Gives a initial early failure if something is wrong and we know a sign operation will fail.
+    // This can be called after creation and before adding data. It is especially for checking
+    // that the key is found and the key can be used to create the signature type
+    virtual std::optional<SigningErrorMessage> checkOk() const = 0;
     virtual ~SigningInterface();
     SigningInterface() = default;
     SigningInterface(const SigningInterface &other) = delete;
@@ -108,7 +120,7 @@ public:
         GPGME
     };
     virtual std::unique_ptr<VerificationInterface> createVerificationHandler(std::vector<unsigned char> &&pkcs7, SignatureType type) = 0;
-    virtual std::unique_ptr<SigningInterface> createSigningHandler(const std::string &certID, HashAlgorithm digestAlgTag) = 0;
+    virtual std::unique_ptr<SigningInterface> createSigningHandler(const std::string &certID, HashAlgorithm digestAlgTag, SMimeSignatureType type) = 0;
     virtual std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates() = 0;
     virtual ~Backend();
     Backend() = default;

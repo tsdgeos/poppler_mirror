@@ -30,6 +30,11 @@ rm -rf $WORK/*
 rm -rf $BUILD
 mkdir -p $BUILD
 
+pushd $SRC/brotli
+cmake . -DBUILD_SHARED_LIBS=False -DCMAKE_BUILD_TYPE=debug
+make -j$(nproc) install
+popd
+
 # Temporarily Add -D_GNU_SOURCE to CFLAGS to fix freetype's dependence on GNU
 # extensions for dlsym to dynamically load harfbuzz. This feature
 # should potentially be disabled instead of fixing the compilation. But that is

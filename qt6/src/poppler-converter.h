@@ -31,6 +31,7 @@
  * Copyright (C) 2022 Martin <martinbts@gmx.net>
  * Copyright (C) 2023 Kevin Ottens <kevin.ottens@enioka.com>. Work sponsored by De Bortoli Wines
  * Copyright (C) 2025, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2026 Sune Stolborg Vuorela <sune@vuorela.dk>, work sponsored by the Direction Interministérielle du Numérique
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,6 +81,19 @@ struct ErrorString
 {
     QVariant data;
     ErrorStringType type;
+};
+/**
+ * The possible s/mime signature types
+ * \since 26.09
+ */
+enum class SMimeSignatureType
+{
+    none, /* nothing specified; do something sane, probably adbe_pkcs7_detached - this comes either from 'older software versions' or via a g10c_pgp_signature_detached signature*/
+    adbe_pkcs7_detached,
+    ETSI_CAdES_B, // Simplest cades
+    ETSI_CAdES_T, // B + Time stamp
+    ETSI_CAdES_LT, // T + Long term validation
+    ETSI_CAdES_LTA, // LT + support for periodical timestamping
 };
 
 class DocumentData;
@@ -458,6 +472,18 @@ public:
         QString imagePath() const;
         void setImagePath(const QString &path);
 
+        /**
+         * The S/Mime signature type to request to create
+         * \since 26.09
+         */
+        SMimeSignatureType requestedSignatureType() const;
+
+        /**
+         * Sets the S/Mime signature type to request to create
+         * \since 26.09
+         */
+        void setRequestedSignatureType(SMimeSignatureType requestedType);
+
     private:
         struct NewSignatureDataPrivate;
         NewSignatureDataPrivate *const d;
@@ -488,6 +514,7 @@ public:
         WriteFailed, ///< Write failed (permissions, faulty disk, ...)
         UserCancelled, ///< User cancelled the process
         BadPassphrase, ///< User entered bad passphrase
+        UnsupportedSignatureType, ///< User asked for a signature type that the current backend/key combo can't deliver \since 26.09
     };
 
     /**

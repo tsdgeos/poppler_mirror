@@ -1900,7 +1900,7 @@ XRefEntry *XRef::getEntry(int i, bool complainIfMissing)
     if (i >= size || entries[i].type == xrefEntryNone) {
 
         if ((!xRefStream) && mainXRefEntriesOffset) {
-            if (unlikely(i >= capacity)) {
+            if (unlikely(i >= size)) {
                 error(errInternal, -1, "Request for out-of-bounds XRef entry [{0:d}]", i);
                 return &dummyXRefEntry;
             }

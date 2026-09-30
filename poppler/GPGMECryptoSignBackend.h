@@ -24,7 +24,7 @@ class GpgSignatureBackend : public CryptoSign::Backend
 public:
     GpgSignatureBackend();
     std::unique_ptr<CryptoSign::VerificationInterface> createVerificationHandler(std::vector<unsigned char> &&pkcs7, CryptoSign::SignatureType type) final;
-    std::unique_ptr<CryptoSign::SigningInterface> createSigningHandler(const std::string &certID, HashAlgorithm digestAlgTag) final;
+    std::unique_ptr<CryptoSign::SigningInterface> createSigningHandler(const std::string &certID, HashAlgorithm digestAlgTag, CryptoSign::SMimeSignatureType type) final;
     std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates() final;
     static bool hasSufficientVersion();
 };
@@ -32,18 +32,20 @@ public:
 class GpgSignatureCreation : public CryptoSign::SigningInterface
 {
 public:
-    explicit GpgSignatureCreation(const std::string &certId);
+    explicit GpgSignatureCreation(const std::string &certId, CryptoSign::SMimeSignatureType type);
     void addData(unsigned char *dataBlock, int dataLen) final;
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
     std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> signDetached(const std::string &password) final;
     CryptoSign::SignatureType signatureType() const final;
     unsigned int estimateSize() const final;
+    std::optional<CryptoSign::SigningErrorMessage> checkOk() const final;
 
 private:
     std::unique_ptr<GpgME::Context> gpgContext;
     GpgME::Data gpgData;
     std::optional<GpgME::Key> key;
     GpgME::Protocol protocol;
+    CryptoSign::SMimeSignatureType m_requestedType;
 };
 
 class GpgSignatureVerification : public CryptoSign::VerificationInterface

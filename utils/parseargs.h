@@ -13,7 +13,7 @@
  All changes made under the Poppler project to this file are licensed
  under GPL version 2 or later
 
- Copyright (C) 2008, 2018 Albert Astals Cid <aacid@kde.org>
+ Copyright (C) 2008, 2018, 2026 Albert Astals Cid <aacid@kde.org>
  Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
 
  To see a description of the changes please see the Changelog file that
@@ -43,12 +43,6 @@ typedef enum
     /*   [val: char *] */
     argGooString, /* string arg      */
     /*   [val: GooString *] */
-    /* dummy entries -- these show up in the usage listing only; */
-    /* useful for X args, for example                            */
-    argFlagDummy,
-    argIntDummy,
-    argFPDummy,
-    argStringDummy
 } ArgKind;
 
 /*

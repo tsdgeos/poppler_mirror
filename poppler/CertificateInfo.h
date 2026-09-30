@@ -20,6 +20,18 @@
 #include "goo/GooString.h"
 #include "poppler_private_export.h"
 
+namespace CryptoSign {
+enum class SMimeSignatureType
+{
+    none, /* nothing specified; do something sane, probably adbe_pkcs7_detached - this comes either from 'older software versions' or via a g10c_pgp_signature_detached signature*/
+    adbe_pkcs7_detached,
+    ETSI_CAdES_B, // Simplest cades
+    ETSI_CAdES_T, // B + Time stamp
+    ETSI_CAdES_LT, // T + Long term validation
+    ETSI_CAdES_LTA, // LT + support for periodical timestamping
+};
+}
+
 enum CertificateKeyUsageExtension
 {
     KU_DIGITAL_SIGNATURE = 0x80,
@@ -129,6 +141,7 @@ public:
     void setQualified(bool qualified);
     KeyLocation getKeyLocation() const;
     CertificateType getCertificateType() const;
+    const std::vector<CryptoSign::SMimeSignatureType> &supportedSMimeSignatureTypes() const;
 
     /* SETTERS */
     void setVersion(int version);
@@ -143,6 +156,7 @@ public:
     void setIsSelfSigned(bool isSelfSigned);
     void setKeyLocation(KeyLocation location);
     void setCertificateType(CertificateType type);
+    void setSupportedSMimeSignatureTypes(std::vector<CryptoSign::SMimeSignatureType> &&supported);
 
 private:
     EntityInfo issuer_info;
@@ -158,6 +172,7 @@ private:
     bool is_self_signed = false;
     KeyLocation keyLocation = KeyLocation::Unknown;
     CertificateType certificate_type = CertificateType::X509;
+    std::vector<CryptoSign::SMimeSignatureType> m_supportedTypes = { CryptoSign::SMimeSignatureType::none };
 };
 
 #endif

@@ -104,7 +104,7 @@ PopplerMedia *_poppler_media_new(const MediaRendition *poppler_media)
         media->filename = g_strdup(poppler_media->getFileName()->c_str());
     }
 
-    const MediaParameters *mp = poppler_media->getBEParameters();
+    std::optional<MediaParameters> mp = poppler_media->getBEParameters();
     mp = mp ? mp : poppler_media->getMHParameters();
 
     media->auto_play = mp ? mp->autoPlay : false;

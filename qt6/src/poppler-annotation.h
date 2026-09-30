@@ -816,6 +816,7 @@ public:
         WriteFailed, ///< Write failed (permissions, faulty disk, ...) \since 24.12
         UserCancelled, ///< User cancelled the process \since 24.12
         BadPassphrase, ///< User entered bad passphrase \since 25.03
+        UnsupportedSignatureType, ///< User asked for a signature type that the current backend/key combo can't deliver \since 26.09
     };
 
     SignatureAnnotation();

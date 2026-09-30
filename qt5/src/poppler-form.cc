@@ -803,7 +803,7 @@ bool CertificateInfo::checkPassword(const QString &password) const
         return false;
     }
     Q_D(const CertificateInfo);
-    auto sigHandler = backend->createSigningHandler(d->nick_name.toStdString(), HashAlgorithm::Sha256);
+    auto sigHandler = backend->createSigningHandler(d->nick_name.toStdString(), HashAlgorithm::Sha256, CryptoSign::SMimeSignatureType::none);
     unsigned char buffer[5];
     memcpy(buffer, "test", 5);
     sigHandler->addData(buffer, 5);
@@ -1214,8 +1214,12 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
     const auto gSignatureText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureText()));
     const auto gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureLeftText()));
 
-    auto failure = fws->signDocumentWithAppearance(outputFileName.toStdString(), data.certNickname().toStdString(), data.password().toStdString(), reason.get(), location.get(), ownerPwd, userPwd, *gSignatureText, *gSignatureLeftText,
-                                                   data.fontSize(), data.leftFontSize(), convertQColor(data.fontColor()), data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()));
+    CryptoSign::SigningOperationData signingData;
+    signingData.nickName = data.certNickname().toStdString();
+    signingData.possiblePassword = data.password().toStdString();
+
+    auto failure = fws->signDocumentWithAppearance(outputFileName.toStdString(), signingData, reason.get(), location.get(), ownerPwd, userPwd, *gSignatureText, *gSignatureLeftText, data.fontSize(), data.leftFontSize(),
+                                                   convertQColor(data.fontColor()), data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()));
     if (failure) {
         m_formData->lastSigningErrorDetails = fromPopplerCore(failure.value().message);
         switch (failure.value().type) {
@@ -1231,6 +1235,8 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
             return WriteFailed;
         case CryptoSign::SigningError::BadPassphrase:
             return BadPassphrase;
+        case CryptoSign::SigningError::UnsupportedSignatureType:
+            return UnsupportedSignatureType;
         }
         return GenericSigningError; // catch all
     }
@@ -1327,7 +1333,11 @@ static bool hasNSSBackendFeature(CryptoSignBackendFeature feature)
 {
     switch (feature) {
     case CryptoSignBackendFeature::BackendAsksPassphrase:
+#if ENABLE_NSS3
+        return NSSSignatureConfiguration::hasNSSPasswordCallback();
+#else
         return false;
+#endif
     }
     return false;
 }

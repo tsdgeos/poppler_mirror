@@ -150,7 +150,7 @@ float MediaRendition::repeatCount() const
 QSize MediaRendition::size() const
 {
     Q_D(const MediaRendition);
-    const MediaParameters *mp = nullptr;
+    std::optional<MediaParameters> mp;
 
     if (d->rendition->getBEParameters()) {
         mp = d->rendition->getBEParameters();

@@ -1550,6 +1550,10 @@ static int fromPdfFlags(int flags)
 {
     int qtflags = 0;
 
+    if (flags & Annot::flagInvisible) {
+        qtflags |= Annotation::Hidden;
+        qtflags |= Annotation::DenyPrint;
+    }
     if (flags & Annot::flagHidden) {
         qtflags |= Annotation::Hidden;
     }
@@ -1563,13 +1567,20 @@ static int fromPdfFlags(int flags)
         qtflags |= Annotation::DenyPrint;
     }
     if (flags & Annot::flagReadOnly) {
-        qtflags |= (Annotation::DenyWrite | Annotation::DenyDelete);
+        qtflags |= Annotation::DenyWrite;
+        qtflags |= Annotation::DenyDelete;
     }
     if (flags & Annot::flagLocked) {
         qtflags |= Annotation::DenyDelete;
     }
     if (flags & Annot::flagToggleNoView) {
         qtflags |= Annotation::ToggleHidingOnMouse;
+    }
+    if (flags & Annot::flagLockedContents) {
+        qtflags |= Annotation::DenyWrite;
+    }
+    if (flags & Annot::flagNoView) {
+        qtflags |= Annotation::Hidden;
     }
 
     return qtflags;
@@ -1581,6 +1592,7 @@ static int toPdfFlags(int qtflags)
 
     if (qtflags & Annotation::Hidden) {
         flags |= Annot::flagHidden;
+        flags |= Annot::flagNoView;
     }
     if (qtflags & Annotation::FixedSize) {
         flags |= Annot::flagNoZoom;

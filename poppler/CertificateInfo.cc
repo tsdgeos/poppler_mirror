@@ -149,3 +149,13 @@ void X509CertificateInfo::setCertificateType(CertificateType type)
 {
     certificate_type = type;
 }
+
+void X509CertificateInfo::setSupportedSMimeSignatureTypes(std::vector<CryptoSign::SMimeSignatureType> &&supported)
+{
+    m_supportedTypes = supported;
+}
+
+const std::vector<CryptoSign::SMimeSignatureType> &X509CertificateInfo::supportedSMimeSignatureTypes() const
+{
+    return m_supportedTypes;
+}

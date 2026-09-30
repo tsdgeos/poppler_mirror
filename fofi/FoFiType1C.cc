@@ -1619,7 +1619,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, std::string &charBuf, const Ty
         for (size_t i = start; i < charBuf.size(); ++i) {
             byte = charBuf[i] ^ (r2 >> 8);
             charBuf[i] = byte;
-            r2 = (byte + r2) * 52845 + 22719;
+            r2 = static_cast<unsigned short>((byte + r2) * 52845U + 22719U);
         }
     }
 
@@ -1707,7 +1707,7 @@ void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, const char *s)
 
     for (p = reinterpret_cast<const unsigned char *>(s); *p; ++p) {
         x = *p ^ (eb->r1 >> 8);
-        eb->r1 = (x + eb->r1) * 52845 + 22719;
+        eb->r1 = static_cast<unsigned short>((x + eb->r1) * 52845U + 22719U);
         (*eb->outputFunc)(eb->outputStream, std::string_view(&hexChars[x >> 4], 1));
         (*eb->outputFunc)(eb->outputStream, std::string_view(&hexChars[x & 0x0f], 1));
         eb->line += 2;
@@ -1726,7 +1726,7 @@ void FoFiType1C::eexecWriteCharstring(Type1CEexecBuf *eb, const unsigned char *s
     // eexec encryption
     for (i = 0; i < n; ++i) {
         x = s[i] ^ (eb->r1 >> 8);
-        eb->r1 = (x + eb->r1) * 52845 + 22719;
+        eb->r1 = static_cast<unsigned short>((x + eb->r1) * 52845U + 22719U);
         (*eb->outputFunc)(eb->outputStream, std::string_view(&hexChars[x >> 4], 1));
         (*eb->outputFunc)(eb->outputStream, std::string_view(&hexChars[x & 0x0f], 1));
         eb->line += 2;

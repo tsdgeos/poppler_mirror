@@ -22,9 +22,7 @@ macro(QT6_ADD_QTEST exe source)
       ${source}
     )
     poppler_add_test(${exe} BUILD_QT6_TESTS ${${test_name}_SOURCES})
-    if(BUILD_QT6_TESTS)
-      add_test(${exe} ${EXECUTABLE_OUTPUT_PATH}/${exe})
-    endif()
+    add_test(${exe} ${EXECUTABLE_OUTPUT_PATH}/${exe})
     target_link_libraries(${exe} poppler-qt6 Qt6::Widgets Qt6::Test Qt6::Gui)
 endmacro()
 

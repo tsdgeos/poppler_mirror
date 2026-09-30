@@ -128,8 +128,8 @@ public:
 
     bool isOk() const { return ok; }
 
-    const MediaParameters *getMHParameters() const { return &MH; }
-    const MediaParameters *getBEParameters() const { return &BE; }
+    const std::optional<MediaParameters> &getMHParameters() const { return MH; }
+    const std::optional<MediaParameters> &getBEParameters() const { return BE; }
 
     const GooString *getContentType() const { return contentType.get(); }
     const GooString *getFileName() const { return fileName.get(); }
@@ -146,9 +146,9 @@ private:
     bool ok;
 
     // "Must Honor" parameters
-    MediaParameters MH;
+    std::optional<MediaParameters> MH;
     // "Best Effort" parameters
-    MediaParameters BE;
+    std::optional<MediaParameters> BE;
 
     bool isEmbedded;
 

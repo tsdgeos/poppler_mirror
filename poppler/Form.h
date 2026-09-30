@@ -326,11 +326,11 @@ public:
     // field "ByteRange" in the dictionary "V".
     // Arguments reason and location are UTF-16 big endian strings with BOM. An empty string and nullptr are acceptable too.
     // Returns success.
-    std::optional<CryptoSign::SigningErrorMessage> signDocument(const std::string &filename, const std::string &certNickname, const std::string &password, const GooString *reason = nullptr, const GooString *location = nullptr,
+    std::optional<CryptoSign::SigningErrorMessage> signDocument(const std::string &filename, const CryptoSign::SigningOperationData &data, const GooString *reason = nullptr, const GooString *location = nullptr,
                                                                 const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {});
 
     // Same as above but adds text, font color, etc.
-    std::optional<CryptoSign::SigningErrorMessage> signDocumentWithAppearance(const std::string &filename, const std::string &certNickname, const std::string &password, const GooString *reason = nullptr, const GooString *location = nullptr,
+    std::optional<CryptoSign::SigningErrorMessage> signDocumentWithAppearance(const std::string &filename, const CryptoSign::SigningOperationData &data, const GooString *reason = nullptr, const GooString *location = nullptr,
                                                                               const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {}, const GooString &signatureText = {},
                                                                               const GooString &signatureTextLeft = {}, double fontSize = {}, double leftFontSize = {}, std::unique_ptr<AnnotColor> &&fontColor = {}, double borderWidth = {},
                                                                               std::unique_ptr<AnnotColor> &&borderColor = {}, std::unique_ptr<AnnotColor> &&backgroundColor = {});
