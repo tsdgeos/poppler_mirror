@@ -23,7 +23,7 @@
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2011, 2012, 2014-2017, 2019, 2020 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011, 2012, 2014-2017, 2019, 2020, 2026 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009-2011, 2013-2015, 2017, 2020 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012, 2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -2714,17 +2714,18 @@ void PSOutputDev::setupImages(Dict *resDict)
     }
 }
 
-void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
+void PSOutputDev::setupImage(Ref id, Stream *str, bool mask, GfxImageColorMap *colorMap, int width, int height)
 {
     bool useFlate, useLZW, useRLE, useCompressed, doUseASCIIHex;
     int c;
     int size, line, col, i;
     int outerSize, outer;
 
-    // filters
-    //~ this does not correctly handle the DeviceN color space
-    //~   -- need to use DeviceNRecoder
+    // doImageL2() and doImageL3() always re-encode DeviceN images, and at
+    // level 2 they declare the alternate color space
+    const bool isDeviceN = colorMap && colorMap->getColorSpace()->getMode() == csDeviceN;
 
+    // filters
     useFlate = useLZW = useRLE = false;
     useCompressed = false;
     doUseASCIIHex = false;
@@ -2736,7 +2737,7 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
             /* nothing to do */;
         } else {
             std::optional<std::string> s = str->getPSFilter(level < psLevel3 ? 2 : 3, "");
-            if (s) {
+            if (s && !isDeviceN) {
                 useCompressed = true;
             } else {
                 if (level >= psLevel3 && getEnableFlate()) {
@@ -2752,6 +2753,9 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
     }
     if (useCompressed) {
         str = str->getUndecodedStream();
+    }
+    if (isDeviceN && level < psLevel3) {
+        str = new DeviceNRecoder(str, width, height, colorMap);
     }
     if (useFlate) {
         str = new FlateEncoder(str);
@@ -5786,7 +5790,7 @@ void PSOutputDev::doImageL2(const GfxState *state, const Object *ref, GfxImageCo
             delete str2;
         } else {
             // make sure the image is setup, it sometimes is not like on bug #17645
-            setupImage(ref->getRef(), str, false);
+            setupImage(ref->getRef(), str, false, colorMap, width, height);
             // set up to use the array already created by setupImages()
             writePSFmt("ImData_{0:d}_{1:d} 0 0\n", ref->getRefNum(), ref->getRefGen());
         }
@@ -6157,7 +6161,7 @@ void PSOutputDev::doImageL3(const GfxState *state, const Object *ref, GfxImageCo
             delete str2;
         } else {
             // make sure the image is setup, it sometimes is not like on bug #17645
-            setupImage(ref->getRef(), str, false);
+            setupImage(ref->getRef(), str, false, colorMap, width, height);
             // set up to use the array already created by setupImages()
             writePSFmt("ImData_{0:d}_{1:d} 0 0\n", ref->getRefNum(), ref->getRefGen());
         }
