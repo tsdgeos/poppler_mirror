@@ -18,7 +18,7 @@ find_package_handle_standard_args(harfbuzz DEFAULT_MSG harfbuzz_LINK_LIBRARIES h
 
 pkg_check_modules(harfbuzz-subset IMPORTED_TARGET harfbuzz-subset)
 
-find_package_handle_standard_args(harfbuzz-subset DEFAULT_MSG harfbuzz-subset_LINK_LIBRARIES harfbuzz-subset_CFLAGS)
+find_package_handle_standard_args(harfbuzz-subset NAME_MISMATCHED REQUIRED_VARS harfbuzz-subset_LINK_LIBRARIES harfbuzz-subset_CFLAGS)
 
 add_library(harfbuzz::harfbuzz ALIAS PkgConfig::harfbuzz)
 add_library(harfbuzz::subset ALIAS PkgConfig::harfbuzz-subset)
