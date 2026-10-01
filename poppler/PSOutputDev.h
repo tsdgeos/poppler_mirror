@@ -20,7 +20,7 @@
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2011, 2015-2017, 2020 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011, 2015-2017, 2020, 2026 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011, 2014, 2017, 2020 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -376,7 +376,7 @@ private:
     void setupType3Font(GfxFont *font, const std::string &psName, Dict *parentResDict);
     std::unique_ptr<GooString> makePSFontName(const GfxFont *font, const Ref *id);
     void setupImages(Dict *resDict);
-    void setupImage(Ref id, Stream *str, bool mask);
+    void setupImage(Ref id, Stream *str, bool mask, GfxImageColorMap *colorMap = nullptr, int width = 0, int height = 0);
     void setupForms(Dict *resDict);
     void setupForm(Ref id, Object *strObj);
     void addProcessColor(double c, double m, double y, double k);
