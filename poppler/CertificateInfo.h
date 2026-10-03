@@ -9,6 +9,7 @@
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright 2023, 2024, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2026 Sune Stolborg Vuorela <sune@vuorela.dk>, work sponsored by the Direction Interministérielle du Numérique
 //
 //========================================================================
 

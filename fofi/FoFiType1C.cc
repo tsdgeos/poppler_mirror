@@ -20,7 +20,8 @@
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2022, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
-// Copyright (C) 2026  Zekun Shen <bruceshenzk@gmail.com>
+// Copyright (C) 2026 Zekun Shen <bruceshenzk@gmail.com>
+// Copyright (C) 2026 William Bader <william@newspapersystems.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

@@ -6,6 +6,7 @@
 //
 // Copyright 2025 Juraj Šarinay <juraj@sarinay.com>
 // Copyright 2026 Albert Astals Cid <aacid@kde.org>
+// Copyright 2026 Sune Stolborg Vuorela <sune@vuorela.dk>, work sponsored by the Direction Interministérielle du Numérique
 //
 //========================================================================
 
