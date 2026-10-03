@@ -25,11 +25,7 @@ git clone --depth 1 https://github.com/madler/zlib.git
 git clone --depth 1 https://gitlab.freedesktop.org/freetype/freetype.git
 git clone --depth 1 https://github.com/mm2/Little-CMS.git
 git clone --depth 1 https://github.com/uclouvain/openjpeg
-# Pin libpng to avoid a build failure:
-# configure: pkgconfig directory is ${libdir}/pkgconfig
-# ./configure: line 10024: syntax error near unexpected token `)'
-# ./configure: line 10024: `            riscv*)'
-git clone https://github.com/glennrp/libpng.git && cd libpng && git checkout b4800bae3379f1abf82359703c28e727b5df4135 && cd ..
+git clone --depth 1 https://github.com/glennrp/libpng.git
 git clone --depth 1 https://gitlab.freedesktop.org/fontconfig/fontconfig.git
 git clone --depth 1 https://gitlab.freedesktop.org/cairo/cairo.git
 git clone --depth 1 --branch=dev git://code.qt.io/qt/qtbase.git
