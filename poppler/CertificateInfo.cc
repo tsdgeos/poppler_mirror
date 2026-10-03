@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@gmail.com>
-// Copyright 2018, 2019, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018, 2019, 2022, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright 2023, 2024, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -152,7 +152,7 @@ void X509CertificateInfo::setCertificateType(CertificateType type)
 
 void X509CertificateInfo::setSupportedSMimeSignatureTypes(std::vector<CryptoSign::SMimeSignatureType> &&supported)
 {
-    m_supportedTypes = supported;
+    m_supportedTypes = std::move(supported);
 }
 
 const std::vector<CryptoSign::SMimeSignatureType> &X509CertificateInfo::supportedSMimeSignatureTypes() const
