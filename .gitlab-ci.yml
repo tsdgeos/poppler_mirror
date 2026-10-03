@@ -262,3 +262,24 @@ trigger_pages:
   script:
     - 'curl --request POST --form "token=$WEB_PAGE_TRIGGER" --form ref=master https://gitlab.freedesktop.org/api/v4/projects/poppler%2Fpoppler-web-page/trigger/pipeline'
   cache: {}
+
+# Simulate building OSS-Fuzz fuzzers and check they compile successfully
+test_ossfuzz_fuzzers_build:
+  stage: build
+  image: gcr.io/oss-fuzz-base/base-builder:latest
+  when: manual
+  before_script: []
+  # The variables $SRC, $SANITIZER_FLAGS_address, $COVERAGE_FLAGS, and $FUZZING_ENGINE
+  # used below are all defined in the oss-fuzz-base/base-builder image
+  script:
+    - mkdir -p $SRC/poppler && cp -r . $SRC/poppler
+    - cd $SRC
+    - $SRC/poppler/test/ossfuzz/prepare_build.sh
+    - export SANITIZER="address"
+    - export SANITIZER_FLAGS="$SANITIZER_FLAGS_address"
+    # https://github.com/google/oss-fuzz/blob/20a387d78148c14dd5243ea1b16164fe08b73884/infra/base-images/base-builder/compile#L144
+    - export CFLAGS="$CFLAGS $SANITIZER_FLAGS $COVERAGE_FLAGS"
+    - export CXXFLAGS="$CFLAGS $CXXFLAGS_EXTRA"
+    - export FUZZING_LANGUAGE="c++"
+    - compile_${FUZZING_ENGINE}
+    - $SRC/poppler/test/ossfuzz/build_fuzzers.sh
