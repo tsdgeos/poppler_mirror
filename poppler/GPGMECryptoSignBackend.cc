@@ -367,7 +367,7 @@ GpgSignatureCreation::GpgSignatureCreation(const std::string &certId, CryptoSign
             break;
         }
     }
-    if (protocol == GpgME::Protocol::CMS && supportsSigningCertificates()) {
+    if (gpgContext && protocol == GpgME::Protocol::CMS && supportsSigningCertificates()) {
         gpgContext->addSignatureNotation("_signingCertificateV2", nullptr, 0);
     }
 }
