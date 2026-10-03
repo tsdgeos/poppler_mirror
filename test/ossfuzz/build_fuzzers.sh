@@ -43,7 +43,7 @@ popd
 export CFLAGS="$CFLAGS -D_GNU_SOURCE"
 
 # Install Boost headers
-cd $SRC/boost_1_87_0/
+cd $SRC/boost_1_92_0/
 CFLAGS="" CXXFLAGS="" ./bootstrap.sh
 CFLAGS="" CXXFLAGS="" ./b2 headers
 ./b2 --with-math install
