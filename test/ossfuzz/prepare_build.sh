@@ -31,7 +31,7 @@ git clone --depth 1 https://gitlab.freedesktop.org/cairo/cairo.git
 git clone --depth 1 --branch=dev git://code.qt.io/qt/qtbase.git
 git clone --depth 1 https://gitlab.gnome.org/GNOME/pango.git
 git clone --depth 1 https://github.com/harfbuzz/harfbuzz.git
-wget https://ftp.gnome.org/pub/gnome/sources/glib/2.80/glib-2.80.0.tar.xz && tar xvJf $SRC/glib-2.80.0.tar.xz && rm $SRC/glib-2.80.0.tar.xz
+wget https://ftp.gnome.org/pub/gnome/sources/glib/2.88/glib-2.88.3.tar.xz && tar xvJf $SRC/glib-2.88.3.tar.xz && rm $SRC/glib-2.88.3.tar.xz
 wget https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.bz2 && tar xvjf $SRC/boost_1_87_0.tar.bz2 && rm $SRC/boost_1_87_0.tar.bz2
 wget https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_99_RTM/src/nss-3.99-with-nspr-4.35.tar.gz && tar xvzf $SRC/nss-3.99-with-nspr-4.35.tar.gz && rm $SRC/nss-3.99-with-nspr-4.35.tar.gz
 git clone --depth 1 --single-branch https://gitlab.freedesktop.org/poppler/poppler-data.git

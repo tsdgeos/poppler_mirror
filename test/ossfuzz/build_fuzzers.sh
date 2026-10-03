@@ -112,7 +112,7 @@ if [ "$SANITIZER" != "memory" ]; then
     ninja -C _builddir install
     popd
 
-    pushd $SRC/glib-2.80.0
+    pushd $SRC/glib-2.88.3
     meson \
         --prefix=$PREFIX \
         --libdir=lib \
