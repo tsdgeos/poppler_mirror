@@ -43,7 +43,7 @@ popd
 export CFLAGS="$CFLAGS -D_GNU_SOURCE"
 
 # Install Boost headers
-cd $SRC/boost_1_87_0/
+cd $SRC/boost_1_92_0/
 CFLAGS="" CXXFLAGS="" ./bootstrap.sh
 CFLAGS="" CXXFLAGS="" ./b2 headers
 ./b2 --with-math install
@@ -53,7 +53,7 @@ mkdir build && cd build
 CFLAGS=-fPIC ../configure --static --prefix=$PREFIX
 make install -j$(nproc)
 
-pushd $SRC/nss-3.99
+pushd $SRC/nss-3.130
 nss_flag=""
 SAVE_CFLAGS="$CFLAGS"
 SAVE_CXXFLAGS="$CXXFLAGS"
@@ -78,8 +78,8 @@ CXXFLAGS="$SAVE_CXXFLAGS"
 
 # NSS has a .pc.in file but doesn't do anything with it
 cp nss/pkg/pkg-config/nss.pc.in $PREFIX/lib/pkgconfig/nss.pc
-sed -i "s#\${libdir}#${SRC}/nss-3.99/dist/Debug/lib#g" $PREFIX/lib/pkgconfig/nss.pc
-sed -i "s#\${includedir}#${SRC}/nss-3.99/dist/public/nss#g" $PREFIX/lib/pkgconfig/nss.pc
+sed -i "s#\${libdir}#${SRC}/nss-3.130/dist/Debug/lib#g" $PREFIX/lib/pkgconfig/nss.pc
+sed -i "s#\${includedir}#${SRC}/nss-3.130/dist/public/nss#g" $PREFIX/lib/pkgconfig/nss.pc
 sed -i "s#%NSS_VERSION%#3.99#g" $PREFIX/lib/pkgconfig/nss.pc
 cp dist/Debug/lib/pkgconfig/nspr.pc $PREFIX/lib/pkgconfig/
 
@@ -112,7 +112,7 @@ if [ "$SANITIZER" != "memory" ]; then
     ninja -C _builddir install
     popd
 
-    pushd $SRC/glib-2.80.0
+    pushd $SRC/glib-2.88.3
     meson \
         --prefix=$PREFIX \
         --libdir=lib \
@@ -228,7 +228,7 @@ fi
 BUILD_CFLAGS="$CFLAGS `pkg-config --static --cflags $DEPS`"
 BUILD_LDFLAGS="-Wl,-static `pkg-config --static --libs $DEPS`"
 # static linking is hard ^_^
-NSS_STATIC_LIBS=`ls $SRC/nss-3.99/dist/Debug/lib/lib*.a`
+NSS_STATIC_LIBS=`ls $SRC/nss-3.130/dist/Debug/lib/lib*.a`
 NSS_STATIC_LIBS="$NSS_STATIC_LIBS $NSS_STATIC_LIBS $NSS_STATIC_LIBS"
 BUILD_LDFLAGS="$BUILD_LDFLAGS $NSS_STATIC_LIBS"
 

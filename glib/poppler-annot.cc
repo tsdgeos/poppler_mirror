@@ -182,6 +182,13 @@ struct _PopplerAnnotInkClass
 };
 using PopplerAnnotInkClass = _PopplerAnnotInkClass;
 
+#pragma clang diagnostic push
+#if defined(__clang__) && defined(__has_warning)
+#    if __has_warning("-Wunused-but-set-global")
+#        pragma clang diagnostic ignored "-Wunused-but-set-global"
+#    endif
+#endif
+
 G_DEFINE_TYPE(PopplerAnnot, poppler_annot, G_TYPE_OBJECT)
 G_DEFINE_TYPE(PopplerAnnotMarkup, poppler_annot_markup, POPPLER_TYPE_ANNOT)
 G_DEFINE_TYPE(PopplerAnnotTextMarkup, poppler_annot_text_markup, POPPLER_TYPE_ANNOT_MARKUP)
@@ -195,6 +202,8 @@ G_DEFINE_TYPE(PopplerAnnotCircle, poppler_annot_circle, POPPLER_TYPE_ANNOT_MARKU
 G_DEFINE_TYPE(PopplerAnnotSquare, poppler_annot_square, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE(PopplerAnnotStamp, poppler_annot_stamp, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE(PopplerAnnotInk, poppler_annot_ink, POPPLER_TYPE_ANNOT_MARKUP)
+
+#pragma clang diagnostic pop
 
 static PopplerAnnot *_poppler_create_annot(GType annot_type, std::shared_ptr<Annot> annot)
 {
