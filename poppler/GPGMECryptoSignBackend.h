@@ -44,8 +44,8 @@ private:
     std::unique_ptr<GpgME::Context> gpgContext;
     GpgME::Data gpgData;
     std::optional<GpgME::Key> key;
-    GpgME::Protocol protocol;
-    CryptoSign::SMimeSignatureType m_requestedType;
+    GpgME::Protocol protocol = GpgME::UnknownProtocol;
+    CryptoSign::SMimeSignatureType m_requestedType = CryptoSign::SMimeSignatureType::none;
 };
 
 class GpgSignatureVerification : public CryptoSign::VerificationInterface

@@ -122,7 +122,7 @@ public:
 private:
     std::unique_ptr<HashContext> hashContext;
     CERTCertificate *signing_cert = nullptr;
-    CryptoSign::SMimeSignatureType m_requestedType;
+    CryptoSign::SMimeSignatureType m_requestedType = CryptoSign::SMimeSignatureType::none;
     unsigned int estimated_size = CryptoSign::defaultMaxSignatureSize;
 };
 
