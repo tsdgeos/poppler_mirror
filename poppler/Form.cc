@@ -42,6 +42,7 @@
 // Copyright 2025 Blair Bonnett <blair.bonnett@gmail.com>
 // Copyright 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
 // Copyright 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+// Copyright 2026 Sune Stolborg Vuorela <sune@vuorela.dk>, work sponsored by the Direction Interministérielle du Numérique
 //
 //========================================================================
 

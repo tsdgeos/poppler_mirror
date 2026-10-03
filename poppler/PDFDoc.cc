@@ -62,6 +62,7 @@
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 // Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2026 Ojas Maheshwari <workonlyojas@gmail.com>
+// Copyright (C) 2026 Sune Stolborg Vuorela <sune@vuorela.dk>, work sponsored by the Direction Interministérielle du Numérique
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

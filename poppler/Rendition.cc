@@ -8,7 +8,7 @@
 // Carlos Garcia Campos <carlosgc@gnome.org> (c) 2010
 // Tobias Koenig <tobias.koenig@kdab.com> (c) 2012
 // Albert Astals Cid <aacid@kde.org> (C) 2017, 2018, 2024-2026
-// g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk> (C) 2025
+// g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk> (C) 2025, 2026
 // 2025 Arnav V <arnav0872@gmail.com> (C) 2025
 // Stefan Brüns <stefan.bruens@rwth-aachen.de> (C) 2026
 //

@@ -1,7 +1,7 @@
 /* poppler-media.cc: glib interface to MediaRendition
  *
  * Copyright (C) 2010 Carlos Garcia Campos <carlosgc@gnome.org>
- * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
  *

@@ -31,6 +31,7 @@
 // Copyright 2024 Pratham Gandhi <ppg.1382@gmail.com>
 // Copyright 2025 Blair Bonnett <blair.bonnett@gmail.com>
 // Copyright 2026 Ojas Maheshwari <workonlyojas@gmail.com>
+// Copyright 2026 Sune Stolborg Vuorela <sune@vuorela.dk>, work sponsored by the Direction Interministérielle du Numérique
 //
 //========================================================================
 

@@ -20,6 +20,7 @@
  * Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
  * Copyright (C) 2024 Stefan Brüns <stefan.bruens@rwth-aachen.de>
  * Copyright (C) 2025 Blair Bonnett <blair.bonnett@gmail.com>
+ * Copyright (C) 2026 Sune Stolborg Vuorela <sune@vuorela.dk>, work sponsored by the Direction Interministérielle du Numérique
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

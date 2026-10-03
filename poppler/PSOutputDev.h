@@ -110,7 +110,7 @@ enum PSForceRasterize
     psNeverRasterize // never rasterize, may produce incorrect output
 };
 
-using PSOutCustomCodeCbk = GooString *(*)(PSOutputDev * psOut, PSOutCustomCodeLocation loc, int n, void *data);
+using PSOutCustomCodeCbk = GooString *(*)(PSOutputDev *psOut, PSOutCustomCodeLocation loc, int n, void *data);
 
 class POPPLER_PRIVATE_EXPORT PSOutputDev : public OutputDev
 {
