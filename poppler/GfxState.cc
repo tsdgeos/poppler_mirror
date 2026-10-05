@@ -396,14 +396,15 @@ static void CMSError(cmsContext /*contextId*/, cmsUInt32Number /*ecode*/, const 
     error(errSyntaxWarning, -1, "{0:s}", text);
 }
 
+class CMSErrorHandlerInstaller
+{
+public:
+    explicit CMSErrorHandlerInstaller() { cmsSetLogErrorHandler(CMSError); }
+};
+
 static void setCMSErrorHandler()
 {
-    static bool installed = false;
-
-    if (!installed) {
-        cmsSetLogErrorHandler(CMSError);
-        installed = true;
-    }
+    static CMSErrorHandlerInstaller errhandler;
 }
 
 unsigned int getCMSColorSpaceType(cmsColorSpaceSignature cs)
@@ -1823,7 +1824,7 @@ void GfxICCBasedColorSpace::buildTransforms(GfxState *state)
 {
     auto dhp = (state != nullptr && state->getDisplayProfile() != nullptr) ? state->getDisplayProfile() : nullptr;
     if (!dhp) {
-        dhp = GfxState::sRGBProfile;
+        dhp = GfxState::sRGBProfile();
     }
     unsigned int cst = getCMSColorSpaceType(cmsGetColorSpace(profile.get()));
     unsigned int dNChannels = getCMSNChannels(cmsGetColorSpace(dhp.get()));
@@ -6282,16 +6283,11 @@ void GfxPath::offset(double dx, double dy)
 
 #if USE_CMS
 
-GfxLCMSProfilePtr GfxXYZ2DisplayTransforms::XYZProfile = nullptr;
-
 GfxXYZ2DisplayTransforms::GfxXYZ2DisplayTransforms(const GfxLCMSProfilePtr &displayProfileA)
 {
-    if (!XYZProfile) {
-        // This is probably the one of the first invocations of lcms2, so we set the error handler
-        setCMSErrorHandler();
+    setCMSErrorHandler();
 
-        XYZProfile = make_GfxLCMSProfilePtr(cmsCreateXYZProfile());
-    }
+    static GfxLCMSProfilePtr XYZProfile = make_GfxLCMSProfilePtr(cmsCreateXYZProfile());
 
     displayProfile = displayProfileA;
     if (displayProfile) {
@@ -6488,14 +6484,20 @@ GfxState::GfxState(double hDPIA, double vDPIA, const PDFRectangle &pageBox, int 
     localDisplayProfile = nullptr;
     XYZ2DisplayTransforms = std::make_shared<GfxXYZ2DisplayTransforms>(nullptr);
 
-    if (!sRGBProfile) {
-        // This is probably the one of the first invocations of lcms2, so we set the error handler
-        setCMSErrorHandler();
-
-        sRGBProfile = make_GfxLCMSProfilePtr(cmsCreate_sRGBProfile());
-    }
+    sRGBProfile();
 #endif
 }
+
+#if USE_CMS
+
+GfxLCMSProfilePtr GfxState::sRGBProfile()
+{
+    // This is probably the one of the first invocations of lcms2, so we set the error handler
+    setCMSErrorHandler();
+    static GfxLCMSProfilePtr sRGBprofile = make_GfxLCMSProfilePtr(cmsCreate_sRGBProfile());
+    return sRGBprofile;
+}
+#endif
 
 GfxState::~GfxState()
 {
@@ -6603,8 +6605,6 @@ GfxState::GfxState(const GfxState *state, bool copyPath)
 }
 
 #if USE_CMS
-
-GfxLCMSProfilePtr GfxState::sRGBProfile = nullptr;
 
 void GfxState::setDisplayProfile(const GfxLCMSProfilePtr &localDisplayProfileA)
 {
