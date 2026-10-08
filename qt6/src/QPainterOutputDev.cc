@@ -479,6 +479,10 @@ void QPainterOutputDev::updateFont(GfxState *state)
         }
     }
 
+    if (!m_rawFont) {
+        return;
+    }
+
     if (!m_rawFont->isValid()) {
         qDebug() << "RawFont is not valid";
     }
@@ -838,6 +842,9 @@ void QPainterOutputDev::drawChar(GfxState *state, double x, double y, double /*d
 
     GfxFontType fontType = gfxFont->getType();
     if (fontType == fontType3) {
+        if (!m_currentType3Font) {
+            return;
+        }
 
         /////////////////////////////////////////////////////////////////////
         //  Draw the QPicture that contains the glyph onto the page

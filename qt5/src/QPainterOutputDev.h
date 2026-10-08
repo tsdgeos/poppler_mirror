@@ -181,10 +181,10 @@ private:
     XRef *xref; // xref table for current document
 
     // The current font in use
-    QRawFont *m_rawFont;
+    QRawFont *m_rawFont = nullptr;
     std::stack<QRawFont *> m_rawFontStack;
 
-    QPainterOutputDevType3Font *m_currentType3Font;
+    QPainterOutputDevType3Font *m_currentType3Font = nullptr;
     std::stack<QPainterOutputDevType3Font *> m_type3FontStack;
 
     // Cache all fonts by their Ref and font size
