@@ -4454,8 +4454,9 @@ bool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePatt
 {
     double xMin, yMin, xMax, yMax;
     bool vaa = getVectorAntialias();
-    // restore vector antialias because we support it here
-    setVectorAntialias(true);
+    // restore vector antialias because we support it here, if this Splash can do
+    // it; otherwise shade without antialiasing rather than fail
+    setVectorAntialias(splash->hasAABuf());
 
     bool retVal = false;
     // get the clip region bbox
@@ -4517,8 +4518,9 @@ bool SplashOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sh
     SplashFunctionPattern pattern(colorMode, state, shading);
     double xMin, yMin, xMax, yMax;
     bool vaa = getVectorAntialias();
-    // restore vector antialias because we support it here
-    setVectorAntialias(true);
+    // restore vector antialias because we support it here, if this Splash can do
+    // it; otherwise shade without antialiasing rather than fail
+    setVectorAntialias(splash->hasAABuf());
 
     bool retVal = false;
     // get the clip region bbox

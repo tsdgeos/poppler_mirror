@@ -246,6 +246,8 @@ public:
 
     void setInShading(bool sh) { inShading = sh; }
     bool getVectorAntialias() const { return vectorAntialias; }
+    // was this Splash created with vector antialiasing (which needs a buffer)?
+    bool hasAABuf() const { return aaBuf != nullptr; }
     void setVectorAntialias(bool vaa) { vectorAntialias = vaa; }
 
     // Do shaded fills with dynamic patterns
