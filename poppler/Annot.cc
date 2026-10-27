@@ -5569,7 +5569,7 @@ AnnotWidget::SubsetFontsResult AnnotWidget::subsetFonts(const FontSubsetter *fon
     }
 
     // TODO: Implement subsetting when appearance is null
-    if (appearance.isNull() || form->getNeedAppearances()) {
+    if (appearance.isNull() || !form || form->getNeedAppearances()) {
         return {};
     }
 
