@@ -473,11 +473,13 @@ std::string TextStringToUtf8(std::string_view textStr)
         utf16[i] = 0;
         utf8 = utf16ToUtf8(utf16.data(), utf16.size());
     } else {
-        utf8.resize(len + 1);
+        char buf[8];
         for (i = 0; i < len; i++) {
-            utf8[i] = pdfDocEncoding[textStr[i] & 0xff];
+            const Unicode u = pdfDocEncoding[textStr[i] & 0xff];
+            if (u) {
+                utf8.append(buf, mapUTF8(u, buf, sizeof(buf)));
+            }
         }
-        utf8[i] = 0;
     }
     return utf8;
 }
