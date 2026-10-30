@@ -4810,7 +4810,7 @@ bool AnnotAppearanceBuilder::drawText(const std::string &inputText, const Form *
 
         case 180:
             GooString::appendf(appearBuf, "-1 0 0 -1 {0:.2f} {1:.2f} cm\n", rect.x2 - rect.x1, rect.y2 - rect.y1);
-            return { rect.x2 - rect.y2, rect.y2 - rect.y1 };
+            return { rect.x2 - rect.x1, rect.y2 - rect.y1 };
 
         case 270:
             GooString::appendf(appearBuf, "0 -1 1 0 0 {0:.2f} cm\n", rect.y2 - rect.y1);
