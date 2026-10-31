@@ -2,9 +2,13 @@
 #include <stdint.h>
 #include <string.h>
 #include <poppler.h>
+#include <GlobalParams.h>
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    GlobalParamsIniter globalParamsIniter(nullptr);
+    globalParams->setErrQuiet(true);
+
     GError *err = NULL;
     PopplerDocument *doc;
     PopplerPage *page;

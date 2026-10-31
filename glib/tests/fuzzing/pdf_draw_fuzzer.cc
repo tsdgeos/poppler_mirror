@@ -2,11 +2,15 @@
 #include <poppler.h>
 #include <cairo.h>
 #include <cairo-pdf.h>
+#include <GlobalParams.h>
 
 #include "fuzzer_temp_file.h"
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    GlobalParamsIniter globalParamsIniter(nullptr);
+    globalParams->setErrQuiet(true);
+
     GError *err = NULL;
     PopplerDocument *doc;
     PopplerPage *page;

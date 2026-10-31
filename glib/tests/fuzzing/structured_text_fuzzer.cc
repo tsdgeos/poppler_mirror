@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <poppler.h>
+#include <GlobalParams.h>
 
 // Recursive function to exercise structure tree parsing
 static void exercise_structure_tree(PopplerStructureElementIter *iter)
@@ -65,6 +66,9 @@ static void exercise_structure_tree(PopplerStructureElementIter *iter)
 // Fuzzer entry point
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    GlobalParamsIniter globalParamsIniter(nullptr);
+    globalParams->setErrQuiet(true);
+
     GError *err = NULL;
 
     // Load document from fuzzer input

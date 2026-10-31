@@ -5,13 +5,13 @@
 #include "fuzzer_init.h"
 #include <poppler-page.h>
 #include <poppler-page-renderer.h>
-
-static void dummy_error_function(const std::string &, void *) { }
+#include <GlobalParams.h>
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     initialize_poppler_data_dir();
-    poppler::set_debug_error_function(dummy_error_function, nullptr);
+    GlobalParamsIniter globalParamsIniter(nullptr);
+    globalParams->setErrQuiet(true);
 
     poppler::document *doc = poppler::document::load_from_raw_data((const char *)data, size);
     if (!doc || doc->is_locked()) {
