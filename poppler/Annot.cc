@@ -3081,17 +3081,19 @@ static std::unique_ptr<GfxFont> createAnnotDrawFont(XRef *xref, Dict *fontParent
         fontDict->add("Encoding", Object::name("WinAnsiEncoding"));
     }
 
-    Ref fontsDictObjRef;
-    Object fontsDictObj = fontParentDict->lookup("Font", &fontsDictObjRef);
+    Ref fontsDictObjRefToMarkAsModified;
+    Object fontsDictObj = fontParentDict->lookup("Font", &fontsDictObjRefToMarkAsModified);
     if (!fontsDictObj.isDict()) {
+        // We are creating a new Font dict so nothing to mark as modified
+        fontsDictObjRefToMarkAsModified = Ref::INVALID();
         fontsDictObj = Object(std::make_unique<Dict>(xref));
         fontParentDict->add("Font", fontsDictObj.copy()); // This is not a copy it's a ref
     }
 
     auto font = GfxFont::makeFont(xref, resourceName, dummyRef, *fontDict);
     fontsDictObj.dictSet(resourceName, Object(std::move(fontDict)));
-    if (fontsDictObjRef != Ref::INVALID()) {
-        xref->setModifiedObject(&fontsDictObj, fontsDictObjRef);
+    if (fontsDictObjRefToMarkAsModified != Ref::INVALID()) {
+        xref->setModifiedObject(&fontsDictObj, fontsDictObjRefToMarkAsModified);
     }
     return font;
 }
