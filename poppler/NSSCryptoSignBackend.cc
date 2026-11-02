@@ -1060,6 +1060,9 @@ SignatureValidationStatus NSSSignatureVerification::validateSignature()
         }
 
         auto innerHashContext = HashContext::create(innerHashAlgorithm);
+        if (!innerHashContext) {
+            return SIGNATURE_GENERIC_ERROR;
+        }
         innerHashContext->updateHash(content_info_data->data, content_info_data->len);
         digest_buffer = innerHashContext->endHash();
         digest.data = digest_buffer.data();
