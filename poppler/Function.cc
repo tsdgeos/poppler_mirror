@@ -1401,7 +1401,12 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
                 if (stack->topTwoAreInts()) {
                     i2 = stack->popInt();
                     i1 = stack->popInt();
-                    stack->pushInt(i1 + i2);
+                    int sum;
+                    if (unlikely(checkedAdd(i1, i2, &sum))) {
+                        stack->pushReal(static_cast<double>(i1) + i2);
+                    } else {
+                        stack->pushInt(sum);
+                    }
                 } else {
                     r2 = stack->popNum();
                     r1 = stack->popNum();
