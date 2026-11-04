@@ -1564,7 +1564,12 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
                 i2 = stack->popInt();
                 i1 = stack->popInt();
                 if (likely(i2 != 0)) {
-                    stack->pushInt(i1 % i2);
+                    if (unlikely(i2 == -1 && i1 == std::numeric_limits<decltype(i1)>::min())) {
+                        error(errSyntaxError, -1, "PostScriptFunction::exec: undefined mod behaviour: {0:d} {1:d}", i1, i2);
+                        stack->pushInt(0);
+                    } else {
+                        stack->pushInt(i1 % i2);
+                    }
                 }
                 break;
             case psOpMul:
