@@ -3411,11 +3411,11 @@ double Annot::calculateFontSize(const Form *form, const GfxFont &font, const std
         double y = hMax - 3;
         size_t i = 0;
         while (i < text.size()) {
-            GooString lineText(text.substr(i));
-            if (!hasUnicodeByteOrderMark(lineText.toStr()) && isUnicode) {
-                prependUnicodeByteOrderMark(lineText.toNonConstStr());
+            std::string lineText(text.substr(i));
+            if (!hasUnicodeByteOrderMark(lineText) && isUnicode) {
+                prependUnicodeByteOrderMark(lineText);
             }
-            const HorizontalTextLayouter textLayouter(lineText.toStr(), form, font, availableWidthInFontSize, forceZapfDingbats);
+            const HorizontalTextLayouter textLayouter(lineText, form, font, availableWidthInFontSize, forceZapfDingbats);
             y -= fontSize;
             if (i == 0) {
                 i += textLayouter.consumedText;
