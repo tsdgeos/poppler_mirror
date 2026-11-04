@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2007-2008, 2010, 2015, 2017, 2018, 2020-2022, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2015, 2017, 2018, 2020-2022, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Sanjoy Mahajan <sanjoy@mit.edu>
 // Copyright (C) 2009, 2011, 2012, 2014-2016, 2020 William Bader <williambader@hotmail.com>
@@ -110,8 +110,8 @@ static bool expand = false;
 static bool noShrink = false;
 static bool noCenter = false;
 static bool duplex = false;
-static char ownerPassword[33] = "\001";
-static char userPassword[33] = "\001";
+static char ownerPassword[128] = "\001";
+static char userPassword[128] = "\001";
 static bool quiet = false;
 static bool printVersion = false;
 static bool printHelp = false;
@@ -213,9 +213,9 @@ int main(int argc, char *argv[])
         }
         if (printVersion || printHelp) {
             exit(0);
-        } else {
-            exit(1);
         }
+
+        exit(1);
     }
     if ((level1 ? 1 : 0) + (level1Sep ? 1 : 0) + (level2 ? 1 : 0) + (level2Sep ? 1 : 0) + (level3 ? 1 : 0) + (level3Sep ? 1 : 0) > 1) {
         fprintf(stderr, "Error: use only one of the 'level' options.\n");
@@ -360,7 +360,7 @@ int main(int argc, char *argv[])
     if (userPassword[0] != '\001') {
         userPW = GooString(userPassword);
     }
-    if (fileName->compare("-") == 0) {
+    if (fileName->toStr() == "-") {
         delete fileName;
         fileName = new GooString("fd://0");
     }
@@ -384,7 +384,7 @@ int main(int argc, char *argv[])
     // construct PostScript file name
     if (argc == 3) {
         psFileName = std::string(argv[2]);
-    } else if (fileName->compare("fd://0") == 0) {
+    } else if (fileName->toStr() == "fd://0") {
         error(errCommandLine, -1, "You have to provide an output filename when reading from stdin.");
         goto err1;
     } else {

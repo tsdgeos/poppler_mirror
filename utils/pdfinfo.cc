@@ -83,8 +83,8 @@ static bool printJS = false;
 static bool isoDates = false;
 static bool rawDates = false;
 static char textEncName[128] = "";
-static char ownerPassword[33] = "\001";
-static char userPassword[33] = "\001";
+static char ownerPassword[128] = "\001";
+static char userPassword[128] = "\001";
 static bool printVersion = false;
 static bool printHelp = false;
 static bool printEnc = false;
@@ -1013,7 +1013,7 @@ int main(int argc, char *argv[])
         userPW = GooString(userPassword);
     }
 
-    if (fileName->compare("-") == 0) {
+    if (fileName->toStr() == "-") {
         delete fileName;
         fileName = new GooString("fd://0");
     }

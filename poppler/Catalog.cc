@@ -777,7 +777,7 @@ Object NameTree::lookup(const GooString *name)
 {
     auto entry = std::ranges::lower_bound(entries, name, EntryGooStringComparer {});
 
-    if (entry != entries.end() && (*entry)->name.compare(name->toStr()) == 0) {
+    if (entry != entries.end() && (*entry)->name.toStr() == name->toStr()) {
         return (*entry)->value.fetch(xref);
     }
     error(errSyntaxError, -1, "failed to look up ({0:s})", name->c_str());

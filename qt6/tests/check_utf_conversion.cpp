@@ -19,6 +19,7 @@ private Q_SLOTS:
     static void testUTF();
     static void testUnicodeToAscii7();
     static void testUnicodeLittleEndian();
+    static void testTextStringToUtf8();
 };
 
 static bool compare(const Unicode *a, const char *b, int len)
@@ -157,6 +158,17 @@ void TestUTFConversion::testUnicodeLittleEndian()
     QVERIFY(UCS4fromLE == UCS4fromBE);
     QVERIFY(compare(UCS4fromLE.data(), expected.utf16(), UCS4fromLE.size()));
     QVERIFY(compare(UCS4fromBE.data(), expected.utf16(), UCS4fromBE.size()));
+}
+
+void TestUTFConversion::testTextStringToUtf8()
+{
+    // PDFDocEncoding, 0xA0 is the euro sign
+    QCOMPARE(TextStringToUtf8("abc"), std::string("abc"));
+    QCOMPARE(TextStringToUtf8("5 \xA0"), std::string("5 \xE2\x82\xAC"));
+    QCOMPARE(TextStringToUtf8(""), std::string());
+
+    // UTF-16BE with byte order mark
+    QCOMPARE(TextStringToUtf8(std::string_view("\xFE\xFF\x00\x48\x26\x11", 6)), std::string("H\xE2\x98\x91"));
 }
 
 QTEST_GUILESS_MAIN(TestUTFConversion)

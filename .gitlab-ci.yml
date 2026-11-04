@@ -67,7 +67,7 @@ build_clang23_libcpp:
   stage: build
   script:
     - echo "We pretend not to have gettext so the GooString::format calls with _( in pdfsig don't complain we're giving it a non literal"
-    - sed -i -e "s@#ifdef HAVE_GETTEXT@#if false@g" utils/pdfsig.cc
+    - sed -i -e "s@#ifdef HAVE_GETTEXT@/* NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if) */\\n#if false@g" utils/pdfsig.cc
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - apt-get install --yes --no-install-recommends libclang-23-dev llvm-23-dev libc++-23-dev libc++abi-23-dev clang-tidy-23 clang-23 libunwind-23-dev gperf jq fonts-droid-fallback libbrotli-dev
     - srcdir=`pwd` && mkdir -p /tmp/poppler_build && cd /tmp/poppler_build

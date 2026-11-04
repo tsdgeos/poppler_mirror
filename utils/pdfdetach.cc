@@ -54,8 +54,8 @@ static char saveFile[128] = "";
 static bool saveAll = false;
 static char savePath[1024] = "";
 static char textEncName[128] = "";
-static char ownerPassword[33] = "\001";
-static char userPassword[33] = "\001";
+static char ownerPassword[128] = "\001";
+static char userPassword[128] = "\001";
 static bool printVersion = false;
 static bool printHelp = false;
 

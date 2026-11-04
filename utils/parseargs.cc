@@ -28,6 +28,8 @@
 #include <cstring>
 #include <cstdlib>
 #include <cctype>
+#include <string>
+#include <vector>
 #include "parseargs.h"
 
 #include "goo/gstrtod.h"
@@ -95,6 +97,9 @@ void printUsage(const char *program, const char *otherArgs, const ArgDesc *args)
         case argString:
         case argGooString:
             typ = " <string>";
+            break;
+        case argStringList:
+            typ = " <int> <string>...";
             break;
         case argFlag:
         default:
@@ -166,6 +171,26 @@ static bool grabArg(const ArgDesc *arg, int i, int *argc, char *argv[])
         if (i + 1 < *argc) {
             (static_cast<GooString *>(arg->val))->assign(argv[i + 1]);
             n = 2;
+        } else {
+            ok = false;
+            n = 1;
+        }
+        break;
+    case argStringList:
+        if (i + 1 < *argc && isInt(argv[i + 1])) {
+            const int count = atoi(argv[i + 1]);
+            if (count >= 0 && count <= *argc - i - 2) {
+                auto *values = static_cast<std::vector<std::string> *>(arg->val);
+                values->clear();
+                values->reserve(count);
+                for (int k = 0; k < count; ++k) {
+                    values->emplace_back(argv[i + 2 + k]);
+                }
+                n = count + 2;
+            } else {
+                ok = false;
+                n = 1;
+            }
         } else {
             ok = false;
             n = 1;

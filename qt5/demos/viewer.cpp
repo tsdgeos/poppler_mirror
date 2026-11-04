@@ -199,7 +199,7 @@ void PdfViewer::loadDocument(const QString &file)
     if (m_doc->xrefWasReconstructed()) {
         xrefReconstructedHandler(m_doc);
     } else {
-        std::function<void()> cb = [this]() { xrefReconstructedHandler(m_doc); };
+        std::function<void()> cb = [this] { xrefReconstructedHandler(m_doc); };
 
         m_doc->setXRefReconstructedCallback(cb);
     }

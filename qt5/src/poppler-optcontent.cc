@@ -3,7 +3,7 @@
  * Copyright (C) 2007, Brad Hards <bradh@kde.org>
  * Copyright (C) 2008, 2014, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008, Carlos Garcia Campos <carlosgc@gnome.org>
- * Copyright (C) 2015-2019, 2022, 2025, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2015-2019, 2022, 2025, 2026, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Hubert Figuière <hub@figuiere.net>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -316,14 +316,16 @@ QVariant OptContentModel::data(const QModelIndex &index, int role) const
     case Qt::EditRole:
         if (node->state() == OptContentItem::On) {
             return true;
-        } else if (node->state() == OptContentItem::Off) {
+        }
+        if (node->state() == OptContentItem::Off) {
             return false;
         }
         break;
     case Qt::CheckStateRole:
         if (node->state() == OptContentItem::On) {
             return Qt::Checked;
-        } else if (node->state() == OptContentItem::Off) {
+        }
+        if (node->state() == OptContentItem::Off) {
             return Qt::Unchecked;
         }
         break;

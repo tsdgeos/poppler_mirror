@@ -27,6 +27,7 @@ private Q_SLOTS:
     static void checkModificationCreationDate();
     static void checkNonMarkupAnnotations();
     static void checkDefaultAppearance();
+    static void checkRichMediaInstanceAsset();
 };
 
 /* Is .5f sufficient for 16 bit color channel roundtrip trough save and load on all architectures? */
@@ -256,6 +257,38 @@ void TestAnnotations::checkDefaultAppearance()
         const DefaultAppearance da { daString };
         QVERIFY(da.getFontName().empty());
     }
+}
+
+void TestAnnotations::checkRichMediaInstanceAsset()
+{
+    // The poster comes first in the Assets name tree, the video instance must still get the trailer
+    std::unique_ptr<Poppler::Document> doc { Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/richmedia_instance_asset.pdf")) };
+    QVERIFY(doc.get());
+
+    std::unique_ptr<Poppler::Page> page { doc->page(0) };
+    QVERIFY(page.get());
+
+    const auto annots = page->annotations();
+    QCOMPARE(annots.size(), 1);
+    QCOMPARE(annots[0]->subType(), Poppler::Annotation::ARichMedia);
+
+    const auto *richMedia = static_cast<const Poppler::RichMediaAnnotation *>(annots[0].get());
+    QVERIFY(richMedia->content());
+    const auto configurations = richMedia->content()->configurations();
+    QCOMPARE(configurations.size(), 1);
+    const auto instances = configurations[0]->instances();
+    QCOMPARE(instances.size(), 5);
+
+    Poppler::EmbeddedFile *video = instances[0]->embeddedFile();
+    QVERIFY(video);
+    QCOMPARE(video->name(), QStringLiteral("trailer.mp4"));
+    QCOMPARE(video->data(), QByteArray("video bytes"));
+
+    // No asset, an asset that's not a dictionary, an asset with no embedded file, an asset with no file name
+    QVERIFY(!instances[1]->embeddedFile());
+    QVERIFY(!instances[2]->embeddedFile());
+    QVERIFY(!instances[3]->embeddedFile());
+    QVERIFY(!instances[4]->embeddedFile());
 }
 
 QTEST_GUILESS_MAIN(TestAnnotations)

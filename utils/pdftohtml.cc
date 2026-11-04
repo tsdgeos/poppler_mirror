@@ -91,8 +91,8 @@ double wordBreakThreshold = 10; // 10%, below converted into a coefficient - 0.1
 bool showHidden = false;
 bool noMerge = false;
 bool fontFullName = false;
-static char ownerPassword[33] = "";
-static char userPassword[33] = "";
+static char ownerPassword[128] = "";
+static char userPassword[128] = "";
 static bool printVersion = false;
 
 static std::unique_ptr<GooString> getInfoString(Dict *infoDict, const char *key);
@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
 
     fileName = new GooString(argv[1]);
 
-    if (fileName->compare("-") == 0) {
+    if (fileName->toStr() == "-") {
         delete fileName;
         fileName = new GooString("fd://0");
     }
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
         if (!htmlFileName) {
             htmlFileName = std::move(tmp);
         }
-    } else if (fileName->compare("fd://0") == 0) {
+    } else if (fileName->toStr() == "fd://0") {
         error(errCommandLine, -1, "You have to provide an output filename when reading from stdin.");
         goto error;
     } else {

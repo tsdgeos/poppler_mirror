@@ -1445,8 +1445,6 @@ public:
     std::shared_ptr<GfxColorTransform> getPerc() const { return XYZ2DisplayTransformPerc; }
 
 private:
-    static GfxLCMSProfilePtr XYZProfile;
-
     GfxLCMSProfilePtr displayProfile;
 
     std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformRelCol;
@@ -1701,7 +1699,7 @@ public:
     void setXYZ2DisplayTransforms(std::shared_ptr<GfxXYZ2DisplayTransforms> transforms);
     std::shared_ptr<GfxColorTransform> getXYZ2DisplayTransform();
     int getCmsRenderingIntent() const;
-    static GfxLCMSProfilePtr sRGBProfile;
+    static GfxLCMSProfilePtr sRGBProfile();
 #endif
 
     void setDefaultGrayColorSpace(std::unique_ptr<GfxColorSpace> &&cs) { defaultGrayColorSpace = std::move(cs); }

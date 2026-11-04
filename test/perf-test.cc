@@ -125,12 +125,6 @@ static char *gOutFileName = nullptr;
    was invalid name */
 static FILE *gOutFile = nullptr;
 
-#if 0
-/* FILE * corresponding to gOutFileName or stderr if gOutFileName is NULL or
-   was invalid name */
-static FILE *gErrFile = nullptr;
-#endif
-
 /* If true, we only dump the text, not render */
 static bool gfTextOnly = false;
 
@@ -435,60 +429,7 @@ static void StrList_Destroy(StrList **root)
     *root = nullptr;
 }
 
-static void my_error(ErrorCategory /*category*/, Goffset /*pos*/, const char * /*msg*/)
-{
-#if 0
-    char        buf[4096], *p = buf;
-
-    // NB: this can be called before the globalParams object is created
-    if (globalParams && globalParams->getErrQuiet()) {
-        return;
-    }
-
-    if (pos >= 0) {
-      p += _snprintf(p, sizeof(buf)-1, "Error (%lld): ", (long long)pos);
-        *p   = '\0';
-        OutputDebugString(p);
-    } else {
-        OutputDebugString("Error: ");
-    }
-
-    p = buf;
-    p += vsnprintf(p, sizeof(buf) - 1, msg, args);
-    while ( p > buf  &&  isspace(p[-1]) )
-            *--p = '\0';
-    *p++ = '\r';
-    *p++ = '\n';
-    *p   = '\0';
-    OutputDebugString(buf);
-
-    if (pos >= 0) {
-        p += _snprintf(p, sizeof(buf)-1, "Error (%lld): ", (long long)pos);
-        *p   = '\0';
-        OutputDebugString(buf);
-        if (gErrFile)
-            fprintf(gErrFile, buf);
-    } else {
-        OutputDebugString("Error: ");
-        if (gErrFile)
-            fprintf(gErrFile, "Error: ");
-    }
-#endif
-#if 0
-    p = buf;
-    va_start(args, msg);
-    p += vsnprintf(p, sizeof(buf) - 3, msg, args);
-    while ( p > buf  &&  isspace(p[-1]) )
-            *--p = '\0';
-    *p++ = '\r';
-    *p++ = '\n';
-    *p   = '\0';
-    OutputDebugString(buf);
-    if (gErrFile)
-        fprintf(gErrFile, buf);
-    va_end(args);
-#endif
-}
+static void my_error(ErrorCategory /*category*/, Goffset /*pos*/, const char * /*msg*/) { }
 
 static void LogInfo(const char *fmt, ...) GCC_PRINTF_FORMAT(1, 2);
 
@@ -821,14 +762,6 @@ int main(int argc, char **argv)
     } else {
         gOutFile = stdout;
     }
-
-#if 0
-    if (gOutFileName) {
-        gErrFile = outFile;
-    } else {
-        gErrFile = stderr;
-    }
-#endif
 
     StrList *curr = gArgsListRoot;
     while (curr) {

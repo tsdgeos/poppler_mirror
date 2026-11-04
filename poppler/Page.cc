@@ -84,22 +84,22 @@ constexpr PDFRectangle r2 { 2, 2, 4, 4 };
 constexpr PDFRectangle r3 { 0, 3, 3, 3 };
 constexpr PDFRectangle r4 { 2, 3, 3, 3 };
 static_assert(r1.isValid());
-static_assert([]() {
+static_assert([] {
     auto r = r1;
     r.clipTo(r1);
     return r == r1;
 }());
-static_assert([]() {
+static_assert([] {
     auto r = r1;
     r.clipTo(r2);
     return r == r2;
 }());
-static_assert([]() {
+static_assert([] {
     auto r = r2;
     r.clipTo(r1);
     return r == r2;
 }());
-static_assert([]() {
+static_assert([] {
     auto r = r2;
     r.clipTo(r3);
     return r == r4;

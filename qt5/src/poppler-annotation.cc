@@ -17,6 +17,7 @@
  * Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
  * Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
  * Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2026 Valentin Pohu <pohuvalentin@gmail.com>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -1800,22 +1801,24 @@ void Annotation::setPopup(const Annotation::Popup &popup)
         return;
     }
 
-#if 0 /* TODO: Remove old popup and add AnnotPopup to page */
-    AnnotMarkup *markupann = dynamic_cast<AnnotMarkup*>(d->pdfAnnot);
+#define ENABLE_QT_SET_POPUP_FOR_PDF_ANNOT 0
+#if ENABLE_QT_SET_POPUP_FOR_PDF_ANNOT
+    AnnotMarkup *markupann = dynamic_cast<AnnotMarkup *>(d->pdfAnnot);
     if (!markupann)
         return;
 
     // Create a new AnnotPopup and assign it to pdfAnnot
-    PDFRectangle rect = d->toPdfRectangle( popup.geometry() );
-    AnnotPopup * p = new AnnotPopup( d->pdfPage->getDoc(), rect );
-    p->setOpen( !(popup.flags() & Annotation::Hidden) );
-    if (!popup.summary().isEmpty())
-    {
+    PDFRectangle rect = d->toPdfRectangle(popup.geometry());
+    AnnotPopup *p = new AnnotPopup(d->pdfPage->getDoc(), rect);
+    p->setOpen(!(popup.flags() & Annotation::Hidden));
+    if (!popup.summary().isEmpty()) {
         GooString *s = QStringToUnicodeGooString(popup.summary());
         markupann->setLabel(s);
         delete s;
     }
     markupann->setPopup(p);
+#else
+    qWarning() << "Annotation::setPopup implementation when the pdf annotation exists not yet complete";
 #endif
 }
 
@@ -4892,6 +4895,15 @@ class RichMediaAnnotation::Settings::Private : public QSharedData
 {
 public:
     Private() = default;
+
+    ~Private()
+    {
+        delete activation;
+        delete deactivation;
+    }
+
+    Private(const Private &) = delete;
+    Private &operator=(const Private &) = delete;
 
     RichMediaAnnotation::Activation *activation = nullptr;
     RichMediaAnnotation::Deactivation *deactivation = nullptr;

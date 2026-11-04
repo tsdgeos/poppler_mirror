@@ -1,16 +1,13 @@
 #include <cstdint>
 #include <poppler-qt6.h>
 #include <QtCore/QBuffer>
-
-static void dummy_error_function(const QString &message, const QVariant &closure)
-{
-    Q_UNUSED(message)
-    Q_UNUSED(closure)
-}
+#include <GlobalParams.h>
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    Poppler::setDebugErrorFunction(dummy_error_function, QVariant());
+    GlobalParamsIniter globalParamsIniter(nullptr);
+    globalParams->setErrQuiet(true);
+
     const QFont font(QStringLiteral("Helvetica"), 20);
     const QColor color = QColor::fromRgb(0xAB, 0xCD, 0xEF);
 

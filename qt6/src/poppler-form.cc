@@ -1200,13 +1200,13 @@ std::pair<SignatureValidationInfo, std::shared_ptr<Poppler::AsyncObject>> FormFi
     auto *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
     const time_t validationTimeT = validationTime.isValid() ? validationTime.toSecsSinceEpoch() : -1;
     SignatureInfo *si = fws->validateSignatureAsync(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation, validationTimeT, !(opt & ValidateWithoutOCSPRevocationCheck), opt & ValidateUseAIACertFetch,
-                                                    [obj = std::weak_ptr<AsyncObject>(object)]() {
+                                                    [obj = std::weak_ptr<AsyncObject>(object)] {
                                                         if (auto l = obj.lock()) {
                                                             // We need to roundtrip over the eventloop
                                                             // to ensure callers have a chance of connecting to AsyncObject::done
                                                             QMetaObject::invokeMethod(
                                                                     l.get(),
-                                                                    [innerObj = std::weak_ptr<AsyncObject>(l)]() {
+                                                                    [innerObj = std::weak_ptr<AsyncObject>(l)] {
                                                                         if (auto innerLocked = innerObj.lock()) {
                                                                             Q_EMIT innerLocked->done();
                                                                         }

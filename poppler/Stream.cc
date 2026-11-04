@@ -2742,7 +2742,7 @@ bool FlateStream::rewind()
 {
     int cmf, flg;
 
-    bool internalResetResult = flateRewind(false);
+    const bool internalResetResult = flateRewind(false);
 
     // read header
     //~ need to look at window size?
@@ -2750,7 +2750,7 @@ bool FlateStream::rewind()
     cmf = str->getChar();
     flg = str->getChar();
     if (cmf == EOF || flg == EOF) {
-        return false;
+        return internalResetResult;
     }
     if ((cmf & 0x0f) != 0x08) {
         error(errSyntaxError, getPos(), "Unknown compression method in flate stream");

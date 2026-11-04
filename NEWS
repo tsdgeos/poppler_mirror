@@ -1,3 +1,39 @@
+Release 26.10.0:
+        core:
+         * Support for eidas (cades-b) signatures
+         * Enable font subsetting when using the windows font backend
+         * Enable brotli streams
+         * NSS-signatures-backend: Be a bit more lenient on what we consider valid cert usage
+         * NSS-signatures-backend: Mark hardware keys as such
+         * NSS-signatures-backend: Reuse password callback for token PIN prompts
+         * PSOutputDev: fix rendering of files when using -preload
+         * Fix rendering of some Forms
+         * Improve code a bit when finding fonts fails
+         * Fix dest dict to name tree fallback when resolving named destination. Issue #1788
+         * Internal code improvements
+         * Fix crashes in malformed documents
+
+        utils:
+         * pdfsig: Write some error message if signing fails
+         * pdfsig: Replace -etsi with -etsi-cades-b and support it with -add-signature
+
+        qt5:
+         * Deprecate CertificateInfo::publicKey()
+         * Map the annotation rules flags a bit closer to the spec
+
+        qt6:
+         * Deprecate CertificateInfo::publicKey()
+         * Map the annotation rules flags a bit closer to the spec
+         * Add API to query and select CAdES-B / S/MIME signature type
+
+        build system:
+         * libbrotlidec is now required for brotli stream support
+         * Find libharfbuzz via pkgconfig
+         * Conditionalise test builds and test dependencies based on enabled frontends
+         * Fix intermittent glib API docs build failure
+         * Don't scan for c++ modules
+         * oss-fuzz build updates
+
 Release 26.09.0:
         core:
          * Subset fonts when saving changes in Annotations and Forms when using fontconfig

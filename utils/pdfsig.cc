@@ -35,7 +35,10 @@
 #include <random>
 #include <filesystem>
 #include <iomanip>
+#include <set>
 #include <sstream>
+#include <unordered_map>
+#include <vector>
 #include "parseargs.h"
 #include "goo/gbasename.h"
 #include "Form.h"
@@ -205,8 +208,10 @@ static bool dumpSignature(int sig_num, FormFieldSignature *s, const char *filena
 
 static GooString nssDir;
 static GooString nssPassword;
-static char ownerPassword[33] = "\001";
-static char userPassword[33] = "\001";
+static std::unordered_map<std::string, std::string> nssPasswords;
+static std::vector<std::string> nssPasswordArguments;
+static char ownerPassword[128] = "\001";
+static char userPassword[128] = "\001";
 static bool printVersion = false;
 static bool printHelp = false;
 static bool printCryptoSignBackends = false;
@@ -235,6 +240,7 @@ static char assertSigner[256] = "";
 static const ArgDesc argDesc[] = {
     { .arg = "-nssdir", .kind = argGooString, .val = &nssDir, .size = 0, .usage = "path to directory of libnss3 database" },
     { .arg = "-nss-pwd", .kind = argGooString, .val = &nssPassword, .size = 0, .usage = "password to access the NSS database (if any)" },
+    { .arg = "-nss-pwds", .kind = argStringList, .val = &nssPasswordArguments, .size = 0, .usage = "passwords to access named NSS stores (if any)" },
     { .arg = "-nocert", .kind = argFlag, .val = &dontVerifyCert, .size = 0, .usage = "don't perform certificate validation" },
     { .arg = "-no-ocsp", .kind = argFlag, .val = &noOCSPRevocationCheck, .size = 0, .usage = "don't perform online OCSP certificate revocation check" },
     { .arg = "-no-appearance", .kind = argFlag, .val = &noAppearance, .size = 0, .usage = "don't add appearance information when signing existing fields" },
@@ -303,17 +309,37 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
 #if ENABLE_NSS3
     bool wrongPassword = false;
     bool passwordNeeded = false;
-    auto passwordCallback = [&passwordNeeded, &wrongPassword](const char *) -> char * {
-        static bool firstTime = true;
-        if (!firstTime) {
-            wrongPassword = true;
+    bool nssPasswordAnswered = false;
+    std::string missingPasswordStore;
+    std::set<std::string> answeredPasswordStores;
+    auto passwordCallback = [&passwordNeeded, &wrongPassword, &nssPasswordAnswered, &missingPasswordStore, &answeredPasswordStores](const char *store) -> char * {
+        const std::string_view storeName = store ? store : "";
+        if (nssPasswords.empty()) {
+            if (nssPasswordAnswered) {
+                wrongPassword = true;
+                return nullptr;
+            }
+            nssPasswordAnswered = true;
+            if (!nssPassword.empty()) {
+                return strdup(nssPassword.c_str());
+            }
+            passwordNeeded = true;
+            missingPasswordStore = storeName;
             return nullptr;
         }
-        firstTime = false;
-        if (!nssPassword.empty()) {
-            return strdup(nssPassword.c_str());
+
+        for (const auto &[userProvidedStoreName, userProvidedStorePassword] : nssPasswords) {
+            if (userProvidedStoreName == storeName) {
+                if (!answeredPasswordStores.insert(userProvidedStoreName).second) {
+                    wrongPassword = true;
+                    return nullptr;
+                }
+                return strdup(userProvidedStorePassword.c_str());
+            }
         }
+
         passwordNeeded = true;
+        missingPasswordStore = storeName;
         return nullptr;
     };
     NSSSignatureConfiguration::setNSSPasswordCallback(passwordCallback);
@@ -329,14 +355,22 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
     NSSSignatureConfiguration::setNSSPasswordCallback({});
     if (passwordNeeded) {
         *error = true;
-        printf("Password is needed to access the NSS database.\n");
-        printf("\tPlease provide one with -nss-pwd.\n");
+        printf("Password is needed to access the NSS store '%s'.\n", missingPasswordStore.c_str());
+        if (nssPasswords.empty()) {
+            printf("\tPlease provide one with -nss-pwd.\n");
+        } else {
+            printf("\tPlease provide one with -nss-pwds.\n");
+        }
         return {};
     }
     if (wrongPassword) {
         *error = true;
         printf("Password was not accepted to open the NSS database.\n");
-        printf("\tPlease provide the correct one with -nss-pwd.\n");
+        if (nssPasswords.empty()) {
+            printf("\tPlease provide the correct one with -nss-pwd.\n");
+        } else {
+            printf("\tPlease provide the correct one with -nss-pwds.\n");
+        }
         return {};
     }
 
@@ -398,6 +432,19 @@ int main(int argc, char *argv[])
     if (!ok) {
         print_version_usage(true);
         return 99;
+    }
+
+    if (!nssPassword.empty() && !nssPasswordArguments.empty()) {
+        fprintf(stderr, "-nss-pwd and -nss-pwds cannot be used together\n");
+        return 99;
+    }
+
+    if (nssPasswordArguments.size() % 2 != 0) {
+        fprintf(stderr, "-nss-pwds requires store-password pairs\n");
+        return 99;
+    }
+    for (size_t i = 0; i < nssPasswordArguments.size(); i += 2) {
+        nssPasswords[nssPasswordArguments[i]] = nssPasswordArguments[i + 1];
     }
 
     if (printVersion) {

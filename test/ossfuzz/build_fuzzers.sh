@@ -237,7 +237,7 @@ fuzzers=$(find $SRC/poppler/cpp/tests/fuzzing/ -name "*_fuzzer.cc")
 for f in $fuzzers; do
     fuzzer_name=$(basename $f .cc)
 
-    $CXX $CXXFLAGS -std=c++23 -I$SRC/poppler/cpp -I$SRC/poppler/build/cpp \
+    $CXX $CXXFLAGS -std=c++23 -I$SRC/poppler/cpp -I$SRC/poppler/build/cpp -I$SRC/poppler -I$SRC/poppler/poppler -I$SRC/poppler/build -I$SRC/poppler/build/poppler \
         $BUILD_CFLAGS \
         $f -o $OUT/$fuzzer_name \
         $PREDEPS_LDFLAGS \
@@ -258,7 +258,7 @@ if [ "$SANITIZER" != "memory" ]; then
     for f in $fuzzers; do
         fuzzer_name=$(basename $f .cc)
 
-        $CXX $CXXFLAGS -std=c++23 -I$SRC/poppler/glib -I$SRC/poppler/build/glib \
+        $CXX $CXXFLAGS -std=c++23 -I$SRC/poppler/glib -I$SRC/poppler/build/glib -I$SRC/poppler -I$SRC/poppler/poppler -I$SRC/poppler/build -I$SRC/poppler/build/poppler \
             $BUILD_CFLAGS \
             $f -o $OUT/$fuzzer_name \
             $PREDEPS_LDFLAGS \
@@ -286,7 +286,7 @@ for f in $fuzzers; do
     fuzzer_name=$(basename $f .cc)
 
     $CXX $CXXFLAGS -std=c++23 -fPIC \
-        -I$SRC/poppler/qt6/src -I$SRC/poppler/build/qt6/src \
+        -I$SRC/poppler/qt6/src -I$SRC/poppler/build/qt6/src -I$SRC/poppler -I$SRC/poppler/poppler -I$SRC/poppler/build -I$SRC/poppler/build/poppler \
         $BUILD_CFLAGS \
         $f -o $OUT/$fuzzer_name \
         $PREDEPS_LDFLAGS \

@@ -1,18 +1,15 @@
 #include <cstdint>
 #include <poppler-qt6.h>
 #include <poppler-form.h>
+#include <GlobalParams.h>
 #include <QtCore/QBuffer>
 #include <QtGui/QImage>
 
-static void dummy_error_function(const QString &message, const QVariant &closure)
-{
-    Q_UNUSED(message)
-    Q_UNUSED(closure)
-}
-
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    Poppler::setDebugErrorFunction(dummy_error_function, QVariant());
+    GlobalParamsIniter globalParamsIniter(nullptr);
+    globalParams->setErrQuiet(true);
+
     QByteArray in_data = QByteArray::fromRawData((const char *)data, size);
     std::unique_ptr<Poppler::Document> doc = Poppler::Document::loadFromData(in_data);
     if (!doc || doc->isLocked()) {

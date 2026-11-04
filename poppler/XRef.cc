@@ -1375,10 +1375,11 @@ Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
     }
 
     case xrefEntryCompressed: {
-#if 0 // Adobe apparently ignores the generation number on compressed objects
-    if (gen != 0) {
-      goto err;
-    }
+#define FOLLOW_SPECIFICATION_STRICTLY 0 // Adobe apparently ignores the generation number on compressed objects
+#if FOLLOW_SPECIFICATION_STRICTLY
+        if (gen != 0) {
+            goto err;
+        }
 #endif
         if (e->offset >= static_cast<unsigned int>(size) || (entries[e->offset].type != xrefEntryUncompressed && entries[e->offset].type != xrefEntryNone)) {
             error(errSyntaxError, -1, "Invalid object stream");

@@ -244,11 +244,9 @@ public:
     // Toggle debug mode on or off.
     void setDebugMode(bool debugModeA) { debugMode = debugModeA; }
 
-#if 1 //~tmp: turn off anti-aliasing temporarily
     void setInShading(bool sh) { inShading = sh; }
     bool getVectorAntialias() const { return vectorAntialias; }
     void setVectorAntialias(bool vaa) { vectorAntialias = vaa; }
-#endif
 
     // Do shaded fills with dynamic patterns
     //

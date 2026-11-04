@@ -43,6 +43,8 @@ typedef enum
     /*   [val: char *] */
     argGooString, /* string arg      */
     /*   [val: GooString *] */
+    argStringList, /* string list arg */
+    /*   [val: std::vector<std::string> *] */
 } ArgKind;
 
 /*

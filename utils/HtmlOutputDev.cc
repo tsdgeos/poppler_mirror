@@ -56,6 +56,8 @@
 //
 //========================================================================
 
+#define ENABLE_HTMLOUTPUTDEV_DEBUGGING 0
+
 #include "config.h"
 #include <cstdio>
 #include <cstdlib>
@@ -121,18 +123,6 @@ extern bool noMerge;
 extern double wordBreakThreshold;
 
 static bool debug = false;
-
-#if 0
-static GooString* Dirname(GooString* str){
-
-  char *p=str->c_str();
-  int len=str->getLength();
-  for (int i=len-1;i>=0;i--)
-    if (*(p+i)==SLASH)
-      return new GooString(p,i+1);
-  return new GooString();
-}
-#endif
 
 static std::string print_matrix(const std::array<double, 4> &mat)
 {
@@ -414,14 +404,6 @@ void HtmlPage::endString()
 
     curStr->endString();
 
-#if 0 //~tmp
-  if (curStr->yMax - curStr->yMin > 20) {
-    delete curStr;
-    curStr = NULL;
-    return;
-  }
-#endif
-
     // insert string in y-major list
     h = curStr->yMax - curStr->yMin;
     y1 = curStr->yMin + 0.5 * h;
@@ -494,17 +476,15 @@ void HtmlPage::coalesce()
     int n, i;
     double curX, curY;
 
-#if 0 //~ for debugging
-  for (str1 = yxStrings; str1; str1 = str1->yxNext) {
-    printf("x=%f..%f  y=%f..%f  size=%2d '",
-	   str1->xMin, str1->xMax, str1->yMin, str1->yMax,
-	   (int)(str1->yMax - str1->yMin));
-    for (i = 0; i < str1->len; ++i) {
-      fputc(str1->text[i] & 0xff, stdout);
+#if ENABLE_HTMLOUTPUTDEV_DEBUGGING
+    for (str1 = yxStrings; str1; str1 = str1->yxNext) {
+        printf("x=%f..%f  y=%f..%f  size=%2d '", str1->xMin, str1->xMax, str1->yMin, str1->yMax, (int)(str1->yMax - str1->yMin));
+        for (i = 0; i < str1->len; ++i) {
+            fputc(str1->text[i] & 0xff, stdout);
+        }
+        printf("'\n");
     }
-    printf("'\n");
-  }
-  printf("\n------------------------------------------------------------\n\n");
+    printf("\n------------------------------------------------------------\n\n");
 #endif
     str1 = yxStrings;
 
@@ -693,14 +673,12 @@ void HtmlPage::coalesce()
     bool finish_a = str1->getLink() != nullptr;
     CloseTags(str1->htext.get(), finish_a, finish_italic, finish_bold);
 
-#if 0 //~ for debugging
-  for (str1 = yxStrings; str1; str1 = str1->yxNext) {
-    printf("x=%3d..%3d  y=%3d..%3d  size=%2d ",
-	   (int)str1->xMin, (int)str1->xMax, (int)str1->yMin, (int)str1->yMax,
-	   (int)(str1->yMax - str1->yMin));
-    printf("'%s'\n", str1->htext->c_str());
-  }
-  printf("\n------------------------------------------------------------\n\n");
+#if ENABLE_HTMLOUTPUTDEV_DEBUGGING
+    for (str1 = yxStrings; str1; str1 = str1->yxNext) {
+        printf("x=%3d..%3d  y=%3d..%3d  size=%2d ", (int)str1->xMin, (int)str1->xMax, (int)str1->yMin, (int)str1->yMax, (int)(str1->yMax - str1->yMin));
+        printf("'%s'\n", str1->htext->c_str());
+    }
+    printf("\n------------------------------------------------------------\n\n");
 #endif
 }
 
@@ -1178,25 +1156,6 @@ HtmlOutputDev::~HtmlOutputDev()
 
 void HtmlOutputDev::startPage(int pageNumA, GfxState *state, XRef * /*xref*/)
 {
-#if 0
-  if (mode&&!xml){
-    if (write){
-      write=false;
-      GooString* fname=Dirname(Docname);
-      fname->append("image.log");
-      if((tin=fopen(getFileNameFromPath(fname->c_str(),fname->getLength()),"w"))==NULL){
-	printf("Error : can not open %s",fname);
-	exit(1);
-      }
-      delete fname;
-    // if(state->getRotation()!=0)
-    //  fprintf(tin,"ROTATE=%d rotate %d neg %d neg translate\n",state->getRotation(),state->getX1(),-state->getY1());
-    // else
-      fprintf(tin,"ROTATE=%d neg %d neg translate\n",state->getX1(),state->getY1());
-    }
-  }
-#endif
-
     pageNum = pageNumA;
     const std::string str = gbasename(Docname->c_str());
     pages->clear();

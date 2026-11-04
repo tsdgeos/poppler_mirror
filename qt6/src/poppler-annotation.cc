@@ -17,6 +17,7 @@
  * Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
  * Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2026 Sune Stolborg Vuorela <sune@vuorela.dk>, work sponsored by the Direction Interministérielle du Numérique
+ * Copyright (C) 2026 Valentin Pohu <pohuvalentin@gmail.com>
  *
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -570,10 +571,10 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
 
             const AnnotRichMedia::Settings *annotSettings = annotRichMedia->getSettings();
             if (annotSettings) {
-                auto *settings = new RichMediaAnnotation::Settings;
+                auto settings = std::make_unique<RichMediaAnnotation::Settings>();
 
                 if (annotSettings->getActivation()) {
-                    auto *activation = new RichMediaAnnotation::Activation;
+                    auto activation = std::make_unique<RichMediaAnnotation::Activation>();
 
                     switch (annotSettings->getActivation()->getCondition()) {
                     case AnnotRichMedia::Activation::conditionPageOpened:
@@ -587,11 +588,11 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
                         break;
                     }
 
-                    settings->setActivation(activation);
+                    settings->setActivation(std::move(activation));
                 }
 
                 if (annotSettings->getDeactivation()) {
-                    auto *deactivation = new RichMediaAnnotation::Deactivation;
+                    auto deactivation = std::make_unique<RichMediaAnnotation::Deactivation>();
 
                     switch (annotSettings->getDeactivation()->getCondition()) {
                     case AnnotRichMedia::Deactivation::conditionPageClosed:
@@ -605,15 +606,15 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
                         break;
                     }
 
-                    settings->setDeactivation(deactivation);
+                    settings->setDeactivation(std::move(deactivation));
                 }
 
-                richMediaAnnotation->setSettings(settings);
+                richMediaAnnotation->setSettings(std::move(settings));
             }
 
             const AnnotRichMedia::Content *annotContent = annotRichMedia->getContent();
             if (annotContent) {
-                auto *content = new RichMediaAnnotation::Content;
+                auto content = std::make_unique<RichMediaAnnotation::Content>();
 
                 const std::vector<std::unique_ptr<AnnotRichMedia::Configuration>> &annotConfigurations = annotContent->getConfigurations();
                 QList<RichMediaAnnotation::Configuration *> configurations;
@@ -671,13 +672,17 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
 
                         const AnnotRichMedia::Params *annotParams = annotInstance->getParams();
                         if (annotParams) {
-                            auto *params = new RichMediaAnnotation::Params;
+                            auto params = std::make_unique<RichMediaAnnotation::Params>();
 
                             if (annotParams->getFlashVars()) {
                                 params->setFlashVars(UnicodeParsedString(annotParams->getFlashVars()));
                             }
 
-                            instance->setParams(params);
+                            instance->setParams(std::move(params));
+                        }
+
+                        if (std::unique_ptr<FileSpec> fileSpec = annotInstance->getEmbeddedFile()) {
+                            instance->setEmbeddedFile(std::unique_ptr<EmbeddedFile>(new EmbeddedFile(*new EmbeddedFileData(std::move(fileSpec)))));
                         }
 
                         instances.append(instance);
@@ -705,14 +710,14 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
                     }
 
                     auto fileSpec = std::make_unique<FileSpec>(annotAsset->getFileSpec());
-                    asset->setEmbeddedFile(new EmbeddedFile(*new EmbeddedFileData(std::move(fileSpec))));
+                    asset->setEmbeddedFile(std::unique_ptr<EmbeddedFile>(new EmbeddedFile(*new EmbeddedFileData(std::move(fileSpec)))));
 
                     assets.append(asset);
                 }
 
                 content->setAssets(assets);
 
-                richMediaAnnotation->setContent(content);
+                richMediaAnnotation->setContent(std::move(content));
             }
 
             annotation.reset(richMediaAnnotation);
@@ -1443,22 +1448,24 @@ void Annotation::setPopup(const Annotation::Popup &popup)
         return;
     }
 
-#if 0 /* TODO: Remove old popup and add AnnotPopup to page */
-    AnnotMarkup *markupann = dynamic_cast<AnnotMarkup*>(d->pdfAnnot);
+#define ENABLE_QT_SET_POPUP_FOR_PDF_ANNOT 0
+#if ENABLE_QT_SET_POPUP_FOR_PDF_ANNOT
+    AnnotMarkup *markupann = dynamic_cast<AnnotMarkup *>(d->pdfAnnot);
     if (!markupann)
         return;
 
     // Create a new AnnotPopup and assign it to pdfAnnot
-    PDFRectangle rect = d->toPdfRectangle( popup.geometry() );
-    AnnotPopup * p = new AnnotPopup( d->pdfPage->getDoc(), rect );
-    p->setOpen( !(popup.flags() & Annotation::Hidden) );
-    if (!popup.summary().isEmpty())
-    {
+    PDFRectangle rect = d->toPdfRectangle(popup.geometry());
+    AnnotPopup *p = new AnnotPopup(d->pdfPage->getDoc(), rect);
+    p->setOpen(!(popup.flags() & Annotation::Hidden));
+    if (!popup.summary().isEmpty()) {
         GooString *s = QStringToUnicodeGooString(popup.summary());
         markupann->setLabel(s);
         delete s;
     }
     markupann->setPopup(p);
+#else
+    qWarning() << "Annotation::setPopup implementation when the pdf annotation exists not yet complete";
 #endif
 }
 
@@ -3713,13 +3720,12 @@ class RichMediaAnnotation::Instance::Private
 public:
     Private() = default;
 
-    ~Private() { delete params; }
-
     Private(const Private &) = delete;
     Private &operator=(const Private &) = delete;
 
     RichMediaAnnotation::Instance::Type type;
-    RichMediaAnnotation::Params *params = nullptr;
+    std::unique_ptr<RichMediaAnnotation::Params> params;
+    std::unique_ptr<EmbeddedFile> embeddedFile;
 };
 
 RichMediaAnnotation::Instance::Instance() : d(new Private) { }
@@ -3736,15 +3742,24 @@ RichMediaAnnotation::Instance::Type RichMediaAnnotation::Instance::type() const
     return d->type;
 }
 
-void RichMediaAnnotation::Instance::setParams(RichMediaAnnotation::Params *params)
+void RichMediaAnnotation::Instance::setParams(std::unique_ptr<RichMediaAnnotation::Params> &&params)
 {
-    delete d->params;
-    d->params = params;
+    d->params = std::move(params);
 }
 
 RichMediaAnnotation::Params *RichMediaAnnotation::Instance::params() const
 {
-    return d->params;
+    return d->params.get();
+}
+
+void RichMediaAnnotation::Instance::setEmbeddedFile(std::unique_ptr<EmbeddedFile> &&embeddedFile)
+{
+    d->embeddedFile = std::move(embeddedFile);
+}
+
+EmbeddedFile *RichMediaAnnotation::Instance::embeddedFile() const
+{
+    return d->embeddedFile.get();
 }
 
 class RichMediaAnnotation::Configuration::Private
@@ -3807,13 +3822,11 @@ class RichMediaAnnotation::Asset::Private
 public:
     Private() = default;
 
-    ~Private() { delete embeddedFile; }
-
     Private(const Private &) = delete;
     Private &operator=(const Private &) = delete;
 
     QString name;
-    EmbeddedFile *embeddedFile = nullptr;
+    std::unique_ptr<EmbeddedFile> embeddedFile;
 };
 
 RichMediaAnnotation::Asset::Asset() : d(new Private) { }
@@ -3830,15 +3843,14 @@ QString RichMediaAnnotation::Asset::name() const
     return d->name;
 }
 
-void RichMediaAnnotation::Asset::setEmbeddedFile(EmbeddedFile *embeddedFile)
+void RichMediaAnnotation::Asset::setEmbeddedFile(std::unique_ptr<EmbeddedFile> &&embeddedFile)
 {
-    delete d->embeddedFile;
-    d->embeddedFile = embeddedFile;
+    d->embeddedFile = std::move(embeddedFile);
 }
 
 EmbeddedFile *RichMediaAnnotation::Asset::embeddedFile() const
 {
-    return d->embeddedFile;
+    return d->embeddedFile.get();
 }
 
 class RichMediaAnnotation::Content::Private
@@ -3940,34 +3952,32 @@ class RichMediaAnnotation::Settings::Private : public QSharedData
 public:
     Private() = default;
 
-    RichMediaAnnotation::Activation *activation = nullptr;
-    RichMediaAnnotation::Deactivation *deactivation = nullptr;
+    std::unique_ptr<RichMediaAnnotation::Activation> activation;
+    std::unique_ptr<RichMediaAnnotation::Deactivation> deactivation;
 };
 
 RichMediaAnnotation::Settings::Settings() : d(new Private) { }
 
 RichMediaAnnotation::Settings::~Settings() = default;
 
-void RichMediaAnnotation::Settings::setActivation(RichMediaAnnotation::Activation *activation)
+void RichMediaAnnotation::Settings::setActivation(std::unique_ptr<RichMediaAnnotation::Activation> &&activation)
 {
-    delete d->activation;
-    d->activation = activation;
+    d->activation = std::move(activation);
 }
 
 RichMediaAnnotation::Activation *RichMediaAnnotation::Settings::activation() const
 {
-    return d->activation;
+    return d->activation.get();
 }
 
-void RichMediaAnnotation::Settings::setDeactivation(RichMediaAnnotation::Deactivation *deactivation)
+void RichMediaAnnotation::Settings::setDeactivation(std::unique_ptr<RichMediaAnnotation::Deactivation> &&deactivation)
 {
-    delete d->deactivation;
-    d->deactivation = deactivation;
+    d->deactivation = std::move(deactivation);
 }
 
 RichMediaAnnotation::Deactivation *RichMediaAnnotation::Settings::deactivation() const
 {
-    return d->deactivation;
+    return d->deactivation.get();
 }
 
 class RichMediaAnnotationPrivate : public AnnotationPrivate
@@ -3987,15 +3997,11 @@ public:
         return nullptr;
     }
 
-    RichMediaAnnotation::Settings *settings = nullptr;
-    RichMediaAnnotation::Content *content = nullptr;
+    std::unique_ptr<RichMediaAnnotation::Settings> settings;
+    std::unique_ptr<RichMediaAnnotation::Content> content;
 };
 
-RichMediaAnnotationPrivate::~RichMediaAnnotationPrivate()
-{
-    delete settings;
-    delete content;
-}
+RichMediaAnnotationPrivate::~RichMediaAnnotationPrivate() = default;
 
 RichMediaAnnotation::RichMediaAnnotation() : Annotation(*new RichMediaAnnotationPrivate()) { }
 
@@ -4008,34 +4014,32 @@ Annotation::SubType RichMediaAnnotation::subType() const
     return ARichMedia;
 }
 
-void RichMediaAnnotation::setSettings(RichMediaAnnotation::Settings *settings)
+void RichMediaAnnotation::setSettings(std::unique_ptr<RichMediaAnnotation::Settings> &&settings)
 {
     Q_D(RichMediaAnnotation);
 
-    delete d->settings;
-    d->settings = settings;
+    d->settings = std::move(settings);
 }
 
 RichMediaAnnotation::Settings *RichMediaAnnotation::settings() const
 {
     Q_D(const RichMediaAnnotation);
 
-    return d->settings;
+    return d->settings.get();
 }
 
-void RichMediaAnnotation::setContent(RichMediaAnnotation::Content *content)
+void RichMediaAnnotation::setContent(std::unique_ptr<RichMediaAnnotation::Content> &&content)
 {
     Q_D(RichMediaAnnotation);
 
-    delete d->content;
-    d->content = content;
+    d->content = std::move(content);
 }
 
 RichMediaAnnotation::Content *RichMediaAnnotation::content() const
 {
     Q_D(const RichMediaAnnotation);
 
-    return d->content;
+    return d->content.get();
 }
 
 // BEGIN utility annotation functions

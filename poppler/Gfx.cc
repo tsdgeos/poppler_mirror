@@ -63,6 +63,7 @@
 #include <config.h>
 
 #include <climits>
+#include <cstdint>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -762,10 +763,6 @@ void Gfx::execOp(Object *cmd, Object args[], int numArgs)
             return;
         }
         if (numArgs > op->numArgs) {
-#if 0
-      error(errSyntaxWarning, getPos(),
-	    "Too many ({0:d}) args to '{1:s}' operator", numArgs, name);
-#endif
             argPtr += numArgs - op->numArgs;
             numArgs = op->numArgs;
         }
@@ -994,19 +991,19 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
             opSetDash(args2, 2);
         }
     }
-#if 0 //~ need to add a new version of GfxResources::lookupFont() that
-      //~ takes an indirect ref instead of a name
-  if (dict->lookup("Font", &obj2)->isArray() &&
-      obj2.arrayGetLength() == 2) {
-    obj2.arrayGet(0, &args2[0]);
-    obj2.arrayGet(1, &args2[1]);
-    if (args2[0].isDict() && args2[1].isNum()) {
-      opSetFont(args2, 2);
+#define SET_FONT_FROM_EXTGSTATE 0
+#if SET_FONT_FROM_EXTGSTATE //~ need to add a new version of GfxResources::lookupFont() that
+    //~ takes an indirect ref instead of a name
+    if (dict->lookup("Font", &obj2)->isArray() && obj2.arrayGetLength() == 2) {
+        obj2.arrayGet(0, &args2[0]);
+        obj2.arrayGet(1, &args2[1]);
+        if (args2[0].isDict() && args2[1].isNum()) {
+            opSetFont(args2, 2);
+        }
+        args2[0].free();
+        args2[1].free();
     }
-    args2[0].free();
-    args2[1].free();
-  }
-  obj2.free();
+    obj2.free();
 #endif
     obj2 = dict->lookup("FL");
     if (obj2.isNum()) {
@@ -2350,12 +2347,10 @@ void Gfx::doShadingPatternFill(GfxShadingPattern *sPat, bool stroke, bool eoFill
         state->clearPath();
     }
 
-#if 1 //~tmp: turn off anti-aliasing temporarily
     bool vaa = out->getVectorAntialias();
     if (vaa) {
         out->setVectorAntialias(false);
     }
-#endif
 
     // do shading type-specific operations
     switch (shading->getType()) {
@@ -2378,11 +2373,9 @@ void Gfx::doShadingPatternFill(GfxShadingPattern *sPat, bool stroke, bool eoFill
         break;
     }
 
-#if 1 //~tmp: turn off anti-aliasing temporarily
     if (vaa) {
         out->setVectorAntialias(true);
     }
-#endif
 
     // restore graphics state
     restoreStateStack(savedState);
@@ -2422,12 +2415,10 @@ void Gfx::opShFill(Object args[], int /*numArgs*/)
     state->setFillColorSpace(shading->getColorSpace()->copy());
     out->updateFillColorSpace(state);
 
-#if 1 //~tmp: turn off anti-aliasing temporarily
     bool vaa = out->getVectorAntialias();
     if (vaa) {
         out->setVectorAntialias(false);
     }
-#endif
 
     // do shading type-specific operations
     switch (shading->getType()) {
@@ -2450,11 +2441,9 @@ void Gfx::opShFill(Object args[], int /*numArgs*/)
         break;
     }
 
-#if 1 //~tmp: turn off anti-aliasing temporarily
     if (vaa) {
         out->setVectorAntialias(true);
     }
-#endif
 
     // restore graphics state
     restoreStateStack(savedState);
@@ -3345,14 +3334,9 @@ void Gfx::gouraudFillTriangle(double x0, double y0, GfxColor *color0, double x1,
     int i;
 
     for (i = 0; i < nComps; ++i) {
-        int color01Delta, color12Delta;
-        if (checkedSubtraction(color0->c[i], color1->c[i], &color01Delta)) {
-            break;
-        }
-        if (checkedSubtraction(color1->c[i], color2->c[i], &color12Delta)) {
-            break;
-        }
-        if (abs(color01Delta) > gouraudColorDelta || abs(color12Delta) > gouraudColorDelta) {
+        const auto color01Delta = static_cast<int64_t>(color0->c[i]) - static_cast<int64_t>(color1->c[i]);
+        const auto color12Delta = static_cast<int64_t>(color1->c[i]) - static_cast<int64_t>(color2->c[i]);
+        if (std::abs(color01Delta) > gouraudColorDelta || std::abs(color12Delta) > gouraudColorDelta) {
             break;
         }
     }
@@ -4226,7 +4210,6 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
     bool maskInterpolate;
     bool hasAlpha;
     Stream *maskStr;
-    int i, n;
 
     // get info from the stream
     bits = 0;
@@ -4265,7 +4248,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
     } else if (obj1.isReal()) {
         width = static_cast<int>(obj1.getReal());
     } else {
-        goto err1;
+        error(errSyntaxError, getPos(), "Bad image parameters");
+        return;
     }
     obj1 = dict->lookup("Height");
     if (obj1.isNull()) {
@@ -4276,11 +4260,13 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
     } else if (obj1.isReal()) {
         height = static_cast<int>(obj1.getReal());
     } else {
-        goto err1;
+        error(errSyntaxError, getPos(), "Bad image parameters");
+        return;
     }
 
     if (width < 1 || height < 1 || width >= (INT_MAX - 7) / height) {
-        goto err1;
+        error(errSyntaxError, getPos(), "Bad image parameters");
+        return;
     }
 
     // image interpolation
@@ -4304,7 +4290,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
     if (obj1.isBool()) {
         mask = obj1.getBool();
     } else if (!obj1.isNull()) {
-        goto err1;
+        error(errSyntaxError, getPos(), "Bad image parameters");
+        return;
     }
 
     // bit depth
@@ -4318,7 +4305,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         } else if (mask) {
             bits = 1;
         } else {
-            goto err1;
+            error(errSyntaxError, getPos(), "Bad image parameters");
+            return;
         }
     }
 
@@ -4327,7 +4315,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
 
         // check for inverted mask
         if (bits != 1) {
-            goto err1;
+            error(errSyntaxError, getPos(), "Bad image parameters");
+            return;
         }
         invert = false;
         obj1 = dict->lookup("Decode");
@@ -4343,16 +4332,18 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                 invert = true;
             }
         } else if (!obj1.isNull()) {
-            goto err1;
+            error(errSyntaxError, getPos(), "Bad image parameters");
+            return;
         }
 
         // if drawing is disabled, skip over inline image data
         if (!ocState || !out->needNonText()) {
             if (!str->rewind()) {
-                goto err1;
+                error(errSyntaxError, getPos(), "Bad image parameters");
+                return;
             }
-            n = height * ((width + 7) / 8);
-            for (i = 0; i < n; ++i) {
+            const int n = height * ((width + 7) / 8);
+            for (int i = 0; i < n; ++i) {
                 str->getChar();
             }
             str->close();
@@ -4367,7 +4358,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         }
     } else {
         if (bits == 0) {
-            goto err1;
+            error(errSyntaxError, getPos(), "Bad image parameters");
+            return;
         }
 
         // get color space and color map
@@ -4444,7 +4436,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
             }
         }
         if (!colorSpace) {
-            goto err1;
+            error(errSyntaxError, getPos(), "Bad image parameters");
+            return;
         }
         obj1 = dict->lookup("Decode");
         if (obj1.isNull()) {
@@ -4452,7 +4445,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         }
         GfxImageColorMap colorMap(bits, &obj1, std::move(colorSpace));
         if (!colorMap.isOk()) {
-            goto err1;
+            error(errSyntaxError, getPos(), "Bad image parameters");
+            return;
         }
 
         // get the mask
@@ -4494,7 +4488,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         if (smaskObj.isStream() || haveMaskImage) {
             // soft mask
             if (inlineImg) {
-                goto err1;
+                error(errSyntaxError, getPos(), "Bad image parameters");
+                return;
             }
             if (!haveMaskImage) {
                 maskStr = smaskObj.getStream();
@@ -4505,7 +4500,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                 obj1 = maskDict->lookup("W");
             }
             if (!obj1.isInt()) {
-                goto err1;
+                error(errSyntaxError, getPos(), "Bad image parameters");
+                return;
             }
             maskWidth = obj1.getInt();
             obj1 = maskDict->lookup("Height");
@@ -4513,7 +4509,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                 obj1 = maskDict->lookup("H");
             }
             if (!obj1.isInt()) {
-                goto err1;
+                error(errSyntaxError, getPos(), "Bad image parameters");
+                return;
             }
             maskHeight = obj1.getInt();
             obj1 = maskDict->lookup("Interpolate");
@@ -4530,7 +4527,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                 obj1 = maskDict->lookup("BPC");
             }
             if (!obj1.isInt()) {
-                goto err1;
+                error(errSyntaxError, getPos(), "Bad image parameters");
+                return;
             }
             maskBits = obj1.getInt();
             obj1 = maskDict->lookup("ColorSpace");
@@ -4546,7 +4544,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
             // Here, we parse manually instead of using GfxColorSpace::parse,
             // since we explicitly need DeviceGray and not some DefaultGray color space
             if (!obj1.isName("DeviceGray") && !obj1.isName("G")) {
-                goto err1;
+                error(errSyntaxError, getPos(), "Bad image parameters");
+                return;
             }
             obj1 = maskDict->lookup("Decode");
             if (obj1.isNull()) {
@@ -4554,7 +4553,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
             }
             maskColorMap = std::make_unique<GfxImageColorMap>(maskBits, &obj1, std::make_unique<GfxDeviceGrayColorSpace>());
             if (!maskColorMap->isOk()) {
-                goto err1;
+                error(errSyntaxError, getPos(), "Bad image parameters");
+                return;
             }
             // handle the Matte entry
             obj1 = maskDict->lookup("Matte");
@@ -4565,16 +4565,17 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                     error(errSyntaxError, -1, "Softmask with matte entry {0:d} x {1:d} must have same geometry as the image {2:d} x {3:d}", maskWidth, maskHeight, width, height);
                 } else {
                     GfxColor matteColor;
-                    for (i = 0; i < colorMap.getColorSpace()->getNComps(); i++) {
-                        Object obj2 = obj1.getArray()->get(i);
+                    int colorMapI;
+                    for (colorMapI = 0; colorMapI < colorMap.getColorSpace()->getNComps(); colorMapI++) {
+                        Object obj2 = obj1.getArray()->get(colorMapI);
                         if (!obj2.isNum()) {
-                            error(errSyntaxError, -1, "Matte entry {0:d} should be a number but it's of type {1:d}", i, obj2.getType());
+                            error(errSyntaxError, -1, "Matte entry {0:d} should be a number but it's of type {1:d}", colorMapI, obj2.getType());
 
                             break;
                         }
-                        matteColor.c[i] = dblToCol(obj2.getNum());
+                        matteColor.c[colorMapI] = dblToCol(obj2.getNum());
                     }
-                    if (i == colorMap.getColorSpace()->getNComps()) {
+                    if (colorMapI == colorMap.getColorSpace()->getNComps()) {
                         maskColorMap->setMatteColor(matteColor);
                     }
                 }
@@ -4582,7 +4583,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
             haveSoftMask = true;
         } else if (maskObj.isArray()) {
             // color key mask
-            for (i = 0; i < maskObj.arrayGetLength() && i < 2 * gfxColorMaxComps; ++i) {
+            for (int i = 0; i < maskObj.arrayGetLength() && i < 2 * gfxColorMaxComps; ++i) {
                 obj1 = maskObj.arrayGet(i);
                 if (obj1.isInt()) {
                     maskColors[i] = obj1.getInt();
@@ -4591,14 +4592,15 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                     maskColors[i] = static_cast<int>(obj1.getReal());
                 } else {
                     error(errSyntaxError, -1, "Mask entry should be an integer but it's of type {0:d}", obj1.getType());
-                    goto err1;
+                    return;
                 }
             }
             haveColorKeyMask = true;
         } else if (maskObj.isStream()) {
             // explicit mask
             if (inlineImg) {
-                goto err1;
+                error(errSyntaxError, getPos(), "Bad image parameters");
+                return;
             }
 
             if (maskStr == nullptr) {
@@ -4610,7 +4612,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                 obj1 = maskDict->lookup("W");
             }
             if (!obj1.isInt()) {
-                goto err1;
+                error(errSyntaxError, getPos(), "Bad image parameters");
+                return;
             }
             maskWidth = obj1.getInt();
             obj1 = maskDict->lookup("Height");
@@ -4618,7 +4621,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                 obj1 = maskDict->lookup("H");
             }
             if (!obj1.isInt()) {
-                goto err1;
+                error(errSyntaxError, getPos(), "Bad image parameters");
+                return;
             }
             maskHeight = obj1.getInt();
             obj1 = maskDict->lookup("Interpolate");
@@ -4636,7 +4640,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                 obj1 = maskDict->lookup("IM");
             }
             if (!haveMaskImage && (!obj1.isBool() || !obj1.getBool())) {
-                goto err1;
+                error(errSyntaxError, getPos(), "Bad image parameters");
+                return;
             }
 
             maskInvert = false;
@@ -4652,7 +4657,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                     maskInvert = true;
                 }
             } else if (!obj1.isNull()) {
-                goto err1;
+                error(errSyntaxError, getPos(), "Bad image parameters");
+                return;
             }
 
             haveExplicitMask = true;
@@ -4661,13 +4667,17 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         // if drawing is disabled, skip over inline image data
         if (!ocState || !out->needNonText() || singular_matrix) {
             if (!str->rewind()) {
-                goto err1;
+                error(errSyntaxError, getPos(), "Bad image parameters");
+                return;
             }
-            if ((static_cast<int64_t>(width) * colorMap.getNumPixelComps() * colorMap.getBits() + 7) >= INT_MAX) {
-                goto err1;
+            const int64_t bytesPerLine = (static_cast<int64_t>(width) * colorMap.getNumPixelComps() * colorMap.getBits() + 7) / 8;
+            const int64_t byteCount = static_cast<int64_t>(height) * bytesPerLine;
+            if (byteCount > INT_MAX) {
+                error(errSyntaxError, getPos(), "Bad image parameters");
+                return;
             }
-            n = height * ((width * colorMap.getNumPixelComps() * colorMap.getBits() + 7) / 8);
-            for (i = 0; i < n; ++i) {
+            const int n = static_cast<int>(byteCount);
+            for (int i = 0; i < n; ++i) {
                 str->getChar();
             }
             str->close();
@@ -4684,15 +4694,8 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         }
     }
 
-    if ((i = width * height) > 1000) {
-        i = 1000;
-    }
-    updateLevel += i;
-
-    return;
-
-err1:
-    error(errSyntaxError, getPos(), "Bad image parameters");
+    const int sizeForUpdateLevel = width * height;
+    updateLevel += std::min(sizeForUpdateLevel, 1000);
 }
 
 bool Gfx::checkTransparencyGroup(Dict *resDict)

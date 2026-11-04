@@ -1060,6 +1060,9 @@ SignatureValidationStatus NSSSignatureVerification::validateSignature()
         }
 
         auto innerHashContext = HashContext::create(innerHashAlgorithm);
+        if (!innerHashContext) {
+            return SIGNATURE_GENERIC_ERROR;
+        }
         innerHashContext->updateHash(content_info_data->data, content_info_data->len);
         digest_buffer = innerHashContext->endHash();
         digest.data = digest_buffer.data();
@@ -1078,7 +1081,7 @@ void NSSSignatureVerification::validateCertificateAsync(std::chrono::system_cloc
     CERTCertificate *cert;
 
     if (!CMSSignerInfo) {
-        validationStatus = std::async([doneCallback]() {
+        validationStatus = std::async([doneCallback] {
             if (doneCallback) {
                 doneCallback();
             }
@@ -1143,7 +1146,7 @@ void NSSSignatureVerification::validateCertificateAsync(std::chrono::system_cloc
     // be put in the thread, but I'm not sure about all of the
     // thread safety of nss.
 
-    validationStatus = std::async([result, doneCallback]() {
+    validationStatus = std::async([result, doneCallback] {
         if (doneCallback) {
             doneCallback();
         }

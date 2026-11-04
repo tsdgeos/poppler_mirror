@@ -318,7 +318,7 @@ void FormWidgetButton::setState(bool astate)
     for (int i = 0; i < tot; i++) {
         bool found_related = false;
         FormWidget *wid = this_page_widgets->getWidget(i);
-        const bool same_fqn = wid->getFullyQualifiedName()->compare(getFullyQualifiedName()->toStr()) == 0;
+        const bool same_fqn = wid->getFullyQualifiedName()->toStr() == getFullyQualifiedName()->toStr();
         const bool same_button_type = wid->getType() == formButton && static_cast<const FormWidgetButton *>(wid)->getButtonType() == this_button_type;
 
         if (same_fqn && same_button_type) {
@@ -1392,7 +1392,7 @@ FormField *FormField::findFieldByRef(Ref aref)
 FormField *FormField::findFieldByFullyQualifiedName(const std::string &name)
 {
     if (terminal) {
-        if (getFullyQualifiedName()->compare(name) == 0) {
+        if (getFullyQualifiedName()->toStr() == name) {
             return this;
         }
     } else {
@@ -1948,11 +1948,11 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
             const size_t numChoices = choices.size();
             for (size_t i = 0; i < numChoices; i++) {
                 if (choices[i].exportVal) {
-                    if (choices[i].exportVal->compare(obj1.getString()) == 0) {
+                    if (choices[i].exportVal->toStr() == obj1.getString()) {
                         optionFound = true;
                     }
                 } else if (choices[i].optionName) {
-                    if (choices[i].optionName->compare(obj1.getString()) == 0) {
+                    if (choices[i].optionName->toStr() == obj1.getString()) {
                         optionFound = true;
                     }
                 }
@@ -1984,11 +1984,11 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
                     bool matches = false;
 
                     if (choices[i].exportVal) {
-                        if (choices[i].exportVal->compare(obj2.getString()) == 0) {
+                        if (choices[i].exportVal->toStr() == obj2.getString()) {
                             matches = true;
                         }
                     } else if (choices[i].optionName) {
-                        if (choices[i].optionName->compare(obj2.getString()) == 0) {
+                        if (choices[i].optionName->toStr() == obj2.getString()) {
                             matches = true;
                         }
                     }

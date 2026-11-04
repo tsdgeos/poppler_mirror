@@ -349,10 +349,8 @@ public:
     //----- links
     virtual void processLink(AnnotLink * /*link*/) { }
 
-#if 1 //~tmp: turn off anti-aliasing temporarily
     virtual bool getVectorAntialias() { return false; }
     virtual void setVectorAntialias(bool /*vaa*/) { }
-#endif
 
 #if USE_CMS
     void setDisplayProfile(const GfxLCMSProfilePtr &profile) { displayprofile = profile; }

@@ -413,7 +413,7 @@ static std::unique_ptr<Array> createWidthArray(const GfxFont *oldFont, XRef *xre
 {
     CIDFontsWidthsBuilder fontsWidths;
 
-    const std::vector<Unicode> sortedUniqueUnicodeValues = [&unicodeValues]() {
+    const std::vector<Unicode> sortedUniqueUnicodeValues = [&unicodeValues] {
         auto copy = unicodeValues;
         std::ranges::sort(copy);
         const auto [first, last] = std::ranges::unique(copy);

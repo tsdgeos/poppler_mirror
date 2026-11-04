@@ -56,6 +56,8 @@
 //
 //========================================================================
 
+#define ENABLE_TEXTDEVOUTPUT_DEBUGGING 0
+
 #include <config.h>
 
 #include <cstdio>
@@ -2202,9 +2204,8 @@ int TextBlock::visitDepthFirst(TextBlock *blkList, int pos1, TextBlock **sorted,
 
     blk1 = this;
 
-#if 0 // for debugging
-  printf("visited: %d %.2f..%.2f %.2f..%.2f\n",
-	 sortPos, blk1->ExMin, blk1->ExMax, blk1->EyMin, blk1->EyMax);
+#if ENABLE_TEXTDEVOUTPUT_DEBUGGING
+    printf("visited: %d %.2f..%.2f %.2f..%.2f\n", sortPos, blk1->ExMin, blk1->ExMax, blk1->EyMin, blk1->EyMax);
 #endif
     visited[pos1] = true;
     pos2 = -1;
@@ -2235,10 +2236,8 @@ int TextBlock::visitDepthFirst(TextBlock *blkList, int pos1, TextBlock **sorted,
             if (blk2->isBeforeByRule1(blk1)) {
                 // Rule (1) blk1 and blk2 overlap, and blk2 is above blk1.
                 before = true;
-#if 0 // for debugging
-        printf("rule1: %.2f..%.2f %.2f..%.2f %.2f..%.2f %.2f..%.2f\n",
-	       blk2->ExMin, blk2->ExMax, blk2->EyMin, blk2->EyMax,
-	       blk1->ExMin, blk1->ExMax, blk1->EyMin, blk1->EyMax);
+#if ENABLE_TEXTDEVOUTPUT_DEBUGGING
+                printf("rule1: %.2f..%.2f %.2f..%.2f %.2f..%.2f %.2f..%.2f\n", blk2->ExMin, blk2->ExMax, blk2->EyMin, blk2->EyMax, blk1->ExMin, blk1->ExMax, blk1->EyMin, blk1->EyMax);
 #endif
             } else if (blk2->isBeforeByRule2(blk1)) {
                 // Rule (2) blk2 left of blk1, and no intervening blk3
@@ -2266,12 +2265,10 @@ int TextBlock::visitDepthFirst(TextBlock *blkList, int pos1, TextBlock **sorted,
                         }
                     }
                 }
-#if 0 // for debugging
-        if (before) {
-	  printf("rule2: %.2f..%.2f %.2f..%.2f %.2f..%.2f %.2f..%.2f\n",
-	         blk1->ExMin, blk1->ExMax, blk1->EyMin, blk1->EyMax,
-	         blk2->ExMin, blk2->ExMax, blk2->EyMin, blk2->EyMax);
-        }
+#if ENABLE_TEXTDEVOUTPUT_DEBUGGING
+                if (before) {
+                    printf("rule2: %.2f..%.2f %.2f..%.2f %.2f..%.2f %.2f..%.2f\n", blk1->ExMin, blk1->ExMax, blk1->EyMin, blk1->EyMax, blk2->ExMin, blk2->ExMax, blk2->EyMin, blk2->EyMax);
+                }
 #endif
             }
         }
@@ -2281,9 +2278,8 @@ int TextBlock::visitDepthFirst(TextBlock *blkList, int pos1, TextBlock **sorted,
             sortPos = blk2->visitDepthFirst(blkList, pos2, sorted, sortPos, visited, cache, cacheSize);
         }
     }
-#if 0 // for debugging
-  printf("sorted: %d %.2f..%.2f %.2f..%.2f\n",
-	 sortPos, blk1->ExMin, blk1->ExMax, blk1->EyMin, blk1->EyMax);
+#if ENABLE_TEXTDEVOUTPUT_DEBUGGING
+    printf("sorted: %d %.2f..%.2f %.2f..%.2f\n", sortPos, blk1->ExMin, blk1->ExMax, blk1->EyMin, blk1->EyMax);
 #endif
     sorted[sortPos++] = blk1;
     return sortPos;
@@ -2876,32 +2872,28 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
     nBlocks = 0;
     primaryRot = 0;
 
-#if 0 // for debugging
-  printf("*** initial words ***\n");
-  for (rot = 0; rot < 4; ++rot) {
-    pool = pools[rot];
-    for (baseIdx = pool->minBaseIdx; baseIdx <= pool->maxBaseIdx; ++baseIdx) {
-      for (word0 = pool->getPool(baseIdx); word0; word0 = word0->next) {
-	printf("    word: x=%.2f..%.2f y=%.2f..%.2f base=%.2f fontSize=%.2f rot=%d link=%p '",
-	       word0->xMin, word0->xMax, word0->yMin, word0->yMax,
-	       word0->base, word0->fontSize, rot*90, word0->link);
-	for (i = 0; i < word0->len; ++i) {
-	  fputc(word0->text[i] & 0xff, stdout);
-	}
-	printf("'\n");
-      }
+#if ENABLE_TEXTDEVOUTPUT_DEBUGGING
+    printf("*** initial words ***\n");
+    for (rot = 0; rot < 4; ++rot) {
+        pool = pools[rot];
+        for (baseIdx = pool->minBaseIdx; baseIdx <= pool->maxBaseIdx; ++baseIdx) {
+            for (word0 = pool->getPool(baseIdx); word0; word0 = word0->next) {
+                printf("    word: x=%.2f..%.2f y=%.2f..%.2f base=%.2f fontSize=%.2f rot=%d link=%p '", word0->xMin, word0->xMax, word0->yMin, word0->yMax, word0->base, word0->fontSize, rot * 90, word0->link);
+                for (i = 0; i < word0->len; ++i) {
+                    fputc(word0->text[i] & 0xff, stdout);
+                }
+                printf("'\n");
+            }
+        }
     }
-  }
-  printf("\n");
+    printf("\n");
 #endif
 
-#if 0 //~ for debugging
-  for (i = 0; i < underlines->getLength(); ++i) {
-    underline = (TextUnderline *)underlines->get(i);
-    printf("underline: x=%g..%g y=%g..%g horiz=%d\n",
-	   underline->x0, underline->x1, underline->y0, underline->y1,
-	   underline->horiz);
-  }
+#if ENABLE_TEXTDEVOUTPUT_DEBUGGING
+    for (i = 0; i < underlines->getLength(); ++i) {
+        underline = (TextUnderline *)underlines->get(i);
+        printf("underline: x=%g..%g y=%g..%g horiz=%d\n", underline->x0, underline->x1, underline->y0, underline->y1, underline->horiz);
+    }
 #endif
 
     if (doHTML) {
@@ -3278,35 +3270,31 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
         }
     }
 
-#if 0 // for debugging
-  printf("*** rotation ***\n");
-  for (rot = 0; rot < 4; ++rot) {
-    printf("  %d: %6d\n", rot, count[rot]);
-  }
-  printf("  primary rot = %d\n", primaryRot);
-  printf("\n");
+#if ENABLE_TEXTDEVOUTPUT_DEBUGGING
+    printf("*** rotation ***\n");
+    for (rot = 0; rot < 4; ++rot) {
+        printf("  %d: %6d\n", rot, count[rot]);
+    }
+    printf("  primary rot = %d\n", primaryRot);
+    printf("\n");
 #endif
 
-#if 0 // for debugging
-  printf("*** blocks ***\n");
-  for (blk = blkList; blk; blk = blk->next) {
-    printf("block: rot=%d x=%.2f..%.2f y=%.2f..%.2f\n",
-	   blk->rot, blk->xMin, blk->xMax, blk->yMin, blk->yMax);
-    for (line = blk->lines; line; line = line->next) {
-      printf("  line: x=%.2f..%.2f y=%.2f..%.2f base=%.2f\n",
-	     line->xMin, line->xMax, line->yMin, line->yMax, line->base);
-      for (word0 = line->words; word0; word0 = word0->next) {
-	printf("    word: x=%.2f..%.2f y=%.2f..%.2f base=%.2f fontSize=%.2f space=%d: '",
-	       word0->xMin, word0->xMax, word0->yMin, word0->yMax,
-	       word0->base, word0->fontSize, word0->spaceAfter);
-	for (i = 0; i < word0->len; ++i) {
-	  fputc(word0->text[i] & 0xff, stdout);
-	}
-	printf("'\n");
-      }
+#if ENABLE_TEXTDEVOUTPUT_DEBUGGING
+    printf("*** blocks ***\n");
+    for (blk = blkList; blk; blk = blk->next) {
+        printf("block: rot=%d x=%.2f..%.2f y=%.2f..%.2f\n", blk->rot, blk->xMin, blk->xMax, blk->yMin, blk->yMax);
+        for (line = blk->lines; line; line = line->next) {
+            printf("  line: x=%.2f..%.2f y=%.2f..%.2f base=%.2f\n", line->xMin, line->xMax, line->yMin, line->yMax, line->base);
+            for (word0 = line->words; word0; word0 = word0->next) {
+                printf("    word: x=%.2f..%.2f y=%.2f..%.2f base=%.2f fontSize=%.2f space=%d: '", word0->xMin, word0->xMax, word0->yMin, word0->yMax, word0->base, word0->fontSize, word0->spaceAfter);
+                for (i = 0; i < word0->len; ++i) {
+                    fputc(word0->text[i] & 0xff, stdout);
+                }
+                printf("'\n");
+            }
+        }
     }
-  }
-  printf("\n");
+    printf("\n");
 #endif
 
     // determine the primary direction
@@ -3326,10 +3314,10 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
     }
     primaryLR = lrCount >= 0;
 
-#if 0 // for debugging
-  printf("*** direction ***\n");
-  printf("lrCount = %d\n", lrCount);
-  printf("primaryLR = %d\n", primaryLR);
+#if ENABLE_TEXTDEVOUTPUT_DEBUGGING
+    printf("*** direction ***\n");
+    printf("lrCount = %d\n", lrCount);
+    printf("primaryLR = %d\n", primaryLR);
 #endif
 
     //----- column assignment
@@ -3435,26 +3423,22 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
         }
     }
 
-#if 0 // for debugging
-  printf("*** blocks, after column assignment ***\n");
-  for (blk = blkList; blk; blk = blk->next) {
-    printf("block: rot=%d x=%.2f..%.2f y=%.2f..%.2f col=%d nCols=%d\n",
-	   blk->rot, blk->xMin, blk->xMax, blk->yMin, blk->yMax, blk->col,
-	   blk->nColumns);
-    for (line = blk->lines; line; line = line->next) {
-      printf("  line: col[0]=%d\n", line->col[0]);
-      for (word0 = line->words; word0; word0 = word0->next) {
-	printf("    word: x=%.2f..%.2f y=%.2f..%.2f base=%.2f fontSize=%.2f space=%d: '",
-	       word0->xMin, word0->xMax, word0->yMin, word0->yMax,
-	       word0->base, word0->fontSize, word0->spaceAfter);
-	for (i = 0; i < word0->len; ++i) {
-	  fputc(word0->text[i] & 0xff, stdout);
-	}
-	printf("'\n");
-      }
+#if ENABLE_TEXTDEVOUTPUT_DEBUGGING
+    printf("*** blocks, after column assignment ***\n");
+    for (blk = blkList; blk; blk = blk->next) {
+        printf("block: rot=%d x=%.2f..%.2f y=%.2f..%.2f col=%d nCols=%d\n", blk->rot, blk->xMin, blk->xMax, blk->yMin, blk->yMax, blk->col, blk->nColumns);
+        for (line = blk->lines; line; line = line->next) {
+            printf("  line: col[0]=%d\n", line->col[0]);
+            for (word0 = line->words; word0; word0 = word0->next) {
+                printf("    word: x=%.2f..%.2f y=%.2f..%.2f base=%.2f fontSize=%.2f space=%d: '", word0->xMin, word0->xMax, word0->yMin, word0->yMax, word0->base, word0->fontSize, word0->spaceAfter);
+                for (i = 0; i < word0->len; ++i) {
+                    fputc(word0->text[i] & 0xff, stdout);
+                }
+                printf("'\n");
+            }
+        }
     }
-  }
-  printf("\n");
+    printf("\n");
 #endif
 
     //----- reading order sort
@@ -3470,8 +3454,8 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
         }
     }
 
-#if 0 // for debugging
-  printf("PAGE\n");
+#if ENABLE_TEXTDEVOUTPUT_DEBUGGING
+    printf("PAGE\n");
 #endif
 
     int sortPos = 0;
@@ -3731,28 +3715,24 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
         gfree(visited);
     }
 
-#if 0 // for debugging
-  printf("*** blocks, after ro sort ***\n");
-  for (i = 0; i < nBlocks; ++i) {
-    blk = blocks[i];
-    printf("block: rot=%d x=%.2f..%.2f y=%.2f..%.2f space=%.2f..%.2f\n",
-	   blk->rot, blk->xMin, blk->xMax, blk->yMin, blk->yMax,
-	   blk->priMin, blk->priMax);
-    for (line = blk->lines; line; line = line->next) {
-      printf("  line:\n");
-      for (word0 = line->words; word0; word0 = word0->next) {
-	printf("    word: x=%.2f..%.2f y=%.2f..%.2f base=%.2f fontSize=%.2f space=%d: '",
-	       word0->xMin, word0->xMax, word0->yMin, word0->yMax,
-	       word0->base, word0->fontSize, word0->spaceAfter);
-	for (j = 0; j < word0->len; ++j) {
-	  fputc(word0->text[j] & 0xff, stdout);
-	}
-	printf("'\n");
-      }
+#if ENABLE_TEXTDEVOUTPUT_DEBUGGING
+    printf("*** blocks, after ro sort ***\n");
+    for (i = 0; i < nBlocks; ++i) {
+        blk = blocks[i];
+        printf("block: rot=%d x=%.2f..%.2f y=%.2f..%.2f space=%.2f..%.2f\n", blk->rot, blk->xMin, blk->xMax, blk->yMin, blk->yMax, blk->priMin, blk->priMax);
+        for (line = blk->lines; line; line = line->next) {
+            printf("  line:\n");
+            for (word0 = line->words; word0; word0 = word0->next) {
+                printf("    word: x=%.2f..%.2f y=%.2f..%.2f base=%.2f fontSize=%.2f space=%d: '", word0->xMin, word0->xMax, word0->yMin, word0->yMax, word0->base, word0->fontSize, word0->spaceAfter);
+                for (j = 0; j < word0->len; ++j) {
+                    fputc(word0->text[j] & 0xff, stdout);
+                }
+                printf("'\n");
+            }
+        }
     }
-  }
-  printf("\n");
-  fflush(stdout);
+    printf("\n");
+    fflush(stdout);
 #endif
 
     // build the flows
@@ -3787,31 +3767,25 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
         lastFlow = flow;
     }
 
-#if 0 // for debugging
-  printf("*** flows ***\n");
-  for (flow = flows; flow; flow = flow->next) {
-    printf("flow: x=%.2f..%.2f y=%.2f..%.2f pri:%.2f..%.2f\n",
-	   flow->xMin, flow->xMax, flow->yMin, flow->yMax,
-	   flow->priMin, flow->priMax);
-    for (blk = flow->blocks; blk; blk = blk->next) {
-      printf("  block: rot=%d x=%.2f..%.2f y=%.2f..%.2f pri=%.2f..%.2f\n",
-	     blk->rot, blk->ExMin, blk->ExMax, blk->EyMin, blk->EyMax,
-	     blk->priMin, blk->priMax);
-      for (line = blk->lines; line; line = line->next) {
-	printf("    line:\n");
-	for (word0 = line->words; word0; word0 = word0->next) {
-	  printf("      word: x=%.2f..%.2f y=%.2f..%.2f base=%.2f fontSize=%.2f space=%d: '",
-		 word0->xMin, word0->xMax, word0->yMin, word0->yMax,
-		 word0->base, word0->fontSize, word0->spaceAfter);
-	  for (i = 0; i < word0->len; ++i) {
-	    fputc(word0->text[i] & 0xff, stdout);
-	  }
-	  printf("'\n");
-	}
-      }
+#if ENABLE_TEXTDEVOUTPUT_DEBUGGING
+    printf("*** flows ***\n");
+    for (flow = flows; flow; flow = flow->next) {
+        printf("flow: x=%.2f..%.2f y=%.2f..%.2f pri:%.2f..%.2f\n", flow->xMin, flow->xMax, flow->yMin, flow->yMax, flow->priMin, flow->priMax);
+        for (blk = flow->blocks; blk; blk = blk->next) {
+            printf("  block: rot=%d x=%.2f..%.2f y=%.2f..%.2f pri=%.2f..%.2f\n", blk->rot, blk->ExMin, blk->ExMax, blk->EyMin, blk->EyMax, blk->priMin, blk->priMax);
+            for (line = blk->lines; line; line = line->next) {
+                printf("    line:\n");
+                for (word0 = line->words; word0; word0 = word0->next) {
+                    printf("      word: x=%.2f..%.2f y=%.2f..%.2f base=%.2f fontSize=%.2f space=%d: '", word0->xMin, word0->xMax, word0->yMin, word0->yMax, word0->base, word0->fontSize, word0->spaceAfter);
+                    for (i = 0; i < word0->len; ++i) {
+                        fputc(word0->text[i] & 0xff, stdout);
+                    }
+                    printf("'\n");
+                }
+            }
+        }
     }
-  }
-  printf("\n");
+    printf("\n");
 #endif
 }
 
@@ -5353,17 +5327,16 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
             it = end;
         }
 
-#if 0 // for debugging
-    printf("*** line fragments ***\n");
-    for (const auto& frag : frags) {
-      printf("frag: x=%.2f..%.2f y=%.2f..%.2f base=%.2f '",
-	     frag.xMin, frag.xMax, frag.yMin, frag.yMax, frag.base);
-      for (int n = 0; n < frag.len; ++n) {
-	fputc(frag.line->text[frag.start + n] & 0xff, stdout);
-      }
-      printf("'\n");
-    }
-    printf("\n");
+#if ENABLE_TEXTDEVOUTPUT_DEBUGGING
+        printf("*** line fragments ***\n");
+        for (const auto &frag : frags) {
+            printf("frag: x=%.2f..%.2f y=%.2f..%.2f base=%.2f '", frag.xMin, frag.xMax, frag.yMin, frag.yMax, frag.base);
+            for (int n = 0; n < frag.len; ++n) {
+                fputc(frag.line->text[frag.start + n] & 0xff, stdout);
+            }
+            printf("'\n");
+        }
+        printf("\n");
 #endif
 
         GooString s;
@@ -5416,7 +5389,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
         for (TextFlow *flow = flows; flow; flow = flow->next) {
             for (TextBlock *blk = flow->blocks; blk; blk = blk->next) {
                 for (TextLine *line = blk->lines; line; line = line->next) {
-                    const bool suppressHyphen = [&]() -> bool {
+                    const bool suppressHyphen = [&] -> bool {
                         if (!line->next && !blk->next) {
                             return false;
                         }

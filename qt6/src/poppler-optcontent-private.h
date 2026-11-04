@@ -116,7 +116,6 @@ public:
        \return the matching optional content item, or null if the reference wasn't found
     */
     OptContentItem *itemFromRef(const QString &ref) const;
-    void setRootNode(OptContentItem *node);
 
     OptContentModel *q;
 

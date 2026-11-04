@@ -55,11 +55,11 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
                     const Object &mkey = mergeNameArray->getNF(j);
                     const Object &mvalue = mergeNameArray->getNF(j + 1);
                     if (mkey.isString() && mvalue.isRef()) {
-                        if (mkey.getString().compare(key.getString()) < 0) {
+                        if (mkey.getString() < key.getString()) {
                             newNameArray->add(Object(std::string { mkey.getString() }));
                             newNameArray->add(Object(Ref { .num = mvalue.getRef().num + numOffset, .gen = mvalue.getRef().gen }));
                             j += 2;
-                        } else if (mkey.getString().compare(key.getString()) == 0) {
+                        } else if (mkey.getString() == key.getString()) {
                             j += 2;
                         } else {
                             break;

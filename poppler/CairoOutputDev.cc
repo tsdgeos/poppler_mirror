@@ -80,6 +80,7 @@
 //------------------------------------------------------------------------
 
 // #define LOG_CAIRO
+#define CHECK_ICC_BASED_COLOR_SPACE_IDENTITY_TRANSFORM 0
 
 // To limit memory usage and improve performance when printing, limit
 // cairo images to this size. 8192 is sufficient for an A2 sized
@@ -590,7 +591,8 @@ bool CairoOutputDev::beginLink(const StructElement *linkElem)
 void CairoOutputDev::getStructElemAttributeString(const StructElement *elem)
 {
     (void)elem;
-#if 0
+#define GENERATE_STRUCT_ELEMENT_ATTRIBUTE_STRING 0
+#if GENERATE_STRUCT_ELEMENT_ATTRIBUTE_STRING
     int mcid = 0;
     GooString attribs;
     Ref ref = elem->getObjectRef();
@@ -2779,13 +2781,11 @@ void CairoOutputDev::drawMaskedImage(GfxState * /*state*/, Object * /*ref*/, Str
         return;
     }
 
-#if 0
-  /* ICCBased color space doesn't do any color correction
-   * so check its underlying color space as well */
-  int is_identity_transform;
-  is_identity_transform = colorMap->getColorSpace()->getMode() == csDeviceRGB ||
-		  (colorMap->getColorSpace()->getMode() == csICCBased &&
-		   ((GfxICCBasedColorSpace*)colorMap->getColorSpace())->getAlt()->getMode() == csDeviceRGB);
+#if CHECK_ICC_BASED_COLOR_SPACE_IDENTITY_TRANSFORM
+    /* ICCBased color space doesn't do any color correction
+     * so check its underlying color space as well */
+    int is_identity_transform;
+    is_identity_transform = colorMap->getColorSpace()->getMode() == csDeviceRGB || (colorMap->getColorSpace()->getMode() == csICCBased && ((GfxICCBasedColorSpace *)colorMap->getColorSpace())->getAlt()->getMode() == csDeviceRGB);
 #endif
 
     /* TODO: Do we want to cache these? */
@@ -2963,13 +2963,11 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
         return;
     }
 
-#if 0
-  /* ICCBased color space doesn't do any color correction
-   * so check its underlying color space as well */
-  int is_identity_transform;
-  is_identity_transform = colorMap->getColorSpace()->getMode() == csDeviceRGB ||
-		  (colorMap->getColorSpace()->getMode() == csICCBased &&
-		   ((GfxICCBasedColorSpace*)colorMap->getColorSpace())->getAlt()->getMode() == csDeviceRGB);
+#if CHECK_ICC_BASED_COLOR_SPACE_IDENTITY_TRANSFORM
+    /* ICCBased color space doesn't do any color correction
+     * so check its underlying color space as well */
+    int is_identity_transform;
+    is_identity_transform = colorMap->getColorSpace()->getMode() == csDeviceRGB || (colorMap->getColorSpace()->getMode() == csICCBased && ((GfxICCBasedColorSpace *)colorMap->getColorSpace())->getAlt()->getMode() == csDeviceRGB);
 #endif
 
     /* TODO: Do we want to cache these? */
@@ -3327,13 +3325,11 @@ public:
             return image;
         }
 
-#if 0
-    /* ICCBased color space doesn't do any color correction
-     * so check its underlying color space as well */
-    int is_identity_transform;
-    is_identity_transform = colorMap->getColorSpace()->getMode() == csDeviceRGB ||
-      (colorMap->getColorSpace()->getMode() == csICCBased &&
-       ((GfxICCBasedColorSpace*)colorMap->getColorSpace())->getAlt()->getMode() == csDeviceRGB);
+#if CHECK_ICC_BASED_COLOR_SPACE_IDENTITY_TRANSFORM
+        /* ICCBased color space doesn't do any color correction
+         * so check its underlying color space as well */
+        int is_identity_transform;
+        is_identity_transform = colorMap->getColorSpace()->getMode() == csDeviceRGB || (colorMap->getColorSpace()->getMode() == csICCBased && ((GfxICCBasedColorSpace *)colorMap->getColorSpace())->getAlt()->getMode() == csDeviceRGB);
 #endif
 
         // special case for one-channel (monochrome/gray/separation) images:

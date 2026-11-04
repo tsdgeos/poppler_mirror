@@ -155,9 +155,9 @@ std::optional<int> PageLabelInfo::labelToIndex(const std::string &label) const
         case Interval::None:
             if (interval.length == 1 && label == interval.prefix) {
                 return interval.base;
-            } else {
-                error(errSyntaxError, -1, "asking to convert label to page index in an unknown scenario, report a bug");
             }
+
+            error(errSyntaxError, -1, "asking to convert label to page index in an unknown scenario, report a bug");
             break;
         }
     }

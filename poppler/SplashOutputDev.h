@@ -332,10 +332,8 @@ public:
         skipRotatedText = skipRotatedTextA;
     }
 
-#if 1 //~tmp: turn off anti-aliasing temporarily
     bool getVectorAntialias() override;
     void setVectorAntialias(bool vaa) override;
-#endif
 
     bool getFontAntialias() const { return fontAntialias; }
     void setFontAntialias(bool anti) { fontAntialias = anti; }

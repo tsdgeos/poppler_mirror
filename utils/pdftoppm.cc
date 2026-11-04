@@ -131,8 +131,8 @@ static char antialiasStr[16] = "";
 static char vectorAntialiasStr[16] = "";
 static bool fontAntialias = true;
 static bool vectorAntialias = true;
-static char ownerPassword[33] = "";
-static char userPassword[33] = "";
+static char ownerPassword[128] = "";
+static char userPassword[128] = "";
 static char TiffCompressionStr[16] = "";
 static char thinLineModeStr[8] = "";
 static SplashThinLineMode thinLineMode = splashThinLineDefault;
@@ -243,7 +243,7 @@ static bool parseJpegOptions()
         opt.erase(iequal, opt.size() - iequal);
         // here opt is "<optN>" and value is "<valN>"
 
-        if (opt.compare("quality") == 0) {
+        if (opt.toStr() == "quality") {
             if (!isInt(value.c_str())) {
                 fprintf(stderr, "Invalid jpeg quality\n");
                 return false;
@@ -253,19 +253,19 @@ static bool parseJpegOptions()
                 fprintf(stderr, "jpeg quality must be between 0 and 100\n");
                 return false;
             }
-        } else if (opt.compare("progressive") == 0) {
+        } else if (opt.toStr() == "progressive") {
             jpegProgressive = false;
-            if (value.compare("y") == 0) {
+            if (value.toStr() == "y") {
                 jpegProgressive = true;
-            } else if (value.compare("n") != 0) {
+            } else if (value.toStr() != "n") {
                 fprintf(stderr, "jpeg progressive option must be \"y\" or \"n\"\n");
                 return false;
             }
-        } else if (opt.compare("optimize") == 0 || opt.compare("optimise") == 0) {
+        } else if (opt.toStr() == "optimize" || opt.toStr() == "optimise") {
             jpegOptimize = false;
-            if (value.compare("y") == 0) {
+            if (value.toStr() == "y") {
                 jpegOptimize = true;
-            } else if (value.compare("n") != 0) {
+            } else if (value.toStr() != "n") {
                 fprintf(stderr, "jpeg optimize option must be \"y\" or \"n\"\n");
                 return false;
             }
@@ -494,7 +494,7 @@ int main(int argc, char *argv[])
     if (fileName == nullptr) {
         fileName = new GooString("fd://0");
     }
-    if (fileName->compare("-") == 0) {
+    if (fileName->toStr() == "-") {
         delete fileName;
         fileName = new GooString("fd://0");
     }

@@ -4,6 +4,7 @@
 #include <poppler-qt6.h>
 #include <poppler-converter.h>
 #include <poppler-form.h>
+#include <GlobalParams.h>
 
 #include <QtCore/QBuffer>
 #include <QtCore/QTemporaryFile>
@@ -11,8 +12,6 @@
 #include <unistd.h>
 #include <libgen.h>
 #include <linux/limits.h>
-
-static void dummy_error_function(const QString &, const QVariant &) { }
 
 static void initialize_nss_dir()
 {
@@ -60,7 +59,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
     }
 
-    Poppler::setDebugErrorFunction(dummy_error_function, QVariant());
+    GlobalParamsIniter globalParamsIniter(nullptr);
+    globalParams->setErrQuiet(true);
     initialize_nss_dir();
 
     uint8_t mode = data[0];

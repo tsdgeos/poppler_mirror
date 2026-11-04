@@ -1131,7 +1131,7 @@ T3FontCache::T3FontCache(const Ref *fontIDA, double m11A, double m12A, double m2
     validBBox = validBBoxA;
     // sanity check for excessively large glyphs (which most likely
     // indicate an incorrect BBox)
-    if (glyphW > INT_MAX / glyphH || glyphW <= 0 || glyphH <= 0 || glyphW * glyphH > 100000) {
+    if (glyphW <= 0 || glyphH <= 0 || glyphW > INT_MAX / glyphH || glyphW * glyphH > 100000) {
         glyphW = glyphH = 100;
         validBBox = false;
     }
@@ -1450,9 +1450,11 @@ void SplashOutputDev::updateLineDash(GfxState *state)
 
 void SplashOutputDev::updateFlatness(GfxState * /*state*/)
 {
-#if 0 // Acrobat ignores the flatness setting, and always renders curves
-      // with a fairly small flatness value
-   splash->setFlatness(state->getFlatness());
+#define USE_FLATNESS_VALUE 0
+#if USE_FLATNESS_VALUE
+    // Acrobat ignores the flatness setting, and always renders curves
+    // with a fairly small flatness value
+    splash->setFlatness(state->getFlatness());
 #endif
 }
 
@@ -1484,9 +1486,11 @@ void SplashOutputDev::updateLineWidth(GfxState *state)
 
 void SplashOutputDev::updateStrokeAdjust(GfxState * /*state*/)
 {
-#if 0 // the SA parameter supposedly defaults to false, but Acrobat
-      // apparently hardwires it to true
-  splash->setStrokeAdjust(state->getStrokeAdjust());
+#define USE_STROKE_ADJUST_VALUE 0
+#if USE_STROKE_ADJUST_VALUE
+    // the SA parameter supposedly defaults to false, but Acrobat
+    // apparently hardwires it to true
+    splash->setStrokeAdjust(state->getStrokeAdjust());
 #endif
 }
 
@@ -1685,7 +1689,7 @@ void SplashOutputDev::setOverprintMask(GfxColorSpace *colorSpace, bool overprint
             mask &= ~7;
         } else if (colorSpace->getMode() == csSeparation) {
             auto *deviceSep = static_cast<GfxSeparationColorSpace *>(colorSpace);
-            additive = deviceSep->getName()->compare("All") != 0 && mask == 0x0f && !deviceSep->isNonMarking();
+            additive = deviceSep->getName()->toStr() != "All" && mask == 0x0f && !deviceSep->isNonMarking();
         } else if (colorSpace->getMode() == csDeviceN) {
             auto *deviceNCS = static_cast<GfxDeviceNColorSpace *>(colorSpace);
             additive = mask == 0x0f && !deviceNCS->isNonMarking();
@@ -4178,7 +4182,6 @@ SplashBitmap *SplashOutputDev::takeBitmap()
     return ret;
 }
 
-#if 1 //~tmp: turn off anti-aliasing temporarily
 bool SplashOutputDev::getVectorAntialias()
 {
     return splash->getVectorAntialias();
@@ -4190,7 +4193,6 @@ void SplashOutputDev::setVectorAntialias(bool vaa)
     vectorAntialias = vaa;
     splash->setVectorAntialias(vaa);
 }
-#endif
 
 void SplashOutputDev::setFreeTypeHinting(bool enable, bool enableSlightHintingA)
 {

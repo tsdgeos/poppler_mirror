@@ -396,14 +396,15 @@ static void CMSError(cmsContext /*contextId*/, cmsUInt32Number /*ecode*/, const 
     error(errSyntaxWarning, -1, "{0:s}", text);
 }
 
+class CMSErrorHandlerInstaller
+{
+public:
+    explicit CMSErrorHandlerInstaller() { cmsSetLogErrorHandler(CMSError); }
+};
+
 static void setCMSErrorHandler()
 {
-    static bool installed = false;
-
-    if (!installed) {
-        cmsSetLogErrorHandler(CMSError);
-        installed = true;
-    }
+    static CMSErrorHandlerInstaller errhandler;
 }
 
 unsigned int getCMSColorSpaceType(cmsColorSpaceSignature cs)
@@ -1823,7 +1824,7 @@ void GfxICCBasedColorSpace::buildTransforms(GfxState *state)
 {
     auto dhp = (state != nullptr && state->getDisplayProfile() != nullptr) ? state->getDisplayProfile() : nullptr;
     if (!dhp) {
-        dhp = GfxState::sRGBProfile;
+        dhp = GfxState::sRGBProfile();
     }
     unsigned int cst = getCMSColorSpaceType(cmsGetColorSpace(profile.get()));
     unsigned int dNChannels = getCMSNChannels(cmsGetColorSpace(dhp.get()));
@@ -2294,15 +2295,16 @@ void GfxICCBasedColorSpace::getDefaultRanges(double *decodeLow, double *decodeRa
 {
     alt->getDefaultRanges(decodeLow, decodeRange, maxImgPixel);
 
-#if 0
-  // this is nominally correct, but some PDF files don't set the
-  // correct ranges in the ICCBased dict
-  int i;
+#define SET_DECODE_LOW_AND_RANGE_FROM_MIN_AND_MAX 0
+#if SET_DECODE_LOW_AND_RANGE_FROM_MIN_AND_MAX
+    // this is nominally correct, but some PDF files don't set the
+    // correct ranges in the ICCBased dict
+    int i;
 
-  for (i = 0; i < nComps; ++i) {
-    decodeLow[i] = rangeMin[i];
-    decodeRange[i] = rangeMax[i] - rangeMin[i];
-  }
+    for (i = 0; i < nComps; ++i) {
+        decodeLow[i] = rangeMin[i];
+        decodeRange[i] = rangeMax[i] - rangeMin[i];
+    }
 #endif
 }
 
@@ -2583,16 +2585,16 @@ void GfxIndexedColorSpace::getDefaultRanges(double *decodeLow, double *decodeRan
 GfxSeparationColorSpace::GfxSeparationColorSpace(std::unique_ptr<GooString> &&nameA, std::unique_ptr<GfxColorSpace> &&altA, std::unique_ptr<Function> funcA) : name(std::move(nameA)), alt(std::move(altA))
 {
     func = std::move(funcA);
-    nonMarking = !name->compare("None");
-    if (!name->compare("Cyan")) {
+    nonMarking = name->toStr() == "None";
+    if (name->toStr() == "Cyan") {
         overprintMask = 0x01;
-    } else if (!name->compare("Magenta")) {
+    } else if (name->toStr() == "Magenta") {
         overprintMask = 0x02;
-    } else if (!name->compare("Yellow")) {
+    } else if (name->toStr() == "Yellow") {
         overprintMask = 0x04;
-    } else if (!name->compare("Black")) {
+    } else if (name->toStr() == "Black") {
         overprintMask = 0x08;
-    } else if (!name->compare("All")) {
+    } else if (name->toStr() == "All") {
         overprintMask = 0xffffffff;
     }
 }
@@ -2662,7 +2664,7 @@ void GfxSeparationColorSpace::getGray(const GfxColor &color, GfxGray *gray) cons
     GfxColor color2;
     int i;
 
-    if (alt->getMode() == csDeviceGray && name->compare("Black") == 0) {
+    if (alt->getMode() == csDeviceGray && name->toStr() == "Black") {
         *gray = clip01(gfxColorComp1 - color.c[0]);
     } else {
         x = colToDbl(color.c[0]);
@@ -2681,7 +2683,7 @@ void GfxSeparationColorSpace::getRGB(const GfxColor &color, GfxRGB *rgb) const
     GfxColor color2;
     int i;
 
-    if (alt->getMode() == csDeviceGray && name->compare("Black") == 0) {
+    if (alt->getMode() == csDeviceGray && name->toStr() == "Black") {
         rgb->r = clip01(gfxColorComp1 - color.c[0]);
         rgb->g = clip01(gfxColorComp1 - color.c[0]);
         rgb->b = clip01(gfxColorComp1 - color.c[0]);
@@ -2703,22 +2705,22 @@ void GfxSeparationColorSpace::getCMYK(const GfxColor &color, GfxCMYK *cmyk) cons
     GfxColor color2;
     int i;
 
-    if (name->compare("Black") == 0) {
+    if (name->toStr() == "Black") {
         cmyk->c = 0;
         cmyk->m = 0;
         cmyk->y = 0;
         cmyk->k = color.c[0];
-    } else if (name->compare("Cyan") == 0) {
+    } else if (name->toStr() == "Cyan") {
         cmyk->c = color.c[0];
         cmyk->m = 0;
         cmyk->y = 0;
         cmyk->k = 0;
-    } else if (name->compare("Magenta") == 0) {
+    } else if (name->toStr() == "Magenta") {
         cmyk->c = 0;
         cmyk->m = color.c[0];
         cmyk->y = 0;
         cmyk->k = 0;
-    } else if (name->compare("Yellow") == 0) {
+    } else if (name->toStr() == "Yellow") {
         cmyk->c = 0;
         cmyk->m = 0;
         cmyk->y = color.c[0];
@@ -2777,7 +2779,7 @@ void GfxSeparationColorSpace::createMapping(std::vector<std::unique_ptr<GfxSepar
         unsigned int newOverprintMask = 0x10;
         for (std::size_t i = 0; i < separationList->size(); i++) {
             const std::unique_ptr<GfxSeparationColorSpace> &sepCS = (*separationList)[i];
-            if (!sepCS->getName()->compare(name->toStr())) {
+            if (sepCS->getName()->toStr() == name->toStr()) {
                 if (sepCS->getFunc()->hasDifferentResultSet(func.get())) {
                     error(errSyntaxWarning, -1, "Different functions found for '{0:t}', convert immediately", name.get());
                     mapping.clear();
@@ -3038,7 +3040,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
                 sepFunc = func.get();
             } else {
                 for (const std::unique_ptr<GfxSeparationColorSpace> &sepCS : sepsCS) {
-                    if (!sepCS->getName()->compare(name)) {
+                    if (sepCS->getName()->toStr() == name) {
                         sepFunc = sepCS->getFunc();
                         break;
                     }
@@ -3046,7 +3048,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
             }
             for (std::size_t j = 0; j < separationList->size(); j++) {
                 const std::unique_ptr<GfxSeparationColorSpace> &sepCS = (*separationList)[j];
-                if (!sepCS->getName()->compare(name)) {
+                if (sepCS->getName()->toStr() == name) {
                     if (sepFunc != nullptr && sepCS->getFunc()->hasDifferentResultSet(sepFunc)) {
                         error(errSyntaxWarning, -1, "Different functions found for '{0:r}', convert immediately", &name);
                         mapping.clear();
@@ -3073,7 +3075,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
                     separationList->push_back(std::make_unique<GfxSeparationColorSpace>(std::make_unique<GooString>(name), alt->copy(), func->copy()));
                 } else {
                     for (const std::unique_ptr<GfxSeparationColorSpace> &sepCS : sepsCS) {
-                        if (!sepCS->getName()->compare(name)) {
+                        if (sepCS->getName()->toStr() == name) {
                             found = true;
                             separationList->push_back(sepCS->copyAsOwnType());
                             break;
@@ -3398,30 +3400,30 @@ std::unique_ptr<GfxShading> GfxShading::parse(GfxResources *res, Object *obj, Ou
     case 4:
         if (obj->isStream()) {
             return GfxGouraudTriangleShading::parse(res, 4, dict, obj->getStream(), out, state);
-        } else {
-            error(errSyntaxWarning, -1, "Invalid Type 4 shading object");
         }
+
+        error(errSyntaxWarning, -1, "Invalid Type 4 shading object");
         break;
     case 5:
         if (obj->isStream()) {
             return GfxGouraudTriangleShading::parse(res, 5, dict, obj->getStream(), out, state);
-        } else {
-            error(errSyntaxWarning, -1, "Invalid Type 5 shading object");
         }
+
+        error(errSyntaxWarning, -1, "Invalid Type 5 shading object");
         break;
     case 6:
         if (obj->isStream()) {
             return GfxPatchMeshShading::parse(res, 6, dict, obj->getStream(), out, state);
-        } else {
-            error(errSyntaxWarning, -1, "Invalid Type 6 shading object");
         }
+
+        error(errSyntaxWarning, -1, "Invalid Type 6 shading object");
         break;
     case 7:
         if (obj->isStream()) {
             return GfxPatchMeshShading::parse(res, 7, dict, obj->getStream(), out, state);
-        } else {
-            error(errSyntaxWarning, -1, "Invalid Type 7 shading object");
         }
+
+        error(errSyntaxWarning, -1, "Invalid Type 7 shading object");
         break;
     default:
         error(errSyntaxWarning, -1, "Unimplemented shading type {0:d}", typeA);
@@ -6281,16 +6283,11 @@ void GfxPath::offset(double dx, double dy)
 
 #if USE_CMS
 
-GfxLCMSProfilePtr GfxXYZ2DisplayTransforms::XYZProfile = nullptr;
-
 GfxXYZ2DisplayTransforms::GfxXYZ2DisplayTransforms(const GfxLCMSProfilePtr &displayProfileA)
 {
-    if (!XYZProfile) {
-        // This is probably the one of the first invocations of lcms2, so we set the error handler
-        setCMSErrorHandler();
+    setCMSErrorHandler();
 
-        XYZProfile = make_GfxLCMSProfilePtr(cmsCreateXYZProfile());
-    }
+    static GfxLCMSProfilePtr XYZProfile = make_GfxLCMSProfilePtr(cmsCreateXYZProfile());
 
     displayProfile = displayProfileA;
     if (displayProfile) {
@@ -6487,14 +6484,20 @@ GfxState::GfxState(double hDPIA, double vDPIA, const PDFRectangle &pageBox, int 
     localDisplayProfile = nullptr;
     XYZ2DisplayTransforms = std::make_shared<GfxXYZ2DisplayTransforms>(nullptr);
 
-    if (!sRGBProfile) {
-        // This is probably the one of the first invocations of lcms2, so we set the error handler
-        setCMSErrorHandler();
-
-        sRGBProfile = make_GfxLCMSProfilePtr(cmsCreate_sRGBProfile());
-    }
+    sRGBProfile();
 #endif
 }
+
+#if USE_CMS
+
+GfxLCMSProfilePtr GfxState::sRGBProfile()
+{
+    // This is probably the one of the first invocations of lcms2, so we set the error handler
+    setCMSErrorHandler();
+    static GfxLCMSProfilePtr sRGBprofile = make_GfxLCMSProfilePtr(cmsCreate_sRGBProfile());
+    return sRGBprofile;
+}
+#endif
 
 GfxState::~GfxState()
 {
@@ -6602,8 +6605,6 @@ GfxState::GfxState(const GfxState *state, bool copyPath)
 }
 
 #if USE_CMS
-
-GfxLCMSProfilePtr GfxState::sRGBProfile = nullptr;
 
 void GfxState::setDisplayProfile(const GfxLCMSProfilePtr &localDisplayProfileA)
 {
