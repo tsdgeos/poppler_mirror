@@ -66,6 +66,8 @@
 // Copyright (C) 2026 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2026 Ojas Maheshwari <workonlyojas@gmail.com>
 // Copyright (C) 2026 Valentin Pohu <pohuvalentin@gmail.com>
+// Copyright (C) 2026 Fran Quinto <fran.quinto@gmail.com>
+// Copyright (C) 2026 Nicolas Höft <nicolas.hoeft@starlabs.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
