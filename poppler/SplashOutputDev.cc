@@ -4278,6 +4278,10 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
         surface_height = static_cast<int>(ceil(fabs(ky)));
         repeatX = x1 - x0;
         repeatY = y1 - y0;
+        if (repeatX < 0 || repeatY < 0) {
+            state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
+            return false;
+        }
         while (static_cast<unsigned long>(repeatX) * repeatY > 0x800000L) {
             // try to avoid bogus memory allocation size
             if (repeatX > 1) {
