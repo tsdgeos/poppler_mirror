@@ -22,6 +22,7 @@
 // Copyright 2023 Ingo Klöcker <kloecker@kde.org>
 // Copyright 2025, 2026 Juraj Šarinay <juraj@sarinay.com>
 // Copyright 2026 Sune Stolborg Vuorela <sune@vuorela.dk>, work sponsored by the Direction Interministérielle du Numérique
+// Copyright 2026 John Cater <katre@henchmonkey.org>
 //
 //========================================================================
 
