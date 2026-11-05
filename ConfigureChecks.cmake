@@ -27,5 +27,6 @@ check_function_exists(gmtime_r HAVE_GMTIME_R)
 check_function_exists(timegm HAVE_TIMEGM)
 check_function_exists(localtime_r HAVE_LOCALTIME_R)
 check_function_exists(strtok_r HAVE_STRTOK_R)
+check_symbol_exists(tcgetattr "termios.h" HAVE_TCGETATTR)
 
 cmake_pop_check_state()

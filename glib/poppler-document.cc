@@ -2,7 +2,7 @@
  * Copyright (C) 2005, Red Hat, Inc.
  *
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2018, 2019, 2021, 2022 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2018, 2019, 2021, 2022, 2026 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2019, 2021, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2020, 2022, 2025, 2026 Albert Astals Cid <aacid@kde.org>
