@@ -3258,15 +3258,39 @@ public:
     {
         Data(std::string t, std::string fName, double w, int cc) : text(std::move(t)), fontName(std::move(fName)), width(w), charCount(cc) { }
 
-        const std::string text;
-        const std::string fontName;
-        const double width;
-        const unsigned int charCount;
+        std::string text;
+        std::string fontName;
+        double width;
+        unsigned int charCount;
     };
 
     std::vector<Data> data;
     int consumedText;
 };
+
+#if ENABLE_HARFBUZZ
+// HorizontalTextLayouter stops at line breaks (or well, technically Annot::layoutText), so lay out each line of text
+static std::vector<HorizontalTextLayouter::Data> layoutAllLines(const std::string &text, const Form *form, const GfxFont &font)
+{
+    std::vector<HorizontalTextLayouter::Data> data;
+    const bool isUnicode = hasUnicodeByteOrderMark(text);
+    size_t i = 0;
+    while (i < text.size()) {
+        std::string lineText(text.substr(i));
+        if (!hasUnicodeByteOrderMark(lineText) && isUnicode) {
+            prependUnicodeByteOrderMark(lineText);
+        }
+        HorizontalTextLayouter textLayouter(lineText, form, font, std::nullopt, false);
+        data.insert(data.end(), textLayouter.data.begin(), textLayouter.data.end());
+        if (i == 0) {
+            i += textLayouter.consumedText;
+        } else {
+            i += textLayouter.consumedText - (isUnicode ? 2 : 0);
+        }
+    }
+    return data;
+}
+#endif
 
 Dict *getFontDictFromResourcesDict(const Object &resources, XRef *xref, bool transparency)
 {
@@ -3321,10 +3345,9 @@ AnnotFreeText::SubsetFontsResult AnnotFreeText::subsetFonts(const FontSubsetter 
 
     GetPrimaryFontResult primaryFontResult = getPrimaryFont(appearanceString, doc);
     Form *form = doc->getCatalog()->getForm();
-    HorizontalTextLayouter textLayouter(contents.toStr(), form, *primaryFontResult.font, std::nullopt, false);
     FontSubsetter::FontStringMap fontStringMap;
 
-    for (const auto &d : textLayouter.data) {
+    for (const auto &d : layoutAllLines(contents.toStr(), form, *primaryFontResult.font)) {
         const std::string &text = d.text;
 
         std::shared_ptr<const GfxFont> font = nullptr;
@@ -5625,12 +5648,10 @@ AnnotWidget::SubsetFontsResult AnnotWidget::subsetFonts(const FontSubsetter *fon
         return {};
     }
 
-    HorizontalTextLayouter textLayouter(content, form, *primaryFont, std::nullopt, false);
-
     FontSubsetter::FontStringMap fontStringMap;
     bool isPassword = textField->isPassword();
 
-    for (const auto &d : textLayouter.data) {
+    for (const auto &d : layoutAllLines(content, form, *primaryFont)) {
         const std::string &text = d.text;
 
         std::shared_ptr<const GfxFont> font = nullptr;
