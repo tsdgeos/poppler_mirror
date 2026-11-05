@@ -34,6 +34,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdlib>
 #include <optional>
 #include <span>
 #include <vector>

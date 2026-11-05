@@ -10,6 +10,7 @@
 //========================================================================
 #include "CryptoSignBackend.h"
 #include "config.h"
+#include <cstdlib>
 #if ENABLE_GPGME
 #    include "GPGMECryptoSignBackend.h"
 #endif
