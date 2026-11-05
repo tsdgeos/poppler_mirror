@@ -1401,7 +1401,12 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
                 if (stack->topTwoAreInts()) {
                     i2 = stack->popInt();
                     i1 = stack->popInt();
-                    stack->pushInt(i1 + i2);
+                    int sum;
+                    if (unlikely(checkedAdd(i1, i2, &sum))) {
+                        stack->pushReal(static_cast<double>(i1) + i2);
+                    } else {
+                        stack->pushInt(sum);
+                    }
                 } else {
                     r2 = stack->popNum();
                     r1 = stack->popNum();
@@ -1564,7 +1569,12 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
                 i2 = stack->popInt();
                 i1 = stack->popInt();
                 if (likely(i2 != 0)) {
-                    stack->pushInt(i1 % i2);
+                    if (unlikely(i2 == -1 && i1 == std::numeric_limits<decltype(i1)>::min())) {
+                        error(errSyntaxError, -1, "PostScriptFunction::exec: undefined mod behaviour: {0:d} {1:d}", i1, i2);
+                        stack->pushInt(0);
+                    } else {
+                        stack->pushInt(i1 % i2);
+                    }
                 }
                 break;
             case psOpMul:

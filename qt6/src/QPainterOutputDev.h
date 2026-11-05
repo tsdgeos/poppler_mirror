@@ -22,6 +22,7 @@
 // Copyright (C) 2013 Mihai Niculescu <q.quark@gmail.com>
 // Copyright (C) 2017, 2018, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Marek Kasik <mkasik@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -181,10 +182,10 @@ private:
     XRef *xref; // xref table for current document
 
     // The current font in use
-    QRawFont *m_rawFont;
+    QRawFont *m_rawFont = nullptr;
     std::stack<QRawFont *> m_rawFontStack;
 
-    QPainterOutputDevType3Font *m_currentType3Font;
+    QPainterOutputDevType3Font *m_currentType3Font = nullptr;
     std::stack<QPainterOutputDevType3Font *> m_type3FontStack;
 
     // Cache all fonts by their Ref and font size

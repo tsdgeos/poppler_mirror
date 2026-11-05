@@ -643,11 +643,6 @@ public:
 
     [[nodiscard]] std::vector<std::vector<std::unique_ptr<TextWordSelection>>> getSelectionWords(const PDFRectangle &selection, SelectionStyle style);
 
-    // Find a string by character position and length.  If found, sets
-    // the text bounding rectangle and returns true; otherwise returns
-    // false.
-    bool findCharRange(int pos, int length, double *xMin, double *yMin, double *xMax, double *yMax) const;
-
     // Dump contents of page to a file.
     void dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol, std::optional<PDFRectangle> area, EndOfLineHyphenMode hyphenMode) const;
 
@@ -846,11 +841,6 @@ public:
     // Get the text which is inside the specified rectangle.
     // You can only give an area if either physLayout or rawOrder are true
     GooString getText(const std::optional<PDFRectangle> &area) const;
-
-    // Find a string by character position and length.  If found, sets
-    // the text bounding rectangle and returns true; otherwise returns
-    // false.
-    bool findCharRange(int pos, int length, double *xMin, double *yMin, double *xMax, double *yMax) const;
 
     void drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle &selection, SelectionStyle style, const GfxColor &glyph_color, const GfxColor &box_color, double box_opacity, bool draw_glyphs);
 

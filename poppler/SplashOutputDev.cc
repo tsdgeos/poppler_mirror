@@ -4278,6 +4278,10 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
         surface_height = static_cast<int>(ceil(fabs(ky)));
         repeatX = x1 - x0;
         repeatY = y1 - y0;
+        if (repeatX < 0 || repeatY < 0) {
+            state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
+            return false;
+        }
         while (static_cast<unsigned long>(repeatX) * repeatY > 0x800000L) {
             // try to avoid bogus memory allocation size
             if (repeatX > 1) {
@@ -4450,8 +4454,9 @@ bool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePatt
 {
     double xMin, yMin, xMax, yMax;
     bool vaa = getVectorAntialias();
-    // restore vector antialias because we support it here
-    setVectorAntialias(true);
+    // restore vector antialias because we support it here, if this Splash can do
+    // it; otherwise shade without antialiasing rather than fail
+    setVectorAntialias(splash->hasAABuf());
 
     bool retVal = false;
     // get the clip region bbox
@@ -4513,8 +4518,9 @@ bool SplashOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sh
     SplashFunctionPattern pattern(colorMode, state, shading);
     double xMin, yMin, xMax, yMax;
     bool vaa = getVectorAntialias();
-    // restore vector antialias because we support it here
-    setVectorAntialias(true);
+    // restore vector antialias because we support it here, if this Splash can do
+    // it; otherwise shade without antialiasing rather than fail
+    setVectorAntialias(splash->hasAABuf());
 
     bool retVal = false;
     // get the clip region bbox

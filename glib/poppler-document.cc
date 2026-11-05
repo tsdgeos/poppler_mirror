@@ -3285,6 +3285,11 @@ static GList *get_optional_content_items_sorted(const OCGs *ocg, Layer *parent, 
             last_item->kids = get_optional_content_items_sorted(ocg, last_item, orderItem.getArray());
             last_item = nullptr;
         } else if (orderItem.isString()) {
+            if (!last_item) {
+                last_item = layer_new(nullptr);
+                items = g_list_prepend(items, last_item);
+            }
+            g_clear_pointer(&last_item->label, g_free);
             last_item->label = _poppler_goo_string_to_utf8(orderItem.getString());
         }
     }

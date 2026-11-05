@@ -29,6 +29,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Marek Kasik <mkasik@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -479,6 +480,10 @@ void QPainterOutputDev::updateFont(GfxState *state)
         }
     }
 
+    if (!m_rawFont) {
+        return;
+    }
+
     if (!m_rawFont->isValid()) {
         qDebug() << "RawFont is not valid";
     }
@@ -838,6 +843,9 @@ void QPainterOutputDev::drawChar(GfxState *state, double x, double y, double /*d
 
     GfxFontType fontType = gfxFont->getType();
     if (fontType == fontType3) {
+        if (!m_currentType3Font) {
+            return;
+        }
 
         /////////////////////////////////////////////////////////////////////
         //  Draw the QPicture that contains the glyph onto the page

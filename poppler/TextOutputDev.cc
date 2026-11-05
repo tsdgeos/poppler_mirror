@@ -5023,92 +5023,6 @@ std::vector<std::vector<std::unique_ptr<TextWordSelection>>> TextPage::getSelect
     return dumper.takeWordList();
 }
 
-bool TextPage::findCharRange(int pos, int length, double *xMin, double *yMin, double *xMax, double *yMax) const
-{
-    TextBlock *blk;
-    TextLine *line;
-    TextWord *word;
-    double xMin0, xMax0, yMin0, yMax0;
-    double xMin1, xMax1, yMin1, yMax1;
-    bool first;
-
-    if (rawOrder) {
-        return false;
-    }
-
-    //~ this doesn't correctly handle ranges split across multiple lines
-    //~ (the highlighted region is the bounding box of all the parts of
-    //~ the range)
-    first = true;
-    xMin0 = xMax0 = yMin0 = yMax0 = 0; // make gcc happy
-    xMin1 = xMax1 = yMin1 = yMax1 = 0; // make gcc happy
-    for (int i = 0; i < nBlocks; ++i) {
-        blk = blocks[i];
-        for (line = blk->lines; line; line = line->next) {
-            for (word = line->words; word; word = word->next) {
-                if (pos < word->charPosEnd && pos + length > word->chars.front().charPos) {
-                    size_t j0, j1;
-                    for (j0 = 0; (j0 + 1) < word->len() && pos >= word->chars[j0 + 1].charPos; ++j0) {
-                        ;
-                    }
-                    for (j1 = word->len(); j1 > j0 && pos + length <= word->chars[j1].charPos; --j1) {
-                        ;
-                    }
-                    auto startingEdge = word->chars[j0].edge;
-                    auto endingEdge = (j1 + 1 == word->len()) ? word->edgeEnd : word->chars[j1 + 1].edge;
-                    switch (line->rot) {
-                    case 0:
-                        xMin1 = startingEdge;
-                        xMax1 = endingEdge;
-                        yMin1 = word->yMin;
-                        yMax1 = word->yMax;
-                        break;
-                    case 1:
-                        xMin1 = word->xMin;
-                        xMax1 = word->xMax;
-                        yMin1 = startingEdge;
-                        yMax1 = endingEdge;
-                        break;
-                    case 2:
-                        xMin1 = endingEdge;
-                        xMax1 = startingEdge;
-                        yMin1 = word->yMin;
-                        yMax1 = word->yMax;
-                        break;
-                    case 3:
-                        xMin1 = word->xMin;
-                        xMax1 = word->xMax;
-                        yMin1 = endingEdge;
-                        yMax1 = startingEdge;
-                        break;
-                    }
-                    if (first || xMin1 < xMin0) {
-                        xMin0 = xMin1;
-                    }
-                    if (first || xMax1 > xMax0) {
-                        xMax0 = xMax1;
-                    }
-                    if (first || yMin1 < yMin0) {
-                        yMin0 = yMin1;
-                    }
-                    if (first || yMax1 > yMax0) {
-                        yMax0 = yMax1;
-                    }
-                    first = false;
-                }
-            }
-        }
-    }
-    if (!first) {
-        *xMin = xMin0;
-        *xMax = xMax0;
-        *yMin = yMin0;
-        *yMax = yMax0;
-        return true;
-    }
-    return false;
-}
-
 std::pair<int, int> TextLine::getLineBounds(const PDFRectangle &area) const
 {
     const auto bBox = getBBox();
@@ -5911,11 +5825,6 @@ std::vector<PDFRectangle *> *TextOutputDev::getSelectionRegion(const PDFRectangl
 GooString TextOutputDev::getSelectionText(const PDFRectangle &selection, SelectionStyle style)
 {
     return text->getSelectionText(selection, style);
-}
-
-bool TextOutputDev::findCharRange(int pos, int length, double *xMin, double *yMin, double *xMax, double *yMax) const
-{
-    return text->findCharRange(pos, length, xMin, yMin, xMax, yMax);
 }
 
 void TextOutputDev::setMergeCombining(bool merge)
