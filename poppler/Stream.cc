@@ -2882,10 +2882,16 @@ void FlateStream::readSome()
             dist = distDecode[code1].first + code2;
             i = index;
             j = (index - dist) & flateMask;
-            for (k = 0; k < len; ++k) {
-                buf[i] = buf[j];
-                i = (i + 1) & flateMask;
-                j = (j + 1) & flateMask;
+            if (dist == 1) {
+                const int first = std::min(len, flateWindow - i);
+                memset(buf + i, buf[j], first);
+                memset(buf, buf[j], len - first);
+            } else {
+                for (k = 0; k < len; ++k) {
+                    buf[i] = buf[j];
+                    i = (i + 1) & flateMask;
+                    j = (j + 1) & flateMask;
+                }
             }
             remain = len;
         }
