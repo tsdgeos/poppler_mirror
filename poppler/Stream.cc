@@ -54,6 +54,7 @@
 
 #include <config.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstddef>
@@ -2783,13 +2784,19 @@ int FlateStream::getChars(int nChars, unsigned char *buffer)
     if (pred) {
         return pred->getChars(nChars, buffer);
     }
-    for (int i = 0; i < nChars; ++i) {
-        const int c = doGetRawChar();
-        if (likely(c != EOF)) {
-            buffer[i] = c;
-        } else {
-            return i;
+    int copied = 0;
+    while (copied < nChars) {
+        while (remain == 0) {
+            if (endOfBlock && eof) {
+                return copied;
+            }
+            readSome();
         }
+        const int count = std::min({ nChars - copied, remain, flateWindow - index });
+        memcpy(buffer + copied, buf + index, count);
+        index = (index + count) & flateMask;
+        remain -= count;
+        copied += count;
     }
     return nChars;
 }
