@@ -1392,7 +1392,12 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
             switch (code[codePtr++].op) {
             case psOpAbs:
                 if (stack->topIsInt()) {
-                    stack->pushInt(abs(stack->popInt()));
+                    i1 = stack->popInt();
+                    if (unlikely(i1 == std::numeric_limits<decltype(i1)>::min())) {
+                        stack->pushReal(fabs(static_cast<double>(i1)));
+                    } else {
+                        stack->pushInt(abs(i1));
+                    }
                 } else {
                     stack->pushReal(fabs(stack->popNum()));
                 }
