@@ -1612,7 +1612,12 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
                 break;
             case psOpNeg:
                 if (stack->topIsInt()) {
-                    stack->pushInt(-stack->popInt());
+                    i1 = stack->popInt();
+                    if (unlikely(i1 == std::numeric_limits<decltype(i1)>::min())) {
+                        stack->pushReal(-static_cast<double>(i1));
+                    } else {
+                        stack->pushInt(-i1);
+                    }
                 } else {
                     stack->pushReal(-stack->popNum());
                 }
