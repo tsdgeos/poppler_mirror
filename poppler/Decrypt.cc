@@ -299,7 +299,7 @@ BaseCryptStream::BaseCryptStream(Stream &strA, const unsigned char *fileKey, Cry
 
     switch (algo) {
     case cryptRC4:
-        if (likely(static_cast<size_t>(keyLength) < sizeof(objKey) - 4)) {
+        if (static_cast<size_t>(keyLength) < sizeof(objKey) - 4) [[likely]] {
             objKey[keyLength] = refA.num & 0xff;
             objKey[keyLength + 1] = (refA.num >> 8) & 0xff;
             objKey[keyLength + 2] = (refA.num >> 16) & 0xff;
@@ -577,7 +577,7 @@ static void rc4InitKey(const unsigned char *key, int keyLen, unsigned char *stat
         state[i] = i;
     }
 
-    if (unlikely(keyLen == 0)) {
+    if (keyLen == 0) [[unlikely]] {
         return;
     }
 

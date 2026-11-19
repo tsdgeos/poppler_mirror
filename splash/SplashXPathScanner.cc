@@ -27,7 +27,6 @@
 #include <cstring>
 #include <algorithm>
 #include <limits>
-#include "goo/GooLikely.h"
 #include "SplashMath.h"
 #include "SplashXPath.h"
 #include "SplashBitmap.h"
@@ -60,7 +59,7 @@ SplashXPathScanner::SplashXPathScanner(const SplashXPath &xPath, bool eoA, int c
 
     for (int i = 0; i < xPath.length; ++i) {
         const SplashXPathSeg *seg = &xPath.segs[i];
-        if (unlikely(std::isnan(seg->x0) || std::isnan(seg->x1) || std::isnan(seg->y0) || std::isnan(seg->y1))) {
+        if (std::isnan(seg->x0) || std::isnan(seg->x1) || std::isnan(seg->y0) || std::isnan(seg->y1)) [[unlikely]] {
             return;
         }
 
@@ -420,7 +419,7 @@ void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf, const int *x0, const in
         int xx = *x0 * splashAASize;
         if (yy >= yyMin && yy <= yyMax) {
             const int intersectionIndex = splashAASize * y + yy - yMin;
-            if (unlikely(intersectionIndex < 0 || (unsigned)intersectionIndex >= allIntersections.size())) {
+            if (intersectionIndex < 0 || static_cast<unsigned>(intersectionIndex) >= allIntersections.size()) [[unlikely]] {
                 break;
             }
             const auto &line = allIntersections[intersectionIndex];

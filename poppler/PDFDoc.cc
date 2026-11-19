@@ -1305,7 +1305,7 @@ void PDFDoc::writeRawStream(Stream *str, OutStream *outStr)
     }
     for (Goffset i = 0; i < length; i++) {
         int c = str->getUnfilteredChar();
-        if (unlikely(c == EOF)) {
+        if (c == EOF) [[unlikely]] {
             error(errSyntaxError, -1, "PDFDoc::writeRawStream: EOF reading stream");
             break;
         }
@@ -1713,7 +1713,7 @@ bool PDFDoc::markDictionary(Dict *dict, XRef *xRef, XRef *countRef, unsigned int
         if (key != "Annots") {
             Object obj1 = dict->getValNF(i).copy();
             const bool success = markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
-            if (unlikely(!success)) {
+            if (!success) [[unlikely]] {
                 return false;
             }
         } else {
@@ -1741,21 +1741,21 @@ bool PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int nu
         for (int i = 0; i < array->getLength(); i++) {
             Object obj1 = array->getNF(i).copy();
             const bool success = markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
-            if (unlikely(!success)) {
+            if (!success) [[unlikely]] {
                 return false;
             }
         }
         break;
     case objDict: {
         const bool success = markDictionary(obj->getDict(), xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
-        if (unlikely(!success)) {
+        if (!success) [[unlikely]] {
             return false;
         }
     } break;
     case objStream: {
         Stream *stream = obj->getStream();
         const bool success = markDictionary(stream->getDict(), xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
-        if (unlikely(!success)) {
+        if (!success) [[unlikely]] {
             return false;
         }
     } break;
@@ -1765,7 +1765,7 @@ bool PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int nu
                 return true; // already marked as free => should be replaced
             }
             const bool success = xRef->add(obj->getRef().num + numOffset, obj->getRef().gen, 0, true);
-            if (unlikely(!success)) {
+            if (!success) [[unlikely]] {
                 return false;
             }
             if (getXRef()->getEntry(obj->getRef().num)->type == xrefEntryCompressed) {
@@ -1783,7 +1783,7 @@ bool PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int nu
         }
         Object obj1 = getXRef()->fetch(obj->getRef());
         const bool success = markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum);
-        if (unlikely(!success)) {
+        if (!success) [[unlikely]] {
             return false;
         }
     } break;
@@ -1844,7 +1844,7 @@ bool PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, unsigne
         Object value = pageDict->getValNF(n).copy();
         if (key != "Parent" && key != "Pages" && key != "AcroForm" && key != "Annots" && key != "P" && key != "Root") {
             const bool success = markObject(&value, xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
-            if (unlikely(!success)) {
+            if (!success) [[unlikely]] {
                 return false;
             }
         }

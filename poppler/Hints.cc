@@ -200,7 +200,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
         }
         for (unsigned int i = 0; i < hintsLength; i++) {
             const int c = s->getChar();
-            if (unlikely(c == EOF)) {
+            if (c == EOF) [[unlikely]] {
                 error(errSyntaxWarning, -1, "Found EOF while reading hints");
                 ok = false;
                 return;
@@ -217,7 +217,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
         }
         for (unsigned int i = 0; i < hintsLength2; i++) {
             const int c = s->getChar();
-            if (unlikely(c == EOF)) {
+            if (c == EOF) [[unlikely]] {
                 error(errSyntaxWarning, -1, "Found EOF while reading hints2");
                 ok = false;
                 return;

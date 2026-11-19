@@ -45,13 +45,12 @@
 #include <cstdlib>
 #include <variant>
 #include "goo/GooString.h"
-#include "goo/GooLikely.h"
 #include "Error.h"
 #include "Ref.h"
 #include "poppler_private_export.h"
 
 #define OBJECT_TYPE_CHECK(wanted_type)                                                                                                                                                                                                         \
-    if (unlikely(type != (wanted_type))) {                                                                                                                                                                                                     \
+    if (type != (wanted_type)) [[unlikely]] {                                                                                                                                                                                                  \
         ::error(errInternal, 0,                                                                                                                                                                                                                \
                 "Call to Object where the object was type {0:d}, "                                                                                                                                                                             \
                 "not the expected type {1:d}",                                                                                                                                                                                                 \
@@ -60,7 +59,7 @@
     }
 
 #define OBJECT_2TYPES_CHECK(wanted_type1, wanted_type2)                                                                                                                                                                                        \
-    if (unlikely(type != (wanted_type1)) && unlikely(type != (wanted_type2))) {                                                                                                                                                                \
+    if (type != (wanted_type1) && type != (wanted_type2)) [[unlikely]] {                                                                                                                                                                       \
         ::error(errInternal, 0,                                                                                                                                                                                                                \
                 "Call to Object where the object was type {0:d}, "                                                                                                                                                                             \
                 "not the expected type {1:d} or {2:d}",                                                                                                                                                                                        \
@@ -69,7 +68,7 @@
     }
 
 #define OBJECT_3TYPES_CHECK(wanted_type1, wanted_type2, wanted_type3)                                                                                                                                                                          \
-    if (unlikely(type != (wanted_type1)) && unlikely(type != (wanted_type2)) && unlikely(type != (wanted_type3))) {                                                                                                                            \
+    if (type != (wanted_type1) && type != (wanted_type2) && type != (wanted_type3)) [[unlikely]] {                                                                                                                                             \
         ::error(errInternal, 0,                                                                                                                                                                                                                \
                 "Call to Object where the object was type {0:d}, "                                                                                                                                                                             \
                 "not the expected type {1:d}, {2:d} or {3:d}",                                                                                                                                                                                 \
@@ -78,7 +77,7 @@
     }
 
 #define CHECK_NOT_DEAD                                                                                                                                                                                                                         \
-    if (unlikely(type == objDead)) {                                                                                                                                                                                                           \
+    if (type == objDead) [[unlikely]] {                                                                                                                                                                                                        \
         ::error(errInternal, 0, "Call to dead object");                                                                                                                                                                                        \
         abort();                                                                                                                                                                                                                               \
     }
@@ -326,7 +325,7 @@ public:
     }
     double getNum(bool *ok) const
     {
-        if (unlikely(type != objInt && type != objInt64 && type != objReal)) {
+        if (type != objInt && type != objInt64 && type != objReal) [[unlikely]] {
             *ok = false;
             return 0.;
         }
@@ -427,7 +426,7 @@ public:
 
     double getNumWithDefaultValue(double defaultValue) const
     {
-        if (unlikely(type != objInt && type != objInt64 && type != objReal)) {
+        if (type != objInt && type != objInt64 && type != objReal) [[unlikely]] {
             return defaultValue;
         }
         return type == objInt ? static_cast<double>(std::get<int>(data)) : type == objInt64 ? static_cast<double>(std::get<long long>(data)) : std::get<double>(data);

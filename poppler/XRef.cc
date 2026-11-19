@@ -507,7 +507,7 @@ bool XRef::readXRef(Goffset *pos, std::vector<Goffset> *followedXRefStm, std::ve
     bool more;
 
     Goffset parsePos;
-    if (unlikely(checkedAdd(start, *pos, &parsePos))) {
+    if (checkedAdd(start, *pos, &parsePos)) [[unlikely]] {
         ok = false;
         return false;
     }
@@ -1221,7 +1221,7 @@ bool XRef::isRefEncrypted(Ref r)
 
     case xrefEntryCompressed: {
         const Goffset objStrNum = e->offset;
-        if (unlikely(objStrNum < 0 || objStrNum >= size)) {
+        if (objStrNum < 0 || objStrNum >= size) [[unlikely]] {
             error(errSyntaxError, -1, "XRef::isRefEncrypted - Compressed object offset out of xref bounds");
             return false;
         }
@@ -1494,7 +1494,7 @@ void XRef::removeDocInfo()
 
     trailerDict.dictRemove("Info");
 
-    if (likely(infoObjRef.isRef())) {
+    if (infoObjRef.isRef()) [[likely]] {
         removeIndirectObject(infoObjRef.getRef());
     }
 }
@@ -1551,7 +1551,7 @@ bool XRef::add(int num, int gen, Goffset offs, bool used)
     if (num >= size) {
         if (num >= capacity) {
             entries = static_cast<XRefEntry *>(greallocn_checkoverflow(entries, num + 1, sizeof(XRefEntry)));
-            if (unlikely(entries == nullptr)) {
+            if (entries == nullptr) [[unlikely]] {
                 size = 0;
                 capacity = 0;
                 return false;
@@ -1590,7 +1590,7 @@ void XRef::setModifiedObject(const Object *o, Ref r)
         return;
     }
     XRefEntry *e = getEntry(r.num);
-    if (unlikely(e->type == xrefEntryFree)) {
+    if (e->type == xrefEntryFree) [[unlikely]] {
         error(errInternal, -1, "XRef::setModifiedObject on ref: {0:d}, {1:d} that is marked as free. This will cause a memory leak", r.num, r.gen);
     }
     e->obj = o->copy();
@@ -1643,7 +1643,7 @@ void XRef::removeIndirectObject(Ref r)
     }
     e->obj = Object();
     e->type = xrefEntryFree;
-    if (likely(e->gen < 65535)) {
+    if (e->gen < 65535) [[likely]] {
         e->gen++;
     }
     e->setFlag(XRefEntry::Updated, true);
@@ -1805,7 +1805,7 @@ bool XRef::parseEntry(Goffset offset, XRefEntry *entry)
 {
     bool r;
 
-    if (unlikely(entry == nullptr)) {
+    if (entry == nullptr) [[unlikely]] {
         return false;
     }
 
@@ -1893,7 +1893,7 @@ DummyXRefEntry dummyXRefEntry;
 
 XRefEntry *XRef::getEntry(int i, bool complainIfMissing)
 {
-    if (unlikely(i < 0)) {
+    if (i < 0) [[unlikely]] {
         error(errInternal, -1, "Request for invalid XRef entry [{0:d}]", i);
         return &dummyXRefEntry;
     }
@@ -1901,7 +1901,7 @@ XRefEntry *XRef::getEntry(int i, bool complainIfMissing)
     if (i >= size || entries[i].type == xrefEntryNone) {
 
         if ((!xRefStream) && mainXRefEntriesOffset) {
-            if (unlikely(i >= size)) {
+            if (i >= size) [[unlikely]] {
                 error(errInternal, -1, "Request for out-of-bounds XRef entry [{0:d}]", i);
                 return &dummyXRefEntry;
             }
@@ -1916,7 +1916,7 @@ XRefEntry *XRef::getEntry(int i, bool complainIfMissing)
 
             // We might have reconstructed the xref
             // Check again i is in bounds
-            if (unlikely(i >= size)) {
+            if (i >= size) [[unlikely]] {
                 return &dummyXRefEntry;
             }
 
@@ -1998,7 +1998,7 @@ void XRef::scanSpecialFlags()
     for (int i = 0; i < size; ++i) {
         if (entries[i].type == xrefEntryCompressed) {
             const Goffset objStmNum = entries[i].offset;
-            if (unlikely(objStmNum < 0 || objStmNum >= size)) {
+            if (objStmNum < 0 || objStmNum >= size) [[unlikely]] {
                 error(errSyntaxError, -1, "Compressed object offset out of xref bounds");
             } else {
                 getEntry(static_cast<int>(objStmNum))->setFlag(XRefEntry::DontRewrite, true);

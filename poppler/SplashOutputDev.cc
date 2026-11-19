@@ -306,7 +306,7 @@ bool SplashUnivariatePattern::getColor(int x, int y, SplashColorPtr c) const
     }
 
     const int filled = shading->getColor(t, &gfxColor);
-    if (unlikely(filled < shading->getColorSpace()->getNComps())) {
+    if (filled < shading->getColorSpace()->getNComps()) [[unlikely]] {
         for (int i = filled; i < shading->getColorSpace()->getNComps(); ++i) {
             gfxColor.c[i] = 0;
         }
@@ -455,7 +455,7 @@ SplashAxialPattern::SplashAxialPattern(SplashColorMode colorModeA, GfxState *sta
     dx = x1 - x0;
     dy = y1 - y0;
     const double mul_denominator = (dx * dx + dy * dy);
-    if (unlikely(mul_denominator == 0)) {
+    if (mul_denominator == 0) [[unlikely]] {
         mul = 0;
     } else {
         mul = 1 / mul_denominator;
@@ -2378,7 +2378,7 @@ void SplashOutputDev::endType3Char(GfxState *state)
 
 void SplashOutputDev::type3D0(GfxState * /*state*/, double /*wx*/, double /*wy*/)
 {
-    if (likely(t3GlyphStack != nullptr)) {
+    if (t3GlyphStack != nullptr) [[likely]] {
         t3GlyphStack->haveDx = true;
     } else {
         error(errSyntaxWarning, -1, "t3GlyphStack was null in SplashOutputDev::type3D0");
@@ -2402,17 +2402,17 @@ void SplashOutputDev::type3D1(GfxState *state, double /*wx*/, double /*wy*/, dou
         return;
     }
 
-    if (unlikely(t3GlyphStack == nullptr)) {
+    if (t3GlyphStack == nullptr) [[unlikely]] {
         error(errSyntaxWarning, -1, "t3GlyphStack was null in SplashOutputDev::type3D1");
         return;
     }
 
-    if (unlikely(t3GlyphStack->origBitmap != nullptr)) {
+    if (t3GlyphStack->origBitmap != nullptr) [[unlikely]] {
         error(errSyntaxWarning, -1, "t3GlyphStack origBitmap was not null in SplashOutputDev::type3D1");
         return;
     }
 
-    if (unlikely(t3GlyphStack->origSplash != nullptr)) {
+    if (t3GlyphStack->origSplash != nullptr) [[unlikely]] {
         error(errSyntaxWarning, -1, "t3GlyphStack origSplash was not null in SplashOutputDev::type3D1");
         return;
     }
@@ -3240,7 +3240,7 @@ void SplashOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str, 
         case splashModeMono1:
         case splashModeMono8:
             imgData.lookup = static_cast<SplashColorPtr>(gmalloc_checkoverflow(n));
-            if (likely(imgData.lookup != nullptr)) {
+            if (imgData.lookup != nullptr) [[likely]] {
                 for (i = 0; i < n; ++i) {
                     pix = static_cast<unsigned char>(i);
                     colorMap->getGray(&pix, &gray);
@@ -3251,7 +3251,7 @@ void SplashOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str, 
         case splashModeRGB8:
         case splashModeBGR8:
             imgData.lookup = static_cast<SplashColorPtr>(gmallocn_checkoverflow(n, 3));
-            if (likely(imgData.lookup != nullptr)) {
+            if (imgData.lookup != nullptr) [[likely]] {
                 for (i = 0; i < n; ++i) {
                     pix = static_cast<unsigned char>(i);
                     colorMap->getRGB(&pix, &rgb);
@@ -3263,7 +3263,7 @@ void SplashOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str, 
             break;
         case splashModeXBGR8:
             imgData.lookup = static_cast<SplashColorPtr>(gmallocn_checkoverflow(n, 4));
-            if (likely(imgData.lookup != nullptr)) {
+            if (imgData.lookup != nullptr) [[likely]] {
                 for (i = 0; i < n; ++i) {
                     pix = static_cast<unsigned char>(i);
                     colorMap->getRGB(&pix, &rgb);
@@ -3277,7 +3277,7 @@ void SplashOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str, 
         case splashModeCMYK8:
             grayIndexed = colorMap->getColorSpace()->getMode() != csDeviceGray;
             imgData.lookup = static_cast<SplashColorPtr>(gmallocn_checkoverflow(n, 4));
-            if (likely(imgData.lookup != nullptr)) {
+            if (imgData.lookup != nullptr) [[likely]] {
                 for (i = 0; i < n; ++i) {
                     pix = static_cast<unsigned char>(i);
                     colorMap->getCMYK(&pix, &cmyk);
@@ -3295,7 +3295,7 @@ void SplashOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str, 
             colorMap->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
             grayIndexed = colorMap->getColorSpace()->getMode() != csDeviceGray;
             imgData.lookup = static_cast<SplashColorPtr>(gmallocn_checkoverflow(n, SPOT_NCOMPS + 4));
-            if (likely(imgData.lookup != nullptr)) {
+            if (imgData.lookup != nullptr) [[likely]] {
                 for (i = 0; i < n; ++i) {
                     pix = static_cast<unsigned char>(i);
                     colorMap->getCMYK(&pix, &cmyk);
@@ -3656,7 +3656,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, S
         std::vector<char> data;
         data.resize(maskChars);
         const int readChars = maskStr->doGetChars(maskChars, reinterpret_cast<unsigned char *>(data.data()));
-        if (unlikely(readChars < maskChars)) {
+        if (readChars < maskChars) [[unlikely]] {
             memset(&data[readChars], 0, maskChars - readChars);
         }
         maskStr->close();
@@ -3736,7 +3736,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, S
         case splashModeRGB8:
         case splashModeBGR8:
             imgData.lookup = static_cast<SplashColorPtr>(gmallocn_checkoverflow(n, 3));
-            if (likely(imgData.lookup != nullptr)) {
+            if (imgData.lookup != nullptr) [[likely]] {
                 for (unsigned i = 0; i < n; ++i) {
                     pix = static_cast<unsigned char>(i);
                     colorMap->getRGB(&pix, &rgb);
@@ -3748,7 +3748,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, S
             break;
         case splashModeXBGR8:
             imgData.lookup = static_cast<SplashColorPtr>(gmallocn_checkoverflow(n, 4));
-            if (likely(imgData.lookup != nullptr)) {
+            if (imgData.lookup != nullptr) [[likely]] {
                 for (unsigned i = 0; i < n; ++i) {
                     pix = static_cast<unsigned char>(i);
                     colorMap->getRGB(&pix, &rgb);
@@ -3761,7 +3761,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, S
             break;
         case splashModeCMYK8:
             imgData.lookup = static_cast<SplashColorPtr>(gmallocn_checkoverflow(n, 4));
-            if (likely(imgData.lookup != nullptr)) {
+            if (imgData.lookup != nullptr) [[likely]] {
                 for (unsigned i = 0; i < n; ++i) {
                     pix = static_cast<unsigned char>(i);
                     colorMap->getCMYK(&pix, &cmyk);
@@ -3774,7 +3774,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, S
             break;
         case splashModeDeviceN8:
             imgData.lookup = static_cast<SplashColorPtr>(gmallocn_checkoverflow(n, SPOT_NCOMPS + 4));
-            if (likely(imgData.lookup != nullptr)) {
+            if (imgData.lookup != nullptr) [[likely]] {
                 for (unsigned i = 0; i < n; ++i) {
                     pix = static_cast<unsigned char>(i);
                     colorMap->getDeviceN(&pix, &deviceN);
@@ -4305,7 +4305,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
         surface_width = static_cast<int>(ceil(fabs(kx)));
         surface_height = static_cast<int>(ceil(fabs(ky)));
         // adjust repeat values to completely fill region
-        if (unlikely(surface_width == 0 || surface_height == 0)) {
+        if (surface_width == 0 || surface_height == 0) [[unlikely]] {
             state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
             return false;
         }

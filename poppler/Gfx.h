@@ -316,9 +316,9 @@ private:
     void doAxialShFill(GfxAxialShading *shading);
     void doRadialShFill(GfxRadialShading *shading);
     void doGouraudTriangleShFill(GfxGouraudTriangleShading *shading);
-    void gouraudFillTriangle(double x0, double y0, GfxColor *color0, double x1, double y1, GfxColor *color1, double x2, double y2, GfxColor *color2, int nComps, int depth, GfxState::ReusablePathIterator *path);
+    void gouraudFillTriangle(double x0, double y0, GfxColor *color0, double x1, double y1, GfxColor *color1, double x2, double y2, GfxColor *color2, int nComps, int depth, GfxState::ReusablePathIterator *path, const PDFRectangle &clipBox);
     void gouraudFillTriangle(double x0, double y0, double color0, double x1, double y1, double color1, double x2, double y2, double color2, double refineColorThreshold, int depth, GfxGouraudTriangleShading *shading,
-                             GfxState::ReusablePathIterator *path);
+                             GfxState::ReusablePathIterator *path, const PDFRectangle &clipBox);
     void doPatchMeshShFill(GfxPatchMeshShading *shading);
     void fillPatch(const GfxPatch *patch, int colorComps, int patchColorComps, double refineColorThreshold, int depth, const GfxPatchMeshShading *shading);
     void doEndPath();

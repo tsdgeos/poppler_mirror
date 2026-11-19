@@ -1195,7 +1195,7 @@ static const StandardMedia standardMedia[] = { { .name = "A0", .width = 2384, .h
 static bool pageDimensionEqual(int a, int b)
 {
     int aux;
-    if (unlikely(checkedSubtraction(a, b, &aux))) {
+    if (checkedSubtraction(a, b, &aux)) [[unlikely]] {
         return false;
     }
     return (abs(aux) < 5);
@@ -3114,7 +3114,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
         return false;
     }
     nStripes = static_cast<int>(ceil(static_cast<double>(sliceArea) / rasterizationSliceSize));
-    if (unlikely(nStripes == 0)) {
+    if (nStripes == 0) [[unlikely]] {
         delete splashOut;
         return false;
     }
@@ -3549,11 +3549,11 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
         y1 = static_cast<int>(floor(state->getY1()));
         x2 = static_cast<int>(ceil(state->getX2()));
         y2 = static_cast<int>(ceil(state->getY2()));
-        if (unlikely(checkedSubtraction(x2, x1, &width))) {
+        if (checkedSubtraction(x2, x1, &width)) [[unlikely]] {
             error(errSyntaxError, -1, "width too big");
             return;
         }
-        if (unlikely(checkedSubtraction(y2, y1, &height))) {
+        if (checkedSubtraction(y2, y1, &height)) [[unlikely]] {
             error(errSyntaxError, -1, "height too big");
             return;
         }
@@ -3605,7 +3605,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
             xScale = xScale0;
             yScale = yScale0;
         } else if ((psShrinkLarger && (width > imgWidth2 || height > imgHeight2)) || (psExpandSmaller && (width < imgWidth2 && height < imgHeight2))) {
-            if (unlikely(width == 0)) {
+            if (width == 0) [[unlikely]] {
                 error(errSyntaxError, -1, "width 0, xScale would be infinite");
                 return;
             }

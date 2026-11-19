@@ -25,7 +25,6 @@
 #include <config.h>
 
 #include "goo/gmem.h"
-#include "goo/GooLikely.h"
 #include "SplashMath.h"
 #include "SplashPath.h"
 #include "SplashXPath.h"
@@ -258,7 +257,7 @@ void SplashXPath::grow(int nSegs)
             size *= 2;
         }
         segs = static_cast<SplashXPathSeg *>(greallocn_checkoverflow(segs, size, sizeof(SplashXPathSeg)));
-        if (unlikely(!segs)) {
+        if (!segs) [[unlikely]] {
             length = 0;
             size = 0;
         }
@@ -374,7 +373,7 @@ void SplashXPath::addCurve(double x0, double y0, double x1, double y1, double x2
 void SplashXPath::addSegment(double x0, double y0, double x1, double y1)
 {
     grow(1);
-    if (unlikely(!segs)) {
+    if (!segs) [[unlikely]] {
         return;
     }
     segs[length].x0 = x0;

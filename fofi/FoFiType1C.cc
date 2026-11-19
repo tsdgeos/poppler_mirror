@@ -35,7 +35,6 @@
 #include <cmath>
 #include "goo/gmem.h"
 #include "goo/gstrtod.h"
-#include "goo/GooLikely.h"
 #include "goo/GooString.h"
 #include "poppler/Error.h"
 #include "FoFiEncodings.h"
@@ -1159,7 +1158,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, std::string &charBuf, const Ty
                     --nOps;
                     ok = true;
                     getIndexVal(*subrIdx, k, &val, &ok);
-                    if (likely(ok && val.pos != offset)) {
+                    if (ok && val.pos != offset) [[likely]] {
                         cvtGlyph(val.pos, val.len, charBuf, subrIdx, pDict, false, offsetBeingParsed);
                     }
                 } else {
@@ -1308,7 +1307,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, std::string &charBuf, const Ty
                     cvtNum(ops[k + 5].num, ops[k + 5].isFP, charBuf);
                     charBuf.push_back(static_cast<char>(8));
                 }
-                if (likely(k + 1 < nOps)) {
+                if (k + 1 < nOps) [[likely]] {
                     cvtNum(ops[k].num, ops[k].isFP, charBuf);
                     cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
                     charBuf.push_back(static_cast<char>(5));
@@ -1397,7 +1396,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, std::string &charBuf, const Ty
                     --nOps;
                     ok = true;
                     getIndexVal(gsubrIdx, k, &val, &ok);
-                    if (likely(ok && val.pos != offset)) {
+                    if (ok && val.pos != offset) [[likely]] {
                         cvtGlyph(val.pos, val.len, charBuf, subrIdx, pDict, false, offsetBeingParsed);
                     }
                 } else {
@@ -2512,7 +2511,7 @@ int FoFiType1C::getDeltaIntArray(std::span<int> arr) const
     x = 0;
     for (i = 0; i < n; ++i) {
         int y;
-        if (unlikely(std::isinf(ops[i].num))) {
+        if (std::isinf(ops[i].num)) [[unlikely]] {
             return i;
         }
         if (checkedAdd(x, static_cast<int>(ops[i].num), &y)) {

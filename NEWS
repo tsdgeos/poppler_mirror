@@ -1,3 +1,29 @@
+Release 26.11.0:
+        core:
+         * Fix subsetting annotations with multiline content
+         * NSS: Fix crash if creating the hash context fails
+         * Fix crash when saving documents with special forms
+         * Properly apply password length limit
+         * Annot: Fix the text width of widgets rotated 180 degrees
+         * FlateStream::rewind: Don't consider the empty stream failing when reviwnding it
+         * TextStringToUtf8: Fix PDFDocEncoding conversion
+         * Internal code improvements
+         * Fix crashes in malformed documents
+
+        utils:
+         * Increase max password length
+         * pdfsig: Allow to give multiple nss passwords
+         * pdfsig: Allow to input the password interactively
+
+        qt6:
+         * Expose the asset of RichMedia instances
+         * Fix leak of RichMedia activation and deactivation
+         * Check that Catalog::getForm() returns a Form before using it
+
+        qt5:
+         * Check that Catalog::getForm() returns a Form before using it
+         * Fix leak of RichMedia activation and deactivation
+
 Release 26.10.0:
         core:
          * Support for eidas (cades-b) signatures

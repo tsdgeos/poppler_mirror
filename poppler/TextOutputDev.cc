@@ -1001,7 +1001,7 @@ void TextPool::addWord(TextWord *word)
     // expand the array if needed
     int wordBaseIdx = static_cast<int>(word->base / textPoolStep);
 
-    if (unlikely(wordBaseIdx <= INT_MIN + 128 || wordBaseIdx >= INT_MAX - 128)) {
+    if (wordBaseIdx <= INT_MIN + 128 || wordBaseIdx >= INT_MAX - 128) [[unlikely]] {
         error(errSyntaxWarning, -1, "wordBaseIdx out of range");
         delete word;
         return;

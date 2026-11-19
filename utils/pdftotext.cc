@@ -461,7 +461,6 @@ static void printInfoString(FILE *f, Dict *infoDict, const char *key, const char
 
     Object obj = infoDict->lookup(key);
     if (obj.isString()) {
-        fputs(text1, f);
         const std::string &s1 = obj.getString();
         if (s1.length() > 1 && (s1.at(0) & 0xff) == 0xfe && (s1.at(1) & 0xff) == 0xff) {
             isUnicode = true;
@@ -470,7 +469,12 @@ static void printInfoString(FILE *f, Dict *infoDict, const char *key, const char
             isUnicode = false;
             i = 0;
         }
-        while (i < obj.getString().size()) {
+        if (isUnicode && (s1.length() % 2 == 1)) {
+            error(errSyntaxWarning, -1, "String has BOM and odd length");
+            return;
+        }
+        fputs(text1, f);
+        while (i < s1.length()) {
             if (isUnicode) {
                 u = ((s1.at(i) & 0xff) << 8) | (s1.at(i + 1) & 0xff);
                 i += 2;

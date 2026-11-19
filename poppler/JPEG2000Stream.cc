@@ -46,7 +46,7 @@ static inline unsigned char adjustComp(int r, int adjust, int depth, int sgndcor
             r = r << (8 - depth);
         }
     }
-    if (unlikely(r > 255)) {
+    if (r > 255) [[unlikely]] {
         r = 255;
     }
     return r;
@@ -54,7 +54,7 @@ static inline unsigned char adjustComp(int r, int adjust, int depth, int sgndcor
 
 static inline int doLookChar(JPXStreamPrivate *priv)
 {
-    if (unlikely(priv->counter >= priv->npixels)) {
+    if (priv->counter >= priv->npixels) [[unlikely]] {
         return EOF;
     }
 
@@ -115,13 +115,13 @@ Goffset JPXStream::getPos()
 
 int JPXStream::getChars(int nChars, unsigned char *buffer)
 {
-    if (unlikely(priv->inited == false)) {
+    if (!priv->inited) [[unlikely]] {
         init();
     }
 
     for (int i = 0; i < nChars; ++i) {
         const int c = doGetChar(priv);
-        if (likely(c != EOF)) {
+        if (c != EOF) [[likely]] {
             buffer[i] = c;
         } else {
             return i;
@@ -132,7 +132,7 @@ int JPXStream::getChars(int nChars, unsigned char *buffer)
 
 int JPXStream::getChar()
 {
-    if (unlikely(priv->inited == false)) {
+    if (!priv->inited) [[unlikely]] {
         init();
     }
 
@@ -141,7 +141,7 @@ int JPXStream::getChar()
 
 int JPXStream::lookChar()
 {
-    if (unlikely(priv->inited == false)) {
+    if (!priv->inited) [[unlikely]] {
         init();
     }
 
@@ -160,7 +160,7 @@ bool JPXStream::isBinary(bool /*last*/) const
 
 void JPXStream::getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode, bool *hasAlpha)
 {
-    if (unlikely(priv->inited == false)) {
+    if (!priv->inited) [[unlikely]] {
         init();
     }
 
@@ -213,7 +213,7 @@ static OPJ_SIZE_T jpxRead_callback(void *p_buffer, OPJ_SIZE_T p_nb_bytes, void *
 {
     auto *jpxData = static_cast<JPXData *>(p_user_data);
 
-    if (unlikely(jpxData->size <= jpxData->pos)) {
+    if (jpxData->size <= jpxData->pos) [[unlikely]] {
         return static_cast<OPJ_SIZE_T>(-1); /* End of file! */
     }
     OPJ_SIZE_T len = jpxData->size - jpxData->pos;

@@ -40,8 +40,6 @@
 #include "SplashFTFontFile.h"
 #include "SplashFTFont.h"
 
-#include "goo/GooLikely.h"
-
 //------------------------------------------------------------------------
 
 static int glyphPathMoveTo(const FT_Vector *pt, void *path);
@@ -76,7 +74,7 @@ SplashFTFont::SplashFTFont(const std::shared_ptr<SplashFTFontFile> &fontFileA, c
     // arithmetic doesn't work so well
     textScale = splashDist(0, 0, textMat[2], textMat[3]) / size;
 
-    if (unlikely(textScale == 0 || face->units_per_EM == 0)) {
+    if (textScale == 0 || face->units_per_EM == 0) [[unlikely]] {
         return;
     }
 
@@ -195,7 +193,7 @@ bool SplashFTFont::makeGlyph(int c, int xFrac, int /*yFrac*/, SplashGlyphBitmap 
     unsigned char *p, *q;
     int i;
 
-    if (unlikely(!isOk)) {
+    if (!isOk) [[unlikely]] {
         return false;
     }
 
@@ -337,7 +335,7 @@ SplashPath *SplashFTFont::getGlyphPath(int c)
     FT_UInt gid;
     FT_Glyph glyph;
 
-    if (unlikely(textScale == 0)) {
+    if (textScale == 0) [[unlikely]] {
         return nullptr;
     }
 

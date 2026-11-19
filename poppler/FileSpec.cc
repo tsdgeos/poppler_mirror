@@ -100,7 +100,7 @@ bool EmbFile::save2(FILE *f)
 {
     int c;
 
-    if (unlikely(!m_objStr.isStream())) {
+    if (!m_objStr.isStream()) [[unlikely]] {
         return false;
     }
 

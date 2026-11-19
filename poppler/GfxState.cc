@@ -81,7 +81,7 @@ constexpr int colorSpaceRecursionLimit = 8;
 bool Matrix::invertTo(Matrix *other) const
 {
     const double det_denominator = determinant();
-    if (unlikely(det_denominator == 0)) {
+    if (det_denominator == 0) [[unlikely]] {
         *other = { 1, 0, 0, 1, 0, 0 };
         return false;
     }
@@ -1129,7 +1129,7 @@ std::unique_ptr<GfxColorSpace> GfxCalRGBColorSpace::parse(const Array &arr, GfxS
     if (obj2.isArrayOfLength(9)) {
         for (i = 0; i < 9; ++i) {
             Object obj3 = obj2.arrayGet(i);
-            if (likely(obj3.isNum())) {
+            if (obj3.isNum()) [[likely]] {
                 cs->mat[i] = obj3.getNum();
             }
         }
@@ -2436,7 +2436,7 @@ GfxColor *GfxIndexedColorSpace::mapColorToBase(const GfxColor &color, GfxColor *
     n = base->getNComps();
     base->getDefaultRanges(low, range, indexHigh);
     const int idx = static_cast<int>(colToDbl(color.c[0]) + 0.5) * n;
-    if (likely((idx + n - 1 < (indexHigh + 1) * base->getNComps()) && idx >= 0)) {
+    if ((idx + n - 1 < (indexHigh + 1) * base->getNComps()) && idx >= 0) [[likely]] {
         p = &lookup[idx];
         for (i = 0; i < n; ++i) {
             baseColor->c[i] = dblToCol(low[i] + (p[i] / 255.0) * range[i]);
@@ -2852,7 +2852,7 @@ std::unique_ptr<GfxColorSpace> GfxDeviceNColorSpace::copy() const
     std::vector<std::unique_ptr<GfxSeparationColorSpace>> sepsCSA;
     sepsCSA.reserve(sepsCS.size());
     for (const std::unique_ptr<GfxSeparationColorSpace> &scs : sepsCS) {
-        if (likely(scs != nullptr)) {
+        if (scs != nullptr) [[likely]] {
             sepsCSA.push_back(scs->copyAsOwnType());
         }
     }
@@ -2926,7 +2926,7 @@ std::unique_ptr<GfxColorSpace> GfxDeviceNColorSpace::parse(GfxResources *res, co
         }
     }
 
-    if (likely(nCompsA >= funcA->getInputSize() && altA->getNComps() <= funcA->getOutputSize())) {
+    if (nCompsA >= funcA->getInputSize() && altA->getNComps() <= funcA->getOutputSize()) [[likely]] {
         return std::make_unique<GfxDeviceNColorSpace>(nCompsA, std::move(namesA), std::move(altA), std::move(funcA), std::move(separationList));
     }
     return nullptr;
@@ -3740,7 +3740,7 @@ void GfxUnivariateShading::setupCache(const Matrix *ctm, double xMin, double yMi
     cacheBounds = nullptr;
     cacheSize = 0;
 
-    if (unlikely(getNFuncs() < 1)) {
+    if (getNFuncs() < 1) [[unlikely]] {
         return;
     }
 
@@ -3784,7 +3784,7 @@ void GfxUnivariateShading::setupCache(const Matrix *ctm, double xMin, double yMi
     }
 
     cacheBounds = static_cast<double *>(gmallocn_checkoverflow(maxSize, sizeof(double) * (nComps + 2)));
-    if (unlikely(!cacheBounds)) {
+    if (!cacheBounds) [[unlikely]] {
         return;
     }
     cacheCoeff = cacheBounds + maxSize;
@@ -3990,7 +3990,7 @@ void GfxAxialShading::getParameterRange(double *lower, double *upper, double xMi
     pdx = x1 - x0;
     pdy = y1 - y0;
     const double invsqnorm_denominator = (pdx * pdx + pdy * pdy);
-    if (unlikely(invsqnorm_denominator == 0)) {
+    if (invsqnorm_denominator == 0) [[unlikely]] {
         *lower = 0;
         *upper = 0;
         return;
@@ -4563,7 +4563,7 @@ std::unique_ptr<GfxGouraudTriangleShading> GfxGouraudTriangleShading::parse(GfxR
         error(errSyntaxWarning, -1, "Missing or invalid BitsPerCoordinate in shading dictionary");
         return {};
     }
-    if (unlikely(coordBits <= 0)) {
+    if (coordBits <= 0) [[unlikely]] {
         error(errSyntaxWarning, -1, "Invalid BitsPerCoordinate in shading dictionary");
         return {};
     }
@@ -4574,7 +4574,7 @@ std::unique_ptr<GfxGouraudTriangleShading> GfxGouraudTriangleShading::parse(GfxR
         error(errSyntaxWarning, -1, "Missing or invalid BitsPerComponent in shading dictionary");
         return {};
     }
-    if (unlikely(compBits <= 0 || compBits > 31)) {
+    if (compBits <= 0 || compBits > 31) [[unlikely]] {
         error(errSyntaxWarning, -1, "Invalid BitsPerComponent in shading dictionary");
         return {};
     }
@@ -4674,7 +4674,7 @@ std::unique_ptr<GfxGouraudTriangleShading> GfxGouraudTriangleShading::parse(GfxR
             int oldVertSize = vertSize;
             vertSize = (vertSize == 0) ? 16 : 2 * vertSize;
             verticesA = static_cast<GfxGouraudVertex *>(greallocn_checkoverflow(verticesA, vertSize, sizeof(GfxGouraudVertex)));
-            if (unlikely(!verticesA)) {
+            if (!verticesA) [[unlikely]] {
                 error(errSyntaxWarning, -1, "GfxGouraudTriangleShading::parse: vertices size overflow");
                 gfree(trianglesA);
                 delete bitBuf;
@@ -4722,7 +4722,7 @@ std::unique_ptr<GfxGouraudTriangleShading> GfxGouraudTriangleShading::parse(GfxR
         nRows = nVerticesA / vertsPerRow;
         nTrianglesA = (nRows - 1) * 2 * (vertsPerRow - 1);
         trianglesA = static_cast<int (*)[3]>(gmallocn_checkoverflow(nTrianglesA * 3, sizeof(int)));
-        if (unlikely(!trianglesA)) {
+        if (!trianglesA) [[unlikely]] {
             gfree(verticesA);
             return nullptr;
         }
@@ -4832,19 +4832,19 @@ void GfxGouraudTriangleShading::getTriangle(int i, double *x0, double *y0, doubl
     assert(isParameterized());
 
     v = triangles[i][0];
-    if (likely(v >= 0 && v < nVertices)) {
+    if (v >= 0 && v < nVertices) [[likely]] {
         *x0 = vertices[v].x;
         *y0 = vertices[v].y;
         *color0 = colToDbl(vertices[v].color.c[0]);
     }
     v = triangles[i][1];
-    if (likely(v >= 0 && v < nVertices)) {
+    if (v >= 0 && v < nVertices) [[likely]] {
         *x1 = vertices[v].x;
         *y1 = vertices[v].y;
         *color1 = colToDbl(vertices[v].color.c[0]);
     }
     v = triangles[i][2];
-    if (likely(v >= 0 && v < nVertices)) {
+    if (v >= 0 && v < nVertices) [[likely]] {
         *x2 = vertices[v].x;
         *y2 = vertices[v].y;
         *color2 = colToDbl(vertices[v].color.c[0]);
@@ -4901,7 +4901,7 @@ std::unique_ptr<GfxPatchMeshShading> GfxPatchMeshShading::parse(GfxResources *re
         error(errSyntaxWarning, -1, "Missing or invalid BitsPerCoordinate in shading dictionary");
         return {};
     }
-    if (unlikely(coordBits <= 0)) {
+    if (coordBits <= 0) [[unlikely]] {
         error(errSyntaxWarning, -1, "Invalid BitsPerCoordinate in shading dictionary");
         return {};
     }
@@ -4912,7 +4912,7 @@ std::unique_ptr<GfxPatchMeshShading> GfxPatchMeshShading::parse(GfxResources *re
         error(errSyntaxWarning, -1, "Missing or invalid BitsPerComponent in shading dictionary");
         return {};
     }
-    if (unlikely(compBits <= 0 || compBits > 31)) {
+    if (compBits <= 0 || compBits > 31) [[unlikely]] {
         error(errSyntaxWarning, -1, "Invalid BitsPerComponent in shading dictionary");
         return {};
     }
@@ -5043,7 +5043,7 @@ std::unique_ptr<GfxPatchMeshShading> GfxPatchMeshShading::parse(GfxResources *re
             int oldPatchesSize = patchesSize;
             patchesSize = (patchesSize == 0) ? 16 : 2 * patchesSize;
             patchesA = static_cast<GfxPatch *>(greallocn_checkoverflow(patchesA, patchesSize, sizeof(GfxPatch)));
-            if (unlikely(!patchesA)) {
+            if (!patchesA) [[unlikely]] {
                 return {};
             }
             memset(patchesA + oldPatchesSize, 0, (patchesSize - oldPatchesSize) * sizeof(GfxPatch));
@@ -5476,7 +5476,7 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode, std::unique_ptr<Gf
     byte_lookup = nullptr;
 
     // bits per component and color space
-    if (unlikely(bitsA <= 0 || bitsA > 30)) {
+    if (bitsA <= 0 || bitsA > 30) [[unlikely]] {
         goto err1;
     }
 
@@ -6656,7 +6656,7 @@ void GfxState::getUserClipBBox(double *xMin, double *yMin, double *xMax, double 
 
     // invert the CTM
     const double det_denominator = (ctm[0] * ctm[3] - ctm[1] * ctm[2]);
-    if (unlikely(det_denominator == 0)) {
+    if (det_denominator == 0) [[unlikely]] {
         *xMin = 0;
         *yMin = 0;
         *xMax = 0;

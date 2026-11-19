@@ -41,7 +41,6 @@
 #include <cmath>
 #include <numbers>
 #include "goo/gmem.h"
-#include "goo/GooLikely.h"
 #include "poppler/GfxState.h"
 #include "poppler/Error.h"
 #include "SplashErrorCodes.h"
@@ -1350,7 +1349,7 @@ inline void Splash::pipeIncX(SplashPipe *pipe)
 
 inline void Splash::drawPixel(SplashPipe *pipe, int x, int y, bool noClip)
 {
-    if (unlikely(y < 0)) {
+    if (y < 0) [[unlikely]] {
         return;
     }
 
@@ -2231,7 +2230,7 @@ std::unique_ptr<SplashPath> Splash::makeDashedPath(const SplashPath &path)
             lineDashStartPhase -= state->lineDash[lineDashStartIdx];
             ++lineDashStartIdx;
         }
-        if (unlikely(lineDashStartIdx == state->lineDash.size())) {
+        if (lineDashStartIdx == state->lineDash.size()) [[unlikely]] {
             return std::make_unique<SplashPath>();
         }
     }
@@ -2855,7 +2854,7 @@ void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData, in
 
     // make sure vx/vy fit in integers since we're transforming them to in the next lines
     for (i = 0; i < 4; ++i) {
-        if (unlikely(vx[i] < INT_MIN || vx[i] > INT_MAX || vy[i] < INT_MIN || vy[i] > INT_MAX)) {
+        if (vx[i] < INT_MIN || vx[i] > INT_MAX || vy[i] < INT_MIN || vy[i] > INT_MAX) [[unlikely]] {
             error(errInternal, -1, "arbitraryTransformMask vertices values don't fit in an integer");
             return;
         }
@@ -3047,7 +3046,7 @@ void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData, in
         for (y = section[i].y0; y <= section[i].y1; ++y) {
             xa = imgCoordMungeLowerC(section[i].xa0 + (static_cast<double>(y) + 0.5 - section[i].ya0) * section[i].dxdya, glyphMode);
             xb = imgCoordMungeUpperC(section[i].xb0 + (static_cast<double>(y) + 0.5 - section[i].yb0) * section[i].dxdyb, glyphMode);
-            if (unlikely(xa < 0)) {
+            if (xa < 0) [[unlikely]] {
                 xa = 0;
             }
             // make sure narrow images cover at least one pixel
@@ -3065,17 +3064,17 @@ void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData, in
                 yy = splashFloor((static_cast<double>(x) + 0.5 - mat[4]) * ir01 + (static_cast<double>(y) + 0.5 - mat[5]) * ir11);
                 // xx should always be within bounds, but floating point
                 // inaccuracy can cause problems
-                if (unlikely(xx < 0)) {
+                if (xx < 0) [[unlikely]] {
                     xx = 0;
                     clipRes2 = splashClipPartial;
-                } else if (unlikely(xx >= scaledWidth)) {
+                } else if (xx >= scaledWidth) [[unlikely]] {
                     xx = scaledWidth - 1;
                     clipRes2 = splashClipPartial;
                 }
-                if (unlikely(yy < 0)) {
+                if (yy < 0) [[unlikely]] {
                     yy = 0;
                     clipRes2 = splashClipPartial;
-                } else if (unlikely(yy >= scaledHeight)) {
+                } else if (yy >= scaledHeight) [[unlikely]] {
                     yy = scaledHeight - 1;
                     clipRes2 = splashClipPartial;
                 }
@@ -3129,13 +3128,13 @@ void Splash::scaleMaskYdownXdown(SplashImageMaskSource src, void *srcData, int s
 
     // allocate buffers
     lineBuf = static_cast<unsigned char *>(gmalloc_checkoverflow(srcWidth));
-    if (unlikely(!lineBuf)) {
+    if (!lineBuf) [[unlikely]] {
         error(errInternal, -1, "Couldn't allocate memory for lineBuf in Splash::scaleMaskYdownXdown");
         return;
     }
 
     pixBuf = static_cast<unsigned int *>(gmallocn_checkoverflow(srcWidth, sizeof(int)));
-    if (unlikely(!pixBuf)) {
+    if (!pixBuf) [[unlikely]] {
         error(errInternal, -1, "Couldn't allocate memory for pixBuf in Splash::scaleMaskYdownXdown");
         gfree(lineBuf);
         return;
@@ -3224,13 +3223,13 @@ void Splash::scaleMaskYdownXup(SplashImageMaskSource src, void *srcData, int src
 
     // allocate buffers
     lineBuf = static_cast<unsigned char *>(gmalloc_checkoverflow(srcWidth));
-    if (unlikely(!lineBuf)) {
+    if (!lineBuf) [[unlikely]] {
         error(errInternal, -1, "Couldn't allocate memory for lineBuf in Splash::scaleMaskYdownXup");
         return;
     }
 
     pixBuf = static_cast<unsigned int *>(gmallocn_checkoverflow(srcWidth, sizeof(int)));
-    if (unlikely(!pixBuf)) {
+    if (!pixBuf) [[unlikely]] {
         error(errInternal, -1, "Couldn't allocate memory for pixBuf in Splash::scaleMaskYdownXup");
         gfree(lineBuf);
         return;
@@ -3312,7 +3311,7 @@ void Splash::scaleMaskYupXdown(SplashImageMaskSource src, void *srcData, int src
 
     // allocate buffers
     lineBuf = static_cast<unsigned char *>(gmalloc_checkoverflow(srcWidth));
-    if (unlikely(!lineBuf)) {
+    if (!lineBuf) [[unlikely]] {
         error(errInternal, -1, "Couldn't allocate memory for lineBuf in Splash::scaleMaskYupXdown");
         return;
     }
@@ -3386,7 +3385,7 @@ void Splash::scaleMaskYupXup(SplashImageMaskSource src, void *srcData, int srcWi
         return;
     }
 
-    if (unlikely(srcWidth <= 0 || srcHeight <= 0)) {
+    if (srcWidth <= 0 || srcHeight <= 0) [[unlikely]] {
         error(errSyntaxError, -1, "srcWidth <= 0 || srcHeight <= 0 in Splash::scaleMaskYupXup");
         gfree(dest->takeData());
         return;
@@ -3402,7 +3401,7 @@ void Splash::scaleMaskYupXup(SplashImageMaskSource src, void *srcData, int srcWi
 
     // allocate buffers
     lineBuf = static_cast<unsigned char *>(gmalloc_checkoverflow(srcWidth));
-    if (unlikely(!lineBuf)) {
+    if (!lineBuf) [[unlikely]] {
         error(errInternal, -1, "Couldn't allocate memory for lineBuf in Splash::scaleMaskYupXup");
         return;
     }
@@ -3706,17 +3705,17 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
 
     // compute the scale factors
     if (splashAbs(mat[0]) >= splashAbs(mat[1])) {
-        if (unlikely(checkedSubtraction(xMax, xMin, &scaledWidth))) {
+        if (checkedSubtraction(xMax, xMin, &scaledWidth)) [[unlikely]] {
             return SplashError::BadArg;
         }
-        if (unlikely(checkedSubtraction(yMax, yMin, &scaledHeight))) {
+        if (checkedSubtraction(yMax, yMin, &scaledHeight)) [[unlikely]] {
             return SplashError::BadArg;
         }
     } else {
-        if (unlikely(checkedSubtraction(yMax, yMin, &scaledWidth))) {
+        if (checkedSubtraction(yMax, yMin, &scaledWidth)) [[unlikely]] {
             return SplashError::BadArg;
         }
-        if (unlikely(checkedSubtraction(xMax, xMin, &scaledHeight))) {
+        if (checkedSubtraction(xMax, xMin, &scaledHeight)) [[unlikely]] {
             return SplashError::BadArg;
         }
     }
@@ -3916,7 +3915,7 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
     for (i = 0; i < nSections; ++i) {
         for (y = section[i].y0; y <= section[i].y1; ++y) {
             xa = imgCoordMungeLower(section[i].xa0 + (static_cast<double>(y) + 0.5 - section[i].ya0) * section[i].dxdya);
-            if (unlikely(xa < 0)) {
+            if (xa < 0) [[unlikely]] {
                 xa = 0;
             }
             xb = imgCoordMungeUpper(section[i].xb0 + (static_cast<double>(y) + 0.5 - section[i].yb0) * section[i].dxdyb);
@@ -3924,7 +3923,7 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
             if (xa == xb) {
                 ++xb;
             }
-            if (unlikely(clipRes == splashClipAllInside && xb > bitmap->getWidth())) {
+            if (clipRes == splashClipAllInside && xb > bitmap->getWidth()) [[unlikely]] {
                 xb = bitmap->getWidth();
             }
             if (clipRes != splashClipAllInside) {
@@ -4005,7 +4004,7 @@ std::unique_ptr<SplashBitmap> Splash::scaleImage(SplashImageSource src, void *sr
                 }
             }
         }
-        if (unlikely(!success)) {
+        if (!success) [[unlikely]] {
             return {};
         }
     } else {
@@ -4036,24 +4035,24 @@ bool Splash::scaleImageYdownXdown(SplashImageSource src, void *srcData, SplashCo
 
     // allocate buffers
     lineBuf = static_cast<unsigned char *>(gmallocn_checkoverflow(srcWidth, nComps));
-    if (unlikely(!lineBuf)) {
+    if (!lineBuf) [[unlikely]] {
         return false;
     }
     pixBuf = static_cast<unsigned int *>(gmallocn_checkoverflow(srcWidth, nComps * sizeof(int)));
-    if (unlikely(!pixBuf)) {
+    if (!pixBuf) [[unlikely]] {
         gfree(lineBuf);
         return false;
     }
     if (srcAlpha) {
         alphaLineBuf = static_cast<unsigned char *>(gmalloc_checkoverflow(srcWidth));
-        if (unlikely(!alphaLineBuf)) {
+        if (!alphaLineBuf) [[unlikely]] {
             error(errInternal, -1, "Couldn't allocate memory for alphaLineBuf in Splash::scaleImageYdownXdown");
             gfree(lineBuf);
             gfree(pixBuf);
             return false;
         }
         alphaPixBuf = static_cast<unsigned int *>(gmallocn_checkoverflow(srcWidth, sizeof(int)));
-        if (unlikely(!alphaPixBuf)) {
+        if (!alphaPixBuf) [[unlikely]] {
             error(errInternal, -1, "Couldn't allocate memory for alphaPixBuf in Splash::scaleImageYdownXdown");
             gfree(lineBuf);
             gfree(pixBuf);
@@ -4287,26 +4286,26 @@ bool Splash::scaleImageYdownXup(SplashImageSource src, void *srcData, SplashColo
 
     // allocate buffers
     pixBuf = static_cast<unsigned int *>(gmallocn_checkoverflow(srcWidth, nComps * sizeof(int)));
-    if (unlikely(!pixBuf)) {
+    if (!pixBuf) [[unlikely]] {
         error(errInternal, -1, "Splash::scaleImageYdownXup. Couldn't allocate pixBuf memory");
         return false;
     }
     lineBuf = static_cast<unsigned char *>(gmallocn_checkoverflow(srcWidth, nComps));
-    if (unlikely(!lineBuf)) {
+    if (!lineBuf) [[unlikely]] {
         error(errInternal, -1, "Splash::scaleImageYdownXup. Couldn't allocate lineBuf memory");
         gfree(pixBuf);
         return false;
     }
     if (srcAlpha) {
         alphaLineBuf = static_cast<unsigned char *>(gmalloc_checkoverflow(srcWidth));
-        if (unlikely(!alphaLineBuf)) {
+        if (!alphaLineBuf) [[unlikely]] {
             error(errInternal, -1, "Couldn't allocate memory for alphaLineBuf in Splash::scaleImageYdownXup");
             gfree(lineBuf);
             gfree(pixBuf);
             return false;
         }
         alphaPixBuf = static_cast<unsigned int *>(gmallocn_checkoverflow(srcWidth, sizeof(int)));
-        if (unlikely(!alphaPixBuf)) {
+        if (!alphaPixBuf) [[unlikely]] {
             error(errInternal, -1, "Couldn't allocate memory for alphaPixBuf in Splash::scaleImageYdownXup");
             gfree(lineBuf);
             gfree(pixBuf);
@@ -4456,13 +4455,13 @@ bool Splash::scaleImageYupXdown(SplashImageSource src, void *srcData, SplashColo
 
     // allocate buffers
     lineBuf = static_cast<unsigned char *>(gmallocn_checkoverflow(srcWidth, nComps));
-    if (unlikely(!lineBuf)) {
+    if (!lineBuf) [[unlikely]] {
         gfree(dest->takeData());
         return false;
     }
     if (srcAlpha) {
         alphaLineBuf = static_cast<unsigned char *>(gmalloc_checkoverflow(srcWidth));
-        if (unlikely(!alphaLineBuf)) {
+        if (!alphaLineBuf) [[unlikely]] {
             error(errInternal, -1, "Couldn't allocate memory for alphaLineBuf in Splash::scaleImageYupXdown");
             gfree(lineBuf);
             return false;
@@ -4621,14 +4620,14 @@ bool Splash::scaleImageYupXup(SplashImageSource src, void *srcData, SplashColorM
 
     // allocate buffers
     lineBuf = static_cast<unsigned char *>(gmallocn(srcWidth, nComps));
-    if (unlikely(!lineBuf)) {
+    if (!lineBuf) [[unlikely]] {
         error(errInternal, -1, "Couldn't allocate memory for lineBuf in Splash::scaleImageYupXup");
         return false;
     }
 
     if (srcAlpha) {
         alphaLineBuf = static_cast<unsigned char *>(gmalloc_checkoverflow(srcWidth));
-        if (unlikely(!alphaLineBuf)) {
+        if (!alphaLineBuf) [[unlikely]] {
             error(errInternal, -1, "Couldn't allocate memory for alphaLineBuf in Splash::scaleImageYupXup");
             gfree(lineBuf);
             return false;
@@ -4805,20 +4804,20 @@ bool Splash::scaleImageYupXupBilinear(SplashImageSource src, void *srcData, Spla
 
     // allocate buffers
     srcBuf = static_cast<unsigned char *>(gmallocn_checkoverflow(srcWidth + 1, nComps)); // + 1 pixel of padding
-    if (unlikely(!srcBuf)) {
+    if (!srcBuf) [[unlikely]] {
         error(errInternal, -1, "Couldn't allocate memory for srcBuf in Splash::scaleImageYupXupBilinear");
         return false;
     }
 
     lineBuf1 = static_cast<unsigned char *>(gmallocn_checkoverflow(scaledWidth, nComps));
-    if (unlikely(!lineBuf1)) {
+    if (!lineBuf1) [[unlikely]] {
         error(errInternal, -1, "Couldn't allocate memory for lineBuf1 in Splash::scaleImageYupXupBilinear");
         gfree(srcBuf);
         return false;
     }
 
     lineBuf2 = static_cast<unsigned char *>(gmallocn_checkoverflow(scaledWidth, nComps));
-    if (unlikely(!lineBuf2)) {
+    if (!lineBuf2) [[unlikely]] {
         error(errInternal, -1, "Couldn't allocate memory for lineBuf2 in Splash::scaleImageYupXupBilinear");
         gfree(srcBuf);
         gfree(lineBuf1);
@@ -4827,7 +4826,7 @@ bool Splash::scaleImageYupXupBilinear(SplashImageSource src, void *srcData, Spla
 
     if (srcAlpha) {
         alphaSrcBuf = static_cast<unsigned char *>(gmalloc_checkoverflow(srcWidth + 1)); // + 1 pixel of padding
-        if (unlikely(!alphaSrcBuf)) {
+        if (!alphaSrcBuf) [[unlikely]] {
             error(errInternal, -1, "Couldn't allocate memory for alphaSrcBuf in Splash::scaleImageYupXupBilinear");
             gfree(srcBuf);
             gfree(lineBuf1);
@@ -4836,7 +4835,7 @@ bool Splash::scaleImageYupXupBilinear(SplashImageSource src, void *srcData, Spla
         }
 
         alphaLineBuf1 = static_cast<unsigned char *>(gmalloc_checkoverflow(scaledWidth));
-        if (unlikely(!alphaLineBuf1)) {
+        if (!alphaLineBuf1) [[unlikely]] {
             error(errInternal, -1, "Couldn't allocate memory for alphaLineBuf1 in Splash::scaleImageYupXupBilinear");
             gfree(srcBuf);
             gfree(lineBuf1);
@@ -4846,7 +4845,7 @@ bool Splash::scaleImageYupXupBilinear(SplashImageSource src, void *srcData, Spla
         }
 
         alphaLineBuf2 = static_cast<unsigned char *>(gmalloc_checkoverflow(scaledWidth));
-        if (unlikely(!alphaLineBuf2)) {
+        if (!alphaLineBuf2) [[unlikely]] {
             error(errInternal, -1, "Couldn't allocate memory for alphaLineBuf2 in Splash::scaleImageYupXupBilinear");
             gfree(srcBuf);
             gfree(lineBuf1);
@@ -4964,7 +4963,7 @@ void Splash::vertFlipImage(SplashBitmap *img, int width, int height, int nComps)
     unsigned char *p0, *p1;
     int w;
 
-    if (unlikely(img->data == nullptr)) {
+    if (img->data == nullptr) [[unlikely]] {
         error(errInternal, -1, "img->data is NULL in Splash::vertFlipImage");
         return;
     }
@@ -5145,7 +5144,7 @@ SplashError Splash::composite(const SplashBitmap &src, int xSrc, int ySrc, int x
         return SplashError::ModeMismatch;
     }
 
-    if (unlikely(!bitmap->data)) {
+    if (!bitmap->data) [[unlikely]] {
         return SplashError::ZeroImage;
     }
 
@@ -5224,7 +5223,7 @@ void Splash::compositeBackground(SplashColorConstPtr color)
     unsigned char colorsp[SPOT_NCOMPS + 4], cp;
     int x, y, mask;
 
-    if (unlikely(bitmap->alpha == nullptr)) {
+    if (bitmap->alpha == nullptr) [[unlikely]] {
         error(errInternal, -1, "bitmap->alpha is NULL in Splash::compositeBackground");
         return;
     }
@@ -5624,7 +5623,7 @@ bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
                 double colorinterp = scanColorMap0 * scanLimitL + scanColorMap1;
 
                 int bitmapOff = scanLineOff + scanLimitL * colorComps;
-                if (likely(bitmapOff >= 0)) {
+                if (bitmapOff >= 0) [[likely]] {
                     for (int X = scanLimitL; X <= scanLimitR && bitmapOff + colorComps <= bitmapOffLimit; ++X, colorinterp += scanColorMap0, bitmapOff += colorComps) {
                         // FIXME : standard rectangular clipping can be done for a
                         // complete scanline which is faster
@@ -5793,7 +5792,7 @@ bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
                 assert(scanLineOff == Y * rowSize);
 
                 int bitmapOff = scanLineOff + scanLimitL * colorComps;
-                if (likely(bitmapOff >= 0)) {
+                if (bitmapOff >= 0) [[likely]] {
                     for (int X = scanLimitL; X <= scanLimitR && bitmapOff + colorComps <= bitmapOffLimit; ++X, bitmapOff += colorComps) {
                         // FIXME : standard rectangular clipping can be done for a
                         // complete scanline which is faster
@@ -5862,7 +5861,7 @@ SplashError Splash::blitTransparent(const SplashBitmap &src, int xSrc, int ySrc,
         return SplashError::ModeMismatch;
     }
 
-    if (unlikely(!bitmap->data)) {
+    if (!bitmap->data) [[unlikely]] {
         return SplashError::ZeroImage;
     }
 

@@ -24,7 +24,6 @@
 
 #include <algorithm>
 #include "goo/GooCheckedOps.h"
-#include "goo/GooLikely.h"
 #include "SplashErrorCodes.h"
 #include "SplashMath.h"
 #include "SplashPath.h"
@@ -213,7 +212,7 @@ SplashError SplashClip::clipToPath(const SplashPath &path, const std::array<doub
     } else {
         if (antialias) {
             xPath.aaScale();
-            if (unlikely(checkedMultiply(yMinI, splashAASize, &yMinAA))) {
+            if (checkedMultiply(yMinI, splashAASize, &yMinAA)) [[unlikely]] {
                 return SplashError::Generic;
             }
             yMaxAA = (yMaxI + 1) * splashAASize - 1;

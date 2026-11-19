@@ -1843,7 +1843,7 @@ GfxCIDFont::GfxCIDFont(std::string_view tagA, Ref idA, std::optional<std::string
                 i += 3;
             } else if (obj2.isInt() && obj3.isArray()) {
                 int j = obj2.getInt();
-                if (likely(j < INT_MAX - obj3.arrayGetLength())) {
+                if (j < INT_MAX - obj3.arrayGetLength()) [[likely]] {
                     for (int k = 0; k < obj3.arrayGetLength(); ++k) {
                         obj4 = obj3.arrayGet(k);
                         if (obj4.isNum()) {

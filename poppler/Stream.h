@@ -143,7 +143,7 @@ public:
         }
         for (int i = 0; i < nChars; ++i) {
             const int c = getChar();
-            if (likely(c != EOF)) {
+            if (c != EOF) [[likely]] {
                 buffer[i] = c;
             } else {
                 return i;
@@ -181,12 +181,12 @@ public:
             length += readChars;
             if (readChars == charsToRead) {
                 if (lookChar() != EOF) {
-                    if (unlikely(checkedAdd(size, sizeIncrement, &size))) {
+                    if (checkedAdd(size, sizeIncrement, &size)) [[unlikely]] {
                         error(errInternal, -1, "toUnsignedChars size grew too much");
                         return {};
                     }
                     charsToRead = sizeIncrement;
-                    if (unlikely(static_cast<size_t>(size) > buf.max_size())) {
+                    if (static_cast<size_t>(size) > buf.max_size()) [[unlikely]] {
                         error(errInternal, -1, "toUnsignedChars size grew too much");
                         return {};
                     }
@@ -736,10 +736,10 @@ private:
     {
         int n;
 
-        if (unlikely(nChars <= 0)) {
+        if (nChars <= 0) [[unlikely]] {
             return 0;
         }
-        if (unlikely(bufPtr >= bufEnd)) {
+        if (bufPtr >= bufEnd) [[unlikely]] {
             return 0;
         }
         if (bufEnd - bufPtr < nChars) {

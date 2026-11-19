@@ -26,7 +26,6 @@
 #include <algorithm>
 #include "goo/gmem.h"
 #include "goo/grandom.h"
-#include "goo/GooLikely.h"
 #include "SplashScreen.h"
 
 static const SplashScreenParams defaultParams = {
@@ -343,7 +342,7 @@ SplashScreen::SplashScreen(const SplashScreen *screen)
     sizeM1 = screen->sizeM1;
     log2Size = screen->log2Size;
     mat = static_cast<unsigned char *>(gmallocn(size * size, sizeof(unsigned char)));
-    if (likely(mat != nullptr)) {
+    if (mat != nullptr) [[likely]] {
         memcpy(mat, screen->mat, size * size * sizeof(unsigned char));
     }
 }
