@@ -1675,7 +1675,13 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
                 if (stack->topTwoAreInts()) {
                     const int i2 = stack->popInt();
                     const int i1 = stack->popInt();
-                    stack->pushInt(i1 - i2);
+
+                    int result;
+                    if (unlikely(checkedSubtraction(i1, i2, &result))) {
+                        stack->pushReal(static_cast<double>(i1) - i2);
+                    } else {
+                        stack->pushInt(result);
+                    }
                 } else {
                     const double r2 = stack->popNum();
                     const double r1 = stack->popNum();
