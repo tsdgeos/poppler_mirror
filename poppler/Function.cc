@@ -1438,8 +1438,12 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
             case psOpBitshift: {
                 const int i2 = stack->popInt();
                 const int i1 = stack->popInt();
-                if (i2 > 0) {
-                    stack->pushInt(i1 << i2);
+                constexpr int maxShift = std::numeric_limits<unsigned int>::digits;
+                if (i2 >= maxShift || i2 <= -maxShift) {
+                    error(errSyntaxError, -1, "PostScriptFunction::exec: undefined bitshift behaviour: {0:d} {1:d}", i1, i2);
+                    stack->pushInt(0);
+                } else if (i2 > 0) {
+                    stack->pushInt(static_cast<int>(static_cast<unsigned int>(i1) << i2));
                 } else if (i2 < 0) {
                     stack->pushInt(static_cast<int>(static_cast<unsigned int>(i1) >> -i2));
                 } else {
