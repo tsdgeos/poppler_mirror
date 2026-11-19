@@ -95,7 +95,7 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
         inlineImg = 0;
     }
 
-    if (unlikely(recursion >= recursionLimit)) {
+    if (recursion >= recursionLimit) [[unlikely]] {
         return Object::error();
     }
 
@@ -149,7 +149,7 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
                 const bool isContents = !hasContentsEntry && key.isName("Contents");
                 hasContentsEntry = hasContentsEntry || isContents;
                 Object obj2 = getObj(false, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1, /*strict*/ false, /*decryptString*/ !isContents);
-                if (unlikely(recursion + 1 >= recursionLimit)) {
+                if (recursion + 1 >= recursionLimit) [[unlikely]] {
                     break;
                 }
                 dict->add(key.getNameString(), std::move(obj2));
@@ -195,7 +195,7 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
             shift();
             shift();
 
-            if (unlikely(num <= 0 || gen < 0)) {
+            if (num <= 0 || gen < 0) [[unlikely]] {
                 return Object();
             }
 
@@ -284,10 +284,10 @@ std::unique_ptr<Stream> Parser::makeStream(Object &&dict, const unsigned char *f
         pos = pos - 1;
         lexer.lookCharLastValueCached = Lexer::LOOK_VALUE_NOT_CACHED;
     }
-    if (unlikely(length < 0)) {
+    if (length < 0) [[unlikely]] {
         return nullptr;
     }
-    if (unlikely(pos > LLONG_MAX - length)) {
+    if (pos > LLONG_MAX - length) [[unlikely]] {
         return nullptr;
     }
     lexer.setPos(pos + length);

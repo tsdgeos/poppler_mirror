@@ -23,7 +23,6 @@
 #include <config.h>
 
 #include "goo/gmem.h"
-#include "goo/GooLikely.h"
 #include "SplashPath.h"
 
 //------------------------------------------------------------------------
@@ -93,7 +92,7 @@ void SplashPath::grow(int nPts)
         }
         pts = static_cast<SplashPathPoint *>(greallocn_checkoverflow(pts, size, sizeof(SplashPathPoint)));
         flags = static_cast<unsigned char *>(greallocn_checkoverflow(flags, size, sizeof(unsigned char)));
-        if (unlikely(!pts || !flags)) {
+        if (!pts || !flags) [[unlikely]] {
             length = size = curSubpath = 0;
         }
     }
@@ -104,7 +103,7 @@ void SplashPath::append(SplashPath *path)
     int i;
 
     grow(path->length);
-    if (unlikely(size == 0)) {
+    if (size == 0) [[unlikely]] {
         return;
     }
 
@@ -122,7 +121,7 @@ SplashError SplashPath::moveTo(double x, double y)
         return SplashError::BogusPath;
     }
     grow(1);
-    if (unlikely(size == 0)) {
+    if (size == 0) [[unlikely]] {
         return SplashError::BogusPath;
     }
     pts[length].x = x;
@@ -139,7 +138,7 @@ SplashError SplashPath::lineTo(double x, double y)
     }
     flags[length - 1] &= ~splashPathLast;
     grow(1);
-    if (unlikely(size == 0)) {
+    if (size == 0) [[unlikely]] {
         return SplashError::BogusPath;
     }
     pts[length].x = x;
@@ -156,7 +155,7 @@ SplashError SplashPath::curveTo(double x1, double y1, double x2, double y2, doub
     }
     flags[length - 1] &= ~splashPathLast;
     grow(3);
-    if (unlikely(size == 0)) {
+    if (size == 0) [[unlikely]] {
         return SplashError::BogusPath;
     }
     pts[length].x = x1;
@@ -197,7 +196,7 @@ void SplashPath::addStrokeAdjustHint(int ctrl0, int ctrl1, int firstPt, int last
         hintsSize = hintsLength ? 2 * hintsLength : 8;
         hints = static_cast<SplashPathHint *>(greallocn_checkoverflow(hints, hintsSize, sizeof(SplashPathHint)));
     }
-    if (unlikely(!hints)) {
+    if (!hints) [[unlikely]] {
         return;
     }
     hints[hintsLength].ctrl0 = ctrl0;

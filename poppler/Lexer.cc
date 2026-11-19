@@ -218,17 +218,17 @@ Object Lexer::getObj(int objNum)
             c = lookChar();
             if (isdigit(c)) {
                 getChar();
-                if (unlikely(overflownLongLong)) {
+                if (overflownLongLong) [[unlikely]] {
                     xf = xf * 10.0 + (c - '0');
-                } else if (unlikely(overflownInteger)) {
-                    if (unlikely(xll > LongLongSafeLimit) && (xll > (LLONG_MAX - (c - '0')) / 10)) {
+                } else if (overflownInteger) [[unlikely]] {
+                    if (xll > LongLongSafeLimit && (xll > (LLONG_MAX - (c - '0')) / 10)) [[unlikely]] {
                         overflownLongLong = true;
                         xf = xll * 10.0 + (c - '0');
                     } else {
                         xll = xll * 10 + (c - '0');
                     }
                 } else {
-                    if (unlikely(xi > IntegerSafeLimit) && (xi > (INT_MAX - (c - '0')) / 10.0)) {
+                    if (xi > IntegerSafeLimit && (xi > (INT_MAX - (c - '0')) / 10.0)) [[unlikely]] {
                         overflownInteger = true;
                         xll = xi * 10LL + (c - '0');
                     } else {
@@ -247,11 +247,11 @@ Object Lexer::getObj(int objNum)
             xll = -xll;
             xf = -xf;
         }
-        if (unlikely(overflownInteger)) {
+        if (overflownInteger) [[unlikely]] {
             if (overflownLongLong) {
                 return Object(xf);
             }
-            if (unlikely(xll == INT_MIN)) {
+            if (xll == INT_MIN) [[unlikely]] {
                 return Object(INT_MIN);
             }
             return Object(xll);
@@ -260,7 +260,7 @@ Object Lexer::getObj(int objNum)
 
         break;
     doReal:
-        if (likely(!overflownInteger)) {
+        if (!overflownInteger) [[likely]] {
             xf = xi;
         } else if (!overflownLongLong) {
             xf = xll;
@@ -461,7 +461,7 @@ Object Lexer::getObj(int objNum)
                 s = std::string(tokBuf, n);
             } else {
                 // Somewhat arbitrary threshold
-                if (unlikely(n == 1024 * 1024)) {
+                if (n == 1024 * 1024) [[unlikely]] {
                     error(errSyntaxError, getPos(), "Error: name token is larger than 1 MB. Suspicion of hostile file. Stopping parsing");
                     return Object::eof();
                 }

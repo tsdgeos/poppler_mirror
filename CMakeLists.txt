@@ -743,7 +743,6 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     goo/gfile.h
     goo/ImgWriter.h
     goo/GooCheckedOps.h
-    goo/GooLikely.h
     goo/gstrtod.h
     goo/grandom.h
     )

@@ -42,7 +42,6 @@
 #include <cstring>
 #include <functional>
 #include "goo/gfile.h"
-#include "goo/GooLikely.h"
 #include "Error.h"
 #include "GlobalParams.h"
 #include "PSTokenizer.h"
@@ -389,7 +388,7 @@ void CharCodeToUnicode::addMapping(CharCode code, char *uStr, int n, int offset)
         if (code >= newLen) {
             newLen = (code + 256) & ~255;
         }
-        if (unlikely(code >= newLen)) {
+        if (code >= newLen) [[unlikely]] {
             error(errSyntaxWarning, -1, "Illegal code value in CharCodeToUnicode::addMapping");
             return;
         }

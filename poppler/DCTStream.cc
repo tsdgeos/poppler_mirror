@@ -245,7 +245,7 @@ int DCTStream::getChars(int nChars, unsigned char *buffer)
 
 int DCTStream::lookChar()
 {
-    if (unlikely(current == nullptr)) {
+    if (current == nullptr) [[unlikely]] {
         return EOF;
     }
     return *current;

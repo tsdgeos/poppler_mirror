@@ -664,12 +664,12 @@ bool ImageStream::getPixel(unsigned char *pix)
 
 unsigned char *ImageStream::getLine()
 {
-    if (unlikely(inputLine == nullptr || imgLine == nullptr)) {
+    if (inputLine == nullptr || imgLine == nullptr) [[unlikely]] {
         return nullptr;
     }
 
     int readChars = str->doGetChars(inputLineSize, inputLine);
-    if (unlikely(readChars == -1)) {
+    if (readChars == -1) [[unlikely]] {
         readChars = 0;
     }
     for (; readChars < inputLineSize; readChars++) {
@@ -1975,7 +1975,7 @@ int CCITTFaxStream::lookChar()
                 code1 = getTwoDimCode();
                 switch (code1) {
                 case twoDimPass:
-                    if (likely(b1i + 1 < columns + 2)) {
+                    if (b1i + 1 < columns + 2) [[likely]] {
                         addPixels(refLine[b1i + 1], blackPixels);
                         if (refLine[b1i + 1] < columns) {
                             b1i += 2;
@@ -2005,7 +2005,7 @@ int CCITTFaxStream::lookChar()
                     }
                     while (refLine[b1i] <= codingLine[a0i] && refLine[b1i] < columns) {
                         b1i += 2;
-                        if (unlikely(b1i > columns + 1)) {
+                        if (b1i > columns + 1) [[unlikely]] {
                             error(errSyntaxError, getPos(), "Bad 2D code {0:04x} in CCITTFax stream", code1);
                             err = true;
                             break;
@@ -2013,7 +2013,7 @@ int CCITTFaxStream::lookChar()
                     }
                     break;
                 case twoDimVertR3:
-                    if (unlikely(b1i > columns + 1)) {
+                    if (b1i > columns + 1) [[unlikely]] {
                         error(errSyntaxError, getPos(), "Bad 2D code {0:04x} in CCITTFax stream", code1);
                         err = true;
                         break;
@@ -2024,7 +2024,7 @@ int CCITTFaxStream::lookChar()
                         ++b1i;
                         while (refLine[b1i] <= codingLine[a0i] && refLine[b1i] < columns) {
                             b1i += 2;
-                            if (unlikely(b1i > columns + 1)) {
+                            if (b1i > columns + 1) [[unlikely]] {
                                 error(errSyntaxError, getPos(), "Bad 2D code {0:04x} in CCITTFax stream", code1);
                                 err = true;
                                 break;
@@ -2033,7 +2033,7 @@ int CCITTFaxStream::lookChar()
                     }
                     break;
                 case twoDimVertR2:
-                    if (unlikely(b1i > columns + 1)) {
+                    if (b1i > columns + 1) [[unlikely]] {
                         error(errSyntaxError, getPos(), "Bad 2D code {0:04x} in CCITTFax stream", code1);
                         err = true;
                         break;
@@ -2044,7 +2044,7 @@ int CCITTFaxStream::lookChar()
                         ++b1i;
                         while (refLine[b1i] <= codingLine[a0i] && refLine[b1i] < columns) {
                             b1i += 2;
-                            if (unlikely(b1i > columns + 1)) {
+                            if (b1i > columns + 1) [[unlikely]] {
                                 error(errSyntaxError, getPos(), "Bad 2D code {0:04x} in CCITTFax stream", code1);
                                 err = true;
                                 break;
@@ -2053,7 +2053,7 @@ int CCITTFaxStream::lookChar()
                     }
                     break;
                 case twoDimVertR1:
-                    if (unlikely(b1i > columns + 1)) {
+                    if (b1i > columns + 1) [[unlikely]] {
                         error(errSyntaxError, getPos(), "Bad 2D code {0:04x} in CCITTFax stream", code1);
                         err = true;
                         break;
@@ -2064,7 +2064,7 @@ int CCITTFaxStream::lookChar()
                         ++b1i;
                         while (refLine[b1i] <= codingLine[a0i] && refLine[b1i] < columns) {
                             b1i += 2;
-                            if (unlikely(b1i > columns + 1)) {
+                            if (b1i > columns + 1) [[unlikely]] {
                                 error(errSyntaxError, getPos(), "Bad 2D code {0:04x} in CCITTFax stream", code1);
                                 err = true;
                                 break;
@@ -2073,7 +2073,7 @@ int CCITTFaxStream::lookChar()
                     }
                     break;
                 case twoDimVert0:
-                    if (unlikely(b1i > columns + 1)) {
+                    if (b1i > columns + 1) [[unlikely]] {
                         error(errSyntaxError, getPos(), "Bad 2D code {0:04x} in CCITTFax stream", code1);
                         err = true;
                         break;
@@ -2084,7 +2084,7 @@ int CCITTFaxStream::lookChar()
                         ++b1i;
                         while (refLine[b1i] <= codingLine[a0i] && refLine[b1i] < columns) {
                             b1i += 2;
-                            if (unlikely(b1i > columns + 1)) {
+                            if (b1i > columns + 1) [[unlikely]] {
                                 error(errSyntaxError, getPos(), "Bad 2D code {0:04x} in CCITTFax stream", code1);
                                 err = true;
                                 break;
@@ -2093,7 +2093,7 @@ int CCITTFaxStream::lookChar()
                     }
                     break;
                 case twoDimVertL3:
-                    if (unlikely(b1i > columns + 1)) {
+                    if (b1i > columns + 1) [[unlikely]] {
                         error(errSyntaxError, getPos(), "Bad 2D code {0:04x} in CCITTFax stream", code1);
                         err = true;
                         break;
@@ -2108,7 +2108,7 @@ int CCITTFaxStream::lookChar()
                         }
                         while (refLine[b1i] <= codingLine[a0i] && refLine[b1i] < columns) {
                             b1i += 2;
-                            if (unlikely(b1i > columns + 1)) {
+                            if (b1i > columns + 1) [[unlikely]] {
                                 error(errSyntaxError, getPos(), "Bad 2D code {0:04x} in CCITTFax stream", code1);
                                 err = true;
                                 break;
@@ -2117,7 +2117,7 @@ int CCITTFaxStream::lookChar()
                     }
                     break;
                 case twoDimVertL2:
-                    if (unlikely(b1i > columns + 1)) {
+                    if (b1i > columns + 1) [[unlikely]] {
                         error(errSyntaxError, getPos(), "Bad 2D code {0:04x} in CCITTFax stream", code1);
                         err = true;
                         break;
@@ -2132,7 +2132,7 @@ int CCITTFaxStream::lookChar()
                         }
                         while (refLine[b1i] <= codingLine[a0i] && refLine[b1i] < columns) {
                             b1i += 2;
-                            if (unlikely(b1i > columns + 1)) {
+                            if (b1i > columns + 1) [[unlikely]] {
                                 error(errSyntaxError, getPos(), "Bad 2D code {0:04x} in CCITTFax stream", code1);
                                 err = true;
                                 break;
@@ -2141,7 +2141,7 @@ int CCITTFaxStream::lookChar()
                     }
                     break;
                 case twoDimVertL1:
-                    if (unlikely(b1i > columns + 1)) {
+                    if (b1i > columns + 1) [[unlikely]] {
                         error(errSyntaxError, getPos(), "Bad 2D code {0:04x} in CCITTFax stream", code1);
                         err = true;
                         break;
@@ -2156,7 +2156,7 @@ int CCITTFaxStream::lookChar()
                         }
                         while (refLine[b1i] <= codingLine[a0i] && refLine[b1i] < columns) {
                             b1i += 2;
-                            if (unlikely(b1i > columns + 1)) {
+                            if (b1i > columns + 1) [[unlikely]] {
                                 error(errSyntaxError, getPos(), "Bad 2D code {0:04x} in CCITTFax stream", code1);
                                 err = true;
                                 break;
@@ -2342,7 +2342,7 @@ int CCITTFaxStream::lookChar()
                 outputBits = 0;
                 if (codingLine[a0i] < columns) {
                     ++a0i;
-                    if (unlikely(a0i > columns)) {
+                    if (a0i > columns) [[unlikely]] {
                         error(errSyntaxError, getPos(), "Bad bits {0:04x} in CCITTFax stream", bits);
                         err = true;
                         break;

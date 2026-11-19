@@ -1092,7 +1092,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
     if (obj1.isInt()) {
         const auto aux = static_cast<VariableTextQuadding>(obj1.getInt());
         hasQuadding = aux == VariableTextQuadding::leftJustified || aux == VariableTextQuadding::centered || aux == VariableTextQuadding::rightJustified;
-        if (likely(hasQuadding)) {
+        if (hasQuadding) [[likely]] {
             quadding = static_cast<VariableTextQuadding>(aux);
         }
     }

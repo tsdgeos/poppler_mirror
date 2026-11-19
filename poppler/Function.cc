@@ -297,7 +297,7 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) : cacheOut {}
         return;
     }
     sampleBits = obj1.getInt();
-    if (unlikely(sampleBits < 1 || sampleBits > 32)) {
+    if (sampleBits < 1 || sampleBits > 32) [[unlikely]] {
         error(errSyntaxError, -1, "Function invalid BitsPerSample");
         return;
     }
@@ -327,7 +327,7 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) : cacheOut {}
         }
     }
     for (i = 0; i < m; ++i) {
-        if (unlikely((domain[i][1] - domain[i][0]) == 0)) {
+        if ((domain[i][1] - domain[i][0]) == 0) [[unlikely]] {
             error(errSyntaxError, -1, "Illegal value in function domain array");
             return;
         }
@@ -499,7 +499,7 @@ void SampledFunction::transform(const double *in, double *out) const
         // pull 2^m values out of the sample array
         for (int j = 0; j < (1 << m); ++j) {
             int idx = idx0 + idxOffset[j] + i;
-            if (likely(idx >= 0 && idx < nSamples)) {
+            if (idx >= 0 && idx < nSamples) [[likely]] {
                 sBuf[j] = samples[idx];
             } else {
                 sBuf[j] = 0; // TODO Investigate if this is what Adobe does
@@ -575,7 +575,7 @@ ExponentialFunction::ExponentialFunction(Dict *dict)
             return;
         }
         n = obj1.arrayGetLength();
-        if (unlikely(n > funcMaxOutputs)) {
+        if (n > funcMaxOutputs) [[unlikely]] {
             error(errSyntaxError, -1, "Function's C0 array is wrong length");
             n = funcMaxOutputs;
         }
@@ -981,11 +981,11 @@ public:
             return;
         }
         --sp;
-        if (unlikely(sp + i + 1 >= psStackSize)) {
+        if (sp + i + 1 >= psStackSize) [[unlikely]] {
             error(errSyntaxError, -1, "Stack underflow in PostScript function");
             return;
         }
-        if (unlikely(i < 0)) {
+        if (i < 0) [[unlikely]] {
             error(errSyntaxError, -1, "Stack overflow in PostScript function");
             return;
         }
@@ -1033,11 +1033,11 @@ void PSStack::copy(int n)
     int i;
 
     int aux;
-    if (unlikely(checkedAdd(sp, n, &aux) || aux > psStackSize)) {
+    if (checkedAdd(sp, n, &aux) || aux > psStackSize) [[unlikely]] {
         error(errSyntaxError, -1, "Stack underflow in PostScript function");
         return;
     }
-    if (unlikely(checkedSubtraction(sp, n, &aux) || aux > psStackSize)) {
+    if (checkedSubtraction(sp, n, &aux) || aux > psStackSize) [[unlikely]] {
         error(errSyntaxError, -1, "Stack underflow in PostScript function");
         return;
     }
@@ -1055,7 +1055,7 @@ void PSStack::roll(int n, int j)
     PSObject obj;
     int i, k;
 
-    if (unlikely(n == 0 || j == INT_MIN)) {
+    if (n == 0 || j == INT_MIN) [[unlikely]] {
         return;
     }
     if (j >= 0) {
@@ -1389,7 +1389,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
             case psOpAbs:
                 if (stack->topIsInt()) {
                     const int i1 = stack->popInt();
-                    if (unlikely(i1 == std::numeric_limits<decltype(i1)>::min())) {
+                    if (i1 == std::numeric_limits<decltype(i1)>::min()) [[unlikely]] {
                         stack->pushReal(fabs(static_cast<double>(i1)));
                     } else {
                         stack->pushInt(abs(i1));
@@ -1403,7 +1403,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
                     const int i2 = stack->popInt();
                     const int i1 = stack->popInt();
                     int sum;
-                    if (unlikely(checkedAdd(i1, i2, &sum))) {
+                    if (checkedAdd(i1, i2, &sum)) [[unlikely]] {
                         stack->pushReal(static_cast<double>(i1) + i2);
                     } else {
                         stack->pushInt(sum);
@@ -1538,7 +1538,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
             case psOpIdiv: {
                 const int i2 = stack->popInt();
                 const int i1 = stack->popInt();
-                if (likely((i2 != 0) && (i2 != -1 || i1 != INT_MIN))) {
+                if ((i2 != 0) && (i2 != -1 || i1 != INT_MIN)) [[likely]] {
                     stack->pushInt(i1 / i2);
                 }
                 break;
@@ -1577,8 +1577,8 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
             case psOpMod: {
                 const int i2 = stack->popInt();
                 const int i1 = stack->popInt();
-                if (likely(i2 != 0)) {
-                    if (unlikely(i2 == -1 && i1 == std::numeric_limits<decltype(i1)>::min())) {
+                if (i2 != 0) [[likely]] {
+                    if (i2 == -1 && i1 == std::numeric_limits<decltype(i1)>::min()) [[unlikely]] {
                         error(errSyntaxError, -1, "PostScriptFunction::exec: undefined mod behaviour: {0:d} {1:d}", i1, i2);
                         stack->pushInt(0);
                     } else {
@@ -1623,7 +1623,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
             case psOpNeg:
                 if (stack->topIsInt()) {
                     const int i1 = stack->popInt();
-                    if (unlikely(i1 == std::numeric_limits<decltype(i1)>::min())) {
+                    if (i1 == std::numeric_limits<decltype(i1)>::min()) [[unlikely]] {
                         stack->pushReal(-static_cast<double>(i1));
                     } else {
                         stack->pushInt(-i1);
@@ -1677,7 +1677,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
                     const int i1 = stack->popInt();
 
                     int result;
-                    if (unlikely(checkedSubtraction(i1, i2, &result))) {
+                    if (checkedSubtraction(i1, i2, &result)) [[unlikely]] {
                         stack->pushReal(static_cast<double>(i1) - i2);
                     } else {
                         stack->pushInt(result);

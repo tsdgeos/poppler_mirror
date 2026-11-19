@@ -22,7 +22,6 @@
 
 #include "config.h"
 
-#include "goo/GooLikely.h"
 #include "goo/GooString.h"
 #include "Error.h"
 #include "UTF.h"
@@ -176,7 +175,7 @@ static int fromLatin(const char *buffer)
     }
 
     const intptr_t diff = p - buffer;
-    if (unlikely(diff > std::numeric_limits<int>::max() / 100)) {
+    if (diff > std::numeric_limits<int>::max() / 100) [[unlikely]] {
         error(errUnimplemented, -1, "Something went wrong in fromLatin conversion");
         return -1;
     }

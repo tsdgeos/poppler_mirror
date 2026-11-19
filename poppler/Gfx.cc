@@ -651,7 +651,7 @@ void Gfx::go(DisplayType displayType)
             }
             GooTimer *timer = nullptr;
 
-            if (unlikely(profileCommands)) {
+            if (profileCommands) [[unlikely]] {
                 timer = new GooTimer();
             }
 
@@ -659,7 +659,7 @@ void Gfx::go(DisplayType displayType)
             execOp(&obj, args, numArgs);
 
             // Update the profile information
-            if (unlikely(profileCommands)) {
+            if (profileCommands) [[unlikely]] {
                 if (auto *const hash = out->getProfileHash()) {
                     auto &data = (*hash)[obj.getCmd()];
                     data.addElement(timer->getElapsed());
@@ -1260,7 +1260,7 @@ void Gfx::doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace,
     }
     for (i = 0; i < 4; ++i) {
         Object obj2 = obj1.arrayGet(i);
-        if (likely(obj2.isNum())) {
+        if (obj2.isNum()) [[likely]] {
             bbox[i] = obj2.getNum();
         } else {
             error(errSyntaxError, getPos(), "Bad form bounding box (non number)");
@@ -1273,7 +1273,7 @@ void Gfx::doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace,
     if (obj1.isArray()) {
         for (i = 0; i < 6; ++i) {
             Object obj2 = obj1.arrayGet(i);
-            if (likely(obj2.isNum())) {
+            if (obj2.isNum()) [[likely]] {
                 m[i] = obj2.getNum();
             } else {
                 m[i] = 0;
@@ -1632,7 +1632,7 @@ void Gfx::opSetStrokeColorN(Object args[], int numArgs)
             state->setStrokeColor(color);
             out->updateStrokeColor(state);
         }
-        if (unlikely(numArgs <= 0)) {
+        if (numArgs <= 0) [[unlikely]] {
             error(errSyntaxError, getPos(), "Incorrect number of arguments in 'SCN' command");
             return;
         }
@@ -2193,7 +2193,7 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
     //~ edge instead of left/bottom (?)
     xstep = fabs(tPat->getXStep());
     ystep = fabs(tPat->getYStep());
-    if (unlikely(xstep == 0 || ystep == 0)) {
+    if (xstep == 0 || ystep == 0) [[unlikely]] {
         goto restore;
     }
     if (tPat->getBBox()[0] < tPat->getBBox()[2]) {
@@ -2956,7 +2956,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
         yz = y0 + sz * (y1 - y0);
         enclosed = (xz - x0) * (xz - x0) + (yz - y0) * (yz - y0) <= r0 * r0;
         const double theta_aux = sqrt((x0 - xz) * (x0 - xz) + (y0 - yz) * (y0 - yz));
-        if (likely(theta_aux != 0)) {
+        if (theta_aux != 0) [[likely]] {
             theta = asin(r0 / theta_aux);
         } else {
             theta = 0;
@@ -3062,7 +3062,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
         n = 3;
     } else {
         const double tmp = 1 - 0.1 / t;
-        if (unlikely(tmp == 1)) {
+        if (tmp == 1) [[unlikely]] {
             n = 200;
         } else {
             n = static_cast<int>(std::numbers::pi / acos(tmp));
@@ -3330,7 +3330,7 @@ void Gfx::doGouraudTriangleShFill(GfxGouraudTriangleShading *shading)
 }
 
 #define checkTrue(b, message)                                                                                                                                                                                                                  \
-    if (unlikely(!(b))) {                                                                                                                                                                                                                      \
+    if (!(b)) [[unlikely]] {                                                                                                                                                                                                                   \
         error(errSyntaxError, -1, message);                                                                                                                                                                                                    \
     }
 
@@ -4827,7 +4827,7 @@ void Gfx::doForm(Object *str)
     }
     for (i = 0; i < 4; ++i) {
         obj1 = bboxObj.arrayGet(i);
-        if (likely(obj1.isNum())) {
+        if (obj1.isNum()) [[likely]] {
             bbox[i] = obj1.getNum();
         } else {
             error(errSyntaxError, getPos(), "Bad form bounding box value");
@@ -4840,7 +4840,7 @@ void Gfx::doForm(Object *str)
     if (matrixObj.isArray()) {
         for (i = 0; i < 6; ++i) {
             obj1 = matrixObj.arrayGet(i);
-            if (likely(obj1.isNum())) {
+            if (obj1.isNum()) [[likely]] {
                 m[i] = obj1.getNum();
             } else {
                 m[i] = 0;
@@ -5296,7 +5296,7 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
         }
         for (i = 0; i < 4; ++i) {
             Object obj1 = bboxObj.arrayGet(i);
-            if (likely(obj1.isNum())) {
+            if (obj1.isNum()) [[likely]] {
                 bbox[i] = obj1.getNum();
             } else {
                 error(errSyntaxError, getPos(), "Bad form bounding box value");
@@ -5309,7 +5309,7 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
         if (matrixObj.isArrayOfLengthAtLeast(6)) {
             for (i = 0; i < 6; ++i) {
                 Object obj1 = matrixObj.arrayGet(i);
-                if (likely(obj1.isNum())) {
+                if (obj1.isNum()) [[likely]] {
                     m[i] = obj1.getNum();
                 } else {
                     error(errSyntaxError, getPos(), "Bad form matrix");

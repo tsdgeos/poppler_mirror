@@ -562,7 +562,7 @@ int JBIG2MMRDecoder::getBlackCode()
             } else {
                 code = buf >> (bufLen - 12);
             }
-            if (unlikely((code & 0xff) < 64)) {
+            if ((code & 0xff) < 64) [[unlikely]] {
                 break;
             }
             p = &blackTab2[(code & 0xff) - 64];
@@ -688,7 +688,7 @@ JBIG2Bitmap::JBIG2Bitmap(unsigned int segNumA, int wA, int hA) : JBIG2Segment(se
     w = wA;
     h = hA;
     int auxW;
-    if (unlikely(checkedAdd(wA, 7, &auxW))) {
+    if (checkedAdd(wA, 7, &auxW)) [[unlikely]] {
         error(errSyntaxError, -1, "invalid width");
         data = nullptr;
         return;
@@ -709,7 +709,7 @@ JBIG2Bitmap::JBIG2Bitmap(unsigned int segNumA, int wA, int hA) : JBIG2Segment(se
 
 JBIG2Bitmap::JBIG2Bitmap(JBIG2Bitmap *bitmap) : JBIG2Segment(0)
 {
-    if (unlikely(bitmap == nullptr)) {
+    if (bitmap == nullptr) [[unlikely]] {
         error(errSyntaxError, -1, "NULL bitmap in JBIG2Bitmap");
         w = h = line = 0;
         data = nullptr;
@@ -761,7 +761,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Bitmap::getSlice(unsigned int x, unsigned int 
 
 void JBIG2Bitmap::expand(int newH, unsigned int pixel)
 {
-    if (unlikely(!data)) {
+    if (!data) [[unlikely]] {
         return;
     }
     if (newH <= h || line <= 0 || newH >= (INT_MAX - 1) / line) {
@@ -843,7 +843,7 @@ void JBIG2Bitmap::combine(const JBIG2Bitmap &bitmap, int x, int y, unsigned int 
     unsigned int src0, src1, src, dest, s1, s2, m1, m2, m3;
     bool oneByte;
 
-    if (unlikely(!isOk())) {
+    if (!isOk()) [[unlikely]] {
         return;
     }
     // check for the pathological case where y = -2^31
@@ -856,7 +856,7 @@ void JBIG2Bitmap::combine(const JBIG2Bitmap &bitmap, int x, int y, unsigned int 
         y0 = 0;
     }
     int yPlusBitmapH;
-    if (unlikely(checkedAdd(y, bitmap.h, &yPlusBitmapH))) {
+    if (checkedAdd(y, bitmap.h, &yPlusBitmapH)) [[unlikely]] {
         return;
     }
     if (yPlusBitmapH > h) {
@@ -873,7 +873,7 @@ void JBIG2Bitmap::combine(const JBIG2Bitmap &bitmap, int x, int y, unsigned int 
     } else {
         x0 = 0;
     }
-    if (unlikely(checkedAdd(x, bitmap.w, &x1))) {
+    if (checkedAdd(x, bitmap.w, &x1)) [[unlikely]] {
         return;
     }
     if (x1 > w) {
@@ -892,10 +892,10 @@ void JBIG2Bitmap::combine(const JBIG2Bitmap &bitmap, int x, int y, unsigned int 
     oneByte = x0 == ((x1 - 1) & ~7);
 
     for (yy = y0; yy < y1; ++yy) {
-        if (unlikely(checkedAdd(y, yy, &yyy))) {
+        if (checkedAdd(y, yy, &yyy)) [[unlikely]] {
             continue;
         }
-        if (unlikely((yyy >= h) || (yyy < 0))) {
+        if ((yyy >= h) || (yyy < 0)) [[unlikely]] {
             continue;
         }
 
@@ -1091,7 +1091,7 @@ public:
     unsigned int getSize() const { return bitmaps.size(); }
     void setBitmap(unsigned int idx, std::unique_ptr<JBIG2Bitmap> bitmap)
     {
-        if (likely(idx < bitmaps.size())) {
+        if (idx < bitmaps.size()) [[likely]] {
             bitmaps[idx] = std::move(bitmap);
         }
     }
@@ -1757,7 +1757,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
             return false;
         }
         symHeight += dh;
-        if (unlikely(symHeight > 0x40000000)) {
+        if (symHeight > 0x40000000) [[unlikely]] {
             error(errSyntaxError, curStr->getPos(), "Bad height value in JBIG2 symbol dictionary");
             return false;
         }
@@ -1831,7 +1831,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                         return false;
                     }
                     JBIG2Bitmap *refBitmap = bitmaps[symID];
-                    if (unlikely(refBitmap == nullptr)) {
+                    if (refBitmap == nullptr) [[unlikely]] {
                         error(errSyntaxError, curStr->getPos(), "Invalid ref bitmap for symbol ID {0:ud} in JBIG2 symbol dictionary", symID);
                         return false;
                     }
@@ -1842,7 +1842,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                 } else {
                     std::unique_ptr<JBIG2Bitmap> bitmap = readTextRegion(huff, true, symWidth, symHeight, refAggNum, 0, numInputSyms + i, nullptr, symCodeLen, bitmaps, 0, 0, 0, 1, 0, huffTableF, huffTableH, huffTableK, huffTableO,
                                                                          huffTableO, huffTableO, huffTableO, huffTableA, sdrTemplate, sdrATX, sdrATY);
-                    if (unlikely(!bitmap)) {
+                    if (!bitmap) [[unlikely]] {
                         error(errSyntaxError, curStr->getPos(), "NULL bitmap in readTextRegion");
                         return false;
                     }
@@ -1853,7 +1853,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                 // non-ref/agg coding
             } else {
                 std::unique_ptr<JBIG2Bitmap> bitmap = readGenericBitmap(false, symWidth, symHeight, sdTemplate, false, false, nullptr, sdATX, sdATY, 0);
-                if (unlikely(!bitmap)) {
+                if (!bitmap) [[unlikely]] {
                     error(errSyntaxError, curStr->getPos(), "NULL bitmap in readGenericBitmap");
                     return false;
                 }
@@ -1876,7 +1876,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, const std::vector<unsig
                 collBitmap = std::make_unique<JBIG2Bitmap>(0, totalWidth, symHeight);
                 bmSize = symHeight * ((totalWidth + 7) >> 3);
                 unsigned char *p = collBitmap->getDataPtr();
-                if (unlikely(p == nullptr)) {
+                if (p == nullptr) [[unlikely]] {
                     return false;
                 }
                 for (k = 0; k < static_cast<unsigned int>(bmSize); ++k) {
@@ -2042,7 +2042,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
         if (seg) {
             if (seg->getType() == jbig2SegSymbolDict) {
                 const unsigned int segSize = static_cast<JBIG2SymbolDict *>(seg)->getSize();
-                if (unlikely(checkedAdd(numSyms, segSize, &numSyms))) {
+                if (checkedAdd(numSyms, segSize, &numSyms)) [[unlikely]] {
                     error(errSyntaxError, getPos(), "Too many symbols in JBIG2 text region");
                     return false;
                 }
@@ -2224,7 +2224,7 @@ bool JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, const std::ve
                     symCodeTab[i++].prefixLen = 0;
                 }
             } else if (j > 0x100) {
-                if (unlikely(i == 0)) {
+                if (i == 0) [[unlikely]] {
                     symCodeTab[i].prefixLen = 0;
                     ++i;
                 }
@@ -2344,7 +2344,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
         } else {
             arithDecoder->decodeInt(&ds, iafsStats);
         }
-        if (unlikely(checkedAdd(sFirst, ds, &sFirst))) {
+        if (checkedAdd(sFirst, ds, &sFirst)) [[unlikely]] {
             return nullptr;
         }
         s = sFirst;
@@ -2362,7 +2362,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
             } else {
                 arithDecoder->decodeInt(&dt, iaitStats);
             }
-            if (unlikely(checkedAdd(t, dt, &tt))) {
+            if (checkedAdd(t, dt, &tt)) [[unlikely]] {
                 return nullptr;
             }
 
@@ -2383,7 +2383,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
 
             if (symID >= numSyms) {
                 error(errSyntaxError, curStr->getPos(), "Invalid symbol number in JBIG2 text region");
-                if (unlikely(numInstances - inst > 0x800)) {
+                if (numInstances - inst > 0x800) [[unlikely]] {
                     // don't loop too often with damaged JBIg2 streams
                     return nullptr;
                 }
@@ -2444,7 +2444,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                     //~ something is wrong here - refCorner shouldn't degenerate into
                     //~   two cases
                     bw = symbolBitmap->getWidth() - 1;
-                    if (unlikely(symbolBitmap->getHeight() == 0)) {
+                    if (symbolBitmap->getHeight() == 0) [[unlikely]] {
                         error(errSyntaxError, curStr->getPos(), "Invalid symbol bitmap height");
                         if (ri) {
                             delete symbolBitmap;
@@ -2453,7 +2453,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                     }
                     bh = symbolBitmap->getHeight() - 1;
                     if (transposed) {
-                        if (unlikely(s > 2 * bitmap->getHeight())) {
+                        if (s > 2 * bitmap->getHeight()) [[unlikely]] {
                             error(errSyntaxError, curStr->getPos(), "Invalid JBIG2 combine");
                             if (ri) {
                                 delete symbolBitmap;
@@ -2478,7 +2478,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                     } else {
                         switch (refCorner) {
                         case 0: // bottom left
-                            if (unlikely(tt - (int)bh > 2 * bitmap->getHeight())) {
+                            if (tt - static_cast<int>(bh) > 2 * bitmap->getHeight()) [[unlikely]] {
                                 error(errSyntaxError, curStr->getPos(), "Invalid JBIG2 combine");
                                 if (ri) {
                                     delete symbolBitmap;
@@ -2488,7 +2488,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                             bitmap->combine(*symbolBitmap, s, tt - bh, combOp);
                             break;
                         case 1: // top left
-                            if (unlikely(tt > 2 * bitmap->getHeight())) {
+                            if (tt > 2 * bitmap->getHeight()) [[unlikely]] {
                                 error(errSyntaxError, curStr->getPos(), "Invalid JBIG2 combine");
                                 if (ri) {
                                     delete symbolBitmap;
@@ -2498,7 +2498,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                             bitmap->combine(*symbolBitmap, s, tt, combOp);
                             break;
                         case 2: // bottom right
-                            if (unlikely(tt - (int)bh > 2 * bitmap->getHeight())) {
+                            if (tt - static_cast<int>(bh) > 2 * bitmap->getHeight()) [[unlikely]] {
                                 error(errSyntaxError, curStr->getPos(), "Invalid JBIG2 combine");
                                 if (ri) {
                                     delete symbolBitmap;
@@ -2508,7 +2508,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                             bitmap->combine(*symbolBitmap, s, tt - bh, combOp);
                             break;
                         case 3: // top right
-                            if (unlikely(tt > 2 * bitmap->getHeight())) {
+                            if (tt > 2 * bitmap->getHeight()) [[unlikely]] {
                                 error(errSyntaxError, curStr->getPos(), "Invalid JBIG2 combine");
                                 if (ri) {
                                     delete symbolBitmap;
@@ -2584,11 +2584,11 @@ bool JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
     aty[3] = -2;
 
     unsigned int grayMaxPlusOne;
-    if (unlikely(checkedAdd(grayMax, 1U, &grayMaxPlusOne))) {
+    if (checkedAdd(grayMax, 1U, &grayMaxPlusOne)) [[unlikely]] {
         return false;
     }
     unsigned int bitmapW;
-    if (unlikely(checkedMultiply(grayMaxPlusOne, patternW, &bitmapW))) {
+    if (checkedMultiply(grayMaxPlusOne, patternW, &bitmapW)) [[unlikely]] {
         return false;
     }
     if (bitmapW >= INT_MAX) {
@@ -2685,7 +2685,7 @@ bool JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, const std
         }
     }
     patternBitmap = patternDict->getBitmap(0);
-    if (unlikely(patternBitmap == nullptr)) {
+    if (patternBitmap == nullptr) [[unlikely]] {
         error(errSyntaxError, curStr->getPos(), "Bad pattern bitmap");
         return false;
     }
@@ -2765,7 +2765,7 @@ bool JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, const std
         for (n = 0; n < gridW; ++n) {
             if (!(enableSkip && skipBitmap->getPixel(n, m))) {
                 patternBitmap = patternDict->getBitmap(grayImg[i]);
-                if (unlikely(patternBitmap == nullptr)) {
+                if (patternBitmap == nullptr) [[unlikely]] {
                     gfree(grayImg);
                     error(errSyntaxError, curStr->getPos(), "Bad pattern bitmap");
                     return false;
@@ -2930,7 +2930,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
         int *codingLine = static_cast<int *>(gmallocn_checkoverflow(w + 1, sizeof(int)));
         int *refLine = static_cast<int *>(gmallocn_checkoverflow(w + 2, sizeof(int)));
 
-        if (unlikely(!codingLine || !refLine)) {
+        if (!codingLine || !refLine) [[unlikely]] {
             gfree(codingLine);
             error(errSyntaxError, curStr->getPos(), "Bad width in JBIG2 generic bitmap");
             return nullptr;
@@ -2967,7 +2967,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
             while (codingLine[a0i] < w) {
                 switch (mmrDecoder->get2DCode()) {
                 case twoDimPass:
-                    if (unlikely(b1i + 1 >= w + 2)) {
+                    if (b1i + 1 >= w + 2) [[unlikely]] {
                         break;
                     }
                     mmrAddPixels(refLine[b1i + 1], blackPixels, codingLine, &a0i, w);
@@ -2999,65 +2999,65 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                     if (codingLine[a0i] < w) {
                         mmrAddPixels(codingLine[a0i] + code2, blackPixels ^ 1, codingLine, &a0i, w);
                     }
-                    while (likely(b1i < w + 2) && refLine[b1i] <= codingLine[a0i] && refLine[b1i] < w) {
+                    while (b1i < w + 2 && refLine[b1i] <= codingLine[a0i] && refLine[b1i] < w) [[likely]] {
                         b1i += 2;
                     }
                     break;
                 }
                 case twoDimVertR3:
-                    if (unlikely(b1i >= w + 2)) {
+                    if (b1i >= w + 2) [[unlikely]] {
                         break;
                     }
                     mmrAddPixels(refLine[b1i] + 3, blackPixels, codingLine, &a0i, w);
                     blackPixels ^= 1;
                     if (codingLine[a0i] < w) {
                         ++b1i;
-                        while (likely(b1i < w + 2) && refLine[b1i] <= codingLine[a0i] && refLine[b1i] < w) {
+                        while (b1i < w + 2 && refLine[b1i] <= codingLine[a0i] && refLine[b1i] < w) [[likely]] {
                             b1i += 2;
                         }
                     }
                     break;
                 case twoDimVertR2:
-                    if (unlikely(b1i >= w + 2)) {
+                    if (b1i >= w + 2) [[unlikely]] {
                         break;
                     }
                     mmrAddPixels(refLine[b1i] + 2, blackPixels, codingLine, &a0i, w);
                     blackPixels ^= 1;
                     if (codingLine[a0i] < w) {
                         ++b1i;
-                        while (likely(b1i < w + 2) && refLine[b1i] <= codingLine[a0i] && refLine[b1i] < w) {
+                        while (b1i < w + 2 && refLine[b1i] <= codingLine[a0i] && refLine[b1i] < w) [[likely]] {
                             b1i += 2;
                         }
                     }
                     break;
                 case twoDimVertR1:
-                    if (unlikely(b1i >= w + 2)) {
+                    if (b1i >= w + 2) [[unlikely]] {
                         break;
                     }
                     mmrAddPixels(refLine[b1i] + 1, blackPixels, codingLine, &a0i, w);
                     blackPixels ^= 1;
                     if (codingLine[a0i] < w) {
                         ++b1i;
-                        while (likely(b1i < w + 2) && refLine[b1i] <= codingLine[a0i] && refLine[b1i] < w) {
+                        while (b1i < w + 2 && refLine[b1i] <= codingLine[a0i] && refLine[b1i] < w) [[likely]] {
                             b1i += 2;
                         }
                     }
                     break;
                 case twoDimVert0:
-                    if (unlikely(b1i >= w + 2)) {
+                    if (b1i >= w + 2) [[unlikely]] {
                         break;
                     }
                     mmrAddPixels(refLine[b1i], blackPixels, codingLine, &a0i, w);
                     blackPixels ^= 1;
                     if (codingLine[a0i] < w) {
                         ++b1i;
-                        while (likely(b1i < w + 2) && refLine[b1i] <= codingLine[a0i] && refLine[b1i] < w) {
+                        while (b1i < w + 2 && refLine[b1i] <= codingLine[a0i] && refLine[b1i] < w) [[likely]] {
                             b1i += 2;
                         }
                     }
                     break;
                 case twoDimVertL3:
-                    if (unlikely(b1i >= w + 2)) {
+                    if (b1i >= w + 2) [[unlikely]] {
                         break;
                     }
                     mmrAddPixelsNeg(refLine[b1i] - 3, blackPixels, codingLine, &a0i, w);
@@ -3068,13 +3068,13 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         } else {
                             ++b1i;
                         }
-                        while (likely(b1i < w + 2) && refLine[b1i] <= codingLine[a0i] && refLine[b1i] < w) {
+                        while (b1i < w + 2 && refLine[b1i] <= codingLine[a0i] && refLine[b1i] < w) [[likely]] {
                             b1i += 2;
                         }
                     }
                     break;
                 case twoDimVertL2:
-                    if (unlikely(b1i >= w + 2)) {
+                    if (b1i >= w + 2) [[unlikely]] {
                         break;
                     }
                     mmrAddPixelsNeg(refLine[b1i] - 2, blackPixels, codingLine, &a0i, w);
@@ -3085,13 +3085,13 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         } else {
                             ++b1i;
                         }
-                        while (likely(b1i < w + 2) && refLine[b1i] <= codingLine[a0i] && refLine[b1i] < w) {
+                        while (b1i < w + 2 && refLine[b1i] <= codingLine[a0i] && refLine[b1i] < w) [[likely]] {
                             b1i += 2;
                         }
                     }
                     break;
                 case twoDimVertL1:
-                    if (unlikely(b1i >= w + 2)) {
+                    if (b1i >= w + 2) [[unlikely]] {
                         break;
                     }
                     mmrAddPixelsNeg(refLine[b1i] - 1, blackPixels, codingLine, &a0i, w);
@@ -3102,7 +3102,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         } else {
                             ++b1i;
                         }
-                        while (likely(b1i < w + 2) && refLine[b1i] <= codingLine[a0i] && refLine[b1i] < w) {
+                        while (b1i < w + 2 && refLine[b1i] <= codingLine[a0i] && refLine[b1i] < w) [[likely]] {
                             b1i += 2;
                         }
                     }
@@ -3430,7 +3430,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                                         atBuf0 |= 0x8000;
                                     }
                                 }
-                                if (unlikely(arithDecoder->getReadPastEndOfStream())) {
+                                if (arithDecoder->getReadPastEndOfStream()) [[unlikely]] {
                                     return nullptr;
                                 }
                             }
@@ -3472,7 +3472,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                 }
-                                if (unlikely(arithDecoder->getReadPastEndOfStream())) {
+                                if (arithDecoder->getReadPastEndOfStream()) [[unlikely]] {
                                     return nullptr;
                                 }
                             }
@@ -3559,7 +3559,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                                         atBuf0 |= 0x8000;
                                     }
                                 }
-                                if (unlikely(arithDecoder->getReadPastEndOfStream())) {
+                                if (arithDecoder->getReadPastEndOfStream()) [[unlikely]] {
                                     return nullptr;
                                 }
                             }
@@ -3674,7 +3674,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                                         atBuf0 |= 0x8000;
                                     }
                                 }
-                                if (unlikely(arithDecoder->getReadPastEndOfStream())) {
+                                if (arithDecoder->getReadPastEndOfStream()) [[unlikely]] {
                                     return nullptr;
                                 }
                             }
@@ -3915,7 +3915,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int
                 if ((pix = arithDecoder->decodeBit(cx, refinementRegionStats.get()))) {
                     bitmap->setPixel(x, y);
                 }
-                if (unlikely(arithDecoder->getReadPastEndOfStream())) {
+                if (arithDecoder->getReadPastEndOfStream()) [[unlikely]] {
                     return nullptr;
                 }
             }
@@ -3994,7 +3994,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int
                     bitmap->setPixel(x, y);
                 }
 
-                if (unlikely(arithDecoder->getReadPastEndOfStream())) {
+                if (arithDecoder->getReadPastEndOfStream()) [[unlikely]] {
                     return nullptr;
                 }
             }
@@ -4073,7 +4073,7 @@ bool JBIG2Stream::readCodeTableSeg(unsigned int segNum)
     huffDecoder->reset();
     huffTabSize = 8;
     huffTab = static_cast<JBIG2HuffmanTable *>(gmallocn_checkoverflow(huffTabSize, sizeof(JBIG2HuffmanTable)));
-    if (unlikely(!huffTab)) {
+    if (!huffTab) [[unlikely]] {
         error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
         return false;
     }
@@ -4084,7 +4084,7 @@ bool JBIG2Stream::readCodeTableSeg(unsigned int segNum)
         if (i == huffTabSize) {
             huffTabSize *= 2;
             huffTab = static_cast<JBIG2HuffmanTable *>(greallocn_checkoverflow(huffTab, huffTabSize, sizeof(JBIG2HuffmanTable)));
-            if (unlikely(!huffTab)) {
+            if (!huffTab) [[unlikely]] {
                 error(errInternal, curStr->getPos(), "Failed allocation when processing JBIG2 stream");
                 return false;
             }
@@ -4101,7 +4101,7 @@ bool JBIG2Stream::readCodeTableSeg(unsigned int segNum)
 
         const int shiftBits = huffTab[i].rangeLen % intNBits;
 
-        if (eof || unlikely(checkedAdd(val, 1 << shiftBits, &val))) {
+        if (eof || checkedAdd(val, 1 << shiftBits, &val)) [[unlikely]] {
             free(huffTab);
             return false;
         }
@@ -4110,13 +4110,13 @@ bool JBIG2Stream::readCodeTableSeg(unsigned int segNum)
     if (i + oob + 3 > huffTabSize) {
         huffTabSize = i + oob + 3;
         huffTab = static_cast<JBIG2HuffmanTable *>(greallocn_checkoverflow(huffTab, huffTabSize, sizeof(JBIG2HuffmanTable)));
-        if (unlikely(!huffTab)) {
+        if (!huffTab) [[unlikely]] {
             error(errInternal, curStr->getPos(), "Failed allocation when processing JBIG2 stream");
             return false;
         }
     }
     int lowValMinusOne;
-    if (unlikely(checkedSubtraction(lowVal, 1, &lowValMinusOne))) {
+    if (checkedSubtraction(lowVal, 1, &lowValMinusOne)) [[unlikely]] {
         free(huffTab);
         return false;
     }

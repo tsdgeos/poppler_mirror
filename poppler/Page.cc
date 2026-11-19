@@ -452,7 +452,7 @@ Annots *Page::getAnnots()
 
 bool Page::addAnnot(const std::shared_ptr<Annot> &annot)
 {
-    if (unlikely(xref->getEntry(pageRef.num)->type == xrefEntryFree)) {
+    if (xref->getEntry(pageRef.num)->type == xrefEntryFree) [[unlikely]] {
         // something very wrong happened if we're here
         error(errInternal, -1, "Can not addAnnot to page with an invalid ref");
         return false;

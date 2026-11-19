@@ -40,7 +40,6 @@
 #include <climits>
 #include <algorithm>
 #include <array>
-#include "goo/GooLikely.h"
 #include "goo/GooString.h"
 #include "goo/GooCheckedOps.h"
 #include "FoFiType1C.h"
@@ -1135,7 +1134,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
         locaTable[i].newOffset = pos;
 
         int newPos;
-        if (unlikely(checkedAdd(pos, locaTable[i].len, &newPos))) {
+        if (checkedAdd(pos, locaTable[i].len, &newPos)) [[unlikely]] {
             ok = false;
         } else {
             pos = newPos;
@@ -1204,7 +1203,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
             checksum = 0;
             const int glyfPos = tables[seekTable("glyf")].offset;
             for (int j = 0; j < nGlyphs; ++j) {
-                if (unlikely(checkedAdd(length, locaTable[j].len, &length))) {
+                if (checkedAdd(length, locaTable[j].len, &length)) [[unlikely]] {
                     error(errSyntaxError, -1, "Integer overflow in glyph table length calculation");
                     ok = false;
                     break;
@@ -1247,7 +1246,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
             newTables[k].offset = pos;
             newTables[k].len = length;
             int newPos;
-            if (unlikely(checkedAdd(pos, length, &newPos))) {
+            if (checkedAdd(pos, length, &newPos)) [[unlikely]] {
                 ok = false;
             } else {
                 pos = newPos;
@@ -1258,7 +1257,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
             ++k;
         }
     }
-    if (unlikely(k < nNewTables)) {
+    if (k < nNewTables) [[unlikely]] {
         error(errSyntaxWarning, -1, "unexpected number of tables");
         nNewTables = k;
     }
@@ -1343,12 +1342,12 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
                 if (j >= 0 && checkRegion(tables[j].offset, tables[j].len)) {
                     dumpString(std::span(file.data() + tables[j].offset, tables[j].len), outputFunc, outputStream);
                 } else if (needVerticalMetrics && i == t42VheaTable) {
-                    if (unlikely(static_cast<size_t>(length) > sizeof(vheaTab))) {
+                    if (static_cast<size_t>(length) > sizeof(vheaTab)) [[unlikely]] {
                         error(errSyntaxWarning, -1, "length bigger than vheaTab size");
                     }
                     dumpString(vheaTab, outputFunc, outputStream);
                 } else if (needVerticalMetrics && i == t42VmtxTable) {
-                    if (unlikely(static_cast<size_t>(length) > vmtxTab.size())) {
+                    if (static_cast<size_t>(length) > vmtxTab.size()) [[unlikely]] {
                         error(errSyntaxWarning, -1, "length bigger than vmtxTab size");
                     }
                     dumpString(vmtxTab, outputFunc, outputStream);
@@ -1467,8 +1466,8 @@ void FoFiTrueType::parse()
         tables[j].checksum = getU32BE(pos + 4, &parsedOk);
         tables[j].offset = static_cast<int>(getU32BE(pos + 8, &parsedOk));
         tables[j].len = static_cast<int>(getU32BE(pos + 12, &parsedOk));
-        if (unlikely((tables[j].offset < 0) || (tables[j].len < 0) || (tables[j].offset < INT_MAX - tables[j].len) || (tables[j].len > INT_MAX - tables[j].offset)
-                     || (tables[j].offset + tables[j].len >= tables[j].offset && tables[j].offset + tables[j].len <= int(file.size())))) {
+        if ((tables[j].offset < 0) || (tables[j].len < 0) || (tables[j].offset < INT_MAX - tables[j].len) || (tables[j].len > INT_MAX - tables[j].offset)
+            || (tables[j].offset + tables[j].len >= tables[j].offset && tables[j].offset + tables[j].len <= static_cast<int>(file.size()))) [[unlikely]] {
             // ignore any bogus entries in the table directory
             ++j;
         }

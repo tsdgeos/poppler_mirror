@@ -2947,7 +2947,7 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
     for (y = 0; y < maskHeight; y++) {
         maskDest = (maskBuffer + y * mask_row_stride);
         pix = maskImgStr.getLine();
-        if (likely(pix != nullptr)) {
+        if (pix != nullptr) [[likely]] {
             maskColorMap->getGrayLine(pix, maskDest, maskWidth);
         }
     }
@@ -2986,7 +2986,7 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
     for (y = 0; y < height; y++) {
         dest = reinterpret_cast<unsigned int *>(buffer + y * row_stride);
         pix = imgStr.getLine();
-        if (likely(pix != nullptr)) {
+        if (pix != nullptr) [[likely]] {
             colorMap->getRGBLine(pix, dest, width);
             if (matteColor != nullptr) {
                 maskDest = (maskBuffer + y * mask_row_stride);
@@ -3423,7 +3423,7 @@ public:
             current_row++;
         }
 
-        if (unlikely(pix == nullptr)) {
+        if (pix == nullptr) [[unlikely]] {
             memset(row_data, 0, width * 4);
             if (!imageError) {
                 error(errInternal, -1, "Bad image stream");
