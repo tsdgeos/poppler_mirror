@@ -1,5 +1,7 @@
 version: '{build}-{branch}'
-image: Visual Studio 2022
+image:
+- Visual Studio 2026
+- Visual Studio 2022
 
 clone_depth: 1
 
@@ -29,5 +31,15 @@ test_script:
 
 environment:
     matrix:
+    - TARGET: windows-msvc2026_64-cl
     - TARGET: windows-mingw_64-gcc
     - TARGET: windows-msvc2022_64-cl
+
+matrix:
+    exclude:
+    - image: Visual Studio 2022
+      TARGET: windows-msvc2026_64-cl
+    - image: Visual Studio 2026
+      TARGET: windows-mingw_64-gcc
+    - image: Visual Studio 2026
+      TARGET: windows-msvc2022_64-cl
